@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Red circle background -->
+    <path
+        android:fillColor="#E53935"
+        android:pathData="M54,54m-40,0a40,40 0,1 1,80 0a40,40 0,1 1,-80 0" />
+    <!-- Alarm bell icon -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,28c-1.1,0 -2,0.9 -2,2v2.1C44.8,33.2 39,39.1 39,46.5V58l-4,4v2h38v-2l-4,-4V46.5c0,-7.4 -5.8,-13.3 -13,-14.4V30C56,28.9 55.1,28 54,28zM54,74c2.2,0 4,-1.8 4,-4h-8C50,72.2 51.8,74 54,74z" />
+    <!-- Left bell hammer -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M33.5,31.5l-3,-3c-0.4,-0.4 -1,-0.4 -1.4,0s-0.4,1 0,1.4l3,3c0.4,0.4 1,0.4 1.4,0S33.9,31.9 33.5,31.5z" />
+    <!-- Right bell hammer -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M74.5,31.5c0.4,-0.4 0.4,-1 0,-1.4s-1,-0.4 -1.4,0l-3,3c-0.4,0.4 -0.4,1 0,1.4s1,0.4 1.4,0L74.5,31.5z" />
+</vector>
