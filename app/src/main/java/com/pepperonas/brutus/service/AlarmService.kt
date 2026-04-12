@@ -6,7 +6,9 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.media.AudioAttributes
+import android.media.AudioFormat
 import android.media.AudioManager
+import android.media.AudioTrack
 import android.media.MediaPlayer
 import android.media.RingtoneManager
 import android.os.IBinder
@@ -18,6 +20,8 @@ import com.pepperonas.brutus.AlarmActivity
 import com.pepperonas.brutus.BrutusApplication
 import com.pepperonas.brutus.data.AlarmRepository
 import com.pepperonas.brutus.scheduler.AlarmScheduler
+import com.pepperonas.brutus.util.AlarmSound
+import com.pepperonas.brutus.util.AlarmSoundGenerator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -25,6 +29,7 @@ import kotlinx.coroutines.launch
 class AlarmService : Service() {
 
     private var mediaPlayer: MediaPlayer? = null
+    private var audioTrack: AudioTrack? = null
     private var wakeLock: PowerManager.WakeLock? = null
     private var vibrator: Vibrator? = null
     private var previousVolume: Int = -1
@@ -70,17 +75,19 @@ class AlarmService : Service() {
         startForeground(NOTIFICATION_ID, notification)
 
         setMaxVolume()
-        playAlarmSound()
         startVibration()
-
-        // Launch alarm activity
         startActivity(activityIntent)
 
-        // Reschedule repeating alarm
+        // Load alarm + play chosen sound
         CoroutineScope(Dispatchers.IO).launch {
             val app = applicationContext as BrutusApplication
             val repo = AlarmRepository(app.database.alarmDao())
             val alarm = repo.getById(alarmId)
+            val sound = AlarmSound.fromId(alarm?.soundId ?: AlarmSound.KLAXON.id)
+
+            launch(Dispatchers.Main) { playAlarmSound(sound) }
+
+            // Reschedule if repeating
             if (alarm != null && alarm.repeatDays != 0) {
                 AlarmScheduler.schedule(this@AlarmService, alarm)
             } else if (alarm != null) {
@@ -103,10 +110,17 @@ class AlarmService : Service() {
         }
     }
 
-    private fun playAlarmSound() {
+    private fun playAlarmSound(sound: AlarmSound) {
+        if (sound == AlarmSound.SYSTEM) {
+            playSystemAlarm()
+        } else {
+            playSynthesized(sound)
+        }
+    }
+
+    private fun playSystemAlarm() {
         val alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
             ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-
         mediaPlayer = MediaPlayer().apply {
             setAudioAttributes(
                 AudioAttributes.Builder()
@@ -119,6 +133,38 @@ class AlarmService : Service() {
             prepare()
             start()
         }
+    }
+
+    private fun playSynthesized(sound: AlarmSound) {
+        val pcm = AlarmSoundGenerator.generatePcm(sound)
+        if (pcm.isEmpty()) {
+            playSystemAlarm()
+            return
+        }
+        val bufferBytes = pcm.size * 2
+
+        val track = AudioTrack.Builder()
+            .setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+            )
+            .setAudioFormat(
+                AudioFormat.Builder()
+                    .setSampleRate(AlarmSoundGenerator.SAMPLE_RATE)
+                    .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                    .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+                    .build()
+            )
+            .setBufferSizeInBytes(bufferBytes)
+            .setTransferMode(AudioTrack.MODE_STATIC)
+            .build()
+
+        track.write(pcm, 0, pcm.size)
+        track.setLoopPoints(0, pcm.size, -1)
+        track.play()
+        audioTrack = track
     }
 
     private fun startVibration() {
@@ -147,10 +193,21 @@ class AlarmService : Service() {
 
     private fun stopAlarm() {
         mediaPlayer?.let {
-            if (it.isPlaying) it.stop()
+            try {
+                if (it.isPlaying) it.stop()
+            } catch (_: IllegalStateException) { }
             it.release()
         }
         mediaPlayer = null
+
+        audioTrack?.let {
+            try {
+                it.stop()
+            } catch (_: IllegalStateException) { }
+            it.release()
+        }
+        audioTrack = null
+
         vibrator?.cancel()
         restoreVolume()
         releaseWakeLock()
@@ -164,14 +221,12 @@ class AlarmService : Service() {
             PowerManager.PARTIAL_WAKE_LOCK,
             "brutus:alarm_wakelock"
         ).apply {
-            acquire(10 * 60 * 1000L) // 10 min timeout
+            acquire(10 * 60 * 1000L)
         }
     }
 
     private fun releaseWakeLock() {
-        wakeLock?.let {
-            if (it.isHeld) it.release()
-        }
+        wakeLock?.let { if (it.isHeld) it.release() }
         wakeLock = null
     }
 

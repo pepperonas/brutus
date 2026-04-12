@@ -1,14 +1,22 @@
 package com.pepperonas.brutus.ui.alarm
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -17,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -31,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import com.pepperonas.brutus.ui.theme.BrutusDarkRed
 import com.pepperonas.brutus.ui.theme.BrutusOrange
 import com.pepperonas.brutus.ui.theme.BrutusRed
+import com.pepperonas.brutus.util.ChallengeFlags
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -38,13 +48,18 @@ import java.util.Locale
 
 @Composable
 fun AlarmScreen(
-    challengeType: Int,
+    challengeFlags: Int,
     qrCodeData: String,
     onDismiss: () -> Unit,
     onSnooze: () -> Unit
 ) {
     var currentTime by remember { mutableStateOf(getCurrentTime()) }
-    var challengeCompleted by remember { mutableStateOf(false) }
+    val active = remember(challengeFlags) {
+        val list = ChallengeFlags.activeList(challengeFlags)
+        list.ifEmpty { listOf(ChallengeFlags.MATH) }
+    }
+    var currentIndex by remember { mutableIntStateOf(0) }
+    val allDone = currentIndex >= active.size
 
     LaunchedEffect(Unit) {
         while (true) {
@@ -69,13 +84,12 @@ fun AlarmScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-            // Clock
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = currentTime,
-                    fontSize = 80.sp,
+                    fontSize = 72.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
                     textAlign = TextAlign.Center,
@@ -87,26 +101,60 @@ fun AlarmScreen(
                     color = BrutusRed,
                     letterSpacing = 8.sp
                 )
-            }
 
-            // Challenge area
-            if (!challengeCompleted) {
-                when (challengeType) {
-                    0 -> MathChallenge(onComplete = { challengeCompleted = true })
-                    1 -> ShakeChallenge(onComplete = { challengeCompleted = true })
-                    2 -> QrChallenge(
-                        expectedQrData = qrCodeData,
-                        onComplete = { challengeCompleted = true }
+                if (active.size > 1) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    ChallengeProgressDots(total = active.size, current = currentIndex)
+                    Text(
+                        text = "Challenge ${minOf(currentIndex + 1, active.size)} von ${active.size}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White.copy(alpha = 0.6f),
+                        modifier = Modifier.padding(top = 6.dp)
                     )
                 }
             }
 
-            // Buttons
+            // Challenge area (sequential)
+            if (!allDone) {
+                AnimatedContent(
+                    targetState = currentIndex,
+                    transitionSpec = {
+                        (fadeIn(tween(300)) togetherWith fadeOut(tween(150)))
+                    },
+                    label = "challengeTransition"
+                ) { idx ->
+                    when (active[idx]) {
+                        ChallengeFlags.MATH -> MathChallenge(onComplete = { currentIndex++ })
+                        ChallengeFlags.SHAKE -> ShakeChallenge(onComplete = { currentIndex++ })
+                        ChallengeFlags.QR -> QrChallenge(
+                            expectedQrData = qrCodeData,
+                            onComplete = { currentIndex++ }
+                        )
+                    }
+                }
+            } else {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(32.dp)
+                ) {
+                    Text(
+                        text = "Geschafft!",
+                        style = MaterialTheme.typography.headlineLarge,
+                        color = Color.White
+                    )
+                    Text(
+                        text = "Guten Morgen",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = BrutusOrange
+                    )
+                }
+            }
+
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (challengeCompleted) {
+                if (allDone) {
                     Button(
                         onClick = onDismiss,
                         modifier = Modifier
@@ -135,19 +183,32 @@ fun AlarmScreen(
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text(
-                        text = "Snooze",
-                        fontSize = 16.sp,
-                        color = BrutusOrange
-                    )
+                    Text(text = "Snooze", fontSize = 16.sp, color = BrutusOrange)
                 }
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }
 }
 
-private fun getCurrentTime(): String {
-    return SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
+@Composable
+private fun ChallengeProgressDots(total: Int, current: Int) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        repeat(total) { i ->
+            val color = when {
+                i < current -> BrutusOrange
+                i == current -> BrutusRed
+                else -> Color.White.copy(alpha = 0.2f)
+            }
+            Box(
+                modifier = Modifier
+                    .size(12.dp)
+                    .background(color, CircleShape)
+            )
+        }
+    }
 }
+
+private fun getCurrentTime(): String =
+    SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())

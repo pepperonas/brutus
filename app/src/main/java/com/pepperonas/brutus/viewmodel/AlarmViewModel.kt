@@ -7,6 +7,7 @@ import com.pepperonas.brutus.BrutusApplication
 import com.pepperonas.brutus.data.AlarmEntity
 import com.pepperonas.brutus.data.AlarmRepository
 import com.pepperonas.brutus.scheduler.AlarmScheduler
+import com.pepperonas.brutus.util.ChallengeFlags
 import com.pepperonas.brutus.util.QrGenerator
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
@@ -32,12 +33,13 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
         minute: Int,
         label: String,
         repeatDays: Int,
-        challengeType: Int,
+        challengeFlags: Int,
         snoozeDuration: Int,
-        qrCodeData: String
+        qrCodeData: String,
+        soundId: Int,
     ) {
         viewModelScope.launch {
-            val finalQr = if (challengeType == 2 && qrCodeData.isBlank()) {
+            val finalQr = if (ChallengeFlags.has(challengeFlags, ChallengeFlags.QR) && qrCodeData.isBlank()) {
                 QrGenerator.generateData()
             } else qrCodeData
 
@@ -46,9 +48,10 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
                 minute = minute,
                 label = label,
                 repeatDays = repeatDays,
-                challengeType = challengeType,
+                challengeFlags = if (challengeFlags == 0) ChallengeFlags.MATH else challengeFlags,
                 snoozeDuration = snoozeDuration,
-                qrCodeData = finalQr
+                qrCodeData = finalQr,
+                soundId = soundId,
             )
             val id = repository.insert(alarm)
             val saved = alarm.copy(id = id)

@@ -31,13 +31,28 @@ Brutus is an Android alarm clock designed for heavy sleepers. It forces you to c
 
 ## Features
 
-### Three Wake-Up Challenges
+### Three Wake-Up Challenges — Combinable
 
 | Mode | Description |
 |------|-------------|
-| **Math Challenge** | Solve 3 randomly generated math problems (multiplication, addition, subtraction) before the alarm stops |
-| **Shake-to-Stop** | Shake your phone 30 times with visual progress ring |
-| **QR-Code Scan** | Scan a specific QR code (e.g. taped to your bathroom mirror) using ML Kit barcode scanning |
+| **Math Challenge** | Solve 3 randomly generated math problems (multiplication, addition, subtraction) |
+| **Shake-to-Stop** | Shake your phone 30 times with a visual progress ring |
+| **QR-Code Scan** | Scan a specific QR code (e.g. taped to your bathroom mirror) via ML Kit |
+
+**Combinations are the key Brutus feature**: enable two or three challenges and you must complete them all in sequence. Maximum brutality: Shake → Math → QR.
+
+### Six Alarm Sounds — All Brutal
+
+| Sound | Character |
+|-------|-----------|
+| **System-Alarm** | Android default alarm tone (fallback) |
+| **Klaxon** | Pulsing two-tone 600/900 Hz square wave |
+| **Sirene** | Sweeping 400–1200 Hz sine siren |
+| **Nuclear Alert** | Rapid sharp 1 kHz beeps |
+| **Nebelhorn** | Low 120 Hz droning pulse with modulation |
+| **Durchdringend** | 3.5 kHz piercing square wave — maximally annoying |
+
+All synthesized tones are generated procedurally via `AudioTrack` with `USAGE_ALARM`, seamlessly looped, and played at maximum `STREAM_ALARM` volume (overrides silent mode).
 
 ### QR Code Generator
 Built-in QR code generator — create a unique code, print it, stick it somewhere far from your bed. The alarm won't stop until you scan it.

@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -48,6 +49,8 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 import com.pepperonas.brutus.data.AlarmEntity
 import com.pepperonas.brutus.ui.theme.BrutusRed
+import com.pepperonas.brutus.util.AlarmSound
+import com.pepperonas.brutus.util.ChallengeFlags
 import com.pepperonas.brutus.util.QrGenerator
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -55,7 +58,9 @@ import com.pepperonas.brutus.util.QrGenerator
 fun AlarmEditDialog(
     existingAlarm: AlarmEntity?,
     onDismiss: () -> Unit,
-    onSave: (Int, Int, String, Int, Int, Int, String) -> Unit
+    onSave: (Int, Int, String, Int, Int, Int, String, Int) -> Unit,
+    onPreviewSound: (AlarmSound) -> Unit,
+    onStopPreview: () -> Unit,
 ) {
     val timePickerState = rememberTimePickerState(
         initialHour = existingAlarm?.hour ?: 7,
@@ -64,17 +69,23 @@ fun AlarmEditDialog(
     )
     var label by remember { mutableStateOf(existingAlarm?.label ?: "") }
     var repeatDays by remember { mutableIntStateOf(existingAlarm?.repeatDays ?: 0) }
-    var challengeType by remember { mutableIntStateOf(existingAlarm?.challengeType ?: 0) }
+    var challengeFlags by remember {
+        mutableIntStateOf(existingAlarm?.challengeFlags ?: ChallengeFlags.MATH)
+    }
     var snoozeDuration by remember { mutableIntStateOf(existingAlarm?.snoozeDuration ?: 5) }
     var qrCodeData by remember { mutableStateOf(existingAlarm?.qrCodeData ?: "") }
     var qrBitmap by remember { mutableStateOf<Bitmap?>(null) }
+    var soundId by remember { mutableIntStateOf(existingAlarm?.soundId ?: AlarmSound.KLAXON.id) }
 
     val days = listOf("Mo", "Di", "Mi", "Do", "Fr", "Sa", "So")
-    val challenges = listOf("Mathe", "Schuetteln", "QR-Code")
     val snoozeOptions = listOf(5, 10, 15)
+    val qrEnabled = ChallengeFlags.has(challengeFlags, ChallengeFlags.QR)
 
     ModalBottomSheet(
-        onDismissRequest = onDismiss,
+        onDismissRequest = {
+            onStopPreview()
+            onDismiss()
+        },
         containerColor = MaterialTheme.colorScheme.surface
     ) {
         Column(
@@ -91,7 +102,6 @@ fun AlarmEditDialog(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // TimePicker
             TimePicker(
                 state = timePickerState,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -99,7 +109,6 @@ fun AlarmEditDialog(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Label
             OutlinedTextField(
                 value = label,
                 onValueChange = { label = it },
@@ -138,23 +147,66 @@ fun AlarmEditDialog(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Challenge type
-            Text("Weckmodus", style = MaterialTheme.typography.titleLarge)
+            // Sound picker
+            Text("Wecker-Sound", style = MaterialTheme.typography.titleLarge)
             Spacer(modifier = Modifier.height(8.dp))
-            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                challenges.forEachIndexed { index, label ->
-                    SegmentedButton(
-                        selected = challengeType == index,
-                        onClick = { challengeType = index },
-                        shape = SegmentedButtonDefaults.itemShape(index, challenges.size)
-                    ) {
-                        Text(label)
-                    }
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                AlarmSound.entries.forEach { snd ->
+                    val selected = soundId == snd.id
+                    FilterChip(
+                        selected = selected,
+                        onClick = {
+                            soundId = snd.id
+                            onPreviewSound(snd)
+                        },
+                        label = { Text(snd.displayName) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = BrutusRed,
+                            selectedLabelColor = Color.White
+                        )
+                    )
+                }
+            }
+            Text(
+                text = AlarmSound.fromId(soundId).description + " - Tippe zum Vorhoeren",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 6.dp)
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            OutlinedButton(
+                onClick = { onStopPreview() },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Vorschau stoppen")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Challenges (multi-select)
+            Text("Weckmodi (kombinierbar)", style = MaterialTheme.typography.titleLarge)
+            Text(
+                text = "Alle ausgewaehlten Challenges muessen nacheinander bestanden werden",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ChallengeChip("Mathe", challengeFlags, ChallengeFlags.MATH) {
+                    challengeFlags = challengeFlags xor ChallengeFlags.MATH
+                }
+                ChallengeChip("Schuetteln", challengeFlags, ChallengeFlags.SHAKE) {
+                    challengeFlags = challengeFlags xor ChallengeFlags.SHAKE
+                }
+                ChallengeChip("QR-Code", challengeFlags, ChallengeFlags.QR) {
+                    challengeFlags = challengeFlags xor ChallengeFlags.QR
                 }
             }
 
-            // QR Code section
-            if (challengeType == 2) {
+            if (qrEnabled) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     OutlinedButton(onClick = {
@@ -189,7 +241,6 @@ fun AlarmEditDialog(
                         modifier = Modifier.padding(top = 8.dp)
                     )
                 }
-                // Show existing QR if editing
                 if (qrBitmap == null && qrCodeData.isNotBlank()) {
                     Spacer(modifier = Modifier.height(8.dp))
                     val existingBmp = remember(qrCodeData) {
@@ -208,7 +259,6 @@ fun AlarmEditDialog(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Snooze
             Text("Snooze-Dauer", style = MaterialTheme.typography.titleLarge)
             Spacer(modifier = Modifier.height(8.dp))
             SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
@@ -225,17 +275,18 @@ fun AlarmEditDialog(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Save button
             Button(
                 onClick = {
+                    onStopPreview()
                     onSave(
                         timePickerState.hour,
                         timePickerState.minute,
                         label,
                         repeatDays,
-                        challengeType,
+                        challengeFlags,
                         snoozeDuration,
-                        qrCodeData
+                        qrCodeData,
+                        soundId,
                     )
                 },
                 modifier = Modifier
@@ -254,14 +305,14 @@ fun AlarmEditDialog(
 }
 
 @Composable
-private fun Box(
-    contentAlignment: Alignment,
-    modifier: Modifier,
-    content: @Composable () -> Unit
-) {
-    androidx.compose.foundation.layout.Box(
-        contentAlignment = contentAlignment,
-        modifier = modifier,
-        content = { content() }
+private fun ChallengeChip(label: String, flags: Int, mask: Int, onToggle: () -> Unit) {
+    FilterChip(
+        selected = ChallengeFlags.has(flags, mask),
+        onClick = onToggle,
+        label = { Text(label) },
+        colors = FilterChipDefaults.filterChipColors(
+            selectedContainerColor = BrutusRed,
+            selectedLabelColor = Color.White
+        )
     )
 }

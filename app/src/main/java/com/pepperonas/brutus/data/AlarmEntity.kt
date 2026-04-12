@@ -2,6 +2,8 @@ package com.pepperonas.brutus.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.pepperonas.brutus.util.AlarmSound
+import com.pepperonas.brutus.util.ChallengeFlags
 
 @Entity(tableName = "alarms")
 data class AlarmEntity(
@@ -10,16 +12,13 @@ data class AlarmEntity(
     val minute: Int,
     val enabled: Boolean = true,
     val label: String = "",
-    val repeatDays: Int = 0,       // bitmask: bit 0=Mon, bit 6=Sun
-    val challengeType: Int = 0,    // 0=Math, 1=Shake, 2=QR
-    val snoozeDuration: Int = 5,   // minutes
-    val qrCodeData: String = "",   // stored QR data for verification
+    val repeatDays: Int = 0,              // bitmask: bit 0=Mon .. bit 6=Sun
+    val challengeFlags: Int = ChallengeFlags.MATH,  // bitmask: MATH | SHAKE | QR
+    val snoozeDuration: Int = 5,          // minutes
+    val qrCodeData: String = "",          // stored QR data for verification
+    val soundId: Int = AlarmSound.KLAXON.id,
 ) {
     fun isDayEnabled(dayIndex: Int): Boolean = (repeatDays and (1 shl dayIndex)) != 0
-
-    fun toggleDay(dayIndex: Int): AlarmEntity {
-        return copy(repeatDays = repeatDays xor (1 shl dayIndex))
-    }
 
     fun timeString(): String = "%02d:%02d".format(hour, minute)
 
@@ -30,10 +29,7 @@ data class AlarmEntity(
         return days.filterIndexed { i, _ -> isDayEnabled(i) }.joinToString(", ")
     }
 
-    fun challengeName(): String = when (challengeType) {
-        0 -> "Mathe"
-        1 -> "Schütteln"
-        2 -> "QR-Code"
-        else -> "Mathe"
-    }
+    fun challengeName(): String = ChallengeFlags.describe(challengeFlags)
+
+    fun soundName(): String = AlarmSound.fromId(soundId).displayName
 }

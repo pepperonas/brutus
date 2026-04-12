@@ -30,6 +30,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,12 +38,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pepperonas.brutus.data.AlarmEntity
 import com.pepperonas.brutus.ui.theme.BrutusRed
 import com.pepperonas.brutus.ui.theme.BrutusTextSecondary
+import com.pepperonas.brutus.util.SoundPreviewPlayer
 import com.pepperonas.brutus.viewmodel.AlarmViewModel
 
 @Composable
@@ -50,6 +53,12 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
     val alarms by viewModel.alarms.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
     var editingAlarm by remember { mutableStateOf<AlarmEntity?>(null) }
+
+    val context = LocalContext.current
+    val previewPlayer = remember { SoundPreviewPlayer(context) }
+    DisposableEffect(Unit) {
+        onDispose { previewPlayer.stop() }
+    }
 
     Scaffold(
         floatingActionButton = {
@@ -70,7 +79,6 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            // Header
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -136,7 +144,9 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
         AlarmEditDialog(
             existingAlarm = editingAlarm,
             onDismiss = { showDialog = false },
-            onSave = { hour, minute, label, repeatDays, challenge, snooze, qr ->
+            onPreviewSound = { snd -> previewPlayer.play(snd) },
+            onStopPreview = { previewPlayer.stop() },
+            onSave = { hour, minute, label, repeatDays, challengeFlags, snooze, qr, soundId ->
                 if (editingAlarm != null) {
                     viewModel.updateAlarm(
                         editingAlarm!!.copy(
@@ -144,13 +154,14 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
                             minute = minute,
                             label = label,
                             repeatDays = repeatDays,
-                            challengeType = challenge,
+                            challengeFlags = challengeFlags,
                             snoozeDuration = snooze,
-                            qrCodeData = qr
+                            qrCodeData = qr,
+                            soundId = soundId,
                         )
                     )
                 } else {
-                    viewModel.addAlarm(hour, minute, label, repeatDays, challenge, snooze, qr)
+                    viewModel.addAlarm(hour, minute, label, repeatDays, challengeFlags, snooze, qr, soundId)
                 }
                 showDialog = false
             }
@@ -198,13 +209,18 @@ private fun AlarmCard(
                         color = BrutusTextSecondary
                     )
                 }
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
                     modifier = Modifier.padding(top = 4.dp)
                 ) {
-                    ChipLabel(alarm.repeatDaysString())
-                    ChipLabel(alarm.challengeName())
-                    ChipLabel("${alarm.snoozeDuration}min Snooze")
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        ChipLabel(alarm.repeatDaysString())
+                        ChipLabel(alarm.soundName())
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        ChipLabel(alarm.challengeName())
+                        ChipLabel("${alarm.snoozeDuration}min")
+                    }
                 }
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {

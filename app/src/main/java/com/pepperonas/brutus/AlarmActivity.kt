@@ -14,6 +14,7 @@ import com.pepperonas.brutus.data.AlarmDatabase
 import com.pepperonas.brutus.service.AlarmService
 import com.pepperonas.brutus.ui.alarm.AlarmScreen
 import com.pepperonas.brutus.ui.theme.BrutusTheme
+import com.pepperonas.brutus.util.ChallengeFlags
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -34,16 +35,15 @@ class AlarmActivity : ComponentActivity() {
 
         CoroutineScope(Dispatchers.IO).launch {
             val alarm = dao.getById(alarmId)
-            val challengeType = alarm?.challengeType ?: 0
+            val flags = alarm?.challengeFlags ?: ChallengeFlags.MATH
             val qrData = alarm?.qrCodeData ?: ""
-            val snoozeDuration = alarm?.snoozeDuration ?: 5
 
             runOnUiThread {
                 setContent {
                     BrutusTheme {
                         Surface(modifier = Modifier.fillMaxSize()) {
                             AlarmScreen(
-                                challengeType = challengeType,
+                                challengeFlags = flags,
                                 qrCodeData = qrData,
                                 onDismiss = { stopAlarm() },
                                 onSnooze = { snoozeAlarm() }
@@ -92,6 +92,6 @@ class AlarmActivity : ComponentActivity() {
 
     @Deprecated("Use onBackPressedDispatcher")
     override fun onBackPressed() {
-        // Block back button - user must complete challenge
+        // Back-Button blockiert - Challenge muss bestanden werden
     }
 }
