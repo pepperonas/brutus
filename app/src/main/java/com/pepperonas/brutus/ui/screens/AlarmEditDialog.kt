@@ -9,8 +9,6 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.TextButton
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.pepperonas.brutus.TestAlarmActivity
@@ -63,6 +61,7 @@ import com.pepperonas.brutus.data.AlarmEntity
 import com.pepperonas.brutus.ui.theme.BrutusRed
 import com.pepperonas.brutus.util.AlarmSound
 import com.pepperonas.brutus.util.ChallengeFlags
+import com.pepperonas.brutus.util.GlobalQrStore
 import com.pepperonas.brutus.util.QrGenerator
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -70,7 +69,7 @@ import com.pepperonas.brutus.util.QrGenerator
 fun AlarmEditDialog(
     existingAlarm: AlarmEntity?,
     onDismiss: () -> Unit,
-    onSave: (Int, Int, String, Int, Int, Int, String, Int) -> Unit,
+    onSave: (Int, Int, String, Int, Int, Int, Int) -> Unit,
     onPreviewSound: (AlarmSound) -> Unit,
     onStopPreview: () -> Unit,
 ) {
@@ -85,25 +84,19 @@ fun AlarmEditDialog(
         mutableIntStateOf(existingAlarm?.challengeFlags ?: ChallengeFlags.MATH)
     }
     var snoozeDuration by remember { mutableIntStateOf(existingAlarm?.snoozeDuration ?: 5) }
-    var qrCodeData by remember { mutableStateOf(existingAlarm?.qrCodeData ?: "") }
-    var qrBitmap by remember { mutableStateOf<Bitmap?>(null) }
     var soundId by remember { mutableIntStateOf(existingAlarm?.soundId ?: AlarmSound.KLAXON.id) }
+    val ctxForQr = LocalContext.current
+    val qrCodeData = remember { GlobalQrStore.get(ctxForQr) }
+    val qrBitmap = remember(qrCodeData) { QrGenerator.generateBitmap(qrCodeData) }
 
     val days = listOf("Mo", "Di", "Mi", "Do", "Fr", "Sa", "So")
     val snoozeOptions = listOf(2, 5, 10, 15)
     val qrEnabled = ChallengeFlags.has(challengeFlags, ChallengeFlags.QR)
 
     val ctx = LocalContext.current
-    var showRegenerateConfirm by remember { mutableStateOf(false) }
 
-    val generateNewQr: () -> Unit = {
-        qrCodeData = QrGenerator.generateData()
-        qrBitmap = QrGenerator.generateBitmap(qrCodeData)
-    }
     val shareQr: () -> Unit = {
-        if (qrCodeData.isBlank()) {
-            Toast.makeText(ctx, "Zuerst QR-Code generieren", Toast.LENGTH_SHORT).show()
-        } else if (!QrGenerator.shareQr(ctx, qrCodeData)) {
+        if (!QrGenerator.shareQr(ctx, qrCodeData)) {
             Toast.makeText(ctx, "Teilen fehlgeschlagen", Toast.LENGTH_SHORT).show()
         }
     }
@@ -117,11 +110,7 @@ fun AlarmEditDialog(
         }
         ctx.startActivity(i)
     }
-    val saveQr: () -> Unit = save@{
-        if (qrCodeData.isBlank()) {
-            Toast.makeText(ctx, "Zuerst QR-Code generieren", Toast.LENGTH_SHORT).show()
-            return@save
-        }
+    val saveQr: () -> Unit = {
         val uri = QrGenerator.savePng(ctx, qrCodeData)
         if (uri != null) {
             Toast.makeText(ctx, "QR-Code in Pictures/Brutus gespeichert", Toast.LENGTH_LONG).show()
@@ -272,65 +261,34 @@ fun AlarmEditDialog(
 
             if (qrEnabled) {
                 Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = "Dein globaler QR-Code — gilt für alle Alarme. Einmal ausdrucken, immer gültig.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Image(
+                    bitmap = qrBitmap.asImageBitmap(),
+                    contentDescription = "QR Code",
+                    modifier = Modifier
+                        .size(220.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .align(Alignment.CenterHorizontally)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "ID: ${qrCodeData.takeLast(8)}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    OutlinedButton(onClick = {
-                        if (qrCodeData.isNotBlank()) showRegenerateConfirm = true
-                        else generateNewQr()
-                    }) {
-                        Text(if (qrCodeData.isBlank()) "QR-Code generieren" else "Neu generieren")
-                    }
-                    if (qrCodeData.isNotBlank()) {
-                        OutlinedButton(onClick = onSaveQrClick) { Text("Als PNG speichern") }
-                        OutlinedButton(onClick = shareQr) { Text("Teilen") }
-                    }
-                }
-                Text(
-                    text = "Ein neuer QR-Code macht den bisherigen ungültig.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 6.dp)
-                )
-                if (qrCodeData.isNotBlank()) {
-                    Text(
-                        text = "ID: ${qrCodeData.takeLast(8)}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                }
-                qrBitmap?.let { bmp ->
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Image(
-                        bitmap = bmp.asImageBitmap(),
-                        contentDescription = "QR Code",
-                        modifier = Modifier
-                            .size(200.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .align(Alignment.CenterHorizontally)
-                    )
-                    Text(
-                        text = "Drucke diesen QR-Code aus und klebe ihn z.B. ins Bad",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
-                }
-                if (qrBitmap == null && qrCodeData.isNotBlank()) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    val existingBmp = remember(qrCodeData) {
-                        QrGenerator.generateBitmap(qrCodeData)
-                    }
-                    Image(
-                        bitmap = existingBmp.asImageBitmap(),
-                        contentDescription = "QR Code",
-                        modifier = Modifier
-                            .size(200.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .align(Alignment.CenterHorizontally)
-                    )
+                    OutlinedButton(onClick = onSaveQrClick) { Text("Als PNG speichern") }
+                    OutlinedButton(onClick = shareQr) { Text("Teilen") }
                 }
             }
 
@@ -374,7 +332,6 @@ fun AlarmEditDialog(
                         repeatDays,
                         challengeFlags,
                         snoozeDuration,
-                        qrCodeData,
                         soundId,
                     )
                 },
@@ -392,30 +349,6 @@ fun AlarmEditDialog(
         }
     }
 
-    if (showRegenerateConfirm) {
-        AlertDialog(
-            onDismissRequest = { showRegenerateConfirm = false },
-            title = { Text("Neuen QR-Code generieren?") },
-            text = {
-                Text(
-                    "Der bisherige QR-Code wird durch einen neuen ersetzt und verliert " +
-                        "dadurch seine Gültigkeit — bereits ausgedruckte oder geteilte " +
-                        "Codes funktionieren dann nicht mehr."
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    generateNewQr()
-                    showRegenerateConfirm = false
-                }) { Text("Neu generieren") }
-            },
-            dismissButton = {
-                TextButton(onClick = { showRegenerateConfirm = false }) {
-                    Text("Abbrechen")
-                }
-            }
-        )
-    }
 }
 
 @Composable

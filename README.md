@@ -58,10 +58,8 @@ Brutus is an Android alarm clock designed for heavy sleepers. It forces you to c
 
 All synthesized tones are generated procedurally via `AudioTrack` with `USAGE_ALARM`, seamlessly looped, and played at maximum `STREAM_ALARM` volume (overrides silent mode).
 
-### QR Code Generator, Speichern & Teilen
-Eingebauter QR-Code-Generator — erzeuge einen einzigartigen Code, speichere ihn als hochauflösendes PNG (1024×1024) in `Pictures/Brutus/` oder teile ihn direkt via Android-Share-Sheet (Mail, Messenger, Bluetooth, etc.). Drucke ihn aus und klebe ihn weit weg vom Bett.
-
-**Wichtig:** Jeder Alarm hat seinen eigenen QR-Code. Beim Drücken von „Neu generieren" wird der bisherige Code unwiderruflich ersetzt — zuvor ausgedruckte oder geteilte Codes verlieren dadurch ihre Gültigkeit. Die App zeigt vorher einen Bestätigungsdialog.
+### Globaler QR-Code, Speichern & Teilen
+Die App generiert **einmalig** einen einzigartigen QR-Code, der für **alle Alarme** gilt und dauerhaft gültig bleibt. Einmal ausdrucken, einmal ins Bad kleben — fertig. Speichere ihn als hochauflösendes PNG (1024×1024) in `Pictures/Brutus/` oder teile ihn direkt via Android-Share-Sheet (Mail, Messenger, Bluetooth, etc.).
 
 ### Weckmodi direkt testen
 Im Edit-Dialog gibt es einen „Weckmodi jetzt testen"-Button: Er startet den kompletten Alarm-Screen mit dem gewählten Sound und den gewählten Challenges, ohne einen echten Alarm zu registrieren. So kannst du vor der ersten Nacht probieren, wie sich z.B. „Schütteln + Mathe + QR" anfühlt.

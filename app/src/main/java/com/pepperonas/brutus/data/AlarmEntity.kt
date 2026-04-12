@@ -15,7 +15,6 @@ data class AlarmEntity(
     val repeatDays: Int = 0,              // bitmask: bit 0=Mon .. bit 6=Sun
     val challengeFlags: Int = ChallengeFlags.MATH,  // bitmask: MATH | SHAKE | QR
     val snoozeDuration: Int = 5,          // minutes
-    val qrCodeData: String = "",          // stored QR data for verification
     val soundId: Int = AlarmSound.KLAXON.id,
 ) {
     fun isDayEnabled(dayIndex: Int): Boolean = (repeatDays and (1 shl dayIndex)) != 0

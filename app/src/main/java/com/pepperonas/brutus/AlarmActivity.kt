@@ -15,6 +15,7 @@ import com.pepperonas.brutus.service.AlarmService
 import com.pepperonas.brutus.ui.alarm.AlarmScreen
 import com.pepperonas.brutus.ui.theme.BrutusTheme
 import com.pepperonas.brutus.util.ChallengeFlags
+import com.pepperonas.brutus.util.GlobalQrStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -36,7 +37,7 @@ class AlarmActivity : ComponentActivity() {
         CoroutineScope(Dispatchers.IO).launch {
             val alarm = dao.getById(alarmId)
             val flags = alarm?.challengeFlags ?: ChallengeFlags.MATH
-            val qrData = alarm?.qrCodeData ?: ""
+            val qrData = GlobalQrStore.get(applicationContext)
 
             runOnUiThread {
                 setContent {
