@@ -1,7 +1,15 @@
 package com.pepperonas.brutus.ui.screens
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.os.Build
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -80,6 +88,35 @@ fun AlarmEditDialog(
     val days = listOf("Mo", "Di", "Mi", "Do", "Fr", "Sa", "So")
     val snoozeOptions = listOf(5, 10, 15)
     val qrEnabled = ChallengeFlags.has(challengeFlags, ChallengeFlags.QR)
+
+    val ctx = LocalContext.current
+    val saveQr: () -> Unit = save@{
+        if (qrCodeData.isBlank()) {
+            Toast.makeText(ctx, "Zuerst QR-Code generieren", Toast.LENGTH_SHORT).show()
+            return@save
+        }
+        val uri = QrGenerator.savePng(ctx, qrCodeData)
+        if (uri != null) {
+            Toast.makeText(ctx, "QR-Code in Pictures/Brutus gespeichert", Toast.LENGTH_LONG).show()
+        } else {
+            Toast.makeText(ctx, "Speichern fehlgeschlagen", Toast.LENGTH_SHORT).show()
+        }
+    }
+    val storagePermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted -> if (granted) saveQr() else
+        Toast.makeText(ctx, "Speicher-Berechtigung benoetigt", Toast.LENGTH_SHORT).show()
+    }
+    val onSaveQrClick: () -> Unit = {
+        val needsPermission = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q &&
+            ContextCompat.checkSelfPermission(ctx, Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
+                PackageManager.PERMISSION_GRANTED
+        if (needsPermission) {
+            storagePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        } else {
+            saveQr()
+        }
+    }
 
     ModalBottomSheet(
         onDismissRequest = {
@@ -216,13 +253,19 @@ fun AlarmEditDialog(
                         Text("QR-Code generieren")
                     }
                     if (qrCodeData.isNotBlank()) {
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(
-                            text = "ID: ${qrCodeData.takeLast(8)}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        OutlinedButton(onClick = onSaveQrClick) {
+                            Text("Als PNG speichern")
+                        }
                     }
+                }
+                if (qrCodeData.isNotBlank()) {
+                    Text(
+                        text = "ID: ${qrCodeData.takeLast(8)}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
                 }
                 qrBitmap?.let { bmp ->
                     Spacer(modifier = Modifier.height(12.dp))

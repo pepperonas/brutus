@@ -1,10 +1,18 @@
 package com.pepperonas.brutus.util
 
+import android.content.ContentValues
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
+import java.io.File
+import java.io.FileOutputStream
 import java.util.UUID
 
 object QrGenerator {
@@ -21,5 +29,63 @@ object QrGenerator {
             }
         }
         return bitmap
+    }
+
+    /**
+     * Saves the QR code as a high-resolution PNG to the public Pictures/Brutus folder.
+     * Returns the content Uri on success, or null on failure.
+     */
+    fun savePng(context: Context, data: String, size: Int = 1024): Uri? {
+        val bitmap = generateBitmap(data, size)
+        val filename = "brutus-qr-${data.takeLast(8)}.png"
+
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            savePngMediaStore(context, bitmap, filename)
+        } else {
+            savePngLegacy(bitmap, filename)
+        }
+    }
+
+    private fun savePngMediaStore(context: Context, bitmap: Bitmap, filename: String): Uri? {
+        val values = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, filename)
+            put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+            put(MediaStore.Images.Media.RELATIVE_PATH, "${Environment.DIRECTORY_PICTURES}/Brutus")
+            put(MediaStore.Images.Media.IS_PENDING, 1)
+        }
+        val resolver = context.contentResolver
+        val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+            ?: return null
+
+        try {
+            resolver.openOutputStream(uri)?.use { out ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+            } ?: return null
+            values.clear()
+            values.put(MediaStore.Images.Media.IS_PENDING, 0)
+            resolver.update(uri, values, null, null)
+            return uri
+        } catch (e: Exception) {
+            resolver.delete(uri, null, null)
+            return null
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun savePngLegacy(bitmap: Bitmap, filename: String): Uri? {
+        return try {
+            val dir = File(
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                "Brutus"
+            )
+            if (!dir.exists()) dir.mkdirs()
+            val file = File(dir, filename)
+            FileOutputStream(file).use { out ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+            }
+            Uri.fromFile(file)
+        } catch (e: Exception) {
+            null
+        }
     }
 }
