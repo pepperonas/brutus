@@ -38,6 +38,8 @@ class AlarmActivity : ComponentActivity() {
             val alarm = dao.getById(alarmId)
             val flags = alarm?.challengeFlags ?: ChallengeFlags.MATH
             val qrData = GlobalQrStore.get(applicationContext)
+            val mathCount = alarm?.mathProblemCount ?: 3
+            val shakeCount = alarm?.shakeCount ?: 30
 
             runOnUiThread {
                 setContent {
@@ -46,6 +48,8 @@ class AlarmActivity : ComponentActivity() {
                             AlarmScreen(
                                 challengeFlags = flags,
                                 qrCodeData = qrData,
+                                mathProblemCount = mathCount,
+                                shakeCount = shakeCount,
                                 onDismiss = { stopAlarm() },
                                 onSnooze = { snoozeAlarm() }
                             )

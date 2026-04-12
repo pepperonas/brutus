@@ -51,6 +51,8 @@ import java.util.Locale
 fun AlarmScreen(
     challengeFlags: Int,
     qrCodeData: String,
+    mathProblemCount: Int,
+    shakeCount: Int,
     onDismiss: () -> Unit,
     onSnooze: () -> Unit
 ) {
@@ -128,8 +130,14 @@ fun AlarmScreen(
                     label = "challengeTransition"
                 ) { idx ->
                     when (active[idx]) {
-                        ChallengeFlags.MATH -> MathChallenge(onComplete = { currentIndex++ })
-                        ChallengeFlags.SHAKE -> ShakeChallenge(onComplete = { currentIndex++ })
+                        ChallengeFlags.MATH -> MathChallenge(
+                            totalRequired = mathProblemCount,
+                            onComplete = { currentIndex++ }
+                        )
+                        ChallengeFlags.SHAKE -> ShakeChallenge(
+                            requiredShakes = shakeCount,
+                            onComplete = { currentIndex++ }
+                        )
                         ChallengeFlags.QR -> QrChallenge(
                             expectedQrData = qrCodeData,
                             onComplete = { currentIndex++ }

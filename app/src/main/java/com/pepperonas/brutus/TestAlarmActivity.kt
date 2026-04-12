@@ -22,6 +22,8 @@ class TestAlarmActivity : ComponentActivity() {
         val flags = intent.getIntExtra(EXTRA_CHALLENGE_FLAGS, ChallengeFlags.MATH)
         val qrData = intent.getStringExtra(EXTRA_QR_DATA).orEmpty()
         val soundId = intent.getIntExtra(EXTRA_SOUND_ID, AlarmSound.KLAXON.id)
+        val mathCount = intent.getIntExtra(EXTRA_MATH_COUNT, 3)
+        val shakeCount = intent.getIntExtra(EXTRA_SHAKE_COUNT, 30)
 
         soundPlayer = SoundPreviewPlayer(this).also {
             it.play(AlarmSound.fromId(soundId))
@@ -33,6 +35,8 @@ class TestAlarmActivity : ComponentActivity() {
                     AlarmScreen(
                         challengeFlags = flags,
                         qrCodeData = qrData,
+                        mathProblemCount = mathCount,
+                        shakeCount = shakeCount,
                         onDismiss = { finish() },
                         onSnooze = { finish() }
                     )
@@ -51,5 +55,7 @@ class TestAlarmActivity : ComponentActivity() {
         const val EXTRA_CHALLENGE_FLAGS = "challenge_flags"
         const val EXTRA_QR_DATA = "qr_data"
         const val EXTRA_SOUND_ID = "sound_id"
+        const val EXTRA_MATH_COUNT = "math_count"
+        const val EXTRA_SHAKE_COUNT = "shake_count"
     }
 }

@@ -36,11 +36,13 @@ import com.pepperonas.brutus.ui.theme.BrutusRedBright
 import kotlin.math.sqrt
 
 @Composable
-fun ShakeChallenge(onComplete: () -> Unit) {
+fun ShakeChallenge(
+    requiredShakes: Int = 30,
+    onComplete: () -> Unit,
+) {
     val context = LocalContext.current
     var shakeCount by remember { mutableIntStateOf(0) }
     var lastAccel by remember { mutableFloatStateOf(SensorManager.GRAVITY_EARTH) }
-    val requiredShakes = 30
 
     val progress by animateFloatAsState(
         targetValue = shakeCount.toFloat() / requiredShakes,

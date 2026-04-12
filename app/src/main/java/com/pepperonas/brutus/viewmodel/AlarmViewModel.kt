@@ -35,6 +35,8 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
         challengeFlags: Int,
         snoozeDuration: Int,
         soundId: Int,
+        mathProblemCount: Int,
+        shakeCount: Int,
     ) {
         viewModelScope.launch {
             val alarm = AlarmEntity(
@@ -45,6 +47,8 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
                 challengeFlags = if (challengeFlags == 0) ChallengeFlags.MATH else challengeFlags,
                 snoozeDuration = snoozeDuration,
                 soundId = soundId,
+                mathProblemCount = mathProblemCount,
+                shakeCount = shakeCount,
             )
             val id = repository.insert(alarm)
             val saved = alarm.copy(id = id)

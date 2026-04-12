@@ -32,6 +32,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -71,7 +76,7 @@ import com.pepperonas.brutus.util.QrGenerator
 fun AlarmEditDialog(
     existingAlarm: AlarmEntity?,
     onDismiss: () -> Unit,
-    onSave: (Int, Int, String, Int, Int, Int, Int) -> Unit,
+    onSave: (Int, Int, String, Int, Int, Int, Int, Int, Int) -> Unit,
     onPreviewSound: (AlarmSound) -> Unit,
     onStopPreview: () -> Unit,
 ) {
@@ -87,6 +92,8 @@ fun AlarmEditDialog(
     }
     var snoozeDuration by remember { mutableIntStateOf(existingAlarm?.snoozeDuration ?: 5) }
     var soundId by remember { mutableIntStateOf(existingAlarm?.soundId ?: AlarmSound.KLAXON.id) }
+    var mathProblemCount by remember { mutableIntStateOf(existingAlarm?.mathProblemCount ?: 3) }
+    var shakeCount by remember { mutableIntStateOf(existingAlarm?.shakeCount ?: 30) }
     val ctxForQr = LocalContext.current
     val qrCodeData = remember { GlobalQrStore.get(ctxForQr) }
     val qrBitmap = remember(qrCodeData) { QrGenerator.generateBitmap(qrCodeData) }
@@ -94,6 +101,8 @@ fun AlarmEditDialog(
     val days = listOf("Mo", "Di", "Mi", "Do", "Fr", "Sa", "So")
     val snoozeOptions = listOf(2, 5, 10, 15)
     val qrEnabled = ChallengeFlags.has(challengeFlags, ChallengeFlags.QR)
+    val mathEnabled = ChallengeFlags.has(challengeFlags, ChallengeFlags.MATH)
+    val shakeEnabled = ChallengeFlags.has(challengeFlags, ChallengeFlags.SHAKE)
 
     val ctx = LocalContext.current
 
@@ -109,6 +118,8 @@ fun AlarmEditDialog(
             putExtra(TestAlarmActivity.EXTRA_CHALLENGE_FLAGS, flags)
             putExtra(TestAlarmActivity.EXTRA_QR_DATA, qrCodeData)
             putExtra(TestAlarmActivity.EXTRA_SOUND_ID, soundId)
+            putExtra(TestAlarmActivity.EXTRA_MATH_COUNT, mathProblemCount)
+            putExtra(TestAlarmActivity.EXTRA_SHAKE_COUNT, shakeCount)
         }
         ctx.startActivity(i)
     }
@@ -263,6 +274,32 @@ fun AlarmEditDialog(
                 }
             }
 
+            if (mathEnabled) {
+                Spacer(modifier = Modifier.height(12.dp))
+                CountStepper(
+                    label = "Aufgaben",
+                    value = mathProblemCount,
+                    onChange = { mathProblemCount = it },
+                    min = 1,
+                    max = 10,
+                    step = 1,
+                    suffix = "",
+                )
+            }
+
+            if (shakeEnabled) {
+                Spacer(modifier = Modifier.height(12.dp))
+                CountStepper(
+                    label = "Schüttel-Anzahl",
+                    value = shakeCount,
+                    onChange = { shakeCount = it },
+                    min = 10,
+                    max = 100,
+                    step = 5,
+                    suffix = "",
+                )
+            }
+
             if (qrEnabled) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
@@ -347,6 +384,8 @@ fun AlarmEditDialog(
                         challengeFlags,
                         snoozeDuration,
                         soundId,
+                        mathProblemCount,
+                        shakeCount,
                     )
                 },
                 modifier = Modifier
@@ -363,6 +402,50 @@ fun AlarmEditDialog(
         }
     }
 
+}
+
+@Composable
+private fun CountStepper(
+    label: String,
+    value: Int,
+    onChange: (Int) -> Unit,
+    min: Int,
+    max: Int,
+    step: Int,
+    suffix: String,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.weight(1f)
+        )
+        IconButton(
+            onClick = { if (value - step >= min) onChange(value - step) },
+            enabled = value - step >= min
+        ) {
+            Icon(Icons.Default.Remove, contentDescription = "Weniger", tint = BrutusRedBright)
+        }
+        Text(
+            text = if (suffix.isBlank()) "$value" else "$value $suffix",
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.width(56.dp),
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+        IconButton(
+            onClick = { if (value + step <= max) onChange(value + step) },
+            enabled = value + step <= max
+        ) {
+            Icon(Icons.Default.Add, contentDescription = "Mehr", tint = BrutusRedBright)
+        }
+    }
 }
 
 @Composable

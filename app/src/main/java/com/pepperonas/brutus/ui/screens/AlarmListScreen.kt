@@ -146,7 +146,7 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
             onDismiss = { showDialog = false },
             onPreviewSound = { snd -> previewPlayer.play(snd) },
             onStopPreview = { previewPlayer.stop() },
-            onSave = { hour, minute, label, repeatDays, challengeFlags, snooze, soundId ->
+            onSave = { hour, minute, label, repeatDays, challengeFlags, snooze, soundId, math, shake ->
                 if (editingAlarm != null) {
                     viewModel.updateAlarm(
                         editingAlarm!!.copy(
@@ -157,10 +157,15 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
                             challengeFlags = challengeFlags,
                             snoozeDuration = snooze,
                             soundId = soundId,
+                            mathProblemCount = math,
+                            shakeCount = shake,
                         )
                     )
                 } else {
-                    viewModel.addAlarm(hour, minute, label, repeatDays, challengeFlags, snooze, soundId)
+                    viewModel.addAlarm(
+                        hour, minute, label, repeatDays, challengeFlags,
+                        snooze, soundId, math, shake
+                    )
                 }
                 showDialog = false
             }

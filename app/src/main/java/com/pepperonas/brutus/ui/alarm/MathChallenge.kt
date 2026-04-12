@@ -57,12 +57,14 @@ private fun generateProblem(): MathProblem {
 }
 
 @Composable
-fun MathChallenge(onComplete: () -> Unit) {
+fun MathChallenge(
+    totalRequired: Int = 3,
+    onComplete: () -> Unit,
+) {
     var solvedCount by remember { mutableIntStateOf(0) }
     var problem by remember { mutableStateOf(generateProblem()) }
     var userInput by remember { mutableStateOf("") }
     var showError by remember { mutableStateOf(false) }
-    val totalRequired = 3
 
     Column(
         modifier = Modifier

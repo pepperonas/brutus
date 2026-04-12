@@ -16,6 +16,8 @@ data class AlarmEntity(
     val challengeFlags: Int = ChallengeFlags.MATH,  // bitmask: MATH | SHAKE | QR
     val snoozeDuration: Int = 5,          // minutes
     val soundId: Int = AlarmSound.KLAXON.id,
+    val mathProblemCount: Int = 3,        // number of math problems to solve
+    val shakeCount: Int = 30,             // number of shakes required
 ) {
     fun isDayEnabled(dayIndex: Int): Boolean = (repeatDays and (1 shl dayIndex)) != 0
 
