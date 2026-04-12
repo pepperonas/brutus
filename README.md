@@ -472,7 +472,7 @@ Brutus is part of a family of small, focused Android apps published under [peppe
 
 If Brutus actually gets you out of bed in the morning, consider buying me a coffee (or a louder alarm) via **PayPal**:
 
-[![Donate via PayPal](https://img.shields.io/badge/PayPal-Donate-00457C?logo=paypal&logoColor=white&style=for-the-badge)](https://www.paypal.com/paypalme/martinpfeffer) **·** [martin.pfeffer@celox.io](https://www.paypal.com/paypalme/martinpfeffer)
+[![Donate via PayPal](https://img.shields.io/badge/PayPal-Donate-00457C?logo=paypal&logoColor=white&style=for-the-badge)](https://www.paypal.com/paypalme/martinpfeffer)
 
 Donations are never expected — the app is and will stay free, ad-free, and offline. Every contribution funds more brutal alarm experiments.
 
