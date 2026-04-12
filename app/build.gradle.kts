@@ -1,8 +1,18 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.devtools.ksp")
+}
+
+val keystoreProperties = Properties().apply {
+    val localProps = rootProject.file("local.properties")
+    if (localProps.exists()) {
+        load(FileInputStream(localProps))
+    }
 }
 
 android {
@@ -17,14 +27,41 @@ android {
         versionName = "1.0.0"
     }
 
+    signingConfigs {
+        create("release") {
+            val envStoreFile = System.getenv("RELEASE_STORE_FILE")
+            val envStorePassword = System.getenv("RELEASE_STORE_PASSWORD")
+            val envKeyAlias = System.getenv("RELEASE_KEY_ALIAS")
+            val envKeyPassword = System.getenv("RELEASE_KEY_PASSWORD")
+
+            val storePathLocal = keystoreProperties["brutus.storeFile"] as String?
+            val storePasswordLocal = keystoreProperties["brutus.storePassword"] as String?
+            val keyAliasLocal = keystoreProperties["brutus.keyAlias"] as String?
+            val keyPasswordLocal = keystoreProperties["brutus.keyPassword"] as String?
+
+            if (envStoreFile != null) {
+                storeFile = file(envStoreFile)
+                storePassword = envStorePassword
+                keyAlias = envKeyAlias
+                keyPassword = envKeyPassword
+            } else if (storePathLocal != null) {
+                storeFile = file(storePathLocal)
+                storePassword = storePasswordLocal
+                keyAlias = keyAliasLocal
+                keyPassword = keyPasswordLocal
+            }
+        }
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
+            isMinifyEnabled = false
+            isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 
