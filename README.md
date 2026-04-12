@@ -49,6 +49,8 @@ Brutus is an Android alarm clock designed for heavy sleepers. It forces you to c
 - [Design philosophy](#design-philosophy)
 - [Troubleshooting](#troubleshooting)
 - [Roadmap](#roadmap)
+- [Developer](#developer)
+- [Donate](#donate)
 - [License](#license)
 
 ---
@@ -453,6 +455,26 @@ Planned, no specific timeline:
 - [ ] GitHub Actions workflow for automated release signing + APK upload
 
 Contributions welcome on any of these — open an issue first to coordinate.
+
+---
+
+## Developer
+
+**Martin Pfeffer** · [celox.io](https://celox.io)
+
+GitHub: [@pepperonas](https://github.com/pepperonas) · Email: [martin.pfeffer@celox.io](mailto:martin.pfeffer@celox.io)
+
+Brutus is part of a family of small, focused Android apps published under [pepperonas](https://github.com/pepperonas) — all built solo, all offline-first, all opinionated.
+
+---
+
+## Donate
+
+If Brutus actually gets you out of bed in the morning, consider buying me a coffee (or a louder alarm) via **PayPal**:
+
+[![Donate via PayPal](https://img.shields.io/badge/PayPal-Donate-00457C?logo=paypal&logoColor=white&style=for-the-badge)](https://www.paypal.com/paypalme/martinpfeffer) **·** [martin.pfeffer@celox.io](https://www.paypal.com/paypalme/martinpfeffer)
+
+Donations are never expected — the app is and will stay free, ad-free, and offline. Every contribution funds more brutal alarm experiments.
 
 ---
 
