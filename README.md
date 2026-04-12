@@ -119,7 +119,7 @@ Snoozing is available during every phase of the alarm (including while a challen
 - Pulsing _"Zum Snoozen wischen"_ hint with a drifting chevron icon, fades out as you drag
 - Springs back on incomplete swipe (damping 0.55)
 - Snaps to the end on successful trigger, then fires the snooze
-- Snooze duration configurable per alarm: **2, 5, 10, or 15 minutes** (default 5)
+- Snooze duration configurable per alarm: **Off, 2, 5, 10, or 15 minutes** (default 5). Set to _Off_ to hide the snooze button entirely on the alarm screen — no escape except finishing the challenge
 
 ### Test mode
 

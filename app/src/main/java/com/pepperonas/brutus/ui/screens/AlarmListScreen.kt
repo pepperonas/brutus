@@ -223,7 +223,10 @@ private fun AlarmCard(
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         ChipLabel(alarm.challengeName())
-                        ChipLabel("${alarm.snoozeDuration}min")
+                        ChipLabel(
+                            if (alarm.snoozeDuration == 0) "Kein Snooze"
+                            else "${alarm.snoozeDuration}min"
+                        )
                     }
                 }
             }

@@ -99,7 +99,7 @@ fun AlarmEditDialog(
     val qrBitmap = remember(qrCodeData) { QrGenerator.generateBitmap(qrCodeData) }
 
     val days = listOf("Mo", "Di", "Mi", "Do", "Fr", "Sa", "So")
-    val snoozeOptions = listOf(2, 5, 10, 15)
+    val snoozeOptions = listOf(0, 2, 5, 10, 15)
     val qrEnabled = ChallengeFlags.has(challengeFlags, ChallengeFlags.QR)
     val mathEnabled = ChallengeFlags.has(challengeFlags, ChallengeFlags.MATH)
     val shakeEnabled = ChallengeFlags.has(challengeFlags, ChallengeFlags.SHAKE)
@@ -120,6 +120,7 @@ fun AlarmEditDialog(
             putExtra(TestAlarmActivity.EXTRA_SOUND_ID, soundId)
             putExtra(TestAlarmActivity.EXTRA_MATH_COUNT, mathProblemCount)
             putExtra(TestAlarmActivity.EXTRA_SHAKE_COUNT, shakeCount)
+            putExtra(TestAlarmActivity.EXTRA_SNOOZE_ENABLED, snoozeDuration > 0)
         }
         ctx.startActivity(i)
     }
@@ -352,7 +353,7 @@ fun AlarmEditDialog(
                         onClick = { snoozeDuration = minutes },
                         shape = SegmentedButtonDefaults.itemShape(index, snoozeOptions.size)
                     ) {
-                        Text("${minutes}min")
+                        Text(if (minutes == 0) "Aus" else "${minutes}min")
                     }
                 }
             }

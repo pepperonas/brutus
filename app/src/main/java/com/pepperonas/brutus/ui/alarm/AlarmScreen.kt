@@ -53,6 +53,7 @@ fun AlarmScreen(
     qrCodeData: String,
     mathProblemCount: Int,
     shakeCount: Int,
+    snoozeEnabled: Boolean,
     onDismiss: () -> Unit,
     onSnooze: () -> Unit
 ) {
@@ -183,9 +184,10 @@ fun AlarmScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
-
-                SwipeToSnoozeButton(onSnooze = onSnooze)
+                if (snoozeEnabled) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    SwipeToSnoozeButton(onSnooze = onSnooze)
+                }
 
                 Spacer(modifier = Modifier.height(24.dp))
             }

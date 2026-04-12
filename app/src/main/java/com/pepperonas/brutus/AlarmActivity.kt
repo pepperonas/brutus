@@ -40,6 +40,7 @@ class AlarmActivity : ComponentActivity() {
             val qrData = GlobalQrStore.get(applicationContext)
             val mathCount = alarm?.mathProblemCount ?: 3
             val shakeCount = alarm?.shakeCount ?: 30
+            val snoozeEnabled = (alarm?.snoozeDuration ?: 5) > 0
 
             runOnUiThread {
                 setContent {
@@ -50,6 +51,7 @@ class AlarmActivity : ComponentActivity() {
                                 qrCodeData = qrData,
                                 mathProblemCount = mathCount,
                                 shakeCount = shakeCount,
+                                snoozeEnabled = snoozeEnabled,
                                 onDismiss = { stopAlarm() },
                                 onSnooze = { snoozeAlarm() }
                             )
