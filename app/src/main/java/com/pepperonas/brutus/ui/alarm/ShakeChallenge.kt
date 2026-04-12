@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pepperonas.brutus.ui.theme.BrutusOrange
 import com.pepperonas.brutus.ui.theme.BrutusRed
+import com.pepperonas.brutus.ui.theme.BrutusRedBright
 import kotlin.math.sqrt
 
 @Composable
@@ -88,7 +89,7 @@ fun ShakeChallenge(onComplete: () -> Unit) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Schuettel-Challenge",
+            text = "Schüttel-Challenge",
             style = MaterialTheme.typography.headlineMedium,
             color = Color.White
         )
@@ -96,7 +97,7 @@ fun ShakeChallenge(onComplete: () -> Unit) {
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Schuettle dein Handy!",
+            text = "Schüttle dein Handy!",
             style = MaterialTheme.typography.bodyLarge,
             color = Color.White.copy(alpha = 0.7f)
         )
@@ -136,7 +137,7 @@ fun ShakeChallenge(onComplete: () -> Unit) {
             Text(
                 text = "Noch ${requiredShakes - shakeCount} mal!",
                 style = MaterialTheme.typography.titleLarge,
-                color = BrutusRed
+                color = BrutusRedBright
             )
         }
     }

@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import com.pepperonas.brutus.ui.theme.BrutusDarkRed
 import com.pepperonas.brutus.ui.theme.BrutusOrange
 import com.pepperonas.brutus.ui.theme.BrutusRed
+import com.pepperonas.brutus.ui.theme.BrutusRedBright
 import com.pepperonas.brutus.util.ChallengeFlags
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
@@ -86,19 +87,22 @@ fun AlarmScreen(
         ) {
             Spacer(modifier = Modifier.height(24.dp))
 
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Text(
                     text = currentTime,
                     fontSize = 72.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
                     textAlign = TextAlign.Center,
-                    letterSpacing = 4.sp
+                    modifier = Modifier.fillMaxWidth()
                 )
                 Text(
                     text = "BRUTUS ALARM",
                     style = MaterialTheme.typography.titleLarge,
-                    color = BrutusRed,
+                    color = BrutusRedBright,
                     letterSpacing = 8.sp
                 )
 

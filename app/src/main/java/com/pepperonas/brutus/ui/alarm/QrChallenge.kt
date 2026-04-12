@@ -44,6 +44,7 @@ import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import com.pepperonas.brutus.ui.theme.BrutusOrange
 import com.pepperonas.brutus.ui.theme.BrutusRed
+import com.pepperonas.brutus.ui.theme.BrutusRedBright
 import java.util.concurrent.Executors
 
 @Composable
@@ -172,7 +173,7 @@ fun QrChallenge(expectedQrData: String, onComplete: () -> Unit) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "Falscher QR-Code! Scanne den richtigen.",
-                    color = BrutusRed,
+                    color = BrutusRedBright,
                     style = MaterialTheme.typography.bodyLarge
                 )
             }

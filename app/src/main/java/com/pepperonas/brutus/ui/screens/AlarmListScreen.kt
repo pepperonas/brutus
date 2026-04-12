@@ -69,7 +69,7 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
                 },
                 containerColor = BrutusRed
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Alarm hinzufuegen")
+                Icon(Icons.Default.Add, contentDescription = "Alarm hinzufügen")
             }
         },
         containerColor = MaterialTheme.colorScheme.background
@@ -232,7 +232,7 @@ private fun AlarmCard(
                 IconButton(onClick = onDelete) {
                     Icon(
                         Icons.Default.Delete,
-                        contentDescription = "Loeschen",
+                        contentDescription = "Löschen",
                         tint = BrutusTextSecondary
                     )
                 }

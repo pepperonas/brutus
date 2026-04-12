@@ -6,7 +6,7 @@ enum class AlarmSound(val id: Int, val displayName: String, val description: Str
     SIREN(2, "Sirene", "Auf- und abschwellender Sweep"),
     NUCLEAR(3, "Nuclear Alert", "Schnelles, scharfes Piepen"),
     FOGHORN(4, "Nebelhorn", "Tiefer, drohnender Puls"),
-    PIERCING(5, "Durchdringend", "Ultra-hohes Piepen - maximal nervig");
+    PIERCING(5, "Durchdringend", "Ultra-hohes Piepen — maximal nervig");
 
     companion object {
         fun fromId(id: Int): AlarmSound = entries.firstOrNull { it.id == id } ?: SYSTEM

@@ -1,6 +1,7 @@
 package com.pepperonas.brutus.ui.screens
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Build
@@ -8,8 +9,11 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import com.pepperonas.brutus.TestAlarmActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -86,10 +90,33 @@ fun AlarmEditDialog(
     var soundId by remember { mutableIntStateOf(existingAlarm?.soundId ?: AlarmSound.KLAXON.id) }
 
     val days = listOf("Mo", "Di", "Mi", "Do", "Fr", "Sa", "So")
-    val snoozeOptions = listOf(5, 10, 15)
+    val snoozeOptions = listOf(2, 5, 10, 15)
     val qrEnabled = ChallengeFlags.has(challengeFlags, ChallengeFlags.QR)
 
     val ctx = LocalContext.current
+    var showRegenerateConfirm by remember { mutableStateOf(false) }
+
+    val generateNewQr: () -> Unit = {
+        qrCodeData = QrGenerator.generateData()
+        qrBitmap = QrGenerator.generateBitmap(qrCodeData)
+    }
+    val shareQr: () -> Unit = {
+        if (qrCodeData.isBlank()) {
+            Toast.makeText(ctx, "Zuerst QR-Code generieren", Toast.LENGTH_SHORT).show()
+        } else if (!QrGenerator.shareQr(ctx, qrCodeData)) {
+            Toast.makeText(ctx, "Teilen fehlgeschlagen", Toast.LENGTH_SHORT).show()
+        }
+    }
+    val launchTest: () -> Unit = {
+        onStopPreview()
+        val flags = if (challengeFlags == 0) ChallengeFlags.MATH else challengeFlags
+        val i = Intent(ctx, TestAlarmActivity::class.java).apply {
+            putExtra(TestAlarmActivity.EXTRA_CHALLENGE_FLAGS, flags)
+            putExtra(TestAlarmActivity.EXTRA_QR_DATA, qrCodeData)
+            putExtra(TestAlarmActivity.EXTRA_SOUND_ID, soundId)
+        }
+        ctx.startActivity(i)
+    }
     val saveQr: () -> Unit = save@{
         if (qrCodeData.isBlank()) {
             Toast.makeText(ctx, "Zuerst QR-Code generieren", Toast.LENGTH_SHORT).show()
@@ -105,7 +132,7 @@ fun AlarmEditDialog(
     val storagePermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted -> if (granted) saveQr() else
-        Toast.makeText(ctx, "Speicher-Berechtigung benoetigt", Toast.LENGTH_SHORT).show()
+        Toast.makeText(ctx, "Speicher-Berechtigung benötigt", Toast.LENGTH_SHORT).show()
     }
     val onSaveQrClick: () -> Unit = {
         val needsPermission = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q &&
@@ -208,7 +235,7 @@ fun AlarmEditDialog(
                 }
             }
             Text(
-                text = AlarmSound.fromId(soundId).description + " - Tippe zum Vorhoeren",
+                text = AlarmSound.fromId(soundId).description + " — Tippe zum Vorhören",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 6.dp)
@@ -226,7 +253,7 @@ fun AlarmEditDialog(
             // Challenges (multi-select)
             Text("Weckmodi (kombinierbar)", style = MaterialTheme.typography.titleLarge)
             Text(
-                text = "Alle ausgewaehlten Challenges muessen nacheinander bestanden werden",
+                text = "Alle ausgewählten Challenges müssen nacheinander bestanden werden",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -235,7 +262,7 @@ fun AlarmEditDialog(
                 ChallengeChip("Mathe", challengeFlags, ChallengeFlags.MATH) {
                     challengeFlags = challengeFlags xor ChallengeFlags.MATH
                 }
-                ChallengeChip("Schuetteln", challengeFlags, ChallengeFlags.SHAKE) {
+                ChallengeChip("Schütteln", challengeFlags, ChallengeFlags.SHAKE) {
                     challengeFlags = challengeFlags xor ChallengeFlags.SHAKE
                 }
                 ChallengeChip("QR-Code", challengeFlags, ChallengeFlags.QR) {
@@ -245,20 +272,27 @@ fun AlarmEditDialog(
 
             if (qrEnabled) {
                 Spacer(modifier = Modifier.height(12.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     OutlinedButton(onClick = {
-                        qrCodeData = QrGenerator.generateData()
-                        qrBitmap = QrGenerator.generateBitmap(qrCodeData)
+                        if (qrCodeData.isNotBlank()) showRegenerateConfirm = true
+                        else generateNewQr()
                     }) {
-                        Text("QR-Code generieren")
+                        Text(if (qrCodeData.isBlank()) "QR-Code generieren" else "Neu generieren")
                     }
                     if (qrCodeData.isNotBlank()) {
-                        Spacer(modifier = Modifier.width(8.dp))
-                        OutlinedButton(onClick = onSaveQrClick) {
-                            Text("Als PNG speichern")
-                        }
+                        OutlinedButton(onClick = onSaveQrClick) { Text("Als PNG speichern") }
+                        OutlinedButton(onClick = shareQr) { Text("Teilen") }
                     }
                 }
+                Text(
+                    text = "Ein neuer QR-Code macht den bisherigen ungültig.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 6.dp)
+                )
                 if (qrCodeData.isNotBlank()) {
                     Text(
                         text = "ID: ${qrCodeData.takeLast(8)}",
@@ -318,6 +352,18 @@ fun AlarmEditDialog(
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            OutlinedButton(
+                onClick = launchTest,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("Weckmodi jetzt testen")
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
             Button(
                 onClick = {
                     onStopPreview()
@@ -344,6 +390,31 @@ fun AlarmEditDialog(
                 )
             }
         }
+    }
+
+    if (showRegenerateConfirm) {
+        AlertDialog(
+            onDismissRequest = { showRegenerateConfirm = false },
+            title = { Text("Neuen QR-Code generieren?") },
+            text = {
+                Text(
+                    "Der bisherige QR-Code wird durch einen neuen ersetzt und verliert " +
+                        "dadurch seine Gültigkeit — bereits ausgedruckte oder geteilte " +
+                        "Codes funktionieren dann nicht mehr."
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    generateNewQr()
+                    showRegenerateConfirm = false
+                }) { Text("Neu generieren") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRegenerateConfirm = false }) {
+                    Text("Abbrechen")
+                }
+            }
+        )
     }
 }
 

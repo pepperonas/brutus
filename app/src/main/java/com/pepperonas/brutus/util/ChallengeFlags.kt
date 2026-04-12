@@ -11,7 +11,7 @@ object ChallengeFlags {
         if (flags == 0) return "Keine"
         val parts = mutableListOf<String>()
         if (has(flags, MATH)) parts += "Mathe"
-        if (has(flags, SHAKE)) parts += "Schuetteln"
+        if (has(flags, SHAKE)) parts += "Schütteln"
         if (has(flags, QR)) parts += "QR-Code"
         return parts.joinToString(" + ")
     }

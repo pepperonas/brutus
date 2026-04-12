@@ -29,6 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pepperonas.brutus.ui.theme.BrutusRed
+import com.pepperonas.brutus.ui.theme.BrutusRedBright
 import kotlin.random.Random
 
 data class MathProblem(val a: Int, val b: Int, val operator: Char) {
@@ -79,7 +80,7 @@ fun MathChallenge(onComplete: () -> Unit) {
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Loesung ${solvedCount + 1} von $totalRequired",
+            text = "Lösung ${solvedCount + 1} von $totalRequired",
             style = MaterialTheme.typography.bodyLarge,
             color = Color.White.copy(alpha = 0.7f)
         )
@@ -118,7 +119,7 @@ fun MathChallenge(onComplete: () -> Unit) {
         if (showError) {
             Text(
                 text = "Falsch! Versuch es nochmal.",
-                color = BrutusRed,
+                color = BrutusRedBright,
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(top = 8.dp)
             )
@@ -139,7 +140,7 @@ fun MathChallenge(onComplete: () -> Unit) {
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier.fillMaxWidth(0.6f)
         ) {
-            Text("Pruefen", style = MaterialTheme.typography.titleLarge)
+            Text("Prüfen", style = MaterialTheme.typography.titleLarge)
         }
     }
 }
