@@ -31,6 +31,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -59,6 +60,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 import com.pepperonas.brutus.data.AlarmEntity
 import com.pepperonas.brutus.ui.theme.BrutusRed
+import com.pepperonas.brutus.ui.theme.BrutusRedBright
 import com.pepperonas.brutus.util.AlarmSound
 import com.pepperonas.brutus.util.ChallengeFlags
 import com.pepperonas.brutus.util.GlobalQrStore
@@ -232,7 +234,9 @@ fun AlarmEditDialog(
             Spacer(modifier = Modifier.height(4.dp))
             OutlinedButton(
                 onClick = { onStopPreview() },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = BrutusRedBright),
+                border = BorderStroke(1.dp, BrutusRedBright.copy(alpha = 0.5f))
             ) {
                 Text("Vorschau stoppen")
             }
@@ -287,8 +291,16 @@ fun AlarmEditDialog(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    OutlinedButton(onClick = onSaveQrClick) { Text("Als PNG speichern") }
-                    OutlinedButton(onClick = shareQr) { Text("Teilen") }
+                    OutlinedButton(
+                        onClick = onSaveQrClick,
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = BrutusRedBright),
+                        border = BorderStroke(1.dp, BrutusRedBright.copy(alpha = 0.5f))
+                    ) { Text("Als PNG speichern") }
+                    OutlinedButton(
+                        onClick = shareQr,
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = BrutusRedBright),
+                        border = BorderStroke(1.dp, BrutusRedBright.copy(alpha = 0.5f))
+                    ) { Text("Teilen") }
                 }
             }
 
@@ -315,7 +327,9 @@ fun AlarmEditDialog(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = BrutusRedBright),
+                border = BorderStroke(1.dp, BrutusRedBright.copy(alpha = 0.5f))
             ) {
                 Text("Weckmodi jetzt testen")
             }

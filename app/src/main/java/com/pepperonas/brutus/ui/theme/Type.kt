@@ -6,11 +6,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 val BrutusTypography = Typography(
-    displayLarge = TextStyle(
-        fontWeight = FontWeight.Bold,
-        fontSize = 72.sp,
-        letterSpacing = (-2).sp
-    ),
+    // Note: displayLarge intentionally left at Material 3 defaults so the
+    // TimePicker's large hour/minute cards stay correctly centered — a
+    // negative letterSpacing override used to shift the glyphs left.
     headlineLarge = TextStyle(
         fontWeight = FontWeight.Bold,
         fontSize = 32.sp
