@@ -111,10 +111,10 @@ class AlarmService : Service() {
     }
 
     private fun playAlarmSound(sound: AlarmSound) {
-        if (sound == AlarmSound.SYSTEM) {
-            playSystemAlarm()
-        } else {
-            playSynthesized(sound)
+        when (sound) {
+            AlarmSound.SILENT -> { /* intentionally nothing */ }
+            AlarmSound.SYSTEM -> playSystemAlarm()
+            else -> playSynthesized(sound)
         }
     }
 

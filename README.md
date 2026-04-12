@@ -82,18 +82,20 @@ Combination examples:
 - **Medium**: Math (5) + Shake (50)
 - **Brutus Mode**: Shake (100) → Math (10) → QR scan across the house
 
-### Six brutal alarm sounds
+### Alarm sounds
 
-Every sound except the System default is synthesized on-device in real time using `AudioTrack` with `USAGE_ALARM` and `CONTENT_TYPE_SONIFICATION` attributes. No external audio assets, tiny APK impact, seamless looping.
+Every synthesized sound is generated on-device in real time using `AudioTrack` with `USAGE_ALARM` and `CONTENT_TYPE_SONIFICATION` attributes. No external audio assets, tiny APK impact, seamless looping.
 
 | Sound | Character | Signal |
 |-------|-----------|--------|
+| **Stumm** | No audio — useful for rehearsing wake modes quietly | — |
 | **System-Alarm** | Android default alarm (fallback) | `RingtoneManager.TYPE_ALARM` |
 | **Klaxon** | Pulsing two-tone alarm | 600/900 Hz square wave, 300 ms each |
 | **Sirene** | Sweeping siren | 400 → 1200 Hz sine sweep, 2 s cycle |
 | **Nuclear Alert** | Rapid sharp beeping | 1 kHz square, 100 ms on / 100 ms off |
-| **Nebelhorn** | Low droning pulse | 120 Hz sine with 4 Hz amplitude modulation |
 | **Durchdringend** | Piercing continuous beep | 3.5 kHz square wave with 8 Hz pulse — the most annoying one by design |
+
+Choosing **Stumm** skips the audio path entirely; vibration still runs so the alarm is noticeable if you need it.
 
 Sound preview works directly inside the edit dialog — tap a chip to hear it, tap _Stop preview_ when you're done.
 

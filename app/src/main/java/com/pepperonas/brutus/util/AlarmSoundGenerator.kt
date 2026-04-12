@@ -12,11 +12,11 @@ object AlarmSoundGenerator {
      */
     fun generatePcm(sound: AlarmSound): ShortArray {
         return when (sound) {
+            AlarmSound.SILENT -> ShortArray(0) // no audio at all
             AlarmSound.SYSTEM -> ShortArray(0) // handled via RingtoneManager
             AlarmSound.KLAXON -> klaxon()
             AlarmSound.SIREN -> siren()
             AlarmSound.NUCLEAR -> nuclear()
-            AlarmSound.FOGHORN -> foghorn()
             AlarmSound.PIERCING -> piercing()
         }
     }
@@ -65,21 +65,6 @@ object AlarmSoundGenerator {
             out[i] = if (phase < 0.5) Short.MAX_VALUE else Short.MIN_VALUE
         }
         return applyEdgeFade(out, 20)
-    }
-
-    // 1500ms: 1000ms @ 120Hz sine + modulation, 500ms silence
-    private fun foghorn(): ShortArray {
-        val durMs = 1500
-        val samples = SAMPLE_RATE * durMs / 1000
-        val out = ShortArray(samples)
-        val tone = samples * 2 / 3
-        for (i in 0 until tone) {
-            val t = i.toDouble() / SAMPLE_RATE
-            val carrier = sin(2 * PI * 120.0 * t)
-            val mod = 0.7 + 0.3 * sin(2 * PI * 4.0 * t)
-            out[i] = (carrier * mod * Short.MAX_VALUE * 0.9).toInt().toShort()
-        }
-        return applyEdgeFade(out, 100)
     }
 
     // 200ms continuous 3500Hz square with amplitude pulse

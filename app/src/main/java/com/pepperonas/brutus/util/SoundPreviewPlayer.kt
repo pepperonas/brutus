@@ -14,6 +14,7 @@ class SoundPreviewPlayer(private val context: Context) {
 
     fun play(sound: AlarmSound) {
         stop()
+        if (sound == AlarmSound.SILENT) return
         if (sound == AlarmSound.SYSTEM) {
             playSystem()
             return
