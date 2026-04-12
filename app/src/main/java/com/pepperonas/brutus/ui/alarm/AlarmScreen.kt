@@ -177,18 +177,7 @@ fun AlarmScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Button(
-                    onClick = onSnooze,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = BrutusOrange.copy(alpha = 0.3f)
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text(text = "Snooze", fontSize = 16.sp, color = BrutusOrange)
-                }
+                SwipeToSnoozeButton(onSnooze = onSnooze)
 
                 Spacer(modifier = Modifier.height(24.dp))
             }
