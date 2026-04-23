@@ -22,6 +22,7 @@ import com.pepperonas.brutus.data.AlarmRepository
 import com.pepperonas.brutus.scheduler.AlarmScheduler
 import com.pepperonas.brutus.util.AlarmSound
 import com.pepperonas.brutus.util.AlarmSoundGenerator
+import com.pepperonas.brutus.util.HardcoreAudioGuard
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -33,6 +34,7 @@ class AlarmService : Service() {
     private var wakeLock: PowerManager.WakeLock? = null
     private var vibrator: Vibrator? = null
     private var previousVolume: Int = -1
+    private var hardcoreGuard: HardcoreAudioGuard? = null
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -85,7 +87,12 @@ class AlarmService : Service() {
             val alarm = repo.getById(alarmId)
             val sound = AlarmSound.fromId(alarm?.soundId ?: AlarmSound.KLAXON.id)
 
-            launch(Dispatchers.Main) { playAlarmSound(sound) }
+            launch(Dispatchers.Main) {
+                if (alarm?.hardcoreMode == true) {
+                    hardcoreGuard = HardcoreAudioGuard(applicationContext).also { it.attach() }
+                }
+                playAlarmSound(sound)
+            }
 
             // Reschedule if repeating
             if (alarm != null && alarm.repeatDays != 0) {
@@ -209,6 +216,8 @@ class AlarmService : Service() {
         audioTrack = null
 
         vibrator?.cancel()
+        hardcoreGuard?.detach()
+        hardcoreGuard = null
         restoreVolume()
         releaseWakeLock()
         stopForeground(STOP_FOREGROUND_REMOVE)

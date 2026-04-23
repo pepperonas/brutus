@@ -4,6 +4,7 @@ import android.app.KeyguardManager
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,6 +17,7 @@ import com.pepperonas.brutus.ui.alarm.AlarmScreen
 import com.pepperonas.brutus.ui.theme.BrutusTheme
 import com.pepperonas.brutus.util.ChallengeFlags
 import com.pepperonas.brutus.util.GlobalQrStore
+import com.pepperonas.brutus.util.HardcoreAudioGuard
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -23,6 +25,8 @@ import kotlinx.coroutines.launch
 class AlarmActivity : ComponentActivity() {
 
     private var alarmId: Long = -1
+    private var hardcoreMode: Boolean = false
+    private var audioGuard: HardcoreAudioGuard? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,8 +45,12 @@ class AlarmActivity : ComponentActivity() {
             val mathCount = alarm?.mathProblemCount ?: 3
             val shakeCount = alarm?.shakeCount ?: 30
             val snoozeEnabled = (alarm?.snoozeDuration ?: 5) > 0
+            hardcoreMode = alarm?.hardcoreMode == true
 
             runOnUiThread {
+                if (hardcoreMode) {
+                    audioGuard = HardcoreAudioGuard(applicationContext).also { it.attach() }
+                }
                 setContent {
                     BrutusTheme {
                         Surface(modifier = Modifier.fillMaxSize()) {
@@ -52,6 +60,7 @@ class AlarmActivity : ComponentActivity() {
                                 mathProblemCount = mathCount,
                                 shakeCount = shakeCount,
                                 snoozeEnabled = snoozeEnabled,
+                                hardcoreMode = hardcoreMode,
                                 onDismiss = { stopAlarm() },
                                 onSnooze = { snoozeAlarm() }
                             )
@@ -60,6 +69,16 @@ class AlarmActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (hardcoreMode && (event.keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ||
+                event.keyCode == KeyEvent.KEYCODE_VOLUME_UP ||
+                event.keyCode == KeyEvent.KEYCODE_VOLUME_MUTE)) {
+            audioGuard?.clampToMax()
+            return true
+        }
+        return super.dispatchKeyEvent(event)
     }
 
     @Suppress("DEPRECATION")
@@ -95,6 +114,12 @@ class AlarmActivity : ComponentActivity() {
         }
         startService(intent)
         finishAndRemoveTask()
+    }
+
+    override fun onDestroy() {
+        audioGuard?.detach()
+        audioGuard = null
+        super.onDestroy()
     }
 
     @Deprecated("Use onBackPressedDispatcher")

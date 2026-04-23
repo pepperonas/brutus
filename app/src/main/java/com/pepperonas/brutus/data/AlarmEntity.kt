@@ -18,6 +18,7 @@ data class AlarmEntity(
     val soundId: Int = AlarmSound.KLAXON.id,
     val mathProblemCount: Int = 3,        // number of math problems to solve
     val shakeCount: Int = 30,             // number of shakes required
+    val hardcoreMode: Boolean = false,    // locks STREAM_ALARM on max + blocks volume keys while ringing
 ) {
     fun isDayEnabled(dayIndex: Int): Boolean = (repeatDays and (1 shl dayIndex)) != 0
 

@@ -23,19 +23,26 @@
 
 > **The alarm clock that makes sure you actually wake up.**
 
-Brutus is an Android alarm clock designed for heavy sleepers. It forces you to complete a configurable challenge — or a chain of challenges — before the alarm stops. No cheating, no auto-dismissing, no snoozing your way back to sleep.
+Brutus is a complete Android clock suite — **Alarm · World Clock · Stopwatch · Timer** — with one mission hiding behind the polished Samsung-style UI: its alarm module forces you to complete a configurable challenge (or a chain of challenges) before ringing stops. No cheating, no auto-dismissing, no snoozing your way back to sleep.
+
+Everything is packed into a four-tab bottom navigation that keeps the brutal alarm engine one tap away while still giving you a proper clock app for everyday use.
 
 ---
 
 ## Table of Contents
 
 - [Why Brutus?](#why-brutus)
+- [App structure](#app-structure)
 - [Features](#features)
   - [Combinable wake-up challenges](#combinable-wake-up-challenges)
-  - [Six brutal alarm sounds](#six-brutal-alarm-sounds)
+  - [Alarm sounds](#alarm-sounds)
+  - [Hardcore Mode](#hardcore-mode)
   - [Global QR code](#global-qr-code)
   - [Slide-to-snooze gesture](#slide-to-snooze-gesture)
   - [Test mode](#test-mode)
+  - [World Clock](#world-clock)
+  - [Stopwatch](#stopwatch)
+  - [Timer](#timer)
   - [Scheduling](#scheduling)
   - [Lock-screen overlay](#lock-screen-overlay)
   - [Reliability](#reliability)
@@ -64,6 +71,23 @@ Stock Android alarms are polite. They ring, you tap _Dismiss_ with your eyes clo
 - **No snoozing without effort** — the snooze button is a slide-to-unlock gesture, not a tap
 - **No workarounds after power loss** — alarms are persisted in Room and re-registered on boot via a `BOOT_COMPLETED` receiver
 - **No cheating with a printed screenshot of your QR code in bed** — you can put the QR far from your bed (like the bathroom mirror) and you must physically walk there to scan it
+
+---
+
+## App structure
+
+Starting with v1.2.0 Brutus ships as a full clock suite. A persistent bottom navigation bar offers four tabs:
+
+| Tab | Icon | Purpose |
+|-----|------|---------|
+| **Alarm** | ⏰ | Samsung-style alarm list with countdown header to next alarm, per-alarm edit sheet, all the brutal wake modes |
+| **Weltuhr** | 🌐 | Live multi-time-zone board powered by `java.time.ZoneId` — add/remove cities, ticks every second |
+| **Stoppuhr** | ⏱ | Start / Stop / Lap stopwatch with centisecond precision via `SystemClock.elapsedRealtime()` |
+| **Timer** | ⌛ | HMS-picker countdown timer with quick presets (1m, 3m, 5m, 10m, 15m, 30m) — rings system alarm tone on finish |
+
+The Alarm tab stays the heart of the app: its cards show a large thin time reading, a `MDMDFSS` weekday strip with active days highlighted in bright red, a sound label, optional `HARDCORE` tag, and a toggle switch on the right. A countdown header (e.g. _"Alarm in 13 Stunden, 29 Minuten"_) sits above the list and refreshes every 30 s.
+
+A premium **monogram app icon** (radial dark-red gradient + gradient-filled "B" with hairline highlight) replaces the previous alarm-bell icon.
 
 ---
 
@@ -101,6 +125,20 @@ Choosing **Stumm** skips the audio path entirely; vibration still runs so the al
 
 Sound preview works directly inside the edit dialog — tap a chip to hear it, tap _Stop preview_ when you're done.
 
+### Hardcore Mode
+
+An opt-in per-alarm switch that makes the alarm immune to volume tampering. When a **Hardcore-Mode alarm is ringing**, Brutus:
+
+1. Clamps `STREAM_ALARM` to its maximum value and keeps it there
+2. Registers a `VOLUME_CHANGED_ACTION` receiver that snaps any user-driven volume change back to max within a few milliseconds
+3. Overrides `dispatchKeyEvent()` in both `AlarmActivity` and `TestAlarmActivity` to **consume volume-up / volume-down / mute key events** — the hardware buttons effectively become inert
+
+The `HARDCORE` tag is shown on the alarm card in the list, and a red `HARDCORE MODE` badge flashes above the clock while the alarm screen is visible. Hardcore is never enabled by default — toggle it per alarm inside the edit sheet.
+
+The guard is strictly scoped to the ringing window: as soon as the alarm is dismissed or snoozed, the receiver detaches and Android's normal volume behavior resumes. Outside of a firing alarm, the hardware volume keys behave normally, so the setting has zero footprint during daily use.
+
+> Android intentionally offers no API to globally "lock" a stream volume. Brutus achieves the locked-feel via immediate re-clamping + key event consumption — the cleanest approach available without requiring system-level permissions.
+
 ### Global QR code
 
 Brutus generates **one unique QR code** per installation, stored once in `SharedPreferences`, valid for every alarm forever. You never need to regenerate it. Workflow:
@@ -131,6 +169,20 @@ Every edit dialog has a **Test wake modes now** button. It opens the full alarm 
 - Calibrating shake threshold to your phone's accelerometer
 - Confirming you can scan your printed QR in realistic lighting
 - Auditioning alarm sounds in context
+
+### World Clock
+
+A live time-zone board powered by `java.time.ZoneId` and `ZonedDateTime`. Each row shows the city (derived from the IANA zone ID), the region, the UTC offset, the local date, and the current time — all refreshed once per second. Add-sheet offers a searchable list of the ~600 available zone IDs on the device. Selection persists across launches via `SharedPreferences` (newline-separated zone IDs).
+
+Default seeded set on first launch: **Europe/Berlin**, **America/New_York**, **Asia/Tokyo**. All removable, all replaceable.
+
+### Stopwatch
+
+Centisecond-precision stopwatch built on `SystemClock.elapsedRealtime()` (unaffected by wall-clock jumps). A single large monospace-width readout (using the Material 3 Light weight for elegance), a red **Start / Stop** circle button, and a surface-variant **Reset / Lap** circle button. Laps are persisted in-memory during the session and shown as a list with per-lap and cumulative columns. Lap button becomes available automatically while the timer is running.
+
+### Timer
+
+HMS picker (hours 0–23, minutes 0–59, seconds 0–59) with up/down steppers on each column. Quick-preset row for common durations (1m, 3m, 5m, 10m, 15m, 30m). During the countdown the screen switches to a large 64 sp time readout and two circle buttons (**Abbruch / Pause-Weiter**). When the timer expires the system `TYPE_ALARM` ringtone plays in a loop with `USAGE_ALARM` audio attributes until **Stopp** is pressed — behavior mirrors a classic kitchen timer rather than a brutal wake mode.
 
 ### Scheduling
 
@@ -311,7 +363,7 @@ No Hilt, no Koin, no Dagger — manual DI via the Application class. No Retrofit
 
 ```
 app/src/main/java/com/pepperonas/brutus/
-├── MainActivity.kt                  Entry screen, hosts the alarm list
+├── MainActivity.kt                  Entry activity, hosts the HomeScreen (4-tab NavHost)
 ├── AlarmActivity.kt                 Lock-screen overlay activity for the firing alarm
 ├── TestAlarmActivity.kt             Preview activity for "test wake modes"
 ├── BrutusApplication.kt             App init, notification channels
@@ -319,13 +371,13 @@ app/src/main/java/com/pepperonas/brutus/
 │   ├── AlarmReceiver.kt             BroadcastReceiver for the AlarmManager trigger
 │   └── BootReceiver.kt              Re-schedules alarms on BOOT_COMPLETED
 ├── service/
-│   └── AlarmService.kt              Foreground service — audio, wake lock, vibration
+│   └── AlarmService.kt              Foreground service — audio, wake lock, vibration, hardcore guard
 ├── scheduler/
 │   └── AlarmScheduler.kt            AlarmManager wrapper with next-occurrence math
 ├── data/
-│   ├── AlarmEntity.kt               Room entity — time, days bitmask, challenge flags, counts
+│   ├── AlarmEntity.kt               Room entity — time, days bitmask, challenge flags, counts, hardcoreMode
 │   ├── AlarmDao.kt                  DAO with Flow-based reactive queries
-│   ├── AlarmDatabase.kt             Room database singleton (v4)
+│   ├── AlarmDatabase.kt             Room database singleton (v5)
 │   └── AlarmRepository.kt           Single data access abstraction
 ├── viewmodel/
 │   └── AlarmViewModel.kt            State container with StateFlow of alarms
@@ -335,10 +387,14 @@ app/src/main/java/com/pepperonas/brutus/
 │   │   ├── Type.kt                  Typography (M3 defaults for TimePicker clarity)
 │   │   └── Theme.kt                 Dark-only color scheme
 │   ├── screens/
-│   │   ├── AlarmListScreen.kt       Main screen: alarm cards, FAB, edit trigger
-│   │   └── AlarmEditDialog.kt       Modal bottom sheet: time, days, sound, challenges, counts, QR, snooze, test
+│   │   ├── HomeScreen.kt            Bottom-nav shell with NavHost across the four tabs
+│   │   ├── AlarmListScreen.kt       Samsung-style alarm list with countdown header and MDMDFSS strip
+│   │   ├── AlarmEditDialog.kt       Modal bottom sheet: time, days, sound, challenges, counts, QR, snooze, hardcore, test
+│   │   ├── WorldClockScreen.kt      Live multi-zone board, add/remove sheet
+│   │   ├── StopwatchScreen.kt       Start / Stop / Lap with centisecond precision
+│   │   └── TimerScreen.kt           HMS picker + countdown + quick presets + ringtone finish
 │   └── alarm/
-│       ├── AlarmScreen.kt           Full-screen overlay with clock + challenge carousel
+│       ├── AlarmScreen.kt           Full-screen overlay with clock + challenge carousel + HARDCORE badge
 │       ├── MathChallenge.kt         Numeric input + random multiplication/addition/subtraction
 │       ├── ShakeChallenge.kt        Accelerometer listener + circular progress ring
 │       ├── QrChallenge.kt           CameraX preview + ML Kit barcode analyzer
@@ -348,8 +404,11 @@ app/src/main/java/com/pepperonas/brutus/
     ├── AlarmSoundGenerator.kt       Procedural PCM synthesis for all non-system sounds
     ├── ChallengeFlags.kt            Bitmask helpers for challenge combinations
     ├── GlobalQrStore.kt             SharedPreferences-backed global QR persistence
+    ├── HardcoreAudioGuard.kt        Volume clamp + VOLUME_CHANGED receiver for Hardcore Mode
+    ├── NextAlarmCalculator.kt       Finds the soonest trigger across all alarms (for the list header)
     ├── QrGenerator.kt               ZXing wrapper + save + share helpers
-    └── SoundPreviewPlayer.kt        AudioTrack wrapper for in-dialog previews
+    ├── SoundPreviewPlayer.kt        AudioTrack wrapper for in-dialog previews
+    └── WorldClockStore.kt           SharedPreferences-backed time-zone selection
 ```
 
 ---
@@ -443,6 +502,10 @@ Pre-1.0 releases use destructive Room migrations. Any alarm data from an older v
 
 Planned, no specific timeline:
 
+- [x] Samsung-style multi-tab clock suite (v1.2.0)
+- [x] World Clock, Stopwatch, Timer (v1.2.0)
+- [x] Hardcore Mode — volume lock + volume-key consumption (v1.2.0)
+- [x] Premium monogram app icon (v1.2.0)
 - [ ] Proper Room migrations (remove `fallbackToDestructiveMigration`)
 - [ ] Configurable shake sensitivity
 - [ ] Math difficulty presets (easy / hard / brutal)

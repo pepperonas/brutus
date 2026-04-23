@@ -54,6 +54,7 @@ fun AlarmScreen(
     mathProblemCount: Int,
     shakeCount: Int,
     snoozeEnabled: Boolean,
+    hardcoreMode: Boolean = false,
     onDismiss: () -> Unit,
     onSnooze: () -> Unit
 ) {
@@ -108,6 +109,22 @@ fun AlarmScreen(
                     color = BrutusRedBright,
                     letterSpacing = 8.sp
                 )
+
+                if (hardcoreMode) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .background(BrutusRed, RoundedCornerShape(6.dp))
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "HARDCORE MODE",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = Color.White,
+                            letterSpacing = 2.sp
+                        )
+                    }
+                }
 
                 if (active.size > 1) {
                     Spacer(modifier = Modifier.height(12.dp))

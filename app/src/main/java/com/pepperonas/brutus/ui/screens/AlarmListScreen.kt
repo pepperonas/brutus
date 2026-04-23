@@ -1,7 +1,6 @@
 package com.pepperonas.brutus.ui.screens
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,22 +16,24 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -44,15 +45,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pepperonas.brutus.data.AlarmEntity
 import com.pepperonas.brutus.ui.theme.BrutusRed
+import com.pepperonas.brutus.ui.theme.BrutusRedBright
 import com.pepperonas.brutus.ui.theme.BrutusTextSecondary
+import com.pepperonas.brutus.util.NextAlarmCalculator
 import com.pepperonas.brutus.util.SoundPreviewPlayer
 import com.pepperonas.brutus.viewmodel.AlarmViewModel
+import kotlinx.coroutines.delay
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun AlarmListScreen(viewModel: AlarmViewModel) {
     val alarms by viewModel.alarms.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
     var editingAlarm by remember { mutableStateOf<AlarmEntity?>(null) }
+    var menuOpen by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val previewPlayer = remember { SoundPreviewPlayer(context) }
@@ -60,82 +68,95 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
         onDispose { previewPlayer.stop() }
     }
 
-    Scaffold(
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    editingAlarm = null
-                    showDialog = true
-                },
-                containerColor = BrutusRed
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Alarm hinzufügen")
-            }
-        },
-        containerColor = MaterialTheme.colorScheme.background
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    Icons.Default.Alarm,
-                    contentDescription = null,
-                    tint = BrutusRed,
-                    modifier = Modifier.size(36.dp)
-                )
-                Text(
-                    text = "Brutus",
-                    style = MaterialTheme.typography.headlineLarge,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.padding(start = 12.dp)
-                )
-            }
+    var nowMillis by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            nowMillis = System.currentTimeMillis()
+            delay(30_000L)
+        }
+    }
 
-            if (alarms.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "Keine Alarme",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = BrutusTextSecondary
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Tippe + um einen Alarm zu erstellen",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = BrutusTextSecondary
-                        )
-                    }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
+    ) {
+        NextAlarmHeader(alarms = alarms, now = nowMillis)
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            IconButton(onClick = {
+                editingAlarm = null
+                showDialog = true
+            }) {
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = "Alarm hinzufügen",
+                    tint = MaterialTheme.colorScheme.onBackground
+                )
+            }
+            Box {
+                IconButton(onClick = { menuOpen = true }) {
+                    Icon(
+                        Icons.Default.MoreVert,
+                        contentDescription = "Mehr",
+                        tint = MaterialTheme.colorScheme.onBackground
+                    )
                 }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(alarms, key = { it.id }) { alarm ->
-                        AlarmCard(
-                            alarm = alarm,
-                            onToggle = { viewModel.toggleAlarm(alarm) },
-                            onDelete = { viewModel.deleteAlarm(alarm) },
-                            onClick = {
-                                editingAlarm = alarm
-                                showDialog = true
-                            }
-                        )
-                    }
-                    item { Spacer(modifier = Modifier.height(80.dp)) }
+                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                    DropdownMenuItem(
+                        text = { Text("Alle löschen") },
+                        onClick = {
+                            menuOpen = false
+                            alarms.forEach { viewModel.deleteAlarm(it) }
+                        }
+                    )
                 }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        if (alarms.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "Keine Alarme",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = BrutusTextSecondary
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Tippe + um einen Alarm zu erstellen",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = BrutusTextSecondary
+                    )
+                }
+            }
+        } else {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(alarms, key = { it.id }) { alarm ->
+                    AlarmCard(
+                        alarm = alarm,
+                        onToggle = { viewModel.toggleAlarm(alarm) },
+                        onDelete = { viewModel.deleteAlarm(alarm) },
+                        onClick = {
+                            editingAlarm = alarm
+                            showDialog = true
+                        }
+                    )
+                }
+                item { Spacer(modifier = Modifier.height(16.dp)) }
             }
         }
     }
@@ -146,7 +167,7 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
             onDismiss = { showDialog = false },
             onPreviewSound = { snd -> previewPlayer.play(snd) },
             onStopPreview = { previewPlayer.stop() },
-            onSave = { hour, minute, label, repeatDays, challengeFlags, snooze, soundId, math, shake ->
+            onSave = { hour, minute, label, repeatDays, challengeFlags, snooze, soundId, math, shake, hardcore ->
                 if (editingAlarm != null) {
                     viewModel.updateAlarm(
                         editingAlarm!!.copy(
@@ -159,18 +180,61 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
                             soundId = soundId,
                             mathProblemCount = math,
                             shakeCount = shake,
+                            hardcoreMode = hardcore,
                         )
                     )
                 } else {
                     viewModel.addAlarm(
                         hour, minute, label, repeatDays, challengeFlags,
-                        snooze, soundId, math, shake
+                        snooze, soundId, math, shake, hardcore
                     )
                 }
                 showDialog = false
             }
         )
     }
+}
+
+@Composable
+private fun NextAlarmHeader(alarms: List<AlarmEntity>, now: Long) {
+    val next = remember(alarms, now) { NextAlarmCalculator.findNext(alarms, now) }
+    val triggerMillis = remember(next, now) { next?.let { NextAlarmCalculator.nextTrigger(it, now) } }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 40.dp, bottom = 24.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            if (triggerMillis != null) {
+                Text(
+                    text = NextAlarmCalculator.formatCountdown(now, triggerMillis),
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = formatTriggerDate(triggerMillis),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = BrutusTextSecondary
+                )
+            } else {
+                Text(
+                    text = "Kein Alarm aktiv",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = BrutusTextSecondary
+                )
+            }
+        }
+    }
+}
+
+private fun formatTriggerDate(millis: Long): String {
+    val fmt = SimpleDateFormat("EEE, d. MMM, HH:mm", Locale.GERMAN)
+    return fmt.format(Date(millis))
 }
 
 @Composable
@@ -181,67 +245,67 @@ private fun AlarmCard(
     onClick: () -> Unit
 ) {
     val cardColor by animateColorAsState(
-        targetValue = if (alarm.enabled) MaterialTheme.colorScheme.surfaceVariant
-        else MaterialTheme.colorScheme.surface,
+        targetValue = MaterialTheme.colorScheme.surfaceVariant,
         label = "cardColor"
     )
 
     Card(
         onClick = onClick,
         colors = CardDefaults.cardColors(containerColor = cardColor),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(20.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(horizontal = 20.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = alarm.timeString(),
-                    fontSize = 40.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontSize = 44.sp,
+                    fontWeight = FontWeight.Light,
                     color = if (alarm.enabled) MaterialTheme.colorScheme.onSurface
                     else BrutusTextSecondary
                 )
                 if (alarm.label.isNotBlank()) {
                     Text(
                         text = alarm.label,
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = BrutusTextSecondary
                     )
                 }
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.padding(top = 4.dp)
-                ) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        ChipLabel(alarm.repeatDaysString())
-                        ChipLabel(alarm.soundName())
-                    }
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        ChipLabel(alarm.challengeName())
-                        ChipLabel(
-                            if (alarm.snoozeDuration == 0) "Kein Snooze"
-                            else "${alarm.snoozeDuration}min"
+            }
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                WeekdayStrip(repeatDays = alarm.repeatDays, enabled = alarm.enabled)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = onDelete, modifier = Modifier.size(36.dp)) {
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = "Löschen",
+                            tint = BrutusTextSecondary
                         )
                     }
-                }
-            }
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Switch(
-                    checked = alarm.enabled,
-                    onCheckedChange = { onToggle() },
-                    colors = SwitchDefaults.colors(checkedTrackColor = BrutusRed)
-                )
-                IconButton(onClick = onDelete) {
-                    Icon(
-                        Icons.Default.Delete,
-                        contentDescription = "Löschen",
-                        tint = BrutusTextSecondary
+                    Spacer(modifier = Modifier.size(4.dp))
+                    Switch(
+                        checked = alarm.enabled,
+                        onCheckedChange = { onToggle() },
+                        colors = SwitchDefaults.colors(
+                            checkedTrackColor = BrutusRed,
+                            checkedThumbColor = androidx.compose.ui.graphics.Color.White,
+                        )
                     )
+                }
+                // Flags row (sound / challenges / hardcore / snooze)
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    if (alarm.hardcoreMode) {
+                        TagChip("HARDCORE", BrutusRed)
+                    }
+                    TagChip(alarm.soundName(), BrutusTextSecondary)
                 }
             }
         }
@@ -249,16 +313,32 @@ private fun AlarmCard(
 }
 
 @Composable
-private fun ChipLabel(text: String) {
+private fun WeekdayStrip(repeatDays: Int, enabled: Boolean) {
+    val labels = listOf("M", "D", "M", "D", "F", "S", "S")
+    Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+        labels.forEachIndexed { index, label ->
+            val isOn = (repeatDays and (1 shl index)) != 0
+            val color = when {
+                !enabled -> BrutusTextSecondary.copy(alpha = 0.35f)
+                isOn -> BrutusRedBright
+                else -> BrutusTextSecondary.copy(alpha = 0.5f)
+            }
+            Text(
+                text = label,
+                fontSize = 12.sp,
+                fontWeight = if (isOn) FontWeight.Bold else FontWeight.Normal,
+                color = color
+            )
+        }
+    }
+}
+
+@Composable
+private fun TagChip(text: String, color: androidx.compose.ui.graphics.Color) {
     Text(
         text = text,
-        style = MaterialTheme.typography.labelLarge,
-        color = BrutusTextSecondary,
-        modifier = Modifier
-            .background(
-                MaterialTheme.colorScheme.surface,
-                RoundedCornerShape(8.dp)
-            )
-            .padding(horizontal = 8.dp, vertical = 4.dp)
+        fontSize = 10.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = color
     )
 }

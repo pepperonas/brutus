@@ -13,7 +13,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
-import com.pepperonas.brutus.ui.screens.AlarmListScreen
+import com.pepperonas.brutus.ui.screens.HomeScreen
 import com.pepperonas.brutus.ui.theme.BrutusTheme
 import com.pepperonas.brutus.viewmodel.AlarmViewModel
 
@@ -36,7 +36,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             BrutusTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    AlarmListScreen(viewModel = viewModel)
+                    HomeScreen(viewModel = viewModel)
                 }
             }
         }

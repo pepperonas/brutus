@@ -48,6 +48,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberTimePickerState
@@ -76,7 +78,7 @@ import com.pepperonas.brutus.util.QrGenerator
 fun AlarmEditDialog(
     existingAlarm: AlarmEntity?,
     onDismiss: () -> Unit,
-    onSave: (Int, Int, String, Int, Int, Int, Int, Int, Int) -> Unit,
+    onSave: (Int, Int, String, Int, Int, Int, Int, Int, Int, Boolean) -> Unit,
     onPreviewSound: (AlarmSound) -> Unit,
     onStopPreview: () -> Unit,
 ) {
@@ -94,6 +96,7 @@ fun AlarmEditDialog(
     var soundId by remember { mutableIntStateOf(existingAlarm?.soundId ?: AlarmSound.KLAXON.id) }
     var mathProblemCount by remember { mutableIntStateOf(existingAlarm?.mathProblemCount ?: 3) }
     var shakeCount by remember { mutableIntStateOf(existingAlarm?.shakeCount ?: 30) }
+    var hardcoreMode by remember { mutableStateOf(existingAlarm?.hardcoreMode ?: false) }
     val ctxForQr = LocalContext.current
     val qrCodeData = remember { GlobalQrStore.get(ctxForQr) }
     val qrBitmap = remember(qrCodeData) { QrGenerator.generateBitmap(qrCodeData) }
@@ -121,6 +124,7 @@ fun AlarmEditDialog(
             putExtra(TestAlarmActivity.EXTRA_MATH_COUNT, mathProblemCount)
             putExtra(TestAlarmActivity.EXTRA_SHAKE_COUNT, shakeCount)
             putExtra(TestAlarmActivity.EXTRA_SNOOZE_ENABLED, snoozeDuration > 0)
+            putExtra(TestAlarmActivity.EXTRA_HARDCORE, hardcoreMode)
         }
         ctx.startActivity(i)
     }
@@ -358,6 +362,36 @@ fun AlarmEditDialog(
                 }
             }
 
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Hardcore Mode toggle
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Hardcore Mode",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = BrutusRedBright
+                    )
+                    Text(
+                        text = "Sperrt die Lautstärke auf Maximum — Lautstärke-Tasten sind während des Alarms wirkungslos.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Switch(
+                    checked = hardcoreMode,
+                    onCheckedChange = { hardcoreMode = it },
+                    colors = SwitchDefaults.colors(checkedTrackColor = BrutusRed)
+                )
+            }
+
             Spacer(modifier = Modifier.height(24.dp))
 
             OutlinedButton(
@@ -387,6 +421,7 @@ fun AlarmEditDialog(
                         soundId,
                         mathProblemCount,
                         shakeCount,
+                        hardcoreMode,
                     )
                 },
                 modifier = Modifier
