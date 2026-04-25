@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pepperonas.brutus.ui.theme.BrutusOrange
 import com.pepperonas.brutus.ui.theme.BrutusOrangeBright
+import com.pepperonas.brutus.util.rememberBrutusHaptics
 import kotlinx.coroutines.launch
 
 /**
@@ -72,6 +73,7 @@ fun SwipeToSnoozeButton(
     val offsetX = remember { Animatable(0f) }
     val scope = rememberCoroutineScope()
     var triggered by remember { mutableStateOf(false) }
+    val haptics = rememberBrutusHaptics()
 
     val maxOffset = (trackWidthPx - thumbSizePx).coerceAtLeast(0f)
     val progress = if (maxOffset > 0f) (offsetX.value / maxOffset).coerceIn(0f, 1f) else 0f
@@ -176,6 +178,7 @@ fun SwipeToSnoozeButton(
                                 if (offsetX.value >= maxOffset * 0.85f && !triggered) {
                                     offsetX.animateTo(maxOffset, tween(150))
                                     triggered = true
+                                    haptics.success()
                                     onSnooze()
                                 } else {
                                     offsetX.animateTo(

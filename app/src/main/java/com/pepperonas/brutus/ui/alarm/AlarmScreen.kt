@@ -42,6 +42,7 @@ import com.pepperonas.brutus.ui.theme.BrutusOrange
 import com.pepperonas.brutus.ui.theme.BrutusRed
 import com.pepperonas.brutus.ui.theme.BrutusRedBright
 import com.pepperonas.brutus.util.ChallengeFlags
+import com.pepperonas.brutus.util.rememberBrutusHaptics
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -65,6 +66,13 @@ fun AlarmScreen(
     }
     var currentIndex by remember { mutableIntStateOf(0) }
     val allDone = currentIndex >= active.size
+    val haptics = rememberBrutusHaptics()
+
+    LaunchedEffect(currentIndex, allDone) {
+        if (currentIndex > 0 || allDone) {
+            if (allDone) haptics.success() else haptics.tap()
+        }
+    }
 
     LaunchedEffect(Unit) {
         while (true) {

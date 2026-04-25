@@ -55,6 +55,7 @@ import com.pepperonas.brutus.ui.theme.BrutusTextSecondary
 import com.pepperonas.brutus.util.ExactAlarmPermission
 import com.pepperonas.brutus.util.NextAlarmCalculator
 import com.pepperonas.brutus.util.SoundPreviewPlayer
+import com.pepperonas.brutus.util.rememberBrutusHaptics
 import com.pepperonas.brutus.viewmodel.AlarmViewModel
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
@@ -73,6 +74,7 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
     DisposableEffect(Unit) {
         onDispose { previewPlayer.stop() }
     }
+    val haptics = rememberBrutusHaptics()
 
     var nowMillis by remember { mutableLongStateOf(System.currentTimeMillis()) }
     LaunchedEffect(Unit) {
@@ -174,8 +176,14 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
                 items(alarms, key = { it.id }) { alarm ->
                     AlarmCard(
                         alarm = alarm,
-                        onToggle = { viewModel.toggleAlarm(alarm) },
-                        onDelete = { viewModel.deleteAlarm(alarm) },
+                        onToggle = {
+                            haptics.tap()
+                            viewModel.toggleAlarm(alarm)
+                        },
+                        onDelete = {
+                            haptics.warn()
+                            viewModel.deleteAlarm(alarm)
+                        },
                         onClick = {
                             editingAlarm = alarm
                             showDialog = true

@@ -72,6 +72,7 @@ import com.pepperonas.brutus.util.AlarmSound
 import com.pepperonas.brutus.util.ChallengeFlags
 import com.pepperonas.brutus.util.GlobalQrStore
 import com.pepperonas.brutus.util.QrGenerator
+import com.pepperonas.brutus.util.rememberBrutusHaptics
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -108,6 +109,7 @@ fun AlarmEditDialog(
     val shakeEnabled = ChallengeFlags.has(challengeFlags, ChallengeFlags.SHAKE)
 
     val ctx = LocalContext.current
+    val haptics = rememberBrutusHaptics()
 
     val shareQr: () -> Unit = {
         if (!QrGenerator.shareQr(ctx, qrCodeData)) {
@@ -387,7 +389,10 @@ fun AlarmEditDialog(
                 }
                 Switch(
                     checked = hardcoreMode,
-                    onCheckedChange = { hardcoreMode = it },
+                    onCheckedChange = {
+                        haptics.tap()
+                        hardcoreMode = it
+                    },
                     colors = SwitchDefaults.colors(checkedTrackColor = BrutusRed)
                 )
             }
@@ -410,6 +415,7 @@ fun AlarmEditDialog(
 
             Button(
                 onClick = {
+                    haptics.success()
                     onStopPreview()
                     onSave(
                         timePickerState.hour,

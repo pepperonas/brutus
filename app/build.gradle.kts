@@ -23,8 +23,8 @@ android {
         applicationId = "com.pepperonas.brutus"
         minSdk = 26
         targetSdk = 35
-        versionCode = 4
-        versionName = "1.3.0"
+        versionCode = 5
+        versionName = "1.3.1"
     }
 
     signingConfigs {
@@ -120,4 +120,8 @@ dependencies {
 
     // ZXing for QR generation
     implementation("com.google.zxing:core:3.5.3")
+
+    // Test dependencies
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:2.1.0")
 }

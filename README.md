@@ -406,13 +406,25 @@ app/src/main/java/com/pepperonas/brutus/
     ├── AlarmSound.kt                Enum of available alarm sounds
     ├── AlarmSoundGenerator.kt       Procedural PCM synthesis for all non-system sounds
     ├── ChallengeFlags.kt            Bitmask helpers for challenge combinations
+    ├── ExactAlarmPermission.kt      canScheduleExactAlarms() check + deep-link Intent (v1.3.0+)
     ├── GlobalQrStore.kt             SharedPreferences-backed global QR persistence
     ├── HardcoreAudioGuard.kt        Volume clamp + VOLUME_CHANGED receiver for Hardcore Mode
+    ├── Haptics.kt                   BrutusHaptics wrapper around HapticFeedbackConstants (v1.3.1+)
     ├── NextAlarmCalculator.kt       Finds the soonest trigger across all alarms (for the list header)
     ├── QrGenerator.kt               ZXing wrapper + save + share helpers
     ├── SoundPreviewPlayer.kt        AudioTrack wrapper for in-dialog previews
     └── WorldClockStore.kt           SharedPreferences-backed time-zone selection
 ```
+
+Tests live alongside the production code under `app/src/test/java/...`:
+
+```
+app/src/test/java/com/pepperonas/brutus/util/
+├── ChallengeFlagsTest.kt          6 tests — describe / activeList / has bitmask edge cases
+└── NextAlarmCalculatorTest.kt    17 tests — one-shot today/tomorrow, repeating wrap, weekend selection, formatCountdown
+```
+
+Run them with `./gradlew :app:testDebugUnitTest`. The `tests.yml` GitHub workflow runs them on every push to `main` and every pull request.
 
 ---
 
@@ -513,6 +525,9 @@ Planned, no specific timeline:
 - [x] R8 / ProGuard rules for size-optimized release builds (v1.3.0)
 - [x] Unbundled ML Kit Barcode for slim APK (v1.3.0)
 - [x] Exact-alarm permission banner with deep link to system settings (v1.3.0)
+- [x] Tasteful haptic feedback on key interactions (v1.3.1)
+- [x] JUnit test coverage for alarm-time math (v1.3.1)
+- [x] GitHub Actions workflow for tests + tagged releases (v1.3.1)
 - [ ] Configurable shake sensitivity
 - [ ] Math difficulty presets (easy / hard / brutal)
 - [ ] Per-alarm sound override at runtime
