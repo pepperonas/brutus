@@ -234,7 +234,9 @@ The APK is signed with a permanent keystore (`CN=Brutus, O=Pepperonas`, RSA 4096
 
 ### Samsung note
 
-Samsung's One UI by default revokes `SCHEDULE_EXACT_ALARM` for third-party apps. If your alarm doesn't fire at the exact minute:
+Samsung's One UI by default revokes `SCHEDULE_EXACT_ALARM` for third-party apps. **v1.3.0 detects this automatically** and shows a red _"Exakte Alarme deaktiviert"_ banner above the alarm list with an _Aktivieren_ button that deep-links straight into the right settings page (`ACTION_REQUEST_SCHEDULE_EXACT_ALARM`). Tap it once, toggle the switch, and you're back. The banner re-checks on every app resume and disappears as soon as the permission is granted.
+
+If you'd rather do it manually:
 
 **Settings → Apps → Brutus → Alarms & reminders → Allow**
 
@@ -253,8 +255,9 @@ Samsung's One UI by default revokes `SCHEDULE_EXACT_ALARM` for third-party apps.
 | `USE_FULL_SCREEN_INTENT` | Lock-screen alarm overlay | Install time |
 | `FOREGROUND_SERVICE` / `FOREGROUND_SERVICE_MEDIA_PLAYBACK` | Alarm playback service | Install time |
 | `WRITE_EXTERNAL_STORAGE` (API ≤ 28 only) | Save QR PNG on legacy Android | Runtime, when saving QR |
+| `ACCESS_NETWORK_STATE` (since v1.3.0) | Lets Play Services check connectivity for the one-time ML Kit Barcode model download | Install time |
 
-No internet permission is requested. Brutus is fully offline.
+Brutus does **not** request `INTERNET` and never sends data anywhere. Starting with v1.3.0 the ML Kit Barcode model is shipped _unbundled_ — the model itself is delivered via Google Play Services and pre-fetched at install time (`com.google.mlkit.vision.DEPENDENCIES = barcode` meta-data). This adds an `ACCESS_NETWORK_STATE` permission so Play Services can check connectivity for the one-time model download, but the app itself never opens a socket.
 
 ---
 
@@ -350,7 +353,7 @@ keytool -genkeypair -v \
 | Background | Foreground Service (media playback type) + `PARTIAL_WAKE_LOCK` |
 | Audio | `AudioTrack` (synthesized) + `MediaPlayer` (system ringtone) |
 | Camera | CameraX 1.4.1 |
-| Barcode scanning | Google ML Kit Barcode Scanning 17.3.0 |
+| Barcode scanning | Google ML Kit Barcode Scanning (unbundled) 18.3.1 |
 | QR generation | ZXing Core 3.5.3 |
 | Gradle | 8.11.1 with AGP 8.7.3 |
 | Min / Target SDK | 26 (Android 8.0) / 35 (Android 15) |
@@ -473,7 +476,7 @@ The same flow, but after the user slide-triggers the snooze button:
 - **Every decision favors waking the user up over UX politeness.** If you need a polite alarm, use the system clock.
 - **Challenges are configurable because brains are different.** Some people need math; others just need physical movement. Some need both.
 - **No account, no network, no tracking.** Brutus never touches the internet.
-- **APK size matters less than reliability.** ML Kit adds ~20 MB; it's worth it for the QR mode.
+- **APK size matters more than we initially thought.** v1.2.0 was 35 MB because of bundled ML Kit; v1.3.0 ships the unbundled variant and ships R8 minification, dropping the APK to under 4 MB without losing any functionality.
 - **Procedural audio beats licensed samples.** Synthesized sounds mean no copyright issues, no asset loading, no file cache — and the sounds can be tuned to be as nasty as needed.
 - **Destructive DB migration is acceptable during pre-1.0 development.** Once Brutus hits a real release cadence, proper Room migrations will replace the current fallback.
 
@@ -494,7 +497,7 @@ Make sure the printed QR has good lighting and enough contrast. Test mode with t
 Force-stop Brutus once via system settings. This is typically an edge case when the service didn't finish cleanly after the alarm was killed by aggressive battery management.
 
 ### App crashes after update
-Pre-1.0 releases use destructive Room migrations. Any alarm data from an older version is dropped on schema change. Create your alarms again.
+Starting with v1.3.0 Brutus uses proper Room migrations and exports its schemas to `app/schemas/`. Migration paths from v4 onward preserve user alarms across updates. Pre-v1.0.0 dev versions (1, 2, 3) still fall back to a destructive recreate — anyone on those was a developer-tester anyway.
 
 ---
 
@@ -506,7 +509,10 @@ Planned, no specific timeline:
 - [x] World Clock, Stopwatch, Timer (v1.2.0)
 - [x] Hardcore Mode — volume lock + volume-key consumption (v1.2.0)
 - [x] Premium monogram app icon (v1.2.0)
-- [ ] Proper Room migrations (remove `fallbackToDestructiveMigration`)
+- [x] Proper Room migrations + schema export (v1.3.0)
+- [x] R8 / ProGuard rules for size-optimized release builds (v1.3.0)
+- [x] Unbundled ML Kit Barcode for slim APK (v1.3.0)
+- [x] Exact-alarm permission banner with deep link to system settings (v1.3.0)
 - [ ] Configurable shake sensitivity
 - [ ] Math difficulty presets (easy / hard / brutal)
 - [ ] Per-alarm sound override at runtime
@@ -514,7 +520,6 @@ Planned, no specific timeline:
 - [ ] Widget: next upcoming alarm
 - [ ] Wear OS companion
 - [ ] Localization beyond German
-- [ ] R8 / ProGuard rules for size-optimized release builds
 - [ ] GitHub Actions workflow for automated release signing + APK upload
 
 Contributions welcome on any of these — open an issue first to coordinate.

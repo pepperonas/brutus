@@ -23,8 +23,8 @@ android {
         applicationId = "com.pepperonas.brutus"
         minSdk = 26
         targetSdk = 35
-        versionCode = 3
-        versionName = "1.2.0"
+        versionCode = 4
+        versionName = "1.3.0"
     }
 
     signingConfigs {
@@ -55,8 +55,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
-            isShrinkResources = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -77,6 +77,11 @@ android {
     buildFeatures {
         compose = true
     }
+}
+
+ksp {
+    // Emit Room schemas so future migrations have a baseline diff to test against.
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 dependencies {
@@ -109,8 +114,9 @@ dependencies {
     implementation("androidx.camera:camera-lifecycle:$cameraVersion")
     implementation("androidx.camera:camera-view:$cameraVersion")
 
-    // ML Kit Barcode
-    implementation("com.google.mlkit:barcode-scanning:17.3.0")
+    // ML Kit Barcode (unbundled — model is downloaded on first use via Play Services,
+    // saves ~10 MB in the APK)
+    implementation("com.google.android.gms:play-services-mlkit-barcode-scanning:18.3.1")
 
     // ZXing for QR generation
     implementation("com.google.zxing:core:3.5.3")

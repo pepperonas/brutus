@@ -26,6 +26,13 @@
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Material.NoActionBar">
 
+        <!-- Pre-fetch the ML Kit Barcode model from Play Services at install time
+             so the QR challenge works on first run without a network round-trip. -->
+        <meta-data
+            android:name="com.google.mlkit.vision.DEPENDENCIES"
+            android:value="barcode" />
+
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

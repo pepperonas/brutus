@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -28,6 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -43,10 +45,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.pepperonas.brutus.data.AlarmEntity
 import com.pepperonas.brutus.ui.theme.BrutusRed
 import com.pepperonas.brutus.ui.theme.BrutusRedBright
 import com.pepperonas.brutus.ui.theme.BrutusTextSecondary
+import com.pepperonas.brutus.util.ExactAlarmPermission
 import com.pepperonas.brutus.util.NextAlarmCalculator
 import com.pepperonas.brutus.util.SoundPreviewPlayer
 import com.pepperonas.brutus.viewmodel.AlarmViewModel
@@ -76,12 +82,32 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
         }
     }
 
+    // Re-check exact-alarm permission whenever the user returns from settings
+    var exactGranted by remember { mutableStateOf(ExactAlarmPermission.isGranted(context)) }
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    DisposableEffect(lifecycle) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                exactGranted = ExactAlarmPermission.isGranted(context)
+            }
+        }
+        lifecycle.addObserver(observer)
+        onDispose { lifecycle.removeObserver(observer) }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp)
     ) {
         NextAlarmHeader(alarms = alarms, now = nowMillis)
+
+        if (!exactGranted) {
+            ExactAlarmBanner(onFix = {
+                ExactAlarmPermission.settingsIntent(context)?.let { context.startActivity(it) }
+            })
+            Spacer(modifier = Modifier.height(12.dp))
+        }
 
         Row(
             modifier = Modifier
@@ -341,4 +367,44 @@ private fun TagChip(text: String, color: androidx.compose.ui.graphics.Color) {
         fontWeight = FontWeight.SemiBold,
         color = color
     )
+}
+
+@Composable
+private fun ExactAlarmBanner(onFix: () -> Unit) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = BrutusRed.copy(alpha = 0.18f)),
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Default.Warning,
+                contentDescription = null,
+                tint = BrutusRedBright,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.size(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Exakte Alarme deaktiviert",
+                    fontWeight = FontWeight.SemiBold,
+                    color = BrutusRedBright,
+                )
+                Text(
+                    text = "Brutus kann ohne diese Berechtigung nicht zur exakten Minute klingeln.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+            Spacer(modifier = Modifier.size(8.dp))
+            TextButton(onClick = onFix) {
+                Text("Aktivieren", color = BrutusRedBright, fontWeight = FontWeight.SemiBold)
+            }
+        }
+    }
 }
