@@ -27,6 +27,7 @@ import com.pepperonas.brutus.util.AlarmSound
 import com.pepperonas.brutus.util.AlarmSoundGenerator
 import com.pepperonas.brutus.util.HardcoreAudioGuard
 import com.pepperonas.brutus.util.UltraHardcoreStore
+import com.pepperonas.brutus.widget.NextAlarmWidget
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -125,6 +126,7 @@ class AlarmService : Service() {
                 } else {
                     repo.setEnabled(alarm.id, false)
                 }
+                NextAlarmWidget.refresh(applicationContext)
             }
         }
     }

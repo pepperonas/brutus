@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [AlarmEntity::class], version = 6, exportSchema = true)
+@Database(entities = [AlarmEntity::class], version = 7, exportSchema = true)
 abstract class AlarmDatabase : RoomDatabase() {
 
     abstract fun alarmDao(): AlarmDao
@@ -46,6 +46,15 @@ abstract class AlarmDatabase : RoomDatabase() {
             }
         }
 
+        /** v1.6.0: optional 10-minute Sunrise pre-alarm. */
+        private val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "ALTER TABLE alarms ADD COLUMN sunriseEnabled INTEGER NOT NULL DEFAULT 0"
+                )
+            }
+        }
+
         fun getInstance(context: Context): AlarmDatabase {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -53,7 +62,7 @@ abstract class AlarmDatabase : RoomDatabase() {
                     AlarmDatabase::class.java,
                     "brutus_alarms.db"
                 )
-                    .addMigrations(MIGRATION_4_5, MIGRATION_5_6)
+                    .addMigrations(MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
                     // Pre-v1.0.0 dev versions never reached external users; if
                     // someone is still on one of them we accept a clean wipe.
                     .fallbackToDestructiveMigrationFrom(1, 2, 3)

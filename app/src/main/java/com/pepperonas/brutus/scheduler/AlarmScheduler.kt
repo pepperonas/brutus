@@ -13,6 +13,9 @@ object AlarmScheduler {
     /** Follow-up offsets after Ultra Hardcore main-alarm dismiss (in minutes). */
     val ULTRA_HARDCORE_FOLLOWUP_OFFSETS_MIN = intArrayOf(10, 15)
 
+    /** Sunrise pre-alarm fires this many minutes before the main alarm. */
+    const val SUNRISE_LEAD_MIN = 10
+
     fun schedule(context: Context, alarm: AlarmEntity) {
         val alarmManager = context.getSystemService(AlarmManager::class.java)
         val nextTrigger = calculateNextTrigger(alarm)
@@ -20,11 +23,29 @@ object AlarmScheduler {
 
         val clockInfo = AlarmManager.AlarmClockInfo(nextTrigger, intent)
         alarmManager.setAlarmClock(clockInfo, intent)
+
+        if (alarm.sunriseEnabled) {
+            val sunriseAt = nextTrigger - SUNRISE_LEAD_MIN * 60_000L
+            if (sunriseAt > System.currentTimeMillis()) {
+                val sunriseIntent = createSunrisePendingIntent(context, alarm.id, nextTrigger)
+                alarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP, sunriseAt, sunriseIntent
+                )
+            }
+        } else {
+            cancelSunrise(context, alarm.id)
+        }
     }
 
     fun cancel(context: Context, alarm: AlarmEntity) {
         val alarmManager = context.getSystemService(AlarmManager::class.java)
         alarmManager.cancel(createPendingIntent(context, alarm))
+        cancelSunrise(context, alarm.id)
+    }
+
+    fun cancelSunrise(context: Context, alarmId: Long) {
+        val alarmManager = context.getSystemService(AlarmManager::class.java)
+        alarmManager.cancel(createSunrisePendingIntent(context, alarmId, 0L))
     }
 
     fun scheduleSnooze(context: Context, alarm: AlarmEntity) {
@@ -138,7 +159,31 @@ object AlarmScheduler {
     private fun followupRequestCode(alarmId: Long, seq: Int): Int =
         0x4F000000 or ((alarmId.toInt() and 0x00FFFFFF) shl 4) or (seq and 0xF)
 
+    private fun createSunrisePendingIntent(
+        context: Context,
+        alarmId: Long,
+        mainTriggerAt: Long,
+    ): PendingIntent {
+        val intent = Intent(context, AlarmReceiver::class.java).apply {
+            putExtra("alarm_id", alarmId)
+            putExtra(EXTRA_IS_SUNRISE, true)
+            putExtra(EXTRA_MAIN_TRIGGER_AT, mainTriggerAt)
+            action = ACTION_ALARM_TRIGGER
+        }
+        return PendingIntent.getBroadcast(
+            context,
+            sunriseRequestCode(alarmId),
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
+
+    private fun sunriseRequestCode(alarmId: Long): Int =
+        0x2D000000 or (alarmId.toInt() and 0x00FFFFFF)
+
     const val ACTION_ALARM_TRIGGER = "com.pepperonas.brutus.ALARM_TRIGGER"
     const val EXTRA_IS_FOLLOWUP = "is_followup"
     const val EXTRA_FOLLOWUP_SEQ = "followup_seq"
+    const val EXTRA_IS_SUNRISE = "is_sunrise"
+    const val EXTRA_MAIN_TRIGGER_AT = "main_trigger_at"
 }

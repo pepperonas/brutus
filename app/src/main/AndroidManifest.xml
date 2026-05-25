@@ -9,6 +9,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <!-- Lets us show the system dialog that whitelists Brutus from aggressive battery management. -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.CAMERA" />
     <!-- Step counter sensor for the Ultra Hardcore anti-snooze task. Runtime permission on API 29+. -->
@@ -58,6 +60,17 @@
             android:excludeFromRecents="true"
             android:theme="@android:style/Theme.Material.NoActionBar" />
 
+        <activity
+            android:name=".SunriseActivity"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:taskAffinity=""
+            android:excludeFromRecents="true"
+            android:showOnLockScreen="true"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:theme="@android:style/Theme.Material.NoActionBar" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -81,6 +94,17 @@
         <receiver
             android:name=".receiver.AlarmReceiver"
             android:exported="false" />
+
+        <receiver
+            android:name=".widget.NextAlarmWidget"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_next_alarm_info" />
+        </receiver>
 
         <receiver
             android:name=".receiver.BootReceiver"

@@ -22,6 +22,7 @@ data class AlarmEntity(
     val ultraHardcoreMode: Boolean = false, // implies hardcoreMode + schedules two follow-up alarms after dismiss
     val mathDifficulty: Int = 1,          // 0 = easy, 1 = hard (legacy default), 2 = brutal
     val shakeSensitivity: Int = 1,        // 0 = light, 1 = normal (default), 2 = hard
+    val sunriseEnabled: Boolean = false,  // 10-minute gentle pre-alarm with screen brightness ramp + chime
 ) {
     fun isDayEnabled(dayIndex: Int): Boolean = (repeatDays and (1 shl dayIndex)) != 0
 

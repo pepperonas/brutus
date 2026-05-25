@@ -89,6 +89,7 @@ data class AlarmEditResult(
     val ultraHardcoreMode: Boolean,
     val mathDifficulty: Int,
     val shakeSensitivity: Int,
+    val sunriseEnabled: Boolean,
 )
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -122,6 +123,7 @@ fun AlarmEditDialog(
     var shakeSensitivity by remember {
         mutableIntStateOf(existingAlarm?.shakeSensitivity ?: ChallengeDifficulty.SHAKE_NORMAL)
     }
+    var sunriseEnabled by remember { mutableStateOf(existingAlarm?.sunriseEnabled ?: false) }
 
     val ctxForQr = LocalContext.current
     val qrCodeData = remember { GlobalQrStore.get(ctxForQr) }
@@ -424,6 +426,20 @@ fun AlarmEditDialog(
 
             Spacer(modifier = Modifier.height(20.dp))
 
+            // Sunrise pre-alarm toggle
+            ModeToggleRow(
+                title = "Sunrise (10 Min Vorlauf)",
+                titleColor = BrutusOrange.copy(alpha = 0.85f),
+                description = "10 Minuten vor dem Wecker startet ein sanfter Vorlauf: Bildschirm wird langsam heller, leises Glockenspiel schwillt an. Der Hauptalarm klingelt danach normal.",
+                checked = sunriseEnabled,
+                onCheckedChange = {
+                    haptics.tap()
+                    sunriseEnabled = it
+                }
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
             // Hardcore Mode toggle
             ModeToggleRow(
                 title = "Hardcore Mode",
@@ -496,6 +512,7 @@ fun AlarmEditDialog(
                             ultraHardcoreMode = ultraHardcoreMode,
                             mathDifficulty = mathDifficulty,
                             shakeSensitivity = shakeSensitivity,
+                            sunriseEnabled = sunriseEnabled,
                         )
                     )
                 },

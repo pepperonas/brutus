@@ -7,6 +7,7 @@ import com.pepperonas.brutus.BrutusApplication
 import com.pepperonas.brutus.data.AlarmRepository
 import com.pepperonas.brutus.scheduler.AlarmScheduler
 import com.pepperonas.brutus.util.UltraHardcoreStore
+import com.pepperonas.brutus.widget.NextAlarmWidget
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -40,6 +41,8 @@ class BootReceiver : BroadcastReceiver() {
                     AlarmScheduler.scheduleFollowup(context, alarm, p.seq, p.triggerAt)
                 }
             }
+
+            NextAlarmWidget.refresh(context)
         }
     }
 }

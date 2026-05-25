@@ -53,6 +53,7 @@ import com.pepperonas.brutus.ui.theme.BrutusOrange
 import com.pepperonas.brutus.ui.theme.BrutusRed
 import com.pepperonas.brutus.ui.theme.BrutusRedBright
 import com.pepperonas.brutus.ui.theme.BrutusTextSecondary
+import com.pepperonas.brutus.util.BatteryOptimizationPermission
 import com.pepperonas.brutus.util.ExactAlarmPermission
 import com.pepperonas.brutus.util.NextAlarmCalculator
 import com.pepperonas.brutus.util.SoundPreviewPlayer
@@ -85,13 +86,15 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
         }
     }
 
-    // Re-check exact-alarm permission whenever the user returns from settings
+    // Re-check exact-alarm + battery permissions whenever the user returns from settings
     var exactGranted by remember { mutableStateOf(ExactAlarmPermission.isGranted(context)) }
+    var batteryIgnoring by remember { mutableStateOf(BatteryOptimizationPermission.isIgnoring(context)) }
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     DisposableEffect(lifecycle) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 exactGranted = ExactAlarmPermission.isGranted(context)
+                batteryIgnoring = BatteryOptimizationPermission.isIgnoring(context)
             }
         }
         lifecycle.addObserver(observer)
@@ -108,6 +111,17 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
         if (!exactGranted) {
             ExactAlarmBanner(onFix = {
                 ExactAlarmPermission.settingsIntent(context)?.let { context.startActivity(it) }
+            })
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+
+        if (!batteryIgnoring) {
+            BatteryOptimizationBanner(onFix = {
+                try {
+                    context.startActivity(BatteryOptimizationPermission.settingsIntent(context))
+                } catch (_: Exception) {
+                    context.startActivity(BatteryOptimizationPermission.fallbackSettingsIntent())
+                }
             })
             Spacer(modifier = Modifier.height(12.dp))
         }
@@ -219,6 +233,7 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
                             ultraHardcoreMode = result.ultraHardcoreMode,
                             mathDifficulty = result.mathDifficulty,
                             shakeSensitivity = result.shakeSensitivity,
+                            sunriseEnabled = result.sunriseEnabled,
                         )
                     )
                 } else {
@@ -236,6 +251,7 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
                         ultraHardcoreMode = result.ultraHardcoreMode,
                         mathDifficulty = result.mathDifficulty,
                         shakeSensitivity = result.shakeSensitivity,
+                        sunriseEnabled = result.sunriseEnabled,
                     )
                 }
                 showDialog = false
@@ -396,8 +412,35 @@ private fun TagChip(text: String, color: androidx.compose.ui.graphics.Color) {
 
 @Composable
 private fun ExactAlarmBanner(onFix: () -> Unit) {
+    PermissionBanner(
+        title = "Exakte Alarme deaktiviert",
+        body = "Brutus kann ohne diese Berechtigung nicht zur exakten Minute klingeln.",
+        actionLabel = "Aktivieren",
+        onFix = onFix,
+    )
+}
+
+@Composable
+private fun BatteryOptimizationBanner(onFix: () -> Unit) {
+    PermissionBanner(
+        title = "Akku-Optimierung aktiv",
+        body = "Aggressive Akkusparmaßnahmen können Alarme verschlucken. Whiteliste Brutus, damit er garantiert klingelt.",
+        actionLabel = "Whitelisten",
+        accent = BrutusOrange,
+        onFix = onFix,
+    )
+}
+
+@Composable
+private fun PermissionBanner(
+    title: String,
+    body: String,
+    actionLabel: String,
+    accent: androidx.compose.ui.graphics.Color = BrutusRedBright,
+    onFix: () -> Unit,
+) {
     Card(
-        colors = CardDefaults.cardColors(containerColor = BrutusRed.copy(alpha = 0.18f)),
+        colors = CardDefaults.cardColors(containerColor = accent.copy(alpha = 0.18f)),
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -410,25 +453,21 @@ private fun ExactAlarmBanner(onFix: () -> Unit) {
             Icon(
                 Icons.Default.Warning,
                 contentDescription = null,
-                tint = BrutusRedBright,
+                tint = accent,
                 modifier = Modifier.size(24.dp)
             )
             Spacer(modifier = Modifier.size(12.dp))
             Column(modifier = Modifier.weight(1f)) {
+                Text(text = title, fontWeight = FontWeight.SemiBold, color = accent)
                 Text(
-                    text = "Exakte Alarme deaktiviert",
-                    fontWeight = FontWeight.SemiBold,
-                    color = BrutusRedBright,
-                )
-                Text(
-                    text = "Brutus kann ohne diese Berechtigung nicht zur exakten Minute klingeln.",
+                    text = body,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
             }
             Spacer(modifier = Modifier.size(8.dp))
             TextButton(onClick = onFix) {
-                Text("Aktivieren", color = BrutusRedBright, fontWeight = FontWeight.SemiBold)
+                Text(actionLabel, color = accent, fontWeight = FontWeight.SemiBold)
             }
         }
     }

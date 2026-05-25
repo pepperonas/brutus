@@ -39,6 +39,9 @@ Everything is packed into a four-tab bottom navigation that keeps the brutal ala
   - [Alarm sounds](#alarm-sounds)
   - [Hardcore Mode](#hardcore-mode)
   - [Ultra Hardcore Mode](#ultra-hardcore-mode)
+  - [Sunrise pre-alarm](#sunrise-pre-alarm)
+  - [Home-screen widget](#home-screen-widget)
+  - [Reliability banners](#reliability-banners)
   - [Global QR code](#global-qr-code)
   - [Slide-to-snooze gesture](#slide-to-snooze-gesture)
   - [Test mode](#test-mode)
@@ -188,6 +191,41 @@ Requires the **`ACTIVITY_RECOGNITION`** runtime permission (API 29+) for the ste
 
 > Ultra Hardcore can be disabled per alarm at any time. Toggling it off in the edit dialog also cancels any currently-armed follow-ups and dismisses the notification immediately.
 
+### Sunrise pre-alarm
+
+A per-alarm opt-in (v1.6.0) that gives you a 10-minute gentle wake-up window _before_ the main alarm starts. When enabled:
+
+- A separate `setExactAndAllowWhileIdle` registration fires 10 min before the main trigger and launches `SunriseActivity` on top of the lock screen.
+- The activity ramps the **screen brightness** linearly from ~5 % to 100 % and the background gradient shifts from black to dawn-orange.
+- A soft **Glockenspiel** loops at the picker's amplitude — no max-volume override, no Hardcore guard. Just an ambient cue.
+- The clock continues to tick centered on the screen with a live countdown to the main alarm.
+- Two buttons: **Wecker stoppen** (disables the alarm entirely, same effect as toggling it off in the list) and **Schon wach — Sunrise schliessen** (closes the pre-alarm; main alarm still fires at the configured time).
+- Sunrise has _no_ challenge requirements and _no_ Hardcore behavior. The brutal alarm path takes over exactly at the configured time regardless of whether the Sunrise activity is still open.
+
+Sunrise is intentionally lightweight (~70 lines of Compose, no schema work beyond a single `sunriseEnabled` column on `AlarmEntity` v6→v7) so it can be layered on top of any challenge / Hardcore / Ultra Hardcore combo.
+
+### Home-screen widget
+
+A 2×1 cell widget (resizable horizontally / vertically) added in v1.6.0. Shows:
+
+- **Time** of the next upcoming alarm (large, light-weight)
+- **Countdown** — "in 7 Std 12 Min" / "in 23 Min" / "in 2 Tagen"
+- **Day strip** — repeat-day shorthand for repeating alarms, or the weekday name for one-shot alarms
+- A small **BRUTUS** marker in the brand red
+
+Tapping the time opens the app. Updates every 30 minutes via `AppWidgetProvider.updatePeriodMillis`, plus an immediate `ACTION_APPWIDGET_UPDATE` broadcast on every alarm add / toggle / delete / fire so the widget never lags behind by more than a few seconds during user interaction. Boot recovery refreshes it too.
+
+The widget reads from the same Room database the app uses, so widgets always agree with the in-app countdown.
+
+### Reliability banners
+
+The alarm list shows _two_ red/orange banners when system state would silently break alarms:
+
+1. **Exakte Alarme deaktiviert** _(v1.3.0)_ — `AlarmManager.canScheduleExactAlarms()` is false (Samsung's default on Android 12+). Deep-links to `ACTION_REQUEST_SCHEDULE_EXACT_ALARM`.
+2. **Akku-Optimierung aktiv** _(v1.6.0)_ — `PowerManager.isIgnoringBatteryOptimizations()` is false (default on every install). Aggressive battery managers on Xiaomi/Huawei/Samsung devices routinely kill background apps and silently swallow alarm broadcasts. Deep-links to `ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` so the user can whitelist Brutus with two taps. Falls back to the general battery-optimization list if the per-app dialog isn't supported.
+
+Both banners disappear automatically as soon as the corresponding system state is fixed — re-checks run on every `ON_RESUME`.
+
 ### Global QR code
 
 Brutus generates **one unique QR code** per installation, stored once in `SharedPreferences`, valid for every alarm forever. You never need to regenerate it. Workflow:
@@ -303,6 +341,7 @@ If you'd rather do it manually:
 | `RECEIVE_BOOT_COMPLETED` | Re-register alarms after reboot | Install time |
 | `CAMERA` | QR code scanning challenge | Runtime, when the alarm fires and QR challenge is active |
 | `ACTIVITY_RECOGNITION` (since v1.4.0) | Step counter for the Ultra Hardcore anti-snooze task | Runtime, when enabling Ultra Hardcore Mode or opening the task screen |
+| `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` (since v1.6.0) | Lets the Akku-Optimierung banner deep-link the system whitelist dialog | Install time (the dialog itself is opt-in per device) |
 | `VIBRATE` | Vibration pattern during alarm | Install time |
 | `USE_FULL_SCREEN_INTENT` | Lock-screen alarm overlay | Install time |
 | `FOREGROUND_SERVICE` / `FOREGROUND_SERVICE_MEDIA_PLAYBACK` | Alarm playback service | Install time |
@@ -422,6 +461,7 @@ app/src/main/java/com/pepperonas/brutus/
 ├── AlarmActivity.kt                 Lock-screen overlay activity for the firing alarm
 ├── TestAlarmActivity.kt             Preview activity for "test wake modes"
 ├── UltraHardcoreTaskActivity.kt     Anti-snooze step-counter task (v1.4.0)
+├── SunriseActivity.kt               10-minute gentle pre-alarm with brightness ramp (v1.6.0)
 ├── BrutusApplication.kt             App init, notification channels
 ├── receiver/
 │   ├── AlarmReceiver.kt             BroadcastReceiver for the AlarmManager trigger
@@ -456,9 +496,12 @@ app/src/main/java/com/pepperonas/brutus/
 │       ├── StepChallenge.kt         Step-counter Compose UI for the Ultra Hardcore anti-snooze task (v1.4.0)
 │       ├── QrChallenge.kt           CameraX preview + ML Kit barcode analyzer
 │       └── SwipeToSnoozeButton.kt   Custom gesture composable with spring-back animation
+├── widget/
+│   └── NextAlarmWidget.kt           Home-screen widget (next alarm time + countdown + days) (v1.6.0)
 └── util/
     ├── AlarmSound.kt                Enum of available alarm sounds
     ├── AlarmSoundGenerator.kt       Procedural PCM synthesis for all non-system sounds
+    ├── BatteryOptimizationPermission.kt  isIgnoring() check + Settings deep-link Intent (v1.6.0)
     ├── ChallengeDifficulty.kt       Math/shake preset descriptions + shake delta threshold (v1.4.0)
     ├── ChallengeFlags.kt            Bitmask helpers for challenge combinations
     ├── ExactAlarmPermission.kt      canScheduleExactAlarms() check + deep-link Intent (v1.3.0+)
@@ -476,11 +519,14 @@ app/src/main/java/com/pepperonas/brutus/
 Tests live alongside the production code under `app/src/test/java/...`:
 
 ```
-app/src/test/java/com/pepperonas/brutus/util/
-├── AlarmSoundGeneratorTest.kt      6 tests — PCM length, peak amplitudes, loop-boundary fade, gentle vs harsh list (v1.5.0)
-├── ChallengeFlagsTest.kt           6 tests — describe / activeList / has bitmask edge cases
-├── ChallengeDifficultyTest.kt      6 tests — math operand ranges, shake threshold ordering, label coverage (v1.4.0)
-└── NextAlarmCalculatorTest.kt     17 tests — one-shot today/tomorrow, repeating wrap, weekend selection, formatCountdown
+app/src/test/java/com/pepperonas/brutus/
+├── scheduler/
+│   └── AlarmSchedulerConstantsTest.kt  4 tests — UHC offsets, sunrise lead, intent extra uniqueness (v1.6.0)
+└── util/
+    ├── AlarmSoundGeneratorTest.kt      6 tests — PCM length, peak amplitudes, loop-boundary fade, gentle vs harsh list (v1.5.0)
+    ├── ChallengeFlagsTest.kt           6 tests — describe / activeList / has bitmask edge cases
+    ├── ChallengeDifficultyTest.kt      6 tests — math operand ranges, shake threshold ordering, label coverage (v1.4.0)
+    └── NextAlarmCalculatorTest.kt     17 tests — one-shot today/tomorrow, repeating wrap, weekend selection, formatCountdown
 ```
 
 Run them with `./gradlew :app:testDebugUnitTest`. The `tests.yml` GitHub workflow runs them on every push to `main` and every pull request.
@@ -616,12 +662,15 @@ Planned, no specific timeline:
 - [x] Configurable shake sensitivity (v1.4.0)
 - [x] Math difficulty presets (easy / hard / brutal) (v1.4.0)
 - [x] Gentle alarm sounds + configurable timer finish tone (v1.5.0)
+- [x] Sunrise pre-alarm with screen brightness ramp + Glockenspiel fade-in (v1.6.0)
+- [x] Home-screen widget showing next upcoming alarm (v1.6.0)
+- [x] Battery-optimization detection banner with deep-link to system whitelist (v1.6.0)
 - [ ] Per-alarm sound override at runtime
 - [ ] Multi-QR support (different codes for different alarms)
-- [ ] Widget: next upcoming alarm
 - [ ] Wear OS companion
 - [ ] Localization beyond German
 - [ ] Sleep statistics tab (how often, dismiss latency, snooze rate)
+- [ ] Backup / restore alarm list as JSON
 
 Contributions welcome on any of these — open an issue first to coordinate.
 

@@ -9,6 +9,7 @@ import com.pepperonas.brutus.data.AlarmRepository
 import com.pepperonas.brutus.scheduler.AlarmScheduler
 import com.pepperonas.brutus.util.ChallengeFlags
 import com.pepperonas.brutus.util.UltraHardcoreStore
+import com.pepperonas.brutus.widget.NextAlarmWidget
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -42,6 +43,7 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
         ultraHardcoreMode: Boolean,
         mathDifficulty: Int,
         shakeSensitivity: Int,
+        sunriseEnabled: Boolean,
     ) {
         viewModelScope.launch {
             val alarm = AlarmEntity(
@@ -58,10 +60,12 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
                 ultraHardcoreMode = ultraHardcoreMode,
                 mathDifficulty = mathDifficulty,
                 shakeSensitivity = shakeSensitivity,
+                sunriseEnabled = sunriseEnabled,
             )
             val id = repository.insert(alarm)
             val saved = alarm.copy(id = id)
             AlarmScheduler.schedule(getApplication(), saved)
+            NextAlarmWidget.refresh(getApplication())
         }
     }
 
@@ -76,6 +80,7 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
                 AlarmScheduler.cancelAllFollowups(getApplication(), alarm.id)
                 UltraHardcoreStore.clearAllFor(getApplication(), alarm.id)
             }
+            NextAlarmWidget.refresh(getApplication())
         }
     }
 
@@ -90,6 +95,7 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
                 AlarmScheduler.cancelAllFollowups(getApplication(), updated.id)
                 UltraHardcoreStore.clearAllFor(getApplication(), updated.id)
             }
+            NextAlarmWidget.refresh(getApplication())
         }
     }
 
@@ -99,6 +105,7 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
             AlarmScheduler.cancelAllFollowups(getApplication(), alarm.id)
             UltraHardcoreStore.clearAllFor(getApplication(), alarm.id)
             repository.delete(alarm)
+            NextAlarmWidget.refresh(getApplication())
         }
     }
 }
