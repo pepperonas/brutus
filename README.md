@@ -132,6 +132,8 @@ Settings are per-alarm and persist in the same Room row.
 
 Every synthesized sound is generated on-device in real time using `AudioTrack` with `USAGE_ALARM` and `CONTENT_TYPE_SONIFICATION` attributes. No external audio assets, tiny APK impact, seamless looping.
 
+**Harsh sounds** — built for wake-the-dead alarm duty:
+
 | Sound | Character | Signal |
 |-------|-----------|--------|
 | **Stumm** | No audio — useful for rehearsing wake modes quietly | — |
@@ -141,9 +143,17 @@ Every synthesized sound is generated on-device in real time using `AudioTrack` w
 | **Nuclear Alert** | Rapid sharp beeping | 1 kHz square, 100 ms on / 100 ms off |
 | **Durchdringend** | Piercing continuous beep | 3.5 kHz square wave with 8 Hz pulse — the most annoying one by design |
 
+**Gentle sounds** _(v1.5.0)_ — for the timer and casual wake-ups, capped at ~50–60 % amplitude:
+
+| Sound | Character | Signal |
+|-------|-----------|--------|
+| **Glockenspiel** | Soft 3-note descending bell with overtones | E5 → C5 → G4 sine + 2nd/3rd harmonics, exp decay |
+| **Marimba** | Woody pluck pattern | 440 Hz sine + 4th harmonic, three plucks/loop, fast envelope |
+| **Morgensonne** | Slow swelling A-major triad | A4 + C♯5 + E5, triangular envelope over 3 s |
+
 Choosing **Stumm** skips the audio path entirely; vibration still runs so the alarm is noticeable if you need it.
 
-Sound preview works directly inside the edit dialog — tap a chip to hear it, tap _Stop preview_ when you're done.
+Sound preview works directly inside the edit dialog — tap a chip to hear it, tap _Stop preview_ when you're done. The Timer screen has its own sound picker (gentle sounds only) — defaults to **Glockenspiel**, persists in `SharedPreferences`.
 
 ### Hardcore Mode
 
@@ -221,7 +231,9 @@ Centisecond-precision stopwatch built on `SystemClock.elapsedRealtime()` (unaffe
 
 ### Timer
 
-HMS picker (hours 0–23, minutes 0–59, seconds 0–59) with up/down steppers on each column. Quick-preset row for common durations (1m, 3m, 5m, 10m, 15m, 30m). During the countdown the screen switches to a large 64 sp time readout and two circle buttons (**Abbruch / Pause-Weiter**). When the timer expires the system `TYPE_ALARM` ringtone plays in a loop with `USAGE_ALARM` audio attributes until **Stopp** is pressed — behavior mirrors a classic kitchen timer rather than a brutal wake mode.
+HMS picker (hours 0–23, minutes 0–59, seconds 0–59) with up/down steppers on each column. Quick-preset row for common durations (1m, 3m, 5m, 10m, 15m, 30m). A **gentle-sound picker** (added in v1.5.0) below the presets lets you pick the finish tone — defaults to **Glockenspiel**, choice persists across launches via `TimerSoundStore`. Tapping a chip previews the sound; **Stopp** halts the preview.
+
+During the countdown the screen switches to a large 64 sp time readout and two circle buttons (**Abbruch / Pause-Weiter**). When the timer expires the chosen synthesized sound (or the system ringtone if **System-Alarm** is picked) plays in a loop with `USAGE_ALARM` audio attributes until **Stopp** is pressed — behavior mirrors a classic kitchen timer rather than a brutal wake mode.
 
 ### Scheduling
 
@@ -455,7 +467,8 @@ app/src/main/java/com/pepperonas/brutus/
     ├── Haptics.kt                   BrutusHaptics wrapper around HapticFeedbackConstants (v1.3.1+)
     ├── NextAlarmCalculator.kt       Finds the soonest trigger across all alarms (for the list header)
     ├── QrGenerator.kt               ZXing wrapper + save + share helpers
-    ├── SoundPreviewPlayer.kt        AudioTrack wrapper for in-dialog previews
+    ├── SoundPreviewPlayer.kt        AudioTrack wrapper for in-dialog previews (handles all AlarmSound types)
+    ├── TimerSoundStore.kt           SharedPreferences-backed timer-finish sound (v1.5.0)
     ├── UltraHardcoreStore.kt        SharedPreferences-backed follow-up alarm registry (v1.4.0)
     └── WorldClockStore.kt           SharedPreferences-backed time-zone selection
 ```
@@ -464,6 +477,7 @@ Tests live alongside the production code under `app/src/test/java/...`:
 
 ```
 app/src/test/java/com/pepperonas/brutus/util/
+├── AlarmSoundGeneratorTest.kt      6 tests — PCM length, peak amplitudes, loop-boundary fade, gentle vs harsh list (v1.5.0)
 ├── ChallengeFlagsTest.kt           6 tests — describe / activeList / has bitmask edge cases
 ├── ChallengeDifficultyTest.kt      6 tests — math operand ranges, shake threshold ordering, label coverage (v1.4.0)
 └── NextAlarmCalculatorTest.kt     17 tests — one-shot today/tomorrow, repeating wrap, weekend selection, formatCountdown
@@ -601,6 +615,7 @@ Planned, no specific timeline:
 - [x] Ultra Hardcore Mode — two follow-up alarms + step-counter anti-snooze task (v1.4.0)
 - [x] Configurable shake sensitivity (v1.4.0)
 - [x] Math difficulty presets (easy / hard / brutal) (v1.4.0)
+- [x] Gentle alarm sounds + configurable timer finish tone (v1.5.0)
 - [ ] Per-alarm sound override at runtime
 - [ ] Multi-QR support (different codes for different alarms)
 - [ ] Widget: next upcoming alarm

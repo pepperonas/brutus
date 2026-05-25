@@ -1,12 +1,11 @@
 package com.pepperonas.brutus.ui.screens
 
-import android.media.AudioAttributes
-import android.media.MediaPlayer
-import android.media.RingtoneManager
 import android.os.SystemClock
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,6 +20,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -44,10 +45,14 @@ import androidx.compose.ui.unit.sp
 import com.pepperonas.brutus.ui.theme.BrutusRed
 import com.pepperonas.brutus.ui.theme.BrutusRedBright
 import com.pepperonas.brutus.ui.theme.BrutusTextSecondary
+import com.pepperonas.brutus.util.AlarmSound
+import com.pepperonas.brutus.util.SoundPreviewPlayer
+import com.pepperonas.brutus.util.TimerSoundStore
 import kotlinx.coroutines.delay
 
 private enum class TimerState { IDLE, RUNNING, PAUSED, FINISHED }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TimerScreen() {
     val context = LocalContext.current
@@ -66,13 +71,10 @@ fun TimerScreen() {
         else -> remaining
     }
 
-    var player by remember { mutableStateOf<MediaPlayer?>(null) }
+    var selectedSound by remember { mutableStateOf(TimerSoundStore.get(context)) }
+    val player = remember { SoundPreviewPlayer(context) }
     DisposableEffect(Unit) {
-        onDispose {
-            player?.runCatching { if (isPlaying) stop() }
-            player?.release()
-            player = null
-        }
+        onDispose { player.stop() }
     }
 
     LaunchedEffect(state) {
@@ -81,21 +83,7 @@ fun TimerScreen() {
             if (tick >= endAt) {
                 state = TimerState.FINISHED
                 remaining = 0L
-                // Play system alarm until stopped
-                val uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-                    ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-                player = MediaPlayer().apply {
-                    setAudioAttributes(
-                        AudioAttributes.Builder()
-                            .setUsage(AudioAttributes.USAGE_ALARM)
-                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                            .build()
-                    )
-                    setDataSource(context, uri)
-                    isLooping = true
-                    prepare()
-                    start()
-                }
+                player.play(selectedSound)
                 break
             }
             delay(100L)
@@ -127,15 +115,27 @@ fun TimerScreen() {
                 onMinutes = { minutes = it },
                 onSeconds = { seconds = it },
             )
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(32.dp))
             QuickPresets { total ->
                 hours = (total / 3600)
                 minutes = ((total / 60) % 60)
                 seconds = (total % 60)
             }
+            Spacer(modifier = Modifier.height(24.dp))
+            TimerSoundPicker(
+                selected = selectedSound,
+                onSelect = { snd ->
+                    player.stop()
+                    selectedSound = snd
+                    TimerSoundStore.set(context, snd)
+                    if (snd != AlarmSound.SILENT) player.play(snd)
+                },
+                onStopPreview = { player.stop() }
+            )
             Spacer(modifier = Modifier.weight(1f))
             Button(
                 onClick = {
+                    player.stop()
                     val totalMs = (hours * 3600L + minutes * 60L + seconds) * 1000L
                     if (totalMs > 0L) {
                         endAt = SystemClock.elapsedRealtime() + totalMs
@@ -179,9 +179,7 @@ fun TimerScreen() {
                     container = MaterialTheme.colorScheme.surfaceVariant,
                     content = MaterialTheme.colorScheme.onSurfaceVariant,
                     onClick = {
-                        player?.runCatching { if (isPlaying) stop() }
-                        player?.release()
-                        player = null
+                        player.stop()
                         state = TimerState.IDLE
                         remaining = 0L
                     }
@@ -211,9 +209,7 @@ fun TimerScreen() {
                         container = BrutusRed,
                         content = Color.White,
                         onClick = {
-                            player?.runCatching { if (isPlaying) stop() }
-                            player?.release()
-                            player = null
+                            player.stop()
                             state = TimerState.IDLE
                             remaining = 0L
                         }
@@ -222,6 +218,61 @@ fun TimerScreen() {
                 }
             }
             Spacer(modifier = Modifier.height(24.dp))
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun TimerSoundPicker(
+    selected: AlarmSound,
+    onSelect: (AlarmSound) -> Unit,
+    onStopPreview: () -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Endton",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            AlarmSound.gentleSounds().forEach { snd ->
+                FilterChip(
+                    selected = selected == snd,
+                    onClick = { onSelect(snd) },
+                    label = { Text(snd.displayName) },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = BrutusRed,
+                        selectedLabelColor = Color.White
+                    )
+                )
+            }
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = selected.description + " — Tippe zum Vorhören",
+                style = MaterialTheme.typography.bodySmall,
+                color = BrutusTextSecondary,
+                modifier = Modifier.weight(1f)
+            )
+            Button(
+                onClick = onStopPreview,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = BrutusRedBright,
+                ),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                modifier = Modifier.height(32.dp)
+            ) {
+                Text("Stopp", fontSize = 12.sp)
+            }
         }
     }
 }
@@ -273,12 +324,14 @@ private fun TimeUnitStepper(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun QuickPresets(onPick: (Int) -> Unit) {
     val presets = listOf(60, 180, 300, 600, 900, 1800)
-    Row(
+    FlowRow(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         presets.forEach { s ->
             Button(
