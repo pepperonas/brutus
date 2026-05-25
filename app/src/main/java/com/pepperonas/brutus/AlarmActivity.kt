@@ -12,9 +12,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.pepperonas.brutus.data.AlarmDatabase
+import com.pepperonas.brutus.scheduler.AlarmScheduler
 import com.pepperonas.brutus.service.AlarmService
 import com.pepperonas.brutus.ui.alarm.AlarmScreen
 import com.pepperonas.brutus.ui.theme.BrutusTheme
+import com.pepperonas.brutus.util.ChallengeDifficulty
 import com.pepperonas.brutus.util.ChallengeFlags
 import com.pepperonas.brutus.util.GlobalQrStore
 import com.pepperonas.brutus.util.HardcoreAudioGuard
@@ -25,7 +27,7 @@ import kotlinx.coroutines.launch
 class AlarmActivity : ComponentActivity() {
 
     private var alarmId: Long = -1
-    private var hardcoreMode: Boolean = false
+    private var hardcoreActive: Boolean = false
     private var audioGuard: HardcoreAudioGuard? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,6 +36,8 @@ class AlarmActivity : ComponentActivity() {
         setupLockScreen()
 
         alarmId = intent.getLongExtra("alarm_id", -1)
+        val isFollowup = intent.getBooleanExtra(AlarmScheduler.EXTRA_IS_FOLLOWUP, false)
+        val followupSeq = intent.getIntExtra(AlarmScheduler.EXTRA_FOLLOWUP_SEQ, 0)
 
         val db = AlarmDatabase.getInstance(applicationContext)
         val dao = db.alarmDao()
@@ -45,10 +49,14 @@ class AlarmActivity : ComponentActivity() {
             val mathCount = alarm?.mathProblemCount ?: 3
             val shakeCount = alarm?.shakeCount ?: 30
             val snoozeEnabled = (alarm?.snoozeDuration ?: 5) > 0
-            hardcoreMode = alarm?.hardcoreMode == true
+            val hardcoreMode = alarm?.hardcoreMode == true
+            val ultraHardcoreMode = alarm?.ultraHardcoreMode == true
+            val mathDifficulty = alarm?.mathDifficulty ?: ChallengeDifficulty.MATH_HARD
+            val shakeSensitivity = alarm?.shakeSensitivity ?: ChallengeDifficulty.SHAKE_NORMAL
+            hardcoreActive = alarm?.hardcoreEffective == true
 
             runOnUiThread {
-                if (hardcoreMode) {
+                if (hardcoreActive) {
                     audioGuard = HardcoreAudioGuard(applicationContext).also { it.attach() }
                 }
                 setContent {
@@ -61,6 +69,11 @@ class AlarmActivity : ComponentActivity() {
                                 shakeCount = shakeCount,
                                 snoozeEnabled = snoozeEnabled,
                                 hardcoreMode = hardcoreMode,
+                                ultraHardcoreMode = ultraHardcoreMode,
+                                isFollowup = isFollowup,
+                                followupSeq = followupSeq,
+                                mathDifficulty = mathDifficulty,
+                                shakeSensitivity = shakeSensitivity,
                                 onDismiss = { stopAlarm() },
                                 onSnooze = { snoozeAlarm() }
                             )
@@ -72,7 +85,7 @@ class AlarmActivity : ComponentActivity() {
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        if (hardcoreMode && (event.keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ||
+        if (hardcoreActive && (event.keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ||
                 event.keyCode == KeyEvent.KEYCODE_VOLUME_UP ||
                 event.keyCode == KeyEvent.KEYCODE_VOLUME_MUTE)) {
             audioGuard?.clampToMax()

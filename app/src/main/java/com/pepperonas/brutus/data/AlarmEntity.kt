@@ -19,6 +19,9 @@ data class AlarmEntity(
     val mathProblemCount: Int = 3,        // number of math problems to solve
     val shakeCount: Int = 30,             // number of shakes required
     val hardcoreMode: Boolean = false,    // locks STREAM_ALARM on max + blocks volume keys while ringing
+    val ultraHardcoreMode: Boolean = false, // implies hardcoreMode + schedules two follow-up alarms after dismiss
+    val mathDifficulty: Int = 1,          // 0 = easy, 1 = hard (legacy default), 2 = brutal
+    val shakeSensitivity: Int = 1,        // 0 = light, 1 = normal (default), 2 = hard
 ) {
     fun isDayEnabled(dayIndex: Int): Boolean = (repeatDays and (1 shl dayIndex)) != 0
 
@@ -34,4 +37,7 @@ data class AlarmEntity(
     fun challengeName(): String = ChallengeFlags.describe(challengeFlags)
 
     fun soundName(): String = AlarmSound.fromId(soundId).displayName
+
+    /** Effective hardcore behavior: ultraHardcoreMode always implies the volume-lock too. */
+    val hardcoreEffective: Boolean get() = hardcoreMode || ultraHardcoreMode
 }

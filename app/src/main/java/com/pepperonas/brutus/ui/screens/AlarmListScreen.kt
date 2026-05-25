@@ -49,6 +49,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.pepperonas.brutus.data.AlarmEntity
+import com.pepperonas.brutus.ui.theme.BrutusOrange
 import com.pepperonas.brutus.ui.theme.BrutusRed
 import com.pepperonas.brutus.ui.theme.BrutusRedBright
 import com.pepperonas.brutus.ui.theme.BrutusTextSecondary
@@ -201,26 +202,40 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
             onDismiss = { showDialog = false },
             onPreviewSound = { snd -> previewPlayer.play(snd) },
             onStopPreview = { previewPlayer.stop() },
-            onSave = { hour, minute, label, repeatDays, challengeFlags, snooze, soundId, math, shake, hardcore ->
+            onSave = { result ->
                 if (editingAlarm != null) {
                     viewModel.updateAlarm(
                         editingAlarm!!.copy(
-                            hour = hour,
-                            minute = minute,
-                            label = label,
-                            repeatDays = repeatDays,
-                            challengeFlags = challengeFlags,
-                            snoozeDuration = snooze,
-                            soundId = soundId,
-                            mathProblemCount = math,
-                            shakeCount = shake,
-                            hardcoreMode = hardcore,
+                            hour = result.hour,
+                            minute = result.minute,
+                            label = result.label,
+                            repeatDays = result.repeatDays,
+                            challengeFlags = result.challengeFlags,
+                            snoozeDuration = result.snoozeDuration,
+                            soundId = result.soundId,
+                            mathProblemCount = result.mathProblemCount,
+                            shakeCount = result.shakeCount,
+                            hardcoreMode = result.hardcoreMode,
+                            ultraHardcoreMode = result.ultraHardcoreMode,
+                            mathDifficulty = result.mathDifficulty,
+                            shakeSensitivity = result.shakeSensitivity,
                         )
                     )
                 } else {
                     viewModel.addAlarm(
-                        hour, minute, label, repeatDays, challengeFlags,
-                        snooze, soundId, math, shake, hardcore
+                        hour = result.hour,
+                        minute = result.minute,
+                        label = result.label,
+                        repeatDays = result.repeatDays,
+                        challengeFlags = result.challengeFlags,
+                        snoozeDuration = result.snoozeDuration,
+                        soundId = result.soundId,
+                        mathProblemCount = result.mathProblemCount,
+                        shakeCount = result.shakeCount,
+                        hardcoreMode = result.hardcoreMode,
+                        ultraHardcoreMode = result.ultraHardcoreMode,
+                        mathDifficulty = result.mathDifficulty,
+                        shakeSensitivity = result.shakeSensitivity,
                     )
                 }
                 showDialog = false
@@ -336,7 +351,9 @@ private fun AlarmCard(
                 }
                 // Flags row (sound / challenges / hardcore / snooze)
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    if (alarm.hardcoreMode) {
+                    if (alarm.ultraHardcoreMode) {
+                        TagChip("ULTRA HC", BrutusOrange)
+                    } else if (alarm.hardcoreMode) {
                         TagChip("HARDCORE", BrutusRed)
                     }
                     TagChip(alarm.soundName(), BrutusTextSecondary)

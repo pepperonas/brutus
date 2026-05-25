@@ -35,8 +35,10 @@ Everything is packed into a four-tab bottom navigation that keeps the brutal ala
 - [App structure](#app-structure)
 - [Features](#features)
   - [Combinable wake-up challenges](#combinable-wake-up-challenges)
+  - [Difficulty + sensitivity presets](#difficulty--sensitivity-presets)
   - [Alarm sounds](#alarm-sounds)
   - [Hardcore Mode](#hardcore-mode)
+  - [Ultra Hardcore Mode](#ultra-hardcore-mode)
   - [Global QR code](#global-qr-code)
   - [Slide-to-snooze gesture](#slide-to-snooze-gesture)
   - [Test mode](#test-mode)
@@ -85,7 +87,7 @@ Starting with v1.2.0 Brutus ships as a full clock suite. A persistent bottom nav
 | **Stoppuhr** | ⏱ | Start / Stop / Lap stopwatch with centisecond precision via `SystemClock.elapsedRealtime()` |
 | **Timer** | ⌛ | HMS-picker countdown timer with quick presets (1m, 3m, 5m, 10m, 15m, 30m) — rings system alarm tone on finish |
 
-The Alarm tab stays the heart of the app: its cards show a large thin time reading, a `MDMDFSS` weekday strip with active days highlighted in bright red, a sound label, optional `HARDCORE` tag, and a toggle switch on the right. A countdown header (e.g. _"Alarm in 13 Stunden, 29 Minuten"_) sits above the list and refreshes every 30 s.
+The Alarm tab stays the heart of the app: its cards show a large thin time reading, a `MDMDFSS` weekday strip with active days highlighted in bright red, a sound label, optional `HARDCORE` or `ULTRA HC` tag, and a toggle switch on the right. A countdown header (e.g. _"Alarm in 13 Stunden, 29 Minuten"_) sits above the list and refreshes every 30 s.
 
 A premium **monogram app icon** (radial dark-red gradient + gradient-filled "B" with hairline highlight) replaces the previous alarm-bell icon.
 
@@ -107,6 +109,24 @@ Combination examples:
 - **Easy**: Math (3 problems) only
 - **Medium**: Math (5) + Shake (50)
 - **Brutus Mode**: Shake (100) → Math (10) → QR scan across the house
+
+### Difficulty + sensitivity presets
+
+Both Math and Shake now ship with a 3-step preset selector that appears inline in the edit dialog when the respective challenge is enabled.
+
+| Math difficulty | Operator pool | Operand range |
+|-----------------|---------------|---------------|
+| **Einfach** | `+`, `-` | 1–20 (subtraction always ≥ 0) |
+| **Hart** _(default)_ | `+`, `-`, `*` | up to 50 × 20 or three-digit add/sub |
+| **Brutal** | `+`, `-`, `*` (biased) | two-digit × two-digit, four-digit sums |
+
+| Shake sensitivity | Accelerometer delta threshold (m/s²) |
+|-------------------|--------------------------------------|
+| **Empfindlich** | ≥ 9 — even light wrist flicks count |
+| **Normal** _(default)_ | ≥ 12 — the previous behavior |
+| **Stark** | ≥ 16 — only deliberate, vigorous shakes register |
+
+Settings are per-alarm and persist in the same Room row.
 
 ### Alarm sounds
 
@@ -138,6 +158,25 @@ The `HARDCORE` tag is shown on the alarm card in the list, and a red `HARDCORE M
 The guard is strictly scoped to the ringing window: as soon as the alarm is dismissed or snoozed, the receiver detaches and Android's normal volume behavior resumes. Outside of a firing alarm, the hardware volume keys behave normally, so the setting has zero footprint during daily use.
 
 > Android intentionally offers no API to globally "lock" a stream volume. Brutus achieves the locked-feel via immediate re-clamping + key event consumption — the cleanest approach available without requiring system-level permissions.
+
+### Ultra Hardcore Mode
+
+Hardcore Mode keeps you from silencing a ringing alarm. **Ultra Hardcore Mode** (v1.4.0) keeps you from going _back_ to sleep after you dismiss it.
+
+When enabled per alarm:
+
+1. **Ultra Hardcore implies Hardcore.** The volume lock + volume-key consumption apply automatically while either the main alarm or a follow-up is ringing.
+2. **As soon as you dismiss the main alarm, Brutus schedules two follow-up alarms** via `AlarmManager.setAlarmClock()` — one at **+10 minutes** from dismiss, another at **+15 minutes**. Both run the same challenge chain, the same sound, and the same Hardcore guard.
+3. **A persistent reminder notification** is posted from a dedicated `IMPORTANCE_HIGH` / bypass-DND channel. Title: _"Ultra Hardcore aktiv"_. It has a `Aufgabe lösen` action — tapping it opens the **Anti-Schlummer-Aufgabe**.
+4. **The anti-snooze task** is a step-counter challenge: walk **30 steps** (configurable per install) with the phone in your hand or pocket. Uses `Sensor.TYPE_STEP_COUNTER` when available, falls back to `TYPE_STEP_DETECTOR`, and finally to an accelerometer impulse heuristic on older hardware that lacks a pedometer.
+5. **Completing the task cancels both pending follow-ups** and clears the reminder notification. Cancelling _without_ completing it leaves both follow-ups armed — Brutus will ring again.
+6. **Reboot survives.** Pending follow-ups are mirrored to `SharedPreferences` (`UltraHardcoreStore`). After `BOOT_COMPLETED`, any follow-up whose trigger time is still in the future is re-registered with `AlarmManager`; expired ones are cleaned out.
+
+The alarm screen shows a brighter **`ULTRA HARDCORE MODE`** badge instead of the regular Hardcore one, and the follow-up firings display _"Re-Alarm 1/2 — du bist nicht entkommen"_ above the clock. Cards in the list carry an orange **`ULTRA HC`** tag.
+
+Requires the **`ACTIVITY_RECOGNITION`** runtime permission (API 29+) for the step counter. If the user denies it, the step challenge degrades to the accelerometer fallback automatically — no Ultra Hardcore alarm ever locks the user out.
+
+> Ultra Hardcore can be disabled per alarm at any time. Toggling it off in the edit dialog also cancels any currently-armed follow-ups and dismisses the notification immediately.
 
 ### Global QR code
 
@@ -251,6 +290,7 @@ If you'd rather do it manually:
 | `WAKE_LOCK` | Keep CPU awake during alarm playback | Install time |
 | `RECEIVE_BOOT_COMPLETED` | Re-register alarms after reboot | Install time |
 | `CAMERA` | QR code scanning challenge | Runtime, when the alarm fires and QR challenge is active |
+| `ACTIVITY_RECOGNITION` (since v1.4.0) | Step counter for the Ultra Hardcore anti-snooze task | Runtime, when enabling Ultra Hardcore Mode or opening the task screen |
 | `VIBRATE` | Vibration pattern during alarm | Install time |
 | `USE_FULL_SCREEN_INTENT` | Lock-screen alarm overlay | Install time |
 | `FOREGROUND_SERVICE` / `FOREGROUND_SERVICE_MEDIA_PLAYBACK` | Alarm playback service | Install time |
@@ -369,6 +409,7 @@ app/src/main/java/com/pepperonas/brutus/
 ├── MainActivity.kt                  Entry activity, hosts the HomeScreen (4-tab NavHost)
 ├── AlarmActivity.kt                 Lock-screen overlay activity for the firing alarm
 ├── TestAlarmActivity.kt             Preview activity for "test wake modes"
+├── UltraHardcoreTaskActivity.kt     Anti-snooze step-counter task (v1.4.0)
 ├── BrutusApplication.kt             App init, notification channels
 ├── receiver/
 │   ├── AlarmReceiver.kt             BroadcastReceiver for the AlarmManager trigger
@@ -398,13 +439,15 @@ app/src/main/java/com/pepperonas/brutus/
 │   │   └── TimerScreen.kt           HMS picker + countdown + quick presets + ringtone finish
 │   └── alarm/
 │       ├── AlarmScreen.kt           Full-screen overlay with clock + challenge carousel + HARDCORE badge
-│       ├── MathChallenge.kt         Numeric input + random multiplication/addition/subtraction
-│       ├── ShakeChallenge.kt        Accelerometer listener + circular progress ring
+│       ├── MathChallenge.kt         Numeric input + random multiplication/addition/subtraction (3 difficulties)
+│       ├── ShakeChallenge.kt        Accelerometer listener + circular progress ring (3 sensitivities)
+│       ├── StepChallenge.kt         Step-counter Compose UI for the Ultra Hardcore anti-snooze task (v1.4.0)
 │       ├── QrChallenge.kt           CameraX preview + ML Kit barcode analyzer
 │       └── SwipeToSnoozeButton.kt   Custom gesture composable with spring-back animation
 └── util/
     ├── AlarmSound.kt                Enum of available alarm sounds
     ├── AlarmSoundGenerator.kt       Procedural PCM synthesis for all non-system sounds
+    ├── ChallengeDifficulty.kt       Math/shake preset descriptions + shake delta threshold (v1.4.0)
     ├── ChallengeFlags.kt            Bitmask helpers for challenge combinations
     ├── ExactAlarmPermission.kt      canScheduleExactAlarms() check + deep-link Intent (v1.3.0+)
     ├── GlobalQrStore.kt             SharedPreferences-backed global QR persistence
@@ -413,6 +456,7 @@ app/src/main/java/com/pepperonas/brutus/
     ├── NextAlarmCalculator.kt       Finds the soonest trigger across all alarms (for the list header)
     ├── QrGenerator.kt               ZXing wrapper + save + share helpers
     ├── SoundPreviewPlayer.kt        AudioTrack wrapper for in-dialog previews
+    ├── UltraHardcoreStore.kt        SharedPreferences-backed follow-up alarm registry (v1.4.0)
     └── WorldClockStore.kt           SharedPreferences-backed time-zone selection
 ```
 
@@ -420,8 +464,9 @@ Tests live alongside the production code under `app/src/test/java/...`:
 
 ```
 app/src/test/java/com/pepperonas/brutus/util/
-├── ChallengeFlagsTest.kt          6 tests — describe / activeList / has bitmask edge cases
-└── NextAlarmCalculatorTest.kt    17 tests — one-shot today/tomorrow, repeating wrap, weekend selection, formatCountdown
+├── ChallengeFlagsTest.kt           6 tests — describe / activeList / has bitmask edge cases
+├── ChallengeDifficultyTest.kt      6 tests — math operand ranges, shake threshold ordering, label coverage (v1.4.0)
+└── NextAlarmCalculatorTest.kt     17 tests — one-shot today/tomorrow, repeating wrap, weekend selection, formatCountdown
 ```
 
 Run them with `./gradlew :app:testDebugUnitTest`. The `tests.yml` GitHub workflow runs them on every push to `main` and every pull request.
@@ -477,9 +522,34 @@ The same flow, but after the user slide-triggers the snooze button:
 - Current alarm is fully torn down
 - The snooze fires exactly like a regular alarm — same challenges, same sound
 
+### Ultra Hardcore follow-up timeline
+
+```
+T  0s     Main alarm fires (same flow as a regular alarm)
+                                     ↓
+          User completes challenges and dismisses
+                                     ↓
+T + 1s    AlarmService.stopAlarm() sees ultraHardcoreMode=true
+            • AlarmScheduler.scheduleFollowup(seq=1, T+10min)
+            • AlarmScheduler.scheduleFollowup(seq=2, T+15min)
+            • UltraHardcoreStore.recordFollowup(...) × 2
+            • Persistent reminder notification posted (CHANNEL_ULTRA_HARDCORE)
+                                     ↓
+        ┌── User opens task → walks N steps ──→ both follow-ups cancelled, notification cleared
+        │
+T + 10m AlarmReceiver fires with EXTRA_IS_FOLLOWUP=true, seq=1
+            • AlarmService skips reschedule logic (one-shot)
+            • Same challenge chain + Hardcore guard apply
+            • UltraHardcoreStore.clearFollowup(seq=1) on dismiss
+                                     ↓
+T + 15m AlarmReceiver fires with EXTRA_IS_FOLLOWUP=true, seq=2
+            • Same flow
+            • Notification auto-cleared once no follow-up entries remain for this alarmId
+```
+
 ### Boot recovery
 
-`BootReceiver` listens for both `ACTION_BOOT_COMPLETED` and `ACTION_LOCKED_BOOT_COMPLETED` (`directBootAware = true`). It queries all enabled alarms from Room and calls `AlarmScheduler.schedule()` on each.
+`BootReceiver` listens for both `ACTION_BOOT_COMPLETED` and `ACTION_LOCKED_BOOT_COMPLETED` (`directBootAware = true`). It queries all enabled alarms from Room and calls `AlarmScheduler.schedule()` on each. Additionally, since v1.4.0, it walks `UltraHardcoreStore.listPending()` and re-registers any pending follow-up whose `triggerAt` is still in the future — expired entries get cleaned out.
 
 ---
 
@@ -528,14 +598,15 @@ Planned, no specific timeline:
 - [x] Tasteful haptic feedback on key interactions (v1.3.1)
 - [x] JUnit test coverage for alarm-time math (v1.3.1)
 - [x] GitHub Actions workflow for tests + tagged releases (v1.3.1)
-- [ ] Configurable shake sensitivity
-- [ ] Math difficulty presets (easy / hard / brutal)
+- [x] Ultra Hardcore Mode — two follow-up alarms + step-counter anti-snooze task (v1.4.0)
+- [x] Configurable shake sensitivity (v1.4.0)
+- [x] Math difficulty presets (easy / hard / brutal) (v1.4.0)
 - [ ] Per-alarm sound override at runtime
 - [ ] Multi-QR support (different codes for different alarms)
 - [ ] Widget: next upcoming alarm
 - [ ] Wear OS companion
 - [ ] Localization beyond German
-- [ ] GitHub Actions workflow for automated release signing + APK upload
+- [ ] Sleep statistics tab (how often, dismiss latency, snooze rate)
 
 Contributions welcome on any of these — open an issue first to coordinate.
 

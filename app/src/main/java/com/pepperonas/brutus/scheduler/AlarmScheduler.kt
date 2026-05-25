@@ -10,6 +10,9 @@ import java.util.Calendar
 
 object AlarmScheduler {
 
+    /** Follow-up offsets after Ultra Hardcore main-alarm dismiss (in minutes). */
+    val ULTRA_HARDCORE_FOLLOWUP_OFFSETS_MIN = intArrayOf(10, 15)
+
     fun schedule(context: Context, alarm: AlarmEntity) {
         val alarmManager = context.getSystemService(AlarmManager::class.java)
         val nextTrigger = calculateNextTrigger(alarm)
@@ -31,6 +34,25 @@ object AlarmScheduler {
 
         val clockInfo = AlarmManager.AlarmClockInfo(triggerTime, intent)
         alarmManager.setAlarmClock(clockInfo, intent)
+    }
+
+    /** Schedules a single Ultra Hardcore follow-up alarm (seq is 1 or 2). */
+    fun scheduleFollowup(context: Context, alarm: AlarmEntity, seq: Int, triggerAt: Long) {
+        val alarmManager = context.getSystemService(AlarmManager::class.java)
+        val intent = createFollowupPendingIntent(context, alarm.id, seq)
+        val clockInfo = AlarmManager.AlarmClockInfo(triggerAt, intent)
+        alarmManager.setAlarmClock(clockInfo, intent)
+    }
+
+    fun cancelFollowup(context: Context, alarmId: Long, seq: Int) {
+        val alarmManager = context.getSystemService(AlarmManager::class.java)
+        alarmManager.cancel(createFollowupPendingIntent(context, alarmId, seq))
+    }
+
+    fun cancelAllFollowups(context: Context, alarmId: Long) {
+        for (seq in 1..ULTRA_HARDCORE_FOLLOWUP_OFFSETS_MIN.size) {
+            cancelFollowup(context, alarmId, seq)
+        }
     }
 
     private fun calculateNextTrigger(alarm: AlarmEntity): Long {
@@ -82,7 +104,7 @@ object AlarmScheduler {
     private fun createPendingIntent(context: Context, alarm: AlarmEntity): PendingIntent {
         val intent = Intent(context, AlarmReceiver::class.java).apply {
             putExtra("alarm_id", alarm.id)
-            action = "com.pepperonas.brutus.ALARM_TRIGGER"
+            action = ACTION_ALARM_TRIGGER
         }
         return PendingIntent.getBroadcast(
             context,
@@ -91,4 +113,32 @@ object AlarmScheduler {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
     }
+
+    private fun createFollowupPendingIntent(
+        context: Context,
+        alarmId: Long,
+        seq: Int,
+    ): PendingIntent {
+        val intent = Intent(context, AlarmReceiver::class.java).apply {
+            putExtra("alarm_id", alarmId)
+            putExtra(EXTRA_IS_FOLLOWUP, true)
+            putExtra(EXTRA_FOLLOWUP_SEQ, seq)
+            action = ACTION_ALARM_TRIGGER
+        }
+        return PendingIntent.getBroadcast(
+            context,
+            followupRequestCode(alarmId, seq),
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
+
+    // Carve a separate request-code space so we never collide with real alarm IDs.
+    // Practical alarms have small IDs (auto-increment from 1); this leaves > 2 billion IDs free.
+    private fun followupRequestCode(alarmId: Long, seq: Int): Int =
+        0x4F000000 or ((alarmId.toInt() and 0x00FFFFFF) shl 4) or (seq and 0xF)
+
+    const val ACTION_ALARM_TRIGGER = "com.pepperonas.brutus.ALARM_TRIGGER"
+    const val EXTRA_IS_FOLLOWUP = "is_followup"
+    const val EXTRA_FOLLOWUP_SEQ = "followup_seq"
 }

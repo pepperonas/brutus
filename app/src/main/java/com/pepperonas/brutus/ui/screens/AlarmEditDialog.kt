@@ -3,15 +3,12 @@ package com.pepperonas.brutus.ui.screens
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
 import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.ui.platform.LocalContext
-import androidx.core.content.ContextCompat
-import com.pepperonas.brutus.TestAlarmActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -30,17 +27,16 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
@@ -64,22 +60,43 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import com.pepperonas.brutus.TestAlarmActivity
 import com.pepperonas.brutus.data.AlarmEntity
+import com.pepperonas.brutus.ui.theme.BrutusOrange
 import com.pepperonas.brutus.ui.theme.BrutusRed
 import com.pepperonas.brutus.ui.theme.BrutusRedBright
 import com.pepperonas.brutus.util.AlarmSound
+import com.pepperonas.brutus.util.ChallengeDifficulty
 import com.pepperonas.brutus.util.ChallengeFlags
 import com.pepperonas.brutus.util.GlobalQrStore
 import com.pepperonas.brutus.util.QrGenerator
 import com.pepperonas.brutus.util.rememberBrutusHaptics
+
+data class AlarmEditResult(
+    val hour: Int,
+    val minute: Int,
+    val label: String,
+    val repeatDays: Int,
+    val challengeFlags: Int,
+    val snoozeDuration: Int,
+    val soundId: Int,
+    val mathProblemCount: Int,
+    val shakeCount: Int,
+    val hardcoreMode: Boolean,
+    val ultraHardcoreMode: Boolean,
+    val mathDifficulty: Int,
+    val shakeSensitivity: Int,
+)
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun AlarmEditDialog(
     existingAlarm: AlarmEntity?,
     onDismiss: () -> Unit,
-    onSave: (Int, Int, String, Int, Int, Int, Int, Int, Int, Boolean) -> Unit,
+    onSave: (AlarmEditResult) -> Unit,
     onPreviewSound: (AlarmSound) -> Unit,
     onStopPreview: () -> Unit,
 ) {
@@ -98,6 +115,14 @@ fun AlarmEditDialog(
     var mathProblemCount by remember { mutableIntStateOf(existingAlarm?.mathProblemCount ?: 3) }
     var shakeCount by remember { mutableIntStateOf(existingAlarm?.shakeCount ?: 30) }
     var hardcoreMode by remember { mutableStateOf(existingAlarm?.hardcoreMode ?: false) }
+    var ultraHardcoreMode by remember { mutableStateOf(existingAlarm?.ultraHardcoreMode ?: false) }
+    var mathDifficulty by remember {
+        mutableIntStateOf(existingAlarm?.mathDifficulty ?: ChallengeDifficulty.MATH_HARD)
+    }
+    var shakeSensitivity by remember {
+        mutableIntStateOf(existingAlarm?.shakeSensitivity ?: ChallengeDifficulty.SHAKE_NORMAL)
+    }
+
     val ctxForQr = LocalContext.current
     val qrCodeData = remember { GlobalQrStore.get(ctxForQr) }
     val qrBitmap = remember(qrCodeData) { QrGenerator.generateBitmap(qrCodeData) }
@@ -110,6 +135,10 @@ fun AlarmEditDialog(
 
     val ctx = LocalContext.current
     val haptics = rememberBrutusHaptics()
+
+    val activityRecognitionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { /* runtime answer handled when the task screen opens; we only ask up-front to smooth the path */ }
 
     val shareQr: () -> Unit = {
         if (!QrGenerator.shareQr(ctx, qrCodeData)) {
@@ -127,6 +156,9 @@ fun AlarmEditDialog(
             putExtra(TestAlarmActivity.EXTRA_SHAKE_COUNT, shakeCount)
             putExtra(TestAlarmActivity.EXTRA_SNOOZE_ENABLED, snoozeDuration > 0)
             putExtra(TestAlarmActivity.EXTRA_HARDCORE, hardcoreMode)
+            putExtra(TestAlarmActivity.EXTRA_ULTRA_HARDCORE, ultraHardcoreMode)
+            putExtra(TestAlarmActivity.EXTRA_MATH_DIFFICULTY, mathDifficulty)
+            putExtra(TestAlarmActivity.EXTRA_SHAKE_SENSITIVITY, shakeSensitivity)
         }
         ctx.startActivity(i)
     }
@@ -292,6 +324,19 @@ fun AlarmEditDialog(
                     step = 1,
                     suffix = "",
                 )
+                Spacer(modifier = Modifier.height(8.dp))
+                DifficultyChips(
+                    title = "Mathe-Schwierigkeit",
+                    options = listOf(
+                        ChallengeDifficulty.MATH_EASY,
+                        ChallengeDifficulty.MATH_HARD,
+                        ChallengeDifficulty.MATH_BRUTAL,
+                    ),
+                    selected = mathDifficulty,
+                    label = { ChallengeDifficulty.mathLabel(it) },
+                    description = ChallengeDifficulty.mathDescription(mathDifficulty),
+                    onSelect = { mathDifficulty = it }
+                )
             }
 
             if (shakeEnabled) {
@@ -304,6 +349,19 @@ fun AlarmEditDialog(
                     max = 100,
                     step = 5,
                     suffix = "",
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                DifficultyChips(
+                    title = "Schüttel-Empfindlichkeit",
+                    options = listOf(
+                        ChallengeDifficulty.SHAKE_LIGHT,
+                        ChallengeDifficulty.SHAKE_NORMAL,
+                        ChallengeDifficulty.SHAKE_HARD,
+                    ),
+                    selected = shakeSensitivity,
+                    label = { ChallengeDifficulty.shakeLabel(it) },
+                    description = ChallengeDifficulty.shakeDescription(shakeSensitivity),
+                    onSelect = { shakeSensitivity = it }
                 )
             }
 
@@ -367,35 +425,41 @@ fun AlarmEditDialog(
             Spacer(modifier = Modifier.height(20.dp))
 
             // Hardcore Mode toggle
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Hardcore Mode",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = BrutusRedBright
-                    )
-                    Text(
-                        text = "Sperrt die Lautstärke auf Maximum — Lautstärke-Tasten sind während des Alarms wirkungslos.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+            ModeToggleRow(
+                title = "Hardcore Mode",
+                titleColor = BrutusRedBright,
+                description = "Sperrt die Lautstärke auf Maximum — Lautstärke-Tasten sind während des Alarms wirkungslos.",
+                checked = hardcoreMode || ultraHardcoreMode,
+                enabled = !ultraHardcoreMode, // Ultra forces this on
+                onCheckedChange = {
+                    haptics.tap()
+                    hardcoreMode = it
                 }
-                Switch(
-                    checked = hardcoreMode,
-                    onCheckedChange = {
-                        haptics.tap()
-                        hardcoreMode = it
-                    },
-                    colors = SwitchDefaults.colors(checkedTrackColor = BrutusRed)
-                )
-            }
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Ultra Hardcore Mode toggle
+            ModeToggleRow(
+                title = "Ultra Hardcore Mode",
+                titleColor = BrutusOrange,
+                description = "Nach dem Dismiss feuert Brutus zweimal nach (+10 und +15 Minuten). Eine Schritt-Aufgabe in der Notification stoppt beide.",
+                checked = ultraHardcoreMode,
+                onCheckedChange = {
+                    haptics.warn()
+                    ultraHardcoreMode = it
+                    if (it) {
+                        hardcoreMode = true
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+                            ContextCompat.checkSelfPermission(
+                                ctx, Manifest.permission.ACTIVITY_RECOGNITION
+                            ) != PackageManager.PERMISSION_GRANTED
+                        ) {
+                            activityRecognitionLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
+                        }
+                    }
+                }
+            )
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -418,16 +482,21 @@ fun AlarmEditDialog(
                     haptics.success()
                     onStopPreview()
                     onSave(
-                        timePickerState.hour,
-                        timePickerState.minute,
-                        label,
-                        repeatDays,
-                        challengeFlags,
-                        snoozeDuration,
-                        soundId,
-                        mathProblemCount,
-                        shakeCount,
-                        hardcoreMode,
+                        AlarmEditResult(
+                            hour = timePickerState.hour,
+                            minute = timePickerState.minute,
+                            label = label,
+                            repeatDays = repeatDays,
+                            challengeFlags = challengeFlags,
+                            snoozeDuration = snoozeDuration,
+                            soundId = soundId,
+                            mathProblemCount = mathProblemCount,
+                            shakeCount = shakeCount,
+                            hardcoreMode = hardcoreMode || ultraHardcoreMode,
+                            ultraHardcoreMode = ultraHardcoreMode,
+                            mathDifficulty = mathDifficulty,
+                            shakeSensitivity = shakeSensitivity,
+                        )
                     )
                 },
                 modifier = Modifier
@@ -443,7 +512,80 @@ fun AlarmEditDialog(
             }
         }
     }
+}
 
+@Composable
+private fun ModeToggleRow(
+    title: String,
+    titleColor: Color,
+    description: String,
+    checked: Boolean,
+    enabled: Boolean = true,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(text = title, style = MaterialTheme.typography.titleLarge, color = titleColor)
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            enabled = enabled,
+            colors = SwitchDefaults.colors(checkedTrackColor = BrutusRed)
+        )
+    }
+}
+
+@Composable
+private fun DifficultyChips(
+    title: String,
+    options: List<Int>,
+    selected: Int,
+    label: (Int) -> String,
+    description: String,
+    onSelect: (Int) -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+    ) {
+        Text(text = title, style = MaterialTheme.typography.titleMedium)
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            options.forEach { opt ->
+                FilterChip(
+                    selected = selected == opt,
+                    onClick = { onSelect(opt) },
+                    label = { Text(label(opt)) },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = BrutusRed,
+                        selectedLabelColor = Color.White
+                    )
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            text = description,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
 }
 
 @Composable

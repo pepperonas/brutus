@@ -33,23 +33,26 @@ import androidx.compose.ui.unit.sp
 import com.pepperonas.brutus.ui.theme.BrutusOrange
 import com.pepperonas.brutus.ui.theme.BrutusRed
 import com.pepperonas.brutus.ui.theme.BrutusRedBright
+import com.pepperonas.brutus.util.ChallengeDifficulty
 import kotlin.math.sqrt
 
 @Composable
 fun ShakeChallenge(
     requiredShakes: Int = 30,
+    sensitivity: Int = ChallengeDifficulty.SHAKE_NORMAL,
     onComplete: () -> Unit,
 ) {
     val context = LocalContext.current
     var shakeCount by remember { mutableIntStateOf(0) }
     var lastAccel by remember { mutableFloatStateOf(SensorManager.GRAVITY_EARTH) }
+    val threshold = remember(sensitivity) { ChallengeDifficulty.shakeThreshold(sensitivity) }
 
     val progress by animateFloatAsState(
         targetValue = shakeCount.toFloat() / requiredShakes,
         label = "shakeProgress"
     )
 
-    DisposableEffect(Unit) {
+    DisposableEffect(sensitivity) {
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
@@ -64,7 +67,7 @@ fun ShakeChallenge(
                 val delta = accel - lastAccel
                 lastAccel = accel
 
-                if (delta > 12 && System.currentTimeMillis() - lastShakeTime > 250) {
+                if (delta > threshold && System.currentTimeMillis() - lastShakeTime > 250) {
                     lastShakeTime = System.currentTimeMillis()
                     shakeCount++
                     if (shakeCount >= requiredShakes) {

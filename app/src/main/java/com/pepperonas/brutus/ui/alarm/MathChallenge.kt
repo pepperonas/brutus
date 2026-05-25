@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pepperonas.brutus.ui.theme.BrutusRed
 import com.pepperonas.brutus.ui.theme.BrutusRedBright
+import com.pepperonas.brutus.util.ChallengeDifficulty
 import kotlin.random.Random
 
 data class MathProblem(val a: Int, val b: Int, val operator: Char) {
@@ -42,27 +43,55 @@ data class MathProblem(val a: Int, val b: Int, val operator: Char) {
     val display: String = "$a $operator $b = ?"
 }
 
-private fun generateProblem(): MathProblem {
-    val ops = listOf('+', '-', '*')
-    val op = ops.random()
-    return when (op) {
-        '*' -> MathProblem(Random.nextInt(10, 50), Random.nextInt(2, 20), op)
-        '-' -> {
-            val a = Random.nextInt(50, 200)
-            val b = Random.nextInt(10, a)
+fun generateProblem(difficulty: Int): MathProblem = when (difficulty) {
+    ChallengeDifficulty.MATH_EASY -> {
+        // Addition and subtraction with single/low-double digits — must remain ≥ 0.
+        val ops = listOf('+', '-')
+        val op = ops.random()
+        if (op == '-') {
+            val a = Random.nextInt(8, 21)
+            val b = Random.nextInt(0, a + 1)
             MathProblem(a, b, op)
+        } else {
+            MathProblem(Random.nextInt(1, 11), Random.nextInt(1, 11), op)
         }
-        else -> MathProblem(Random.nextInt(50, 500), Random.nextInt(50, 500), op)
+    }
+    ChallengeDifficulty.MATH_BRUTAL -> {
+        // Two-digit multiplication or very large additions/subtractions.
+        val ops = listOf('+', '-', '*', '*') // bias towards multiplication
+        when (val op = ops.random()) {
+            '*' -> MathProblem(Random.nextInt(11, 30), Random.nextInt(11, 30), op)
+            '-' -> {
+                val a = Random.nextInt(500, 2000)
+                val b = Random.nextInt(100, a)
+                MathProblem(a, b, op)
+            }
+            else -> MathProblem(Random.nextInt(500, 2000), Random.nextInt(500, 2000), op)
+        }
+    }
+    else -> {
+        // Legacy "hard" generator (the previous default).
+        val ops = listOf('+', '-', '*')
+        when (val op = ops.random()) {
+            '*' -> MathProblem(Random.nextInt(10, 50), Random.nextInt(2, 20), op)
+            '-' -> {
+                val a = Random.nextInt(50, 200)
+                val b = Random.nextInt(10, a)
+                MathProblem(a, b, op)
+            }
+            else -> MathProblem(Random.nextInt(50, 500), Random.nextInt(50, 500), op)
+        }
     }
 }
 
 @Composable
 fun MathChallenge(
     totalRequired: Int = 3,
+    difficulty: Int = ChallengeDifficulty.MATH_HARD,
     onComplete: () -> Unit,
 ) {
     var solvedCount by remember { mutableIntStateOf(0) }
-    var problem by remember { mutableStateOf(generateProblem()) }
+    var problem by remember { mutableStateOf(generateProblem(difficulty)) }
     var userInput by remember { mutableStateOf("") }
     var showError by remember { mutableStateOf(false) }
 
@@ -82,7 +111,7 @@ fun MathChallenge(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Lösung ${solvedCount + 1} von $totalRequired",
+            text = "Lösung ${solvedCount + 1} von $totalRequired · ${ChallengeDifficulty.mathLabel(difficulty)}",
             style = MaterialTheme.typography.bodyLarge,
             color = Color.White.copy(alpha = 0.7f)
         )
@@ -112,7 +141,7 @@ fun MathChallenge(
                 solvedCount++
                 userInput = ""
                 if (solvedCount >= totalRequired) onComplete()
-                else problem = generateProblem()
+                else problem = generateProblem(difficulty)
             }, onWrong = { showError = true; userInput = "" }) }),
             isError = showError,
             modifier = Modifier.fillMaxWidth(0.6f)
@@ -135,7 +164,7 @@ fun MathChallenge(
                     solvedCount++
                     userInput = ""
                     if (solvedCount >= totalRequired) onComplete()
-                    else problem = generateProblem()
+                    else problem = generateProblem(difficulty)
                 }, onWrong = { showError = true; userInput = "" })
             },
             colors = ButtonDefaults.buttonColors(containerColor = BrutusRed),

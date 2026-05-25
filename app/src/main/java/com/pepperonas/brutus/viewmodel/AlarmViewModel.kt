@@ -8,6 +8,7 @@ import com.pepperonas.brutus.data.AlarmEntity
 import com.pepperonas.brutus.data.AlarmRepository
 import com.pepperonas.brutus.scheduler.AlarmScheduler
 import com.pepperonas.brutus.util.ChallengeFlags
+import com.pepperonas.brutus.util.UltraHardcoreStore
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -38,6 +39,9 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
         mathProblemCount: Int,
         shakeCount: Int,
         hardcoreMode: Boolean,
+        ultraHardcoreMode: Boolean,
+        mathDifficulty: Int,
+        shakeSensitivity: Int,
     ) {
         viewModelScope.launch {
             val alarm = AlarmEntity(
@@ -51,6 +55,9 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
                 mathProblemCount = mathProblemCount,
                 shakeCount = shakeCount,
                 hardcoreMode = hardcoreMode,
+                ultraHardcoreMode = ultraHardcoreMode,
+                mathDifficulty = mathDifficulty,
+                shakeSensitivity = shakeSensitivity,
             )
             val id = repository.insert(alarm)
             val saved = alarm.copy(id = id)
@@ -65,6 +72,9 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
                 AlarmScheduler.schedule(getApplication(), alarm)
             } else {
                 AlarmScheduler.cancel(getApplication(), alarm)
+                // If Ultra Hardcore got turned off, also clear any in-flight follow-ups.
+                AlarmScheduler.cancelAllFollowups(getApplication(), alarm.id)
+                UltraHardcoreStore.clearAllFor(getApplication(), alarm.id)
             }
         }
     }
@@ -77,6 +87,8 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
                 AlarmScheduler.schedule(getApplication(), updated)
             } else {
                 AlarmScheduler.cancel(getApplication(), updated)
+                AlarmScheduler.cancelAllFollowups(getApplication(), updated.id)
+                UltraHardcoreStore.clearAllFor(getApplication(), updated.id)
             }
         }
     }
@@ -84,6 +96,8 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
     fun deleteAlarm(alarm: AlarmEntity) {
         viewModelScope.launch {
             AlarmScheduler.cancel(getApplication(), alarm)
+            AlarmScheduler.cancelAllFollowups(getApplication(), alarm.id)
+            UltraHardcoreStore.clearAllFor(getApplication(), alarm.id)
             repository.delete(alarm)
         }
     }

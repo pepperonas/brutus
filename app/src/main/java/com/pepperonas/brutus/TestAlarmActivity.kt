@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import com.pepperonas.brutus.ui.alarm.AlarmScreen
 import com.pepperonas.brutus.ui.theme.BrutusTheme
 import com.pepperonas.brutus.util.AlarmSound
+import com.pepperonas.brutus.util.ChallengeDifficulty
 import com.pepperonas.brutus.util.ChallengeFlags
 import com.pepperonas.brutus.util.HardcoreAudioGuard
 import com.pepperonas.brutus.util.SoundPreviewPlayer
@@ -17,7 +18,7 @@ import com.pepperonas.brutus.util.SoundPreviewPlayer
 class TestAlarmActivity : ComponentActivity() {
 
     private var soundPlayer: SoundPreviewPlayer? = null
-    private var hardcoreMode: Boolean = false
+    private var hardcoreActive: Boolean = false
     private var audioGuard: HardcoreAudioGuard? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,13 +30,17 @@ class TestAlarmActivity : ComponentActivity() {
         val mathCount = intent.getIntExtra(EXTRA_MATH_COUNT, 3)
         val shakeCount = intent.getIntExtra(EXTRA_SHAKE_COUNT, 30)
         val snoozeEnabled = intent.getBooleanExtra(EXTRA_SNOOZE_ENABLED, true)
-        hardcoreMode = intent.getBooleanExtra(EXTRA_HARDCORE, false)
+        val hardcoreMode = intent.getBooleanExtra(EXTRA_HARDCORE, false)
+        val ultraHardcoreMode = intent.getBooleanExtra(EXTRA_ULTRA_HARDCORE, false)
+        val mathDifficulty = intent.getIntExtra(EXTRA_MATH_DIFFICULTY, ChallengeDifficulty.MATH_HARD)
+        val shakeSensitivity = intent.getIntExtra(EXTRA_SHAKE_SENSITIVITY, ChallengeDifficulty.SHAKE_NORMAL)
+        hardcoreActive = hardcoreMode || ultraHardcoreMode
 
         soundPlayer = SoundPreviewPlayer(this).also {
             it.play(AlarmSound.fromId(soundId))
         }
 
-        if (hardcoreMode) {
+        if (hardcoreActive) {
             audioGuard = HardcoreAudioGuard(applicationContext).also { it.attach() }
         }
 
@@ -49,6 +54,9 @@ class TestAlarmActivity : ComponentActivity() {
                         shakeCount = shakeCount,
                         snoozeEnabled = snoozeEnabled,
                         hardcoreMode = hardcoreMode,
+                        ultraHardcoreMode = ultraHardcoreMode,
+                        mathDifficulty = mathDifficulty,
+                        shakeSensitivity = shakeSensitivity,
                         onDismiss = { finish() },
                         onSnooze = { finish() }
                     )
@@ -58,7 +66,7 @@ class TestAlarmActivity : ComponentActivity() {
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        if (hardcoreMode && (event.keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ||
+        if (hardcoreActive && (event.keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ||
                 event.keyCode == KeyEvent.KEYCODE_VOLUME_UP ||
                 event.keyCode == KeyEvent.KEYCODE_VOLUME_MUTE)) {
             audioGuard?.clampToMax()
@@ -83,5 +91,8 @@ class TestAlarmActivity : ComponentActivity() {
         const val EXTRA_SHAKE_COUNT = "shake_count"
         const val EXTRA_SNOOZE_ENABLED = "snooze_enabled"
         const val EXTRA_HARDCORE = "hardcore"
+        const val EXTRA_ULTRA_HARDCORE = "ultra_hardcore"
+        const val EXTRA_MATH_DIFFICULTY = "math_difficulty"
+        const val EXTRA_SHAKE_SENSITIVITY = "shake_sensitivity"
     }
 }

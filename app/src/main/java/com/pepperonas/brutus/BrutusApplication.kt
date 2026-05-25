@@ -33,13 +33,26 @@ class BrutusApplication : Application() {
             description = "Background alarm service"
         }
 
+        val ultraHardcoreChannel = NotificationChannel(
+            CHANNEL_ULTRA_HARDCORE,
+            "Ultra Hardcore Reminder",
+            NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            description = "Persistent reminder while two follow-up alarms are armed"
+            setBypassDnd(true)
+            setSound(null, null)
+            enableVibration(false)
+        }
+
         val nm = getSystemService(NotificationManager::class.java)
         nm.createNotificationChannel(alarmChannel)
         nm.createNotificationChannel(serviceChannel)
+        nm.createNotificationChannel(ultraHardcoreChannel)
     }
 
     companion object {
         const val CHANNEL_ALARM = "brutus_alarm"
         const val CHANNEL_SERVICE = "brutus_service"
+        const val CHANNEL_ULTRA_HARDCORE = "brutus_ultra_hardcore"
     }
 }

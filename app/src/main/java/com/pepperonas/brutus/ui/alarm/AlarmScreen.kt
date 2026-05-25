@@ -41,6 +41,7 @@ import com.pepperonas.brutus.ui.theme.BrutusDarkRed
 import com.pepperonas.brutus.ui.theme.BrutusOrange
 import com.pepperonas.brutus.ui.theme.BrutusRed
 import com.pepperonas.brutus.ui.theme.BrutusRedBright
+import com.pepperonas.brutus.util.ChallengeDifficulty
 import com.pepperonas.brutus.util.ChallengeFlags
 import com.pepperonas.brutus.util.rememberBrutusHaptics
 import kotlinx.coroutines.delay
@@ -56,6 +57,11 @@ fun AlarmScreen(
     shakeCount: Int,
     snoozeEnabled: Boolean,
     hardcoreMode: Boolean = false,
+    ultraHardcoreMode: Boolean = false,
+    isFollowup: Boolean = false,
+    followupSeq: Int = 0,
+    mathDifficulty: Int = ChallengeDifficulty.MATH_HARD,
+    shakeSensitivity: Int = ChallengeDifficulty.SHAKE_NORMAL,
     onDismiss: () -> Unit,
     onSnooze: () -> Unit
 ) {
@@ -118,7 +124,7 @@ fun AlarmScreen(
                     letterSpacing = 8.sp
                 )
 
-                if (hardcoreMode) {
+                if (hardcoreMode || ultraHardcoreMode) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Box(
                         modifier = Modifier
@@ -126,12 +132,22 @@ fun AlarmScreen(
                             .padding(horizontal = 10.dp, vertical = 4.dp)
                     ) {
                         Text(
-                            text = "HARDCORE MODE",
+                            text = if (ultraHardcoreMode) "ULTRA HARDCORE MODE" else "HARDCORE MODE",
                             style = MaterialTheme.typography.labelLarge,
                             color = Color.White,
                             letterSpacing = 2.sp
                         )
                     }
+                }
+
+                if (isFollowup && followupSeq > 0) {
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = "Re-Alarm $followupSeq/2 — du bist nicht entkommen",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = BrutusOrange,
+                        letterSpacing = 1.sp
+                    )
                 }
 
                 if (active.size > 1) {
@@ -158,10 +174,12 @@ fun AlarmScreen(
                     when (active[idx]) {
                         ChallengeFlags.MATH -> MathChallenge(
                             totalRequired = mathProblemCount,
+                            difficulty = mathDifficulty,
                             onComplete = { currentIndex++ }
                         )
                         ChallengeFlags.SHAKE -> ShakeChallenge(
                             requiredShakes = shakeCount,
+                            sensitivity = shakeSensitivity,
                             onComplete = { currentIndex++ }
                         )
                         ChallengeFlags.QR -> QrChallenge(
