@@ -55,6 +55,7 @@ import com.pepperonas.brutus.ui.theme.BrutusRedBright
 import com.pepperonas.brutus.ui.theme.BrutusTextSecondary
 import com.pepperonas.brutus.util.BatteryOptimizationPermission
 import com.pepperonas.brutus.util.ExactAlarmPermission
+import com.pepperonas.brutus.util.FullScreenIntentPermission
 import com.pepperonas.brutus.util.NextAlarmCalculator
 import com.pepperonas.brutus.util.SoundPreviewPlayer
 import com.pepperonas.brutus.util.rememberBrutusHaptics
@@ -86,15 +87,17 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
         }
     }
 
-    // Re-check exact-alarm + battery permissions whenever the user returns from settings
+    // Re-check exact-alarm + battery + full-screen-intent permissions on resume
     var exactGranted by remember { mutableStateOf(ExactAlarmPermission.isGranted(context)) }
     var batteryIgnoring by remember { mutableStateOf(BatteryOptimizationPermission.isIgnoring(context)) }
+    var fsiGranted by remember { mutableStateOf(FullScreenIntentPermission.isGranted(context)) }
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     DisposableEffect(lifecycle) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 exactGranted = ExactAlarmPermission.isGranted(context)
                 batteryIgnoring = BatteryOptimizationPermission.isIgnoring(context)
+                fsiGranted = FullScreenIntentPermission.isGranted(context)
             }
         }
         lifecycle.addObserver(observer)
@@ -122,6 +125,13 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
                 } catch (_: Exception) {
                     context.startActivity(BatteryOptimizationPermission.fallbackSettingsIntent())
                 }
+            })
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+
+        if (!fsiGranted) {
+            FullScreenIntentBanner(onFix = {
+                FullScreenIntentPermission.settingsIntent(context)?.let { context.startActivity(it) }
             })
             Spacer(modifier = Modifier.height(12.dp))
         }
@@ -427,6 +437,16 @@ private fun BatteryOptimizationBanner(onFix: () -> Unit) {
         body = "Aggressive Akkusparmaßnahmen können Alarme verschlucken. Whiteliste Brutus, damit er garantiert klingelt.",
         actionLabel = "Whitelisten",
         accent = BrutusOrange,
+        onFix = onFix,
+    )
+}
+
+@Composable
+private fun FullScreenIntentBanner(onFix: () -> Unit) {
+    PermissionBanner(
+        title = "Vollbild-Alarm blockiert",
+        body = "Ohne diese Berechtigung erscheint der Alarm nur als Benachrichtigung — die App poppt nicht in den Vordergrund.",
+        actionLabel = "Erlauben",
         onFix = onFix,
     )
 }

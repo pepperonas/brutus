@@ -77,7 +77,12 @@ class AlarmService : Service() {
             putExtra("alarm_id", alarmId)
             putExtra(AlarmScheduler.EXTRA_IS_FOLLOWUP, isFollowup)
             putExtra(AlarmScheduler.EXTRA_FOLLOWUP_SEQ, followupSeq)
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            addFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK
+                    or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                    or Intent.FLAG_ACTIVITY_NO_USER_ACTION
+            )
         }
         val pendingIntent = PendingIntent.getActivity(
             this, 0, activityIntent,
@@ -92,8 +97,10 @@ class AlarmService : Service() {
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setContentTitle(if (isFollowup) "Brutus Re-Alarm" else "Brutus Alarm")
             .setContentText(contentText)
+            .setContentIntent(pendingIntent)
             .setOngoing(true)
             .setCategory(Notification.CATEGORY_ALARM)
+            .setVisibility(Notification.VISIBILITY_PUBLIC)
             .setFullScreenIntent(pendingIntent, true)
             .build()
 
@@ -101,7 +108,20 @@ class AlarmService : Service() {
 
         setMaxVolume()
         startVibration()
-        startActivity(activityIntent)
+
+        // Belt and suspenders: the full-screen intent on the notification is the
+        // canonical route for foregrounding on Android 10+, but we also call
+        // startActivity directly because the foreground service grants us the
+        // background-activity-start privilege. If the full-screen intent
+        // permission is revoked, this is the only path that still works
+        // reliably; if it's granted, the second call is a no-op because the
+        // activity is singleInstance.
+        try {
+            startActivity(activityIntent)
+        } catch (e: Exception) {
+            // Some OEMs throw on background activity starts even from a foreground
+            // service. The full-screen intent above handles those devices.
+        }
 
         // Load alarm + play chosen sound
         CoroutineScope(Dispatchers.IO).launch {

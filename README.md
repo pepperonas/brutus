@@ -223,8 +223,9 @@ The alarm list shows _two_ red/orange banners when system state would silently b
 
 1. **Exakte Alarme deaktiviert** _(v1.3.0)_ — `AlarmManager.canScheduleExactAlarms()` is false (Samsung's default on Android 12+). Deep-links to `ACTION_REQUEST_SCHEDULE_EXACT_ALARM`.
 2. **Akku-Optimierung aktiv** _(v1.6.0)_ — `PowerManager.isIgnoringBatteryOptimizations()` is false (default on every install). Aggressive battery managers on Xiaomi/Huawei/Samsung devices routinely kill background apps and silently swallow alarm broadcasts. Deep-links to `ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` so the user can whitelist Brutus with two taps. Falls back to the general battery-optimization list if the per-app dialog isn't supported.
+3. **Vollbild-Alarm blockiert** _(v1.6.1)_ — Android 14+ no longer grants `USE_FULL_SCREEN_INTENT` by default to apps outside the Calling / Default Alarm categories. Without it, Brutus's lock-screen overlay is silently downgraded to a heads-up notification and the app does _not_ pop to the foreground when the alarm fires. The banner uses `NotificationManager.canUseFullScreenIntent()` and deep-links to `ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT` so the user can flip the switch.
 
-Both banners disappear automatically as soon as the corresponding system state is fixed — re-checks run on every `ON_RESUME`.
+All three banners disappear automatically as soon as the corresponding system state is fixed — re-checks run on every `ON_RESUME`.
 
 ### Global QR code
 
@@ -505,6 +506,7 @@ app/src/main/java/com/pepperonas/brutus/
     ├── ChallengeDifficulty.kt       Math/shake preset descriptions + shake delta threshold (v1.4.0)
     ├── ChallengeFlags.kt            Bitmask helpers for challenge combinations
     ├── ExactAlarmPermission.kt      canScheduleExactAlarms() check + deep-link Intent (v1.3.0+)
+    ├── FullScreenIntentPermission.kt canUseFullScreenIntent() check + deep-link Intent (v1.6.1)
     ├── GlobalQrStore.kt             SharedPreferences-backed global QR persistence
     ├── HardcoreAudioGuard.kt        Volume clamp + VOLUME_CHANGED receiver for Hardcore Mode
     ├── Haptics.kt                   BrutusHaptics wrapper around HapticFeedbackConstants (v1.3.1+)
