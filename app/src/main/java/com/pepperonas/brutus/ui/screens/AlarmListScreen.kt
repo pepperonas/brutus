@@ -1,7 +1,10 @@
 package com.pepperonas.brutus.ui.screens
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -41,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -312,6 +316,7 @@ private fun formatTriggerDate(millis: Long): String {
     return fmt.format(Date(millis))
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun AlarmCard(
     alarm: AlarmEntity,
@@ -323,6 +328,7 @@ private fun AlarmCard(
         targetValue = MaterialTheme.colorScheme.surfaceVariant,
         label = "cardColor"
     )
+    val dim = !alarm.enabled
 
     Card(
         onClick = onClick,
@@ -330,94 +336,149 @@ private fun AlarmCard(
         shape = RoundedCornerShape(20.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = alarm.timeString(),
-                    fontSize = 44.sp,
-                    fontWeight = FontWeight.Light,
-                    color = if (alarm.enabled) MaterialTheme.colorScheme.onSurface
-                    else BrutusTextSecondary
-                )
-                if (alarm.label.isNotBlank()) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = alarm.label,
+                        text = alarm.timeString(),
+                        fontSize = 44.sp,
+                        fontWeight = FontWeight.Light,
+                        color = if (alarm.enabled) MaterialTheme.colorScheme.onSurface
+                        else BrutusTextSecondary
+                    )
+                    Text(
+                        text = alarm.repeatDaysString(),
                         style = MaterialTheme.typography.bodyMedium,
                         color = BrutusTextSecondary
                     )
-                }
-            }
-            Column(
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                WeekdayStrip(repeatDays = alarm.repeatDays, enabled = alarm.enabled)
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = onDelete, modifier = Modifier.size(36.dp)) {
-                        Icon(
-                            Icons.Default.Delete,
-                            contentDescription = "Löschen",
-                            tint = BrutusTextSecondary
+                    if (alarm.label.isNotBlank()) {
+                        Text(
+                            text = alarm.label,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurface.copy(
+                                alpha = if (dim) 0.5f else 0.85f
+                            )
                         )
                     }
-                    Spacer(modifier = Modifier.size(4.dp))
-                    Switch(
-                        checked = alarm.enabled,
-                        onCheckedChange = { onToggle() },
-                        colors = SwitchDefaults.colors(
-                            checkedTrackColor = BrutusRed,
-                            checkedThumbColor = androidx.compose.ui.graphics.Color.White,
-                        )
+                }
+                IconButton(onClick = onDelete, modifier = Modifier.size(36.dp)) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = "Löschen",
+                        tint = BrutusTextSecondary
                     )
                 }
-                // Flags row (sound / challenges / hardcore / snooze)
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    if (alarm.ultraHardcoreMode) {
-                        TagChip("ULTRA HC", BrutusOrange)
-                    } else if (alarm.hardcoreMode) {
-                        TagChip("HARDCORE", BrutusRed)
-                    }
-                    TagChip(alarm.soundName(), BrutusTextSecondary)
+                Spacer(modifier = Modifier.size(4.dp))
+                Switch(
+                    checked = alarm.enabled,
+                    onCheckedChange = { onToggle() },
+                    colors = SwitchDefaults.colors(
+                        checkedTrackColor = BrutusRed,
+                        checkedThumbColor = androidx.compose.ui.graphics.Color.White,
+                    )
+                )
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+            WeekdayStrip(repeatDays = alarm.repeatDays, enabled = alarm.enabled)
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // Info chips: mode, sunrise, challenge, snooze, sound
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                if (alarm.ultraHardcoreMode) {
+                    InfoChip("ULTRA HC", BrutusOrange, filled = true, dim = dim)
+                } else if (alarm.hardcoreMode) {
+                    InfoChip("HARDCORE", BrutusRed, filled = true, dim = dim)
                 }
+                if (alarm.sunriseEnabled) {
+                    InfoChip("☀ Sunrise", BrutusOrange, dim = dim)
+                }
+                InfoChip(alarm.challengeName(), BrutusRedBright, dim = dim)
+                InfoChip("Snooze ${alarm.snoozeDuration}m", BrutusTextSecondary, dim = dim)
+                InfoChip("♪ ${alarm.soundName()}", BrutusTextSecondary, dim = dim)
             }
         }
     }
 }
 
+/** Full-width weekday strip — always a single row, each day gets an equal slice. */
 @Composable
 private fun WeekdayStrip(repeatDays: Int, enabled: Boolean) {
-    val labels = listOf("M", "D", "M", "D", "F", "S", "S")
-    Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+    val labels = listOf("Mo", "Di", "Mi", "Do", "Fr", "Sa", "So")
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
         labels.forEachIndexed { index, label ->
             val isOn = (repeatDays and (1 shl index)) != 0
-            val color = when {
+            val textColor = when {
                 !enabled -> BrutusTextSecondary.copy(alpha = 0.35f)
-                isOn -> BrutusRedBright
-                else -> BrutusTextSecondary.copy(alpha = 0.5f)
+                isOn -> androidx.compose.ui.graphics.Color.White
+                else -> BrutusTextSecondary.copy(alpha = 0.6f)
             }
-            Text(
-                text = label,
-                fontSize = 12.sp,
-                fontWeight = if (isOn) FontWeight.Bold else FontWeight.Normal,
-                color = color
-            )
+            val bg = when {
+                isOn && enabled -> BrutusRed
+                isOn -> BrutusRed.copy(alpha = 0.3f)
+                else -> androidx.compose.ui.graphics.Color.Transparent
+            }
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(bg)
+                    .padding(vertical = 5.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = label,
+                    fontSize = 12.sp,
+                    fontWeight = if (isOn) FontWeight.Bold else FontWeight.Normal,
+                    color = textColor
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun TagChip(text: String, color: androidx.compose.ui.graphics.Color) {
-    Text(
-        text = text,
-        fontSize = 10.sp,
-        fontWeight = FontWeight.SemiBold,
-        color = color
-    )
+private fun InfoChip(
+    text: String,
+    color: androidx.compose.ui.graphics.Color,
+    filled: Boolean = false,
+    dim: Boolean = false,
+) {
+    val alpha = if (dim) 0.5f else 1f
+    if (filled) {
+        Text(
+            text = text,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold,
+            color = androidx.compose.ui.graphics.Color.White.copy(alpha = alpha),
+            modifier = Modifier
+                .clip(RoundedCornerShape(6.dp))
+                .background(color.copy(alpha = alpha))
+                .padding(horizontal = 8.dp, vertical = 3.dp)
+        )
+    } else {
+        Text(
+            text = text,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = color.copy(alpha = alpha),
+            modifier = Modifier
+                .clip(RoundedCornerShape(6.dp))
+                .background(color.copy(alpha = 0.14f * alpha))
+                .padding(horizontal = 8.dp, vertical = 3.dp)
+        )
+    }
 }
 
 @Composable

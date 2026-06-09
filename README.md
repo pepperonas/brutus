@@ -90,7 +90,7 @@ Starting with v1.2.0 Brutus ships as a full clock suite. A persistent bottom nav
 | **Stoppuhr** | ⏱ | Start / Stop / Lap stopwatch with centisecond precision via `SystemClock.elapsedRealtime()` |
 | **Timer** | ⌛ | HMS-picker countdown timer with quick presets (1m, 3m, 5m, 10m, 15m, 30m) — rings system alarm tone on finish |
 
-The Alarm tab stays the heart of the app: its cards show a large thin time reading, a `MDMDFSS` weekday strip with active days highlighted in bright red, a sound label, optional `HARDCORE` or `ULTRA HC` tag, and a toggle switch on the right. A countdown header (e.g. _"Alarm in 13 Stunden, 29 Minuten"_) sits above the list and refreshes every 30 s.
+The Alarm tab stays the heart of the app: its cards show a large thin time reading, the repeat summary (_Einmalig_ / _Jeden Tag_ / explicit day list), an optional label, and a toggle switch on the right. Below sits a **full-width weekday strip** — seven equal `Mo Di Mi Do Fr Sa So` pills that always render on a single line, active days filled bright red. A row of **info chips** underneath surfaces the mode (`ULTRA HC` / `HARDCORE`), `☀ Sunrise`, the challenge (`Mathe + Schütteln`…), the snooze interval (`Snooze 5m`) and the `♪` sound at a glance _(redesigned in v1.7.0)_. A countdown header (e.g. _"Alarm in 13 Stunden, 29 Minuten"_) sits above the list and refreshes every 30 s.
 
 A premium **monogram app icon** (radial dark-red gradient + gradient-filled "B" with hairline highlight) replaces the previous alarm-bell icon.
 
@@ -145,6 +145,16 @@ Every synthesized sound is generated on-device in real time using `AudioTrack` w
 | **Sirene** | Sweeping siren | 400 → 1200 Hz sine sweep, 2 s cycle |
 | **Nuclear Alert** | Rapid sharp beeping | 1 kHz square, 100 ms on / 100 ms off |
 | **Durchdringend** | Piercing continuous beep | 3.5 kHz square wave with 8 Hz pulse — the most annoying one by design |
+
+**Extreme sounds** _(v1.7.0)_ — five more ways to be ripped out of bed:
+
+| Sound | Character | Signal |
+|-------|-----------|--------|
+| **Stadion-Horn** | Brash stadium air-horn blat | Three detuned sawtooth voices (Bb3 / ~Eb4 / Bb4) stacked, 0.9 s |
+| **Presslufthammer** | Pounding construction-site rattle | ~73 Hz square gated 28 ms on / 22 ms off, with a clattering 5th-harmonic grit |
+| **Feueralarm** | Standardized T-3 smoke-alarm cadence | 3.1 kHz square, three 0.5 s beeps + 1.5 s pause, looped |
+| **Bohrer** | Screeching dental drill | 1.6 kHz FM carrier, 42 Hz modulator (index 9) with a slow ±220 Hz wail |
+| **Banshee** | Dissonant rising wail | Four tightly-detuned voices (620–652 Hz) beating while the cluster sweeps +90 % up |
 
 **Gentle sounds** _(v1.5.0)_ — for the timer and casual wake-ups, capped at ~50–60 % amplitude:
 
@@ -525,7 +535,7 @@ app/src/test/java/com/pepperonas/brutus/
 ├── scheduler/
 │   └── AlarmSchedulerConstantsTest.kt  4 tests — UHC offsets, sunrise lead, intent extra uniqueness (v1.6.0)
 └── util/
-    ├── AlarmSoundGeneratorTest.kt      6 tests — PCM length, peak amplitudes, loop-boundary fade, gentle vs harsh list (v1.5.0)
+    ├── AlarmSoundGeneratorTest.kt      7 tests — PCM length, peak amplitudes, loop-boundary fade, gentle vs harsh + extreme list (v1.7.0)
     ├── ChallengeFlagsTest.kt           6 tests — describe / activeList / has bitmask edge cases
     ├── ChallengeDifficultyTest.kt      6 tests — math operand ranges, shake threshold ordering, label coverage (v1.4.0)
     └── NextAlarmCalculatorTest.kt     17 tests — one-shot today/tomorrow, repeating wrap, weekend selection, formatCountdown
@@ -667,6 +677,9 @@ Planned, no specific timeline:
 - [x] Sunrise pre-alarm with screen brightness ramp + Glockenspiel fade-in (v1.6.0)
 - [x] Home-screen widget showing next upcoming alarm (v1.6.0)
 - [x] Battery-optimization detection banner with deep-link to system whitelist (v1.6.0)
+- [x] Pop alarm to the foreground via full-screen-intent banner + hardened activity launch (v1.6.1)
+- [x] Redesigned alarm cards — full-width weekday strip + info chips (mode, sunrise, challenge, snooze, sound) (v1.7.0)
+- [x] Five extreme alarm sounds — Stadion-Horn, Presslufthammer, Feueralarm, Bohrer, Banshee (v1.7.0)
 - [ ] Per-alarm sound override at runtime
 - [ ] Multi-QR support (different codes for different alarms)
 - [ ] Wear OS companion

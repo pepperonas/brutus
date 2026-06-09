@@ -14,6 +14,13 @@ enum class AlarmSound(
     NUCLEAR(3, "Nuclear Alert", "Schnelles, scharfes Piepen"),
     PIERCING(5, "Durchdringend", "Ultra-hohes Piepen — maximal nervig"),
 
+    // v1.7.0 — five extra extreme sounds for the hardcore crowd.
+    AIRHORN(10, "Stadion-Horn", "Brüllendes Air-Horn aus verstimmten Sägezähnen"),
+    JACKHAMMER(11, "Presslufthammer", "Pochende Tiefton-Salven wie eine Baustelle"),
+    FIRE_ALARM(12, "Feueralarm", "Temporal-3 Rauchmelder-Muster bei 3,1 kHz"),
+    DENTIST(13, "Bohrer", "FM-modulierter Zahnarzt-Bohrer — kreischendes Schleifen"),
+    BANSHEE(14, "Banshee", "Dissonanter, aufsteigender Schwebungs-Cluster"),
+
     // v1.5.0 — gentle sounds, designed for the timer and casual wake-ups.
     CHIME(7, "Glockenspiel", "Sanftes 3-Ton-Glockenspiel mit Nachklang", gentle = true),
     MARIMBA(8, "Marimba", "Holziges Anschlag-Pattern", gentle = true),

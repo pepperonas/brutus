@@ -74,6 +74,21 @@ class AlarmSoundGeneratorTest {
     }
 
     @Test
+    fun `the v1_7 extreme sounds are harsh, not gentle`() {
+        val extreme = listOf(
+            AlarmSound.AIRHORN, AlarmSound.JACKHAMMER, AlarmSound.FIRE_ALARM,
+            AlarmSound.DENTIST, AlarmSound.BANSHEE,
+        )
+        val gentle = AlarmSound.gentleSounds()
+        extreme.forEach { snd ->
+            assertTrue(snd !in gentle, "$snd must not be offered as a gentle sound")
+            assertTrue(!snd.gentle, "$snd.gentle should be false")
+            val peak = AlarmSoundGenerator.generatePcm(snd).maxOf { max(it.toInt(), -it.toInt()) }
+            assertTrue(peak > Short.MAX_VALUE * 0.3, "$snd peak $peak is too quiet for an extreme sound")
+        }
+    }
+
+    @Test
     fun `TimerSoundStore default is CHIME`() {
         assertEquals(AlarmSound.CHIME, TimerSoundStore.DEFAULT_SOUND)
     }
