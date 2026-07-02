@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -69,6 +70,30 @@ fun QrChallenge(expectedQrData: String, onComplete: () -> Unit) {
         }
     }
 
+    // Owned by the composition so they can be shut down when the challenge
+    // leaves the screen — otherwise the camera keeps streaming until the
+    // hosting activity dies.
+    val analysisExecutor = remember { Executors.newSingleThreadExecutor() }
+    val scanner = remember {
+        BarcodeScanning.getClient(
+            BarcodeScannerOptions.Builder()
+                .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
+                .build()
+        )
+    }
+    val cameraProviderRef = remember { arrayOfNulls<ProcessCameraProvider>(1) }
+    // Multiple frames can be in flight when the right code is scanned; make
+    // sure onComplete fires exactly once (a double-fire would skip the next
+    // challenge in the sequence).
+    val completed = remember { mutableStateOf(false) }
+    DisposableEffect(Unit) {
+        onDispose {
+            cameraProviderRef[0]?.unbindAll()
+            analysisExecutor.shutdown()
+            scanner.close()
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -106,25 +131,20 @@ fun QrChallenge(expectedQrData: String, onComplete: () -> Unit) {
 
                         cameraProviderFuture.addListener({
                             val cameraProvider = cameraProviderFuture.get()
+                            cameraProviderRef[0] = cameraProvider
 
                             val preview = Preview.Builder().build().also {
                                 it.surfaceProvider = previewView.surfaceProvider
                             }
 
-                            val options = BarcodeScannerOptions.Builder()
-                                .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
-                                .build()
-                            val scanner = BarcodeScanning.getClient(options)
-                            val executor = Executors.newSingleThreadExecutor()
-
                             val imageAnalysis = ImageAnalysis.Builder()
                                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                                 .build()
                                 .also { analysis ->
-                                    analysis.setAnalyzer(executor) { imageProxy ->
+                                    analysis.setAnalyzer(analysisExecutor) { imageProxy ->
                                         @androidx.annotation.OptIn(androidx.camera.core.ExperimentalGetImage::class)
                                         val mediaImage = imageProxy.image
-                                        if (mediaImage != null) {
+                                        if (mediaImage != null && !completed.value) {
                                             val inputImage = InputImage.fromMediaImage(
                                                 mediaImage,
                                                 imageProxy.imageInfo.rotationDegrees
@@ -134,7 +154,10 @@ fun QrChallenge(expectedQrData: String, onComplete: () -> Unit) {
                                                     for (barcode in barcodes) {
                                                         val value = barcode.rawValue ?: continue
                                                         if (value == expectedQrData) {
-                                                            onComplete()
+                                                            if (!completed.value) {
+                                                                completed.value = true
+                                                                onComplete()
+                                                            }
                                                             return@addOnSuccessListener
                                                         } else {
                                                             scannedWrong = true

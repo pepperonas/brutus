@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -195,12 +194,16 @@ fun AlarmEditDialog(
         },
         containerColor = MaterialTheme.colorScheme.surface
     ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+        // Scrollable content; the save CTA below stays pinned so the primary
+        // action never requires scrolling through the whole sheet.
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .weight(1f, fill = false)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp)
-                .padding(bottom = 48.dp)
+                .padding(bottom = 12.dp)
         ) {
             Text(
                 text = if (existingAlarm != null) "Alarm bearbeiten" else "Neuer Alarm",
@@ -226,20 +229,22 @@ fun AlarmEditDialog(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Repeat days
+            // Repeat days — equal-weight pills so all seven always fit one row,
+            // even on ~360 dp screens (fixed 44 dp circles used to wrap "So").
             Text("Wiederholen", style = MaterialTheme.typography.titleLarge)
             Spacer(modifier = Modifier.height(8.dp))
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 days.forEachIndexed { index, day ->
                     val selected = (repeatDays and (1 shl index)) != 0
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
-                            .size(44.dp)
-                            .clip(CircleShape)
+                            .weight(1f)
+                            .height(44.dp)
+                            .clip(RoundedCornerShape(12.dp))
                             .background(if (selected) BrutusRed else MaterialTheme.colorScheme.surfaceVariant)
                             .clickable { repeatDays = repeatDays xor (1 shl index) }
                     ) {
@@ -491,8 +496,16 @@ fun AlarmEditDialog(
                 Text("Weckmodi jetzt testen")
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+        }
 
+        // Pinned save CTA (outside the scroll container)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(top = 8.dp, bottom = 32.dp)
+        ) {
             Button(
                 onClick = {
                     haptics.success()
@@ -527,6 +540,7 @@ fun AlarmEditDialog(
                     style = MaterialTheme.typography.titleLarge
                 )
             }
+        }
         }
     }
 }

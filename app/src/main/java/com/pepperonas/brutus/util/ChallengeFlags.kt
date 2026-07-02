@@ -7,6 +7,13 @@ object ChallengeFlags {
 
     fun has(flags: Int, flag: Int): Boolean = (flags and flag) != 0
 
+    /**
+     * An alarm without any challenge can't exist — the alarm screen falls back
+     * to a math challenge at runtime anyway, so persist that same fallback to
+     * keep the list UI honest.
+     */
+    fun sanitize(flags: Int): Int = if (flags == 0) MATH else flags
+
     fun describe(flags: Int): String {
         if (flags == 0) return "Keine"
         val parts = mutableListOf<String>()

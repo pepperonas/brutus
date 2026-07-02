@@ -51,7 +51,7 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
                 minute = minute,
                 label = label,
                 repeatDays = repeatDays,
-                challengeFlags = if (challengeFlags == 0) ChallengeFlags.MATH else challengeFlags,
+                challengeFlags = ChallengeFlags.sanitize(challengeFlags),
                 snoozeDuration = snoozeDuration,
                 soundId = soundId,
                 mathProblemCount = mathProblemCount,
@@ -70,6 +70,10 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun updateAlarm(alarm: AlarmEntity) {
+        // Same guard as addAlarm — deselecting every challenge would otherwise
+        // store flags=0 ("Keine") while the alarm screen enforces math anyway.
+        @Suppress("NAME_SHADOWING")
+        val alarm = alarm.copy(challengeFlags = ChallengeFlags.sanitize(alarm.challengeFlags))
         viewModelScope.launch {
             repository.update(alarm)
             if (alarm.enabled) {

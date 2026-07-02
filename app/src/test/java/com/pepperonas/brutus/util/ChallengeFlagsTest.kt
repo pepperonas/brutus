@@ -42,4 +42,12 @@ class ChallengeFlagsTest {
     fun `activeList empty for zero`() {
         assertEquals(emptyList(), ChallengeFlags.activeList(0))
     }
+
+    @Test
+    fun `sanitize maps zero to MATH and passes everything else through`() {
+        assertEquals(ChallengeFlags.MATH, ChallengeFlags.sanitize(0))
+        assertEquals(ChallengeFlags.SHAKE, ChallengeFlags.sanitize(ChallengeFlags.SHAKE))
+        val combined = ChallengeFlags.MATH or ChallengeFlags.QR
+        assertEquals(combined, ChallengeFlags.sanitize(combined))
+    }
 }

@@ -45,6 +45,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -112,6 +116,21 @@ fun SwipeToSnoozeButton(
         modifier = modifier
             .fillMaxWidth()
             .height(height)
+            // Accessibility fallback: TalkBack / switch-access users can't
+            // perform the drag gesture — expose snooze as a custom action.
+            .semantics {
+                contentDescription = "Zum Snoozen wischen"
+                customActions = listOf(
+                    CustomAccessibilityAction("Snoozen") {
+                        if (!triggered) {
+                            triggered = true
+                            haptics.success()
+                            onSnooze()
+                        }
+                        true
+                    }
+                )
+            }
             .clip(RoundedCornerShape(height / 2))
             .background(BrutusOrange.copy(alpha = 0.12f))
             .border(

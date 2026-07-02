@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -75,6 +76,7 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
     var showDialog by remember { mutableStateOf(false) }
     var editingAlarm by remember { mutableStateOf<AlarmEntity?>(null) }
     var menuOpen by remember { mutableStateOf(false) }
+    var confirmDeleteAll by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val previewPlayer = remember { SoundPreviewPlayer(context) }
@@ -168,9 +170,10 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                     DropdownMenuItem(
                         text = { Text("Alle löschen") },
+                        enabled = alarms.isNotEmpty(),
                         onClick = {
                             menuOpen = false
-                            alarms.forEach { viewModel.deleteAlarm(it) }
+                            confirmDeleteAll = true
                         }
                     )
                 }
@@ -222,6 +225,33 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
                 item { Spacer(modifier = Modifier.height(16.dp)) }
             }
         }
+    }
+
+    if (confirmDeleteAll) {
+        AlertDialog(
+            onDismissRequest = { confirmDeleteAll = false },
+            title = { Text("Alle Alarme löschen?") },
+            text = {
+                Text(
+                    if (alarms.size == 1) "1 Alarm wird unwiderruflich gelöscht."
+                    else "${alarms.size} Alarme werden unwiderruflich gelöscht."
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmDeleteAll = false
+                    haptics.warn()
+                    alarms.forEach { viewModel.deleteAlarm(it) }
+                }) {
+                    Text("Löschen", color = BrutusRedBright, fontWeight = FontWeight.SemiBold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmDeleteAll = false }) {
+                    Text("Abbrechen")
+                }
+            }
+        )
     }
 
     if (showDialog) {
@@ -366,14 +396,13 @@ private fun AlarmCard(
                         )
                     }
                 }
-                IconButton(onClick = onDelete, modifier = Modifier.size(36.dp)) {
+                IconButton(onClick = onDelete) {
                     Icon(
                         Icons.Default.Delete,
                         contentDescription = "Löschen",
                         tint = BrutusTextSecondary
                     )
                 }
-                Spacer(modifier = Modifier.size(4.dp))
                 Switch(
                     checked = alarm.enabled,
                     onCheckedChange = { onToggle() },

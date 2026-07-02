@@ -278,6 +278,8 @@ Default seeded set on first launch: **Europe/Berlin**, **America/New_York**, **A
 
 Centisecond-precision stopwatch built on `SystemClock.elapsedRealtime()` (unaffected by wall-clock jumps). A single large monospace-width readout (using the Material 3 Light weight for elegance), a red **Start / Stop** circle button, and a surface-variant **Reset / Lap** circle button. Laps are persisted in-memory during the session and shown as a list with per-lap and cumulative columns. Lap button becomes available automatically while the timer is running.
 
+Since **v1.8.0** the stopwatch (and the timer) keep their entire state — including a running measurement, laps, and a timer's finish sound — in Activity-scoped ViewModels, so switching bottom-nav tabs no longer resets them.
+
 ### Timer
 
 HMS picker (hours 0–23, minutes 0–59, seconds 0–59) with up/down steppers on each column. Quick-preset row for common durations (1m, 3m, 5m, 10m, 15m, 30m). A **gentle-sound picker** (added in v1.5.0) below the presets lets you pick the finish tone — defaults to **Glockenspiel**, choice persists across launches via `TimerSoundStore`. Tapping a chip previews the sound; **Stopp** halts the preview.
@@ -310,9 +312,11 @@ The firing alarm presents a full-screen activity **over** the lock screen:
 |---------|-----------|
 | Keeping audio playing with screen off | Foreground service with `mediaPlayback` type + `PARTIAL_WAKE_LOCK` (10 min timeout) |
 | Surviving silent / DND | `STREAM_ALARM` with maximum volume set at start, restored when dismissed |
-| Surviving reboot | Room persistence + `BOOT_COMPLETED` / `LOCKED_BOOT_COMPLETED` receiver |
+| Surviving reboot | Room persistence + `BOOT_COMPLETED` / `LOCKED_BOOT_COMPLETED` receiver, held open via `goAsync()` so the reschedule can't be killed mid-flight (v1.8.0) |
 | Surviving app kill | `START_STICKY` service, alarm is re-scheduled before firing |
 | Preventing accidental snooze | Slide-to-snooze gesture with 85% drag threshold |
+| Overlapping alarms | If a second alarm fires while one is still ringing, the old session is cleanly finished first — audio released, and a UHC main alarm's follow-ups get armed instead of silently dropped (v1.8.0) |
+| Rescheduling with Sunrise | `schedule()` always cancels a previously armed sunrise pre-alarm before re-arming, so no stale sunrise can fire at the old time (v1.8.0) |
 
 ---
 
@@ -487,7 +491,9 @@ app/src/main/java/com/pepperonas/brutus/
 │   ├── AlarmDatabase.kt             Room database singleton (v5)
 │   └── AlarmRepository.kt           Single data access abstraction
 ├── viewmodel/
-│   └── AlarmViewModel.kt            State container with StateFlow of alarms
+│   ├── AlarmViewModel.kt            State container with StateFlow of alarms
+│   ├── TimerViewModel.kt            Countdown state + ticker, survives tab switches (v1.8.0)
+│   └── StopwatchViewModel.kt        Stopwatch state + laps, survives tab switches (v1.8.0)
 ├── ui/
 │   ├── theme/
 │   │   ├── Color.kt                 Dark palette with BrutusRed + BrutusRedBright
@@ -536,7 +542,7 @@ app/src/test/java/com/pepperonas/brutus/
 │   └── AlarmSchedulerConstantsTest.kt  4 tests — UHC offsets, sunrise lead, intent extra uniqueness (v1.6.0)
 └── util/
     ├── AlarmSoundGeneratorTest.kt      7 tests — PCM length, peak amplitudes, loop-boundary fade, gentle vs harsh + extreme list (v1.7.0)
-    ├── ChallengeFlagsTest.kt           6 tests — describe / activeList / has bitmask edge cases
+    ├── ChallengeFlagsTest.kt           7 tests — describe / activeList / has / sanitize bitmask edge cases
     ├── ChallengeDifficultyTest.kt      6 tests — math operand ranges, shake threshold ordering, label coverage (v1.4.0)
     └── NextAlarmCalculatorTest.kt     17 tests — one-shot today/tomorrow, repeating wrap, weekend selection, formatCountdown
 ```
@@ -680,6 +686,9 @@ Planned, no specific timeline:
 - [x] Pop alarm to the foreground via full-screen-intent banner + hardened activity launch (v1.6.1)
 - [x] Redesigned alarm cards — full-width weekday strip + info chips (mode, sunrise, challenge, snooze, sound) (v1.7.0)
 - [x] Five extreme alarm sounds — Stadion-Horn, Presslufthammer, Feueralarm, Bohrer, Banshee (v1.7.0)
+- [x] Bug-fix pass: `goAsync()` in boot/widget receivers, overlapping-alarm session takeover, stale-sunrise cancel, camera release after QR scan, siren loop click (v1.8.0)
+- [x] Timer & stopwatch survive tab switches via Activity-scoped ViewModels (v1.8.0)
+- [x] GUI polish: delete-all confirmation, one-line weekday picker in the edit sheet, pinned save CTA, 48 dp delete target, TalkBack snooze action, search placeholder (v1.8.0)
 - [ ] Per-alarm sound override at runtime
 - [ ] Multi-QR support (different codes for different alarms)
 - [ ] Wear OS companion

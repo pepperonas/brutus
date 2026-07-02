@@ -58,7 +58,9 @@ object AlarmSoundGenerator {
             phase += 2 * PI * freq / SAMPLE_RATE
             out[i] = (sin(phase) * Short.MAX_VALUE * 0.95).toInt().toShort()
         }
-        return out
+        // The accumulated phase ends at an arbitrary point in the cycle — fade
+        // the edges or the loop wrap produces an audible click every 2 s.
+        return applyEdgeFade(out, 50)
     }
 
     // 200ms: 100ms @ 1000Hz, 100ms silence

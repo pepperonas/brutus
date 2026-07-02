@@ -67,9 +67,19 @@ class AlarmService : Service() {
     }
 
     private fun startAlarm(alarmId: Long, isFollowup: Boolean, followupSeq: Int) {
+        // A second alarm can fire while one is still ringing. Finish the old
+        // session first: stop its audio/vibration (otherwise the old MediaPlayer/
+        // AudioTrack is orphaned and blares forever) and — if it was an Ultra
+        // Hardcore main alarm — arm its follow-ups, since its dismiss path will
+        // never run anymore.
+        if (currentAlarmId != -1L) {
+            finishSessionForTakeover()
+        }
+
         currentAlarmId = alarmId
         currentIsFollowup = isFollowup
         currentFollowupSeq = followupSeq
+        currentUltraHardcore = false
 
         acquireWakeLock()
 
@@ -129,9 +139,12 @@ class AlarmService : Service() {
             val repo = AlarmRepository(app.database.alarmDao())
             val alarm = repo.getById(alarmId)
             val sound = AlarmSound.fromId(alarm?.soundId ?: AlarmSound.KLAXON.id)
-            currentUltraHardcore = alarm?.ultraHardcoreMode == true
 
             launch(Dispatchers.Main) {
+                // A takeover may have replaced the session while we were reading
+                // the DB — never write into (or play on top of) the new session.
+                if (currentAlarmId != alarmId) return@launch
+                currentUltraHardcore = alarm?.ultraHardcoreMode == true
                 if (alarm?.hardcoreEffective == true) {
                     hardcoreGuard = HardcoreAudioGuard(applicationContext).also { it.attach() }
                 }
@@ -246,12 +259,8 @@ class AlarmService : Service() {
         stopAlarm()
     }
 
-    private fun stopAlarm() {
-        val alarmIdSnap = currentAlarmId
-        val ultraSnap = currentUltraHardcore
-        val isFollowupSnap = currentIsFollowup
-        val followupSeqSnap = currentFollowupSeq
-
+    /** Stops audio/vibration and releases guard, volume override and wake lock. */
+    private fun cleanupPlayback() {
         mediaPlayer?.let {
             try {
                 if (it.isPlaying) it.stop()
@@ -273,6 +282,33 @@ class AlarmService : Service() {
         hardcoreGuard = null
         restoreVolume()
         releaseWakeLock()
+    }
+
+    /**
+     * Called when a new alarm fires while another is still ringing. The outgoing
+     * alarm's dismiss path will never run, so its Ultra Hardcore follow-ups must
+     * be armed here — otherwise a UHC alarm could be defeated simply by letting a
+     * second alarm land on top of it.
+     */
+    private fun finishSessionForTakeover() {
+        val alarmIdSnap = currentAlarmId
+        val ultraSnap = currentUltraHardcore
+        val isFollowupSnap = currentIsFollowup
+
+        cleanupPlayback()
+
+        if (ultraSnap && alarmIdSnap != -1L && !isFollowupSnap) {
+            armUltraHardcoreFollowups(alarmIdSnap)
+        }
+    }
+
+    private fun stopAlarm() {
+        val alarmIdSnap = currentAlarmId
+        val ultraSnap = currentUltraHardcore
+        val isFollowupSnap = currentIsFollowup
+        val followupSeqSnap = currentFollowupSeq
+
+        cleanupPlayback()
         stopForeground(STOP_FOREGROUND_REMOVE)
 
         // Ultra Hardcore: when the main alarm is dismissed, arm the two follow-ups.

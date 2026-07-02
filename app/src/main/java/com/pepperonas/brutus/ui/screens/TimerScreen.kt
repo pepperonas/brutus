@@ -1,6 +1,5 @@
 package com.pepperonas.brutus.ui.screens
 
-import android.os.SystemClock
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,68 +26,28 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pepperonas.brutus.ui.theme.BrutusRed
 import com.pepperonas.brutus.ui.theme.BrutusRedBright
 import com.pepperonas.brutus.ui.theme.BrutusTextSecondary
 import com.pepperonas.brutus.util.AlarmSound
-import com.pepperonas.brutus.util.SoundPreviewPlayer
-import com.pepperonas.brutus.util.TimerSoundStore
-import kotlinx.coroutines.delay
-
-private enum class TimerState { IDLE, RUNNING, PAUSED, FINISHED }
+import com.pepperonas.brutus.viewmodel.TimerState
+import com.pepperonas.brutus.viewmodel.TimerViewModel
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun TimerScreen() {
-    val context = LocalContext.current
-
-    var hours by remember { mutableIntStateOf(0) }
-    var minutes by remember { mutableIntStateOf(5) }
-    var seconds by remember { mutableIntStateOf(0) }
-
-    var state by remember { mutableStateOf(TimerState.IDLE) }
-    var endAt by remember { mutableLongStateOf(0L) }      // elapsedRealtime end
-    var remaining by remember { mutableLongStateOf(0L) }  // ms left (when paused / idle)
-    var tick by remember { mutableLongStateOf(0L) }
-
-    val liveRemaining = when (state) {
-        TimerState.RUNNING -> (endAt - tick).coerceAtLeast(0L)
-        else -> remaining
-    }
-
-    var selectedSound by remember { mutableStateOf(TimerSoundStore.get(context)) }
-    val player = remember { SoundPreviewPlayer(context) }
-    DisposableEffect(Unit) {
-        onDispose { player.stop() }
-    }
-
-    LaunchedEffect(state) {
-        while (state == TimerState.RUNNING) {
-            tick = SystemClock.elapsedRealtime()
-            if (tick >= endAt) {
-                state = TimerState.FINISHED
-                remaining = 0L
-                player.play(selectedSound)
-                break
-            }
-            delay(100L)
-        }
-    }
+fun TimerScreen(viewModel: TimerViewModel = viewModel()) {
+    // All countdown state (incl. the ticking loop and the finish sound) lives in
+    // the ViewModel so a running timer survives bottom-nav tab switches.
+    val state = viewModel.state
+    val liveRemaining = viewModel.liveRemaining
+    val selectedSound = viewModel.selectedSound
 
     Column(
         modifier = Modifier
@@ -110,40 +69,27 @@ fun TimerScreen() {
 
         if (state == TimerState.IDLE) {
             TimerConfigurator(
-                hours = hours, minutes = minutes, seconds = seconds,
-                onHours = { hours = it },
-                onMinutes = { minutes = it },
-                onSeconds = { seconds = it },
+                hours = viewModel.hours, minutes = viewModel.minutes, seconds = viewModel.seconds,
+                onHours = { viewModel.hours = it },
+                onMinutes = { viewModel.minutes = it },
+                onSeconds = { viewModel.seconds = it },
             )
             Spacer(modifier = Modifier.height(32.dp))
             QuickPresets { total ->
-                hours = (total / 3600)
-                minutes = ((total / 60) % 60)
-                seconds = (total % 60)
+                viewModel.hours = (total / 3600)
+                viewModel.minutes = ((total / 60) % 60)
+                viewModel.seconds = (total % 60)
             }
             Spacer(modifier = Modifier.height(24.dp))
             TimerSoundPicker(
                 selected = selectedSound,
-                onSelect = { snd ->
-                    player.stop()
-                    selectedSound = snd
-                    TimerSoundStore.set(context, snd)
-                    if (snd != AlarmSound.SILENT) player.play(snd)
-                },
-                onStopPreview = { player.stop() }
+                onSelect = { snd -> viewModel.selectSound(snd) },
+                onStopPreview = { viewModel.player.stop() }
             )
             Spacer(modifier = Modifier.weight(1f))
             Button(
-                onClick = {
-                    player.stop()
-                    val totalMs = (hours * 3600L + minutes * 60L + seconds) * 1000L
-                    if (totalMs > 0L) {
-                        endAt = SystemClock.elapsedRealtime() + totalMs
-                        remaining = totalMs
-                        state = TimerState.RUNNING
-                    }
-                },
-                enabled = (hours + minutes + seconds) > 0,
+                onClick = { viewModel.start() },
+                enabled = (viewModel.hours + viewModel.minutes + viewModel.seconds) > 0,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -178,41 +124,26 @@ fun TimerScreen() {
                     label = "Abbruch",
                     container = MaterialTheme.colorScheme.surfaceVariant,
                     content = MaterialTheme.colorScheme.onSurfaceVariant,
-                    onClick = {
-                        player.stop()
-                        state = TimerState.IDLE
-                        remaining = 0L
-                    }
+                    onClick = { viewModel.cancel() }
                 )
                 when (state) {
                     TimerState.RUNNING -> CircleActionButton(
                         label = "Pause",
                         container = BrutusRed,
                         content = Color.White,
-                        onClick = {
-                            remaining = (endAt - SystemClock.elapsedRealtime())
-                                .coerceAtLeast(0L)
-                            state = TimerState.PAUSED
-                        }
+                        onClick = { viewModel.pause() }
                     )
                     TimerState.PAUSED -> CircleActionButton(
                         label = "Weiter",
                         container = BrutusRed,
                         content = Color.White,
-                        onClick = {
-                            endAt = SystemClock.elapsedRealtime() + remaining
-                            state = TimerState.RUNNING
-                        }
+                        onClick = { viewModel.resume() }
                     )
                     TimerState.FINISHED -> CircleActionButton(
                         label = "Stopp",
                         container = BrutusRed,
                         content = Color.White,
-                        onClick = {
-                            player.stop()
-                            state = TimerState.IDLE
-                            remaining = 0L
-                        }
+                        onClick = { viewModel.cancel() }
                     )
                     else -> {}
                 }

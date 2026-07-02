@@ -252,6 +252,18 @@ private fun AddZoneSheet(
                         fontSize = 16.sp
                     ),
                     cursorBrush = androidx.compose.ui.graphics.SolidColor(BrutusRed),
+                    decorationBox = { innerTextField ->
+                        Box {
+                            if (query.isEmpty()) {
+                                Text(
+                                    text = "Stadt oder Region suchen…",
+                                    color = BrutusTextSecondary,
+                                    fontSize = 16.sp
+                                )
+                            }
+                            innerTextField()
+                        }
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 8.dp)

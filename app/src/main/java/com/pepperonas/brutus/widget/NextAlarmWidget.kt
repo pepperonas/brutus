@@ -32,7 +32,17 @@ class NextAlarmWidget : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
-        appWidgetIds.forEach { id -> updateWidget(context, appWidgetManager, id) }
+        // goAsync keeps the (possibly cold-started) process alive until the DB
+        // read + RemoteViews push are done — without it the widget can get stuck
+        // on the placeholder when the process is reaped right after onReceive.
+        val pendingResult = goAsync()
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                appWidgetIds.forEach { id -> updateWidget(context, appWidgetManager, id) }
+            } finally {
+                pendingResult.finish()
+            }
+        }
     }
 
     override fun onEnabled(context: Context) {
@@ -41,40 +51,38 @@ class NextAlarmWidget : AppWidgetProvider() {
         refresh(context)
     }
 
-    private fun updateWidget(
+    private suspend fun updateWidget(
         context: Context,
         manager: AppWidgetManager,
         widgetId: Int,
     ) {
-        CoroutineScope(Dispatchers.IO).launch {
-            val app = context.applicationContext as BrutusApplication
-            val alarms = app.database.alarmDao().getEnabledAlarms()
-            val now = System.currentTimeMillis()
-            val next = NextAlarmCalculator.findNext(alarms, now)
-            val triggerAt = next?.let { NextAlarmCalculator.nextTrigger(it, now) }
+        val app = context.applicationContext as BrutusApplication
+        val alarms = app.database.alarmDao().getEnabledAlarms()
+        val now = System.currentTimeMillis()
+        val next = NextAlarmCalculator.findNext(alarms, now)
+        val triggerAt = next?.let { NextAlarmCalculator.nextTrigger(it, now) }
 
-            val views = RemoteViews(context.packageName, R.layout.widget_next_alarm)
-            if (next == null || triggerAt == null) {
-                views.setTextViewText(R.id.widget_time, "—")
-                views.setTextViewText(R.id.widget_countdown, "kein Alarm")
-                views.setTextViewText(R.id.widget_days, "")
-            } else {
-                views.setTextViewText(R.id.widget_time, next.timeString())
-                views.setTextViewText(R.id.widget_countdown, formatRelative(triggerAt, now))
-                views.setTextViewText(R.id.widget_days, formatDays(next.repeatDays, triggerAt))
-            }
-
-            val intent = Intent(context, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            }
-            val pi = PendingIntent.getActivity(
-                context, widgetId, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-            views.setOnClickPendingIntent(R.id.widget_time, pi)
-
-            manager.updateAppWidget(widgetId, views)
+        val views = RemoteViews(context.packageName, R.layout.widget_next_alarm)
+        if (next == null || triggerAt == null) {
+            views.setTextViewText(R.id.widget_time, "—")
+            views.setTextViewText(R.id.widget_countdown, "kein Alarm")
+            views.setTextViewText(R.id.widget_days, "")
+        } else {
+            views.setTextViewText(R.id.widget_time, next.timeString())
+            views.setTextViewText(R.id.widget_countdown, formatRelative(triggerAt, now))
+            views.setTextViewText(R.id.widget_days, formatDays(next.repeatDays, triggerAt))
         }
+
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        val pi = PendingIntent.getActivity(
+            context, widgetId, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        views.setOnClickPendingIntent(R.id.widget_time, pi)
+
+        manager.updateAppWidget(widgetId, views)
     }
 
     companion object {

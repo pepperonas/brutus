@@ -1,6 +1,5 @@
 package com.pepperonas.brutus.ui.screens
 
-import android.os.SystemClock
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,41 +19,23 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pepperonas.brutus.ui.theme.BrutusRed
 import com.pepperonas.brutus.ui.theme.BrutusTextSecondary
-import kotlinx.coroutines.delay
+import com.pepperonas.brutus.viewmodel.StopwatchViewModel
 
 @Composable
-fun StopwatchScreen() {
-    // Running state: when `startAt` > 0 the stopwatch is running.
-    // Accumulated holds time from all prior run segments.
-    var startAt by remember { mutableLongStateOf(0L) }
-    var accumulated by remember { mutableLongStateOf(0L) }
-    var tick by remember { mutableLongStateOf(0L) } // forces recomposition
-    val laps = remember { mutableStateListOf<Long>() }
-
-    val running = startAt != 0L
-
-    LaunchedEffect(running) {
-        while (running) {
-            tick = SystemClock.elapsedRealtime()
-            delay(25L)
-        }
-    }
-
-    val elapsed = if (running) accumulated + (tick - startAt) else accumulated
+fun StopwatchScreen(viewModel: StopwatchViewModel = viewModel()) {
+    // State + ticker live in the ViewModel so a running measurement (incl. laps)
+    // survives bottom-nav tab switches.
+    val running = viewModel.running
+    val laps = viewModel.laps
+    val elapsed = viewModel.elapsed
 
     Column(
         modifier = Modifier
@@ -93,28 +74,14 @@ fun StopwatchScreen() {
                 label = if (running) "Runde" else "Reset",
                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
                 contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                onClick = {
-                    if (running) {
-                        laps.add(0, elapsed)
-                    } else {
-                        accumulated = 0L
-                        laps.clear()
-                    }
-                }
+                onClick = { viewModel.lapOrReset() }
             )
             // Right: Start / Stop
             CircleActionButton(
                 label = if (running) "Stopp" else "Start",
                 containerColor = BrutusRed,
                 contentColor = androidx.compose.ui.graphics.Color.White,
-                onClick = {
-                    if (running) {
-                        accumulated = elapsed
-                        startAt = 0L
-                    } else {
-                        startAt = SystemClock.elapsedRealtime()
-                    }
-                }
+                onClick = { viewModel.startStop() }
             )
         }
 

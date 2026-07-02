@@ -24,6 +24,10 @@ object AlarmScheduler {
         val clockInfo = AlarmManager.AlarmClockInfo(nextTrigger, intent)
         alarmManager.setAlarmClock(clockInfo, intent)
 
+        // Always clear any previously armed sunrise first — if the new trigger is
+        // less than SUNRISE_LEAD_MIN away we would otherwise leave a stale sunrise
+        // registration (with an outdated mainTriggerAt) armed for the old time.
+        cancelSunrise(context, alarm.id)
         if (alarm.sunriseEnabled) {
             val sunriseAt = nextTrigger - SUNRISE_LEAD_MIN * 60_000L
             if (sunriseAt > System.currentTimeMillis()) {
@@ -32,8 +36,6 @@ object AlarmScheduler {
                     AlarmManager.RTC_WAKEUP, sunriseAt, sunriseIntent
                 )
             }
-        } else {
-            cancelSunrise(context, alarm.id)
         }
     }
 

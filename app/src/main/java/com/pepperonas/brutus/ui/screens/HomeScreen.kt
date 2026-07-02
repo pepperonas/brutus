@@ -23,8 +23,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pepperonas.brutus.ui.theme.BrutusRed
 import com.pepperonas.brutus.viewmodel.AlarmViewModel
+import com.pepperonas.brutus.viewmodel.StopwatchViewModel
+import com.pepperonas.brutus.viewmodel.TimerViewModel
 
 private enum class HomeTab(val route: String, val label: String, val icon: ImageVector) {
     ALARM("alarm", "Alarm", Icons.Filled.Alarm),
@@ -36,6 +39,10 @@ private enum class HomeTab(val route: String, val label: String, val icon: Image
 @Composable
 fun HomeScreen(viewModel: AlarmViewModel) {
     val navController = rememberNavController()
+    // Activity-scoped (created here, outside the NavHost) so running timers /
+    // stopwatch measurements survive tab switches.
+    val timerViewModel: TimerViewModel = viewModel()
+    val stopwatchViewModel: StopwatchViewModel = viewModel()
     val backStack by navController.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route
 
@@ -82,8 +89,8 @@ fun HomeScreen(viewModel: AlarmViewModel) {
         ) {
             composable(HomeTab.ALARM.route) { AlarmListScreen(viewModel = viewModel) }
             composable(HomeTab.WORLD.route) { WorldClockScreen() }
-            composable(HomeTab.STOPWATCH.route) { StopwatchScreen() }
-            composable(HomeTab.TIMER.route) { TimerScreen() }
+            composable(HomeTab.STOPWATCH.route) { StopwatchScreen(viewModel = stopwatchViewModel) }
+            composable(HomeTab.TIMER.route) { TimerScreen(viewModel = timerViewModel) }
         }
     }
 }
