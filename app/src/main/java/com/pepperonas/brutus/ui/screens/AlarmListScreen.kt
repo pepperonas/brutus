@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Warning
@@ -30,6 +31,10 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -42,6 +47,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,6 +72,7 @@ import com.pepperonas.brutus.util.SoundPreviewPlayer
 import com.pepperonas.brutus.util.rememberBrutusHaptics
 import com.pepperonas.brutus.viewmodel.AlarmViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -77,6 +84,30 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
     var editingAlarm by remember { mutableStateOf<AlarmEntity?>(null) }
     var menuOpen by remember { mutableStateOf(false) }
     var confirmDeleteAll by remember { mutableStateOf(false) }
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    // Deletes with an undo affordance: the removed alarms are held here until
+    // the snackbar is dismissed or its "Rückgängig" action restores them.
+    val deleteWithUndo: (List<AlarmEntity>) -> Unit = { toDelete ->
+        if (toDelete.isNotEmpty()) {
+            toDelete.forEach { viewModel.deleteAlarm(it) }
+            scope.launch {
+                // A newer delete replaces a still-visible undo snackbar.
+                snackbarHostState.currentSnackbarData?.dismiss()
+                val result = snackbarHostState.showSnackbar(
+                    message = if (toDelete.size == 1) "Alarm gelöscht"
+                    else "${toDelete.size} Alarme gelöscht",
+                    actionLabel = "Rückgängig",
+                    duration = SnackbarDuration.Long,
+                )
+                if (result == SnackbarResult.ActionPerformed) {
+                    viewModel.restoreAlarms(toDelete)
+                }
+            }
+        }
+    }
 
     val context = LocalContext.current
     val previewPlayer = remember { SoundPreviewPlayer(context) }
@@ -110,6 +141,7 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
         onDispose { lifecycle.removeObserver(observer) }
     }
 
+    Box(modifier = Modifier.fillMaxSize()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -214,7 +246,14 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
                         },
                         onDelete = {
                             haptics.warn()
-                            viewModel.deleteAlarm(alarm)
+                            deleteWithUndo(listOf(alarm))
+                        },
+                        onCopy = {
+                            haptics.tap()
+                            // id = 0 marks the dialog payload as a copy template:
+                            // everything prefilled, saving creates a NEW alarm.
+                            editingAlarm = alarm.copy(id = 0)
+                            showDialog = true
                         },
                         onClick = {
                             editingAlarm = alarm
@@ -227,21 +266,29 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
         }
     }
 
+    SnackbarHost(
+        hostState = snackbarHostState,
+        modifier = Modifier
+            .align(Alignment.BottomCenter)
+            .padding(bottom = 8.dp)
+    )
+    }
+
     if (confirmDeleteAll) {
         AlertDialog(
             onDismissRequest = { confirmDeleteAll = false },
             title = { Text("Alle Alarme löschen?") },
             text = {
                 Text(
-                    if (alarms.size == 1) "1 Alarm wird unwiderruflich gelöscht."
-                    else "${alarms.size} Alarme werden unwiderruflich gelöscht."
+                    if (alarms.size == 1) "1 Alarm wird gelöscht."
+                    else "${alarms.size} Alarme werden gelöscht."
                 )
             },
             confirmButton = {
                 TextButton(onClick = {
                     confirmDeleteAll = false
                     haptics.warn()
-                    alarms.forEach { viewModel.deleteAlarm(it) }
+                    deleteWithUndo(alarms.toList())
                 }) {
                     Text("Löschen", color = BrutusRedBright, fontWeight = FontWeight.SemiBold)
                 }
@@ -261,7 +308,8 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
             onPreviewSound = { snd -> previewPlayer.play(snd) },
             onStopPreview = { previewPlayer.stop() },
             onSave = { result ->
-                if (editingAlarm != null) {
+                // id == 0 means "copy template" — persist as a new alarm.
+                if (editingAlarm != null && editingAlarm!!.id != 0L) {
                     viewModel.updateAlarm(
                         editingAlarm!!.copy(
                             hour = result.hour,
@@ -352,6 +400,7 @@ private fun AlarmCard(
     alarm: AlarmEntity,
     onToggle: () -> Unit,
     onDelete: () -> Unit,
+    onCopy: () -> Unit,
     onClick: () -> Unit
 ) {
     val cardColor by animateColorAsState(
@@ -395,6 +444,14 @@ private fun AlarmCard(
                             )
                         )
                     }
+                }
+                IconButton(onClick = onCopy) {
+                    Icon(
+                        Icons.Default.ContentCopy,
+                        contentDescription = "Kopieren",
+                        tint = BrutusTextSecondary,
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
                 IconButton(onClick = onDelete) {
                     Icon(

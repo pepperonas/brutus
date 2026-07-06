@@ -206,7 +206,12 @@ fun AlarmEditDialog(
                 .padding(bottom = 12.dp)
         ) {
             Text(
-                text = if (existingAlarm != null) "Alarm bearbeiten" else "Neuer Alarm",
+                // id == 0 with a non-null alarm means "prefilled copy template".
+                text = when {
+                    existingAlarm == null -> "Neuer Alarm"
+                    existingAlarm.id == 0L -> "Alarm kopieren"
+                    else -> "Alarm bearbeiten"
+                },
                 style = MaterialTheme.typography.headlineMedium
             )
 
@@ -536,7 +541,8 @@ fun AlarmEditDialog(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = if (existingAlarm != null) "Speichern" else "Alarm erstellen",
+                    text = if (existingAlarm != null && existingAlarm.id != 0L) "Speichern"
+                    else "Alarm erstellen",
                     style = MaterialTheme.typography.titleLarge
                 )
             }

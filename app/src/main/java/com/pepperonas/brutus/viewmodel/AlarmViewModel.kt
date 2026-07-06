@@ -112,4 +112,21 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
             NextAlarmWidget.refresh(getApplication())
         }
     }
+
+    /**
+     * Undo path for deletions: re-inserts the given alarms (fresh IDs) and
+     * re-schedules the ones that were enabled.
+     */
+    fun restoreAlarms(alarms: List<AlarmEntity>) {
+        if (alarms.isEmpty()) return
+        viewModelScope.launch {
+            alarms.forEach { alarm ->
+                val id = repository.insert(alarm.copy(id = 0))
+                if (alarm.enabled) {
+                    AlarmScheduler.schedule(getApplication(), alarm.copy(id = id))
+                }
+            }
+            NextAlarmWidget.refresh(getApplication())
+        }
+    }
 }

@@ -92,6 +92,8 @@ Starting with v1.2.0 Brutus ships as a full clock suite. A persistent bottom nav
 
 The Alarm tab stays the heart of the app: its cards show a large thin time reading, the repeat summary (_Einmalig_ / _Jeden Tag_ / explicit day list), an optional label, and a toggle switch on the right. Below sits a **full-width weekday strip** — seven equal `Mo Di Mi Do Fr Sa So` pills that always render on a single line, active days filled bright red. A row of **info chips** underneath surfaces the mode (`ULTRA HC` / `HARDCORE`), `☀ Sunrise`, the challenge (`Mathe + Schütteln`…), the snooze interval (`Snooze 5m`) and the `♪` sound at a glance _(redesigned in v1.7.0)_. A countdown header (e.g. _"Alarm in 13 Stunden, 29 Minuten"_) sits above the list and refreshes every 30 s.
 
+Since **v1.9.0** every card also has a **copy button** (⧉): it opens the edit sheet prefilled with all of the source alarm's settings ("Alarm kopieren") — adjust the time, save, done; no confusing identical duplicate is created behind your back. And every delete — single or _Alle löschen_ — shows an **undo snackbar** ("Rückgängig") that restores the alarm(s) including their scheduling.
+
 A premium **monogram app icon** (radial dark-red gradient + gradient-filled "B" with hairline highlight) replaces the previous alarm-bell icon.
 
 ---
@@ -689,6 +691,8 @@ Planned, no specific timeline:
 - [x] Bug-fix pass: `goAsync()` in boot/widget receivers, overlapping-alarm session takeover, stale-sunrise cancel, camera release after QR scan, siren loop click (v1.8.0)
 - [x] Timer & stopwatch survive tab switches via Activity-scoped ViewModels (v1.8.0)
 - [x] GUI polish: delete-all confirmation, one-line weekday picker in the edit sheet, pinned save CTA, 48 dp delete target, TalkBack snooze action, search placeholder (v1.8.0)
+- [x] Undo snackbar for deletions (single + delete-all, restores scheduling) (v1.9.0)
+- [x] Copy alarms — prefilled "Alarm kopieren" edit sheet per card (v1.9.0)
 - [ ] Per-alarm sound override at runtime
 - [ ] Multi-QR support (different codes for different alarms)
 - [ ] Wear OS companion
