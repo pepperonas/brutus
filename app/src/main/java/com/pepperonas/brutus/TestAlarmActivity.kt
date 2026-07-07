@@ -45,7 +45,7 @@ class TestAlarmActivity : ComponentActivity() {
         }
 
         setContent {
-            BrutusTheme {
+            BrutusTheme(darkTheme = true) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     AlarmScreen(
                         challengeFlags = flags,

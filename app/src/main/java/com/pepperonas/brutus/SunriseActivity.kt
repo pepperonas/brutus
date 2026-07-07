@@ -80,7 +80,7 @@ class SunriseActivity : ComponentActivity() {
         }
 
         setContent {
-            BrutusTheme {
+            BrutusTheme(darkTheme = true) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     SunriseScreen(
                         mainTriggerAt = mainTriggerAt,

@@ -24,7 +24,7 @@ android {
         minSdk = 26
         targetSdk = 35
         versionCode = 12
-        versionName = "1.9.0"
+        versionName = "2.0.0-alpha01"
     }
 
     signingConfigs {
@@ -85,12 +85,19 @@ ksp {
 }
 
 dependencies {
-    val composeBom = platform("androidx.compose:compose-bom:2024.12.01")
+    // BOM 2026.06.01 maps material3 1.4.0 (stable) — but there the Expressive APIs
+    // (MaterialExpressiveTheme, MotionScheme, expressiveLightColorScheme) are still
+    // `internal`. They graduated in the 1.5.0-alpha channel, so material3 is pinned
+    // past the BOM. 1.5.0-alpha18 is the newest alpha still on Compose 1.11
+    // (alpha19+ pulls Compose 1.12 → requires compileSdk 37 + AGP 9.1); components
+    // not yet graduated in alpha18 (ButtonGroup, FloatingToolbar) are used behind
+    // an explicit @OptIn(ExperimentalMaterial3ExpressiveApi).
+    val composeBom = platform("androidx.compose:compose-bom:2026.06.01")
     implementation(composeBom)
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material3:material3:1.5.0-alpha18")
     implementation("androidx.compose.material:material-icons-extended")
     debugImplementation("androidx.compose.ui:ui-tooling")
 

@@ -60,7 +60,7 @@ class AlarmActivity : ComponentActivity() {
                     audioGuard = HardcoreAudioGuard(applicationContext).also { it.attach() }
                 }
                 setContent {
-                    BrutusTheme {
+                    BrutusTheme(darkTheme = true) {
                         Surface(modifier = Modifier.fillMaxSize()) {
                             AlarmScreen(
                                 challengeFlags = flags,

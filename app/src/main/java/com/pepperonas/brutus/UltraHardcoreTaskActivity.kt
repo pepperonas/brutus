@@ -58,7 +58,7 @@ class UltraHardcoreTaskActivity : ComponentActivity() {
         else UltraHardcoreStore.DEFAULT_STEP_TARGET
 
         setContent {
-            BrutusTheme {
+            BrutusTheme(darkTheme = true) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     var done by remember { mutableStateOf(false) }
 

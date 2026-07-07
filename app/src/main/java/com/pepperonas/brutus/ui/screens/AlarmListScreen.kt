@@ -52,6 +52,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -64,6 +65,7 @@ import com.pepperonas.brutus.ui.theme.BrutusOrange
 import com.pepperonas.brutus.ui.theme.BrutusRed
 import com.pepperonas.brutus.ui.theme.BrutusRedBright
 import com.pepperonas.brutus.ui.theme.BrutusTextSecondary
+import com.pepperonas.brutus.ui.theme.ThemeSettings
 import com.pepperonas.brutus.util.BatteryOptimizationPermission
 import com.pepperonas.brutus.util.ExactAlarmPermission
 import com.pepperonas.brutus.util.FullScreenIntentPermission
@@ -208,6 +210,28 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
                             confirmDeleteAll = true
                         }
                     )
+                    // Material You opt-in (API 31+): wallpaper-based dynamic color
+                    // instead of the red brand scheme.
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                        val dynamicOn by ThemeSettings.dynamicColorFlow(context)
+                            .collectAsState(initial = false)
+                        DropdownMenuItem(
+                            text = { Text("Material You Farben") },
+                            trailingIcon = {
+                                Switch(
+                                    checked = dynamicOn,
+                                    onCheckedChange = null,
+                                    modifier = Modifier.scale(0.8f)
+                                )
+                            },
+                            onClick = {
+                                haptics.tap()
+                                scope.launch {
+                                    ThemeSettings.setDynamicColor(context, !dynamicOn)
+                                }
+                            }
+                        )
+                    }
                 }
             }
         }

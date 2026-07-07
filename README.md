@@ -6,7 +6,7 @@
 
 [![Android](https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white)](https://developer.android.com)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.1.0-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org)
-[![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-Material3-4285F4?logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
+[![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-material3%201.5.0--alpha18-4285F4?logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
 [![API](https://img.shields.io/badge/API-26%2B-brightgreen)](https://developer.android.com/about/versions/oreo)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/pepperonas/brutus?color=FF5252)](https://github.com/pepperonas/brutus/releases/latest)
@@ -16,7 +16,7 @@
 [![CameraX](https://img.shields.io/badge/CameraX-1.4.1-00BCD4)](https://developer.android.com/training/camerax)
 [![ML Kit](https://img.shields.io/badge/ML%20Kit-Barcode-EA4335?logo=google&logoColor=white)](https://developers.google.com/ml-kit/vision/barcode-scanning)
 [![ZXing](https://img.shields.io/badge/ZXing-3.5.3-000000)](https://github.com/zxing/zxing)
-[![Material Design](https://img.shields.io/badge/Material%20Design%203-Dark%20Theme-757575?logo=materialdesign&logoColor=white)](https://m3.material.io)
+[![Material Design](https://img.shields.io/badge/Material%203-Expressive-6750A4?logo=materialdesign&logoColor=white)](https://m3.material.io)
 [![minSdk](https://img.shields.io/badge/minSdk-26-green)](https://apilevels.com)
 [![targetSdk](https://img.shields.io/badge/targetSdk-35-green)](https://apilevels.com)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
