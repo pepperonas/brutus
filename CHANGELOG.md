@@ -2,6 +2,24 @@
 
 All notable changes to Brutus are documented here. Versions follow [SemVer](https://semver.org).
 
+## [2.0.0-alpha02] — 2026-07-08 · M3 Expressive, Phase 2: Navigation & Chrome
+
+### Changed
+- **Bottom navigation → `ShortNavigationBar`** (M3 Expressive): tonal
+  `surfaceContainer` background, role-based selection colors (pill indicator in
+  `secondaryContainer` — the hardcoded red selection is gone), filled/outlined
+  icon swap with a soft spatial spring (`MotionScheme.fastSpatialSpec`).
+  Extracted as a previewable composable with dark/light/dynamic previews.
+  A `WideNavigationRail` variant was evaluated and skipped: Brutus is a
+  portrait phone app (alarm/lock-screen flows), landscape tablets aren't a target.
+- Icon `contentDescription` in nav items set to `null` — the always-visible
+  label already names the tab; TalkBack no longer announces it twice.
+
+### Fixed (Edge-to-Edge)
+- The four alarm-facing activities (ring, test alarm, sunrise, UHC task) now
+  call `enableEdgeToEdge()`: their gradients bleed behind the system bars while
+  content respects `safeDrawingPadding()` (cutouts, gesture areas).
+
 ## [2.0.0-alpha01] — 2026-07-07 · M3 Expressive, Phase 1: Fundament
 
 Visual-only redesign onto **Material 3 Expressive** begins. No behavior changes —
