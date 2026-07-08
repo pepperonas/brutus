@@ -7,7 +7,7 @@ import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
+import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -26,26 +26,30 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Calculate
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
@@ -59,14 +63,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.pepperonas.brutus.TestAlarmActivity
 import com.pepperonas.brutus.data.AlarmEntity
-import com.pepperonas.brutus.ui.theme.BrutusOrange
-import com.pepperonas.brutus.ui.theme.BrutusRed
-import com.pepperonas.brutus.ui.theme.BrutusRedBright
+import com.pepperonas.brutus.ui.theme.BrutusTheme
 import com.pepperonas.brutus.util.AlarmSound
 import com.pepperonas.brutus.util.ChallengeDifficulty
 import com.pepperonas.brutus.util.ChallengeFlags
@@ -192,7 +196,7 @@ fun AlarmEditDialog(
             onStopPreview()
             onDismiss()
         },
-        containerColor = MaterialTheme.colorScheme.surface
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
         // Scrollable content; the save CTA below stays pinned so the primary
@@ -224,11 +228,17 @@ fun AlarmEditDialog(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            OutlinedTextField(
+            TextField(
                 value = label,
                 onValueChange = { label = it },
                 label = { Text("Bezeichnung") },
                 singleLine = true,
+                shape = MaterialTheme.shapes.medium,
+                colors = TextFieldDefaults.colors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent,
+                ),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -244,18 +254,24 @@ fun AlarmEditDialog(
             ) {
                 days.forEachIndexed { index, day ->
                     val selected = (repeatDays and (1 shl index)) != 0
+                    val bg by animateColorAsState(
+                        targetValue = if (selected) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.surfaceContainerHigh,
+                        label = "dayPill"
+                    )
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
                             .weight(1f)
                             .height(44.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(if (selected) BrutusRed else MaterialTheme.colorScheme.surfaceVariant)
+                            .clip(MaterialTheme.shapes.small)
+                            .background(bg)
                             .clickable { repeatDays = repeatDays xor (1 shl index) }
                     ) {
                         Text(
                             text = day,
-                            color = if (selected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = if (selected) MaterialTheme.colorScheme.onPrimary
+                            else MaterialTheme.colorScheme.onSurfaceVariant,
                             style = MaterialTheme.typography.labelLarge
                         )
                     }
@@ -280,10 +296,6 @@ fun AlarmEditDialog(
                             onPreviewSound(snd)
                         },
                         label = { Text(snd.displayName) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = BrutusRed,
-                            selectedLabelColor = Color.White
-                        )
                     )
                 }
             }
@@ -293,12 +305,9 @@ fun AlarmEditDialog(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 6.dp)
             )
-            Spacer(modifier = Modifier.height(4.dp))
-            OutlinedButton(
+            TextButton(
                 onClick = { onStopPreview() },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = BrutusRedBright),
-                border = BorderStroke(1.dp, BrutusRedBright.copy(alpha = 0.5f))
+                modifier = Modifier.align(Alignment.End),
             ) {
                 Text("Vorschau stoppen")
             }
@@ -314,15 +323,33 @@ fun AlarmEditDialog(
             )
             Spacer(modifier = Modifier.height(8.dp))
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ChallengeChip("Mathe", challengeFlags, ChallengeFlags.MATH) {
+                ChallengeChip("Mathe", Icons.Default.Calculate, challengeFlags, ChallengeFlags.MATH) {
                     challengeFlags = challengeFlags xor ChallengeFlags.MATH
                 }
-                ChallengeChip("Schütteln", challengeFlags, ChallengeFlags.SHAKE) {
+                ChallengeChip("Schütteln", Icons.Default.Vibration, challengeFlags, ChallengeFlags.SHAKE) {
                     challengeFlags = challengeFlags xor ChallengeFlags.SHAKE
                 }
-                ChallengeChip("QR-Code", challengeFlags, ChallengeFlags.QR) {
+                ChallengeChip("QR-Code", Icons.Default.QrCodeScanner, challengeFlags, ChallengeFlags.QR) {
                     challengeFlags = challengeFlags xor ChallengeFlags.QR
                 }
+            }
+            // The "chain": combined challenges run strictly in this order.
+            val chainNames = remember(challengeFlags) {
+                ChallengeFlags.activeList(challengeFlags).map { flag ->
+                    when (flag) {
+                        ChallengeFlags.MATH -> "Mathe"
+                        ChallengeFlags.SHAKE -> "Schütteln"
+                        else -> "QR-Code"
+                    }
+                }
+            }
+            if (chainNames.size > 1) {
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = "Reihenfolge: " + chainNames.joinToString("  →  "),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
 
             if (mathEnabled) {
@@ -405,16 +432,8 @@ fun AlarmEditDialog(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    OutlinedButton(
-                        onClick = onSaveQrClick,
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = BrutusRedBright),
-                        border = BorderStroke(1.dp, BrutusRedBright.copy(alpha = 0.5f))
-                    ) { Text("Als PNG speichern") }
-                    OutlinedButton(
-                        onClick = shareQr,
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = BrutusRedBright),
-                        border = BorderStroke(1.dp, BrutusRedBright.copy(alpha = 0.5f))
-                    ) { Text("Teilen") }
+                    FilledTonalButton(onClick = onSaveQrClick) { Text("Als PNG speichern") }
+                    FilledTonalButton(onClick = shareQr) { Text("Teilen") }
                 }
             }
 
@@ -439,7 +458,7 @@ fun AlarmEditDialog(
             // Sunrise pre-alarm toggle
             ModeToggleRow(
                 title = "Sunrise (10 Min Vorlauf)",
-                titleColor = BrutusOrange.copy(alpha = 0.85f),
+                danger = false,
                 description = "10 Minuten vor dem Wecker startet ein sanfter Vorlauf: Bildschirm wird langsam heller, leises Glockenspiel schwillt an. Der Hauptalarm klingelt danach normal.",
                 checked = sunriseEnabled,
                 onCheckedChange = {
@@ -453,7 +472,7 @@ fun AlarmEditDialog(
             // Hardcore Mode toggle
             ModeToggleRow(
                 title = "Hardcore Mode",
-                titleColor = BrutusRedBright,
+                danger = true,
                 description = "Sperrt die Lautstärke auf Maximum — Lautstärke-Tasten sind während des Alarms wirkungslos.",
                 checked = hardcoreMode || ultraHardcoreMode,
                 enabled = !ultraHardcoreMode, // Ultra forces this on
@@ -468,7 +487,7 @@ fun AlarmEditDialog(
             // Ultra Hardcore Mode toggle
             ModeToggleRow(
                 title = "Ultra Hardcore Mode",
-                titleColor = BrutusOrange,
+                danger = true,
                 description = "Nach dem Dismiss feuert Brutus zweimal nach (+10 und +15 Minuten). Eine Schritt-Aufgabe in der Notification stoppt beide.",
                 checked = ultraHardcoreMode,
                 onCheckedChange = {
@@ -489,14 +508,11 @@ fun AlarmEditDialog(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            OutlinedButton(
+            FilledTonalButton(
                 onClick = launchTest,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = BrutusRedBright),
-                border = BorderStroke(1.dp, BrutusRedBright.copy(alpha = 0.5f))
             ) {
                 Text("Weckmodi jetzt testen")
             }
@@ -537,8 +553,7 @@ fun AlarmEditDialog(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = BrutusRed),
-                shape = RoundedCornerShape(16.dp)
+                shape = MaterialTheme.shapes.large,
             ) {
                 Text(
                     text = if (existingAlarm != null && existingAlarm.id != 0L) "Speichern"
@@ -551,20 +566,45 @@ fun AlarmEditDialog(
     }
 }
 
+/**
+ * Mode toggle as a tonal "danger level" card: while OFF it rests quietly on a
+ * neutral container; switching it ON tints the whole row — error tones for the
+ * hardcore modes, tertiary (warm sunrise orange) for the gentle pre-alarm.
+ * Deliberate but calm; no screaming red headline while everything is off.
+ */
 @Composable
 private fun ModeToggleRow(
     title: String,
-    titleColor: Color,
+    danger: Boolean,
     description: String,
     checked: Boolean,
     enabled: Boolean = true,
     onCheckedChange: (Boolean) -> Unit,
 ) {
+    val cs = MaterialTheme.colorScheme
+    val container by animateColorAsState(
+        targetValue = when {
+            !checked -> cs.surfaceContainerHigh
+            danger -> cs.errorContainer
+            else -> cs.tertiaryContainer
+        },
+        label = "modeContainer"
+    )
+    val titleColor = when {
+        !checked -> cs.onSurface
+        danger -> cs.onErrorContainer
+        else -> cs.onTertiaryContainer
+    }
+    val bodyColor = when {
+        !checked -> cs.onSurfaceVariant
+        danger -> cs.onErrorContainer.copy(alpha = 0.8f)
+        else -> cs.onTertiaryContainer.copy(alpha = 0.8f)
+    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .clip(MaterialTheme.shapes.medium)
+            .background(container)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -573,18 +613,18 @@ private fun ModeToggleRow(
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = bodyColor
             )
         }
         Switch(
             checked = checked,
             onCheckedChange = onCheckedChange,
             enabled = enabled,
-            colors = SwitchDefaults.colors(checkedTrackColor = BrutusRed)
         )
     }
 }
 
+/** Preset picker as a segmented button row — one visible slot per level. */
 @Composable
 private fun DifficultyChips(
     title: String,
@@ -597,23 +637,21 @@ private fun DifficultyChips(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .clip(MaterialTheme.shapes.medium)
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         Text(text = title, style = MaterialTheme.typography.titleMedium)
         Spacer(modifier = Modifier.height(8.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            options.forEach { opt ->
-                FilterChip(
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+            options.forEachIndexed { index, opt ->
+                SegmentedButton(
                     selected = selected == opt,
                     onClick = { onSelect(opt) },
-                    label = { Text(label(opt)) },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = BrutusRed,
-                        selectedLabelColor = Color.White
-                    )
-                )
+                    shape = SegmentedButtonDefaults.itemShape(index, options.size)
+                ) {
+                    Text(label(opt))
+                }
             }
         }
         Spacer(modifier = Modifier.height(6.dp))
@@ -638,8 +676,8 @@ private fun CountStepper(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .clip(MaterialTheme.shapes.medium)
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -652,7 +690,11 @@ private fun CountStepper(
             onClick = { if (value - step >= min) onChange(value - step) },
             enabled = value - step >= min
         ) {
-            Icon(Icons.Default.Remove, contentDescription = "Weniger", tint = BrutusRedBright)
+            Icon(
+                Icons.Default.Remove,
+                contentDescription = "Weniger",
+                tint = MaterialTheme.colorScheme.primary
+            )
         }
         Text(
             text = if (suffix.isBlank()) "$value" else "$value $suffix",
@@ -664,20 +706,102 @@ private fun CountStepper(
             onClick = { if (value + step <= max) onChange(value + step) },
             enabled = value + step <= max
         ) {
-            Icon(Icons.Default.Add, contentDescription = "Mehr", tint = BrutusRedBright)
+            Icon(
+                Icons.Default.Add,
+                contentDescription = "Mehr",
+                tint = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }
 
 @Composable
-private fun ChallengeChip(label: String, flags: Int, mask: Int, onToggle: () -> Unit) {
+private fun ChallengeChip(
+    label: String,
+    icon: ImageVector,
+    flags: Int,
+    mask: Int,
+    onToggle: () -> Unit,
+) {
     FilterChip(
         selected = ChallengeFlags.has(flags, mask),
         onClick = onToggle,
         label = { Text(label) },
-        colors = FilterChipDefaults.filterChipColors(
-            selectedContainerColor = BrutusRed,
-            selectedLabelColor = Color.White
-        )
+        leadingIcon = {
+            Icon(
+                icon,
+                contentDescription = null,
+                modifier = Modifier.size(FilterChipDefaults.IconSize)
+            )
+        },
     )
+}
+
+// ---------------------------------------------------------------------------
+// Previews
+// ---------------------------------------------------------------------------
+
+@Composable
+private fun EditControlsSpecimen() {
+    Column(
+        modifier = Modifier.padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            ChallengeChip("Mathe", Icons.Default.Calculate, ChallengeFlags.MATH, ChallengeFlags.MATH) {}
+            ChallengeChip("Schütteln", Icons.Default.Vibration, ChallengeFlags.MATH, ChallengeFlags.SHAKE) {}
+            ChallengeChip("QR-Code", Icons.Default.QrCodeScanner, ChallengeFlags.MATH, ChallengeFlags.QR) {}
+        }
+        DifficultyChips(
+            title = "Mathe-Schwierigkeit",
+            options = listOf(
+                ChallengeDifficulty.MATH_EASY,
+                ChallengeDifficulty.MATH_HARD,
+                ChallengeDifficulty.MATH_BRUTAL,
+            ),
+            selected = ChallengeDifficulty.MATH_HARD,
+            label = { ChallengeDifficulty.mathLabel(it) },
+            description = ChallengeDifficulty.mathDescription(ChallengeDifficulty.MATH_HARD),
+            onSelect = {}
+        )
+        CountStepper(label = "Aufgaben", value = 3, onChange = {}, min = 1, max = 10, step = 1, suffix = "")
+        ModeToggleRow(
+            title = "Sunrise (10 Min Vorlauf)", danger = false,
+            description = "Sanfter Vorlauf mit Licht und Glockenspiel.",
+            checked = true, onCheckedChange = {}
+        )
+        ModeToggleRow(
+            title = "Ultra Hardcore Mode", danger = true,
+            description = "Feuert nach dem Dismiss zweimal nach.",
+            checked = true, onCheckedChange = {}
+        )
+        ModeToggleRow(
+            title = "Hardcore Mode", danger = true,
+            description = "Sperrt die Lautstärke auf Maximum.",
+            checked = false, onCheckedChange = {}
+        )
+    }
+}
+
+@Preview(name = "Edit controls dark", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
+@Composable
+private fun EditControlsPreviewDark() {
+    BrutusTheme(darkTheme = true) { EditControlsSpecimen() }
+}
+
+@Preview(name = "Edit controls light", uiMode = Configuration.UI_MODE_NIGHT_NO, showBackground = true)
+@Composable
+private fun EditControlsPreviewLight() {
+    BrutusTheme(darkTheme = false) { EditControlsSpecimen() }
+}
+
+@Preview(
+    name = "Edit controls dynamic",
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true,
+    wallpaper = androidx.compose.ui.tooling.preview.Wallpapers.RED_DOMINATED_EXAMPLE,
+)
+@Composable
+private fun EditControlsPreviewDynamic() {
+    BrutusTheme(darkTheme = true) { EditControlsSpecimen() }
 }
