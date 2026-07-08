@@ -2,6 +2,11 @@ package com.pepperonas.brutus.ui.screens
 
 import android.content.res.Configuration
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -26,7 +31,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -80,12 +87,40 @@ fun HomeScreen(viewModel: AlarmViewModel) {
             )
         }
     ) { padding ->
+        // Direction-aware shared-axis X between tabs: the incoming screen
+        // slides a short distance from the side its tab sits on, springing
+        // via the expressive spatial spec, while fades do the hand-over.
+        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+        val spatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<IntOffset>()
+        fun tabIndex(entry: NavBackStackEntry): Int =
+            HomeTab.entries.indexOfFirst { it.route == entry.destination.route }
+
         NavHost(
             navController = navController,
             startDestination = HomeTab.ALARM.route,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(padding),
+            enterTransition = {
+                val dir = if (tabIndex(targetState) >= tabIndex(initialState)) 1 else -1
+                slideInHorizontally(spatialSpec) { full -> dir * full / 8 } +
+                    fadeIn(tween(220, delayMillis = 40))
+            },
+            exitTransition = {
+                val dir = if (tabIndex(targetState) >= tabIndex(initialState)) 1 else -1
+                slideOutHorizontally(spatialSpec) { full -> -dir * full / 8 } +
+                    fadeOut(tween(110))
+            },
+            popEnterTransition = {
+                val dir = if (tabIndex(targetState) >= tabIndex(initialState)) 1 else -1
+                slideInHorizontally(spatialSpec) { full -> dir * full / 8 } +
+                    fadeIn(tween(220, delayMillis = 40))
+            },
+            popExitTransition = {
+                val dir = if (tabIndex(targetState) >= tabIndex(initialState)) 1 else -1
+                slideOutHorizontally(spatialSpec) { full -> -dir * full / 8 } +
+                    fadeOut(tween(110))
+            },
         ) {
             composable(HomeTab.ALARM.route) { AlarmListScreen(viewModel = viewModel) }
             composable(HomeTab.WORLD.route) { WorldClockScreen() }

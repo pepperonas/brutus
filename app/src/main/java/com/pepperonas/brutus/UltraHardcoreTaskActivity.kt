@@ -39,9 +39,6 @@ import com.pepperonas.brutus.scheduler.AlarmScheduler
 import com.pepperonas.brutus.service.AlarmService
 import com.pepperonas.brutus.ui.alarm.StepChallenge
 import com.pepperonas.brutus.ui.theme.BrutusDarkRed
-import com.pepperonas.brutus.ui.theme.BrutusOrange
-import com.pepperonas.brutus.ui.theme.BrutusRed
-import com.pepperonas.brutus.ui.theme.BrutusRedBright
 import com.pepperonas.brutus.ui.theme.BrutusTheme
 import com.pepperonas.brutus.util.UltraHardcoreStore
 import kotlinx.coroutines.delay
@@ -128,7 +125,7 @@ class UltraHardcoreTaskActivity : ComponentActivity() {
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 4.sp,
-                color = BrutusRedBright,
+                color = MaterialTheme.colorScheme.error,
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
@@ -151,7 +148,7 @@ class UltraHardcoreTaskActivity : ComponentActivity() {
                 text = "Geschafft!",
                 fontSize = 36.sp,
                 fontWeight = FontWeight.Bold,
-                color = BrutusOrange
+                color = MaterialTheme.colorScheme.tertiary
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
@@ -189,7 +186,7 @@ class UltraHardcoreTaskActivity : ComponentActivity() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(64.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = BrutusRed),
+                    // Theme primary IS the brand red on the pinned-dark alarm surfaces.
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Text("Schliessen", fontSize = 18.sp, fontWeight = FontWeight.Bold)

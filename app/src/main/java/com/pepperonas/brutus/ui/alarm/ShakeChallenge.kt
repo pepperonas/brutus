@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.WavyProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -30,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.pepperonas.brutus.ui.theme.rememberReducedMotion
 import com.pepperonas.brutus.util.ChallengeDifficulty
 import kotlin.math.sqrt
 
@@ -41,6 +43,7 @@ fun ShakeChallenge(
     onComplete: () -> Unit,
 ) {
     val context = LocalContext.current
+    val reducedMotion = rememberReducedMotion()
     var shakeCount by remember { mutableIntStateOf(0) }
     var lastAccel by remember { mutableFloatStateOf(SensorManager.GRAVITY_EARTH) }
     val threshold = remember(sensitivity) { ChallengeDifficulty.shakeThreshold(sensitivity) }
@@ -118,6 +121,8 @@ fun ShakeChallenge(
                 modifier = Modifier.size(200.dp),
                 color = MaterialTheme.colorScheme.tertiary,
                 trackColor = Color.White.copy(alpha = 0.1f),
+                amplitude = if (reducedMotion) { _ -> 0f }
+                else WavyProgressIndicatorDefaults.indicatorAmplitude,
             )
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(

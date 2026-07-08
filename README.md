@@ -23,7 +23,7 @@
 
 > **The alarm clock that makes sure you actually wake up.**
 
-Brutus is a complete Android clock suite — **Alarm · World Clock · Stopwatch · Timer** — with one mission hiding behind the polished Samsung-style UI: its alarm module forces you to complete a configurable challenge (or a chain of challenges) before ringing stops. No cheating, no auto-dismissing, no snoozing your way back to sleep.
+Brutus is a complete Android clock suite — **Alarm · World Clock · Stopwatch · Timer** — with one mission hiding behind the polished **Material 3 Expressive** UI (tonal surfaces, spatial springs, wavy progress, Space Grotesk display type, dark/light + optional Material You): its alarm module forces you to complete a configurable challenge (or a chain of challenges) before ringing stops. No cheating, no auto-dismissing, no snoozing your way back to sleep.
 
 Everything is packed into a four-tab bottom navigation that keeps the brutal alarm engine one tap away while still giving you a proper clock app for everyday use.
 
@@ -85,7 +85,7 @@ Starting with v1.2.0 Brutus ships as a full clock suite. A persistent bottom nav
 
 | Tab | Icon | Purpose |
 |-----|------|---------|
-| **Alarm** | ⏰ | Samsung-style alarm list with countdown header to next alarm, per-alarm edit sheet, all the brutal wake modes |
+| **Alarm** | ⏰ | Expressive alarm list with countdown header, tonal card hierarchy (next alarm highlighted), swipe-to-delete + undo, per-alarm edit sheet, all the brutal wake modes |
 | **Weltuhr** | 🌐 | Live multi-time-zone board powered by `java.time.ZoneId` — add/remove cities, ticks every second |
 | **Stoppuhr** | ⏱ | Start / Stop / Lap stopwatch with centisecond precision via `SystemClock.elapsedRealtime()` |
 | **Timer** | ⌛ | HMS-picker countdown timer with quick presets (1m, 3m, 5m, 10m, 15m, 30m) — rings system alarm tone on finish |
@@ -503,7 +503,7 @@ app/src/main/java/com/pepperonas/brutus/
 │   │   └── Theme.kt                 Dark-only color scheme
 │   ├── screens/
 │   │   ├── HomeScreen.kt            Bottom-nav shell with NavHost across the four tabs
-│   │   ├── AlarmListScreen.kt       Samsung-style alarm list with countdown header and MDMDFSS strip
+│   │   ├── AlarmListScreen.kt       Expressive alarm list: tonal cards, swipe-to-delete, FAB, MDMDFSS strip
 │   │   ├── AlarmEditDialog.kt       Modal bottom sheet: time, days, sound, challenges, counts, QR, snooze, hardcore, test
 │   │   ├── WorldClockScreen.kt      Live multi-zone board, add/remove sheet
 │   │   ├── StopwatchScreen.kt       Start / Stop / Lap with centisecond precision

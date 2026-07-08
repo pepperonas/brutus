@@ -8,20 +8,12 @@ import androidx.compose.ui.graphics.Color
 // ============================================================================
 
 // Brand seed. The tonal palettes below are derived from this red
-// (Material Theme Builder, chroma-clamped red family).
-val BrutusRed = Color(0xFFE53935)           // Material Red 600
-val BrutusRedBright = Color(0xFFFF8A80)     // Material Red A100 — text accents on dark
-val BrutusDarkRed = Color(0xFFB71C1C)       // Material Red 900 — alarm gradient bg only
-val BrutusOrange = Color(0xFFFF9800)        // tertiary seed (Sunrise/Timer accents)
-val BrutusOrangeBright = Color(0xFFFFB74D)
-
-// Legacy dark-surface aliases — still referenced by screens; migrated to
-// surfaceContainer* roles screen-by-screen during the Expressive redesign.
-val BrutusDark = Color(0xFF121212)
-val BrutusSurface = Color(0xFF1E1E1E)
-val BrutusCard = Color(0xFF2C2C2C)
-val BrutusTextPrimary = Color(0xFFEEEEEE)
-val BrutusTextSecondary = Color(0xFFB0B0B0)
+// (Material Theme Builder, chroma-clamped red family). Only three raw brand
+// colors survive the Expressive migration; everything else in the UI goes
+// through MaterialTheme.colorScheme roles.
+val BrutusRed = Color(0xFFE53935)           // Material Red 600 — the seed; dark-scheme primary
+val BrutusRedBright = Color(0xFFFF8A80)     // Material Red A100 — the "BRUTUS ALARM" wordmark
+val BrutusDarkRed = Color(0xFFB71C1C)       // Material Red 900 — alarm/UHC gradient core only
 
 // ============================================================================
 // Red-seed tonal roles — DARK

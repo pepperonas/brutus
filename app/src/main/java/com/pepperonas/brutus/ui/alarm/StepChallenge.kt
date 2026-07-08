@@ -24,6 +24,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.WavyProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -42,6 +43,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import com.pepperonas.brutus.ui.theme.rememberReducedMotion
 
 /**
  * The Ultra Hardcore "anti-snooze" task: walk a configurable number of steps within the
@@ -56,6 +58,7 @@ fun StepChallenge(
     onComplete: () -> Unit,
 ) {
     val context = LocalContext.current
+    val reducedMotion = rememberReducedMotion()
     val sensorManager = remember {
         context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     }
@@ -144,6 +147,8 @@ fun StepChallenge(
                 modifier = Modifier.size(220.dp),
                 color = MaterialTheme.colorScheme.tertiary,
                 trackColor = Color.White.copy(alpha = 0.1f),
+                amplitude = if (reducedMotion) { _ -> 0f }
+                else WavyProgressIndicatorDefaults.indicatorAmplitude,
             )
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(

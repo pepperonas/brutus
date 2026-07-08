@@ -151,6 +151,8 @@ fun AlarmScreen(
                 Text(
                     text = "BRUTUS ALARM",
                     style = MaterialTheme.typography.titleLarge,
+                    // Deliberate raw brand color: the wordmark stays BrutusRedBright
+                    // even under Material You — this screen IS the brand.
                     color = BrutusRedBright,
                     letterSpacing = 8.sp
                 )

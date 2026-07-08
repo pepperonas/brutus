@@ -28,6 +28,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.WavyProgressIndicatorDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -38,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pepperonas.brutus.ui.theme.BrutusTheme
+import com.pepperonas.brutus.ui.theme.rememberReducedMotion
 import com.pepperonas.brutus.util.AlarmSound
 import com.pepperonas.brutus.viewmodel.TimerState
 import com.pepperonas.brutus.viewmodel.TimerViewModel
@@ -156,12 +158,16 @@ private fun TimerRing(remainingMs: Long, totalMs: Long, finished: Boolean) {
         else MaterialTheme.colorScheme.primary,
         label = "timerRingColor"
     )
+    // The rolling wave is decoration — flatten it when animations are off.
+    val reducedMotion = rememberReducedMotion()
     Box(contentAlignment = Alignment.Center, modifier = Modifier.size(280.dp)) {
         CircularWavyProgressIndicator(
             progress = { fraction },
             modifier = Modifier.size(280.dp),
             color = ringColor,
             trackColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            amplitude = if (reducedMotion) { _ -> 0f }
+            else WavyProgressIndicatorDefaults.indicatorAmplitude,
         )
         Text(
             text = formatCountdown(remainingMs),

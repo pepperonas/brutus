@@ -2,6 +2,25 @@
 
 All notable changes to Brutus are documented here. Versions follow [SemVer](https://semver.org).
 
+## [2.0.0] — 2026-07-08 · M3 Expressive, Phase 4: Motion-Polish & Konsistenz (final)
+
+The Expressive redesign is complete — this closes the 2.0.0-alpha series.
+
+### Changed
+- **Direction-aware tab transitions**: switching bottom-nav tabs now runs a
+  shared-axis-X hand-over (short spring slide from the side the tab sits on +
+  fade-through) instead of a hard cut, driven by the expressive spatial spec.
+- **Reduced-motion pass completed**: the wavy timer/shake/step rings flatten to plain
+  rings (`amplitude = 0`) when system animations are disabled; breathing
+  gradient and pulse hints were already gated in Phase 3.
+- **Color-role sweep finished**: UHC task screen migrated (error label,
+  tertiary success, primary CTA); the only surviving raw brand colors are
+  documented in `Color.kt` — the seed (`BrutusRed`), the alarm wordmark
+  (`BrutusRedBright`) and the alarm/UHC gradient core (`BrutusDarkRed`).
+  Dead legacy surface/text aliases removed. No stray `Color(0x…)` and no
+  custom ripple/indication overrides anywhere in the UI layer.
+- versionCode 13, versionName 2.0.0.
+
 ## [2.0.0-alpha03] — 2026-07-08 · M3 Expressive, Phase 3: Screens
 
 ### Alarm list (3.1)
