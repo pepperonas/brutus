@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -42,8 +41,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pepperonas.brutus.data.AlarmDatabase
 import com.pepperonas.brutus.scheduler.AlarmScheduler
-import com.pepperonas.brutus.ui.theme.BrutusOrange
-import com.pepperonas.brutus.ui.theme.BrutusRed
 import com.pepperonas.brutus.ui.theme.BrutusTheme
 import com.pepperonas.brutus.util.AlarmSound
 import com.pepperonas.brutus.util.SoundPreviewPlayer
@@ -202,13 +199,17 @@ private fun SunriseScreen(
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
                     letterSpacing = 6.sp,
-                    color = BrutusOrange.copy(alpha = 0.7f + 0.3f * warmth)
+                    color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.7f + 0.3f * warmth)
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = formatNow(nowMillis),
-                    fontSize = 88.sp,
-                    fontWeight = FontWeight.Light,
+                    // Calm hero: light weight stays (gentle pre-alarm, not the
+                    // ring screen), but tabular numerals stop the tick-jitter.
+                    style = MaterialTheme.typography.displayLarge.copy(
+                        fontSize = 88.sp,
+                        fontWeight = FontWeight.Light,
+                    ),
                     color = Color.White.copy(alpha = 0.6f + 0.4f * warmth)
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -229,8 +230,7 @@ private fun SunriseScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = BrutusRed),
-                    shape = RoundedCornerShape(16.dp)
+                    shape = MaterialTheme.shapes.large,
                 ) {
                     Text(
                         "Wecker stoppen",
@@ -247,7 +247,7 @@ private fun SunriseScreen(
                         containerColor = Color.Transparent,
                         contentColor = Color.White.copy(alpha = 0.7f)
                     ),
-                    shape = RoundedCornerShape(16.dp)
+                    shape = MaterialTheme.shapes.large,
                 ) {
                     Text(
                         "Schon wach — Sunrise schliessen",

@@ -2,6 +2,52 @@
 
 All notable changes to Brutus are documented here. Versions follow [SemVer](https://semver.org).
 
+## [2.0.0-alpha03] — 2026-07-08 · M3 Expressive, Phase 3: Screens
+
+### Alarm list (3.1)
+- Tonal card hierarchy: **next alarm on primaryContainer**, enabled on
+  surfaceContainerHigh, disabled sinks to surfaceContainerLow; display-type
+  time (Space Grotesk, `tnum`), animated container color.
+- **Swipe-to-delete** (errorContainer reveal) on top of the undo snackbar;
+  the delete button stays for TalkBack. Brand-red **FAB with press
+  shape-morph**, expressive empty state, `animateItem()` springs,
+  role-based chips/banners/weekday pills.
+
+### Alarm edit sheet (3.2)
+- Difficulty/sensitivity presets → **SegmentedButtonRow**; challenge chips
+  with icons + "Reihenfolge"-chain caption; **tonal danger-level rows**
+  (errorContainer when a hardcore mode is armed, tertiaryContainer for
+  Sunrise); tonal rounded TextField; FilledTonalButtons; sheet on
+  surfaceContainerLow.
+
+### Alarm ring & challenges (3.3)
+- **Breathing brand gradient** (calm 5s swell; static under reduced motion —
+  new `rememberReducedMotion()`), hero clock on displayLarge + `tnum`,
+  press-morphing ALARM STOPPEN CTA.
+- **MathChallenge: on-screen keypad** (12 morphing keys, primary confirm) —
+  no system keyboard over the alarm anymore.
+- Shake/Step rings → **CircularWavyProgressIndicator** (tertiary wave);
+  QR frame as expressive squircle with error-flash on wrong scans;
+  SwipeToSnooze on tertiary roles with circle→squircle thumb morph.
+
+### Timer & stopwatch (3.4)
+- Countdown inside a **wavy ring** that flips to error tones on finish;
+  presets → AssistChips; controls as wide tonal/primary button pairs;
+  laps as tonal rows with tabular numerals + `animateItem()`.
+
+### World clock (3.5)
+- Tonal zone cards with **day/night role indicator** (tertiary sun /
+  secondary moon), display-type time, pill search field, globe empty state.
+
+### Sunrise & widget (3.6, 3.7)
+- Sunrise: role-tinted labels (tertiary), tabular-numeral hero, primary CTA;
+  the physical dawn-warmth gradient stays (deliberate, brightness-coupled).
+- Widget: 24dp corners, warm surfaceContainer gradient, text on
+  onSurface/outline tones, red tone-80 countdown.
+
+All screens (except the deliberately dark-pinned alarm surfaces) ship
+dark + light + dynamic previews.
+
 ## [2.0.0-alpha02] — 2026-07-08 · M3 Expressive, Phase 2: Navigation & Chrome
 
 ### Changed
