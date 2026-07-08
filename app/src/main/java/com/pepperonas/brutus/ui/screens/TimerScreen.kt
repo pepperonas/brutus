@@ -1,5 +1,7 @@
 package com.pepperonas.brutus.ui.screens
 
+import android.content.res.Configuration
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,35 +14,34 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.pepperonas.brutus.ui.theme.BrutusRed
-import com.pepperonas.brutus.ui.theme.BrutusRedBright
-import com.pepperonas.brutus.ui.theme.BrutusTextSecondary
+import com.pepperonas.brutus.ui.theme.BrutusTheme
 import com.pepperonas.brutus.util.AlarmSound
 import com.pepperonas.brutus.viewmodel.TimerState
 import com.pepperonas.brutus.viewmodel.TimerViewModel
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TimerScreen(viewModel: TimerViewModel = viewModel()) {
     // All countdown state (incl. the ticking loop and the finish sound) lives in
@@ -58,7 +59,6 @@ fun TimerScreen(viewModel: TimerViewModel = viewModel()) {
         Text(
             text = "Timer",
             style = MaterialTheme.typography.headlineLarge,
-            fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier
                 .fillMaxWidth()
@@ -93,63 +93,83 @@ fun TimerScreen(viewModel: TimerViewModel = viewModel()) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = BrutusRed),
-                shape = RoundedCornerShape(16.dp)
+                shape = MaterialTheme.shapes.large,
             ) {
-                Text("Start", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                Text("Start", fontSize = 18.sp)
             }
             Spacer(modifier = Modifier.height(24.dp))
         } else {
-            Box(
-                modifier = Modifier
-                    .padding(vertical = 48.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = formatCountdown(liveRemaining),
-                    fontSize = 64.sp,
-                    fontWeight = FontWeight.Light,
-                    color = if (state == TimerState.FINISHED) BrutusRedBright
-                    else MaterialTheme.colorScheme.onBackground
-                )
-            }
+            val totalMs = (viewModel.hours * 3600L + viewModel.minutes * 60L + viewModel.seconds) * 1000L
+            Spacer(modifier = Modifier.height(16.dp))
+            TimerRing(
+                remainingMs = liveRemaining,
+                totalMs = totalMs,
+                finished = state == TimerState.FINISHED,
+            )
 
             Spacer(modifier = Modifier.weight(1f))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                CircleActionButton(
-                    label = "Abbruch",
-                    container = MaterialTheme.colorScheme.surfaceVariant,
-                    content = MaterialTheme.colorScheme.onSurfaceVariant,
-                    onClick = { viewModel.cancel() }
-                )
-                when (state) {
-                    TimerState.RUNNING -> CircleActionButton(
-                        label = "Pause",
-                        container = BrutusRed,
-                        content = Color.White,
-                        onClick = { viewModel.pause() }
-                    )
-                    TimerState.PAUSED -> CircleActionButton(
-                        label = "Weiter",
-                        container = BrutusRed,
-                        content = Color.White,
-                        onClick = { viewModel.resume() }
-                    )
-                    TimerState.FINISHED -> CircleActionButton(
-                        label = "Stopp",
-                        container = BrutusRed,
-                        content = Color.White,
-                        onClick = { viewModel.cancel() }
-                    )
-                    else -> {}
+                FilledTonalButton(
+                    onClick = { viewModel.cancel() },
+                    shape = MaterialTheme.shapes.large,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(64.dp),
+                ) {
+                    Text("Abbruch", fontSize = 16.sp)
+                }
+                val (mainLabel, mainAction) = when (state) {
+                    TimerState.RUNNING -> "Pause" to { viewModel.pause() }
+                    TimerState.PAUSED -> "Weiter" to { viewModel.resume() }
+                    else -> "Stopp" to { viewModel.cancel() }
+                }
+                Button(
+                    onClick = mainAction,
+                    shape = MaterialTheme.shapes.large,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(64.dp),
+                ) {
+                    Text(mainLabel, fontSize = 16.sp)
                 }
             }
             Spacer(modifier = Modifier.height(24.dp))
         }
+    }
+}
+
+/**
+ * Live countdown inside a wavy ring: the wave rolls while time drains, the
+ * remaining fraction empties the ring, and the whole thing flips to error
+ * tones the moment the timer fires.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun TimerRing(remainingMs: Long, totalMs: Long, finished: Boolean) {
+    val fraction = if (totalMs > 0) (remainingMs.toFloat() / totalMs).coerceIn(0f, 1f) else 0f
+    val ringColor by animateColorAsState(
+        targetValue = if (finished) MaterialTheme.colorScheme.error
+        else MaterialTheme.colorScheme.primary,
+        label = "timerRingColor"
+    )
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(280.dp)) {
+        CircularWavyProgressIndicator(
+            progress = { fraction },
+            modifier = Modifier.size(280.dp),
+            color = ringColor,
+            trackColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        )
+        Text(
+            text = formatCountdown(remainingMs),
+            style = MaterialTheme.typography.displayLarge.copy(fontSize = 56.sp),
+            color = if (finished) MaterialTheme.colorScheme.error
+            else MaterialTheme.colorScheme.onBackground,
+            textAlign = TextAlign.Center,
+        )
     }
 }
 
@@ -176,10 +196,6 @@ private fun TimerSoundPicker(
                     selected = selected == snd,
                     onClick = { onSelect(snd) },
                     label = { Text(snd.displayName) },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = BrutusRed,
-                        selectedLabelColor = Color.White
-                    )
                 )
             }
         }
@@ -190,18 +206,10 @@ private fun TimerSoundPicker(
             Text(
                 text = selected.description + " — Tippe zum Vorhören",
                 style = MaterialTheme.typography.bodySmall,
-                color = BrutusTextSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f)
             )
-            Button(
-                onClick = onStopPreview,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = BrutusRedBright,
-                ),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 0.dp),
-                modifier = Modifier.height(32.dp)
-            ) {
+            TextButton(onClick = onStopPreview) {
                 Text("Stopp", fontSize = 12.sp)
             }
         }
@@ -235,7 +243,11 @@ private fun TimeUnitStepper(
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         IconButton(onClick = { if (value + 1 <= max) onChange(value + 1) }) {
-            Icon(Icons.Default.Add, contentDescription = "Mehr", tint = BrutusRedBright)
+            Icon(
+                Icons.Default.Add,
+                contentDescription = "Mehr",
+                tint = MaterialTheme.colorScheme.primary
+            )
         }
         Box(
             modifier = Modifier.size(width = 88.dp, height = 72.dp),
@@ -243,15 +255,18 @@ private fun TimeUnitStepper(
         ) {
             Text(
                 text = "%02d".format(value),
-                fontSize = 52.sp,
-                fontWeight = FontWeight.Light,
+                style = MaterialTheme.typography.displayMedium.copy(fontSize = 52.sp),
                 color = MaterialTheme.colorScheme.onBackground
             )
         }
         IconButton(onClick = { if (value - 1 >= min) onChange(value - 1) }) {
-            Icon(Icons.Default.Remove, contentDescription = "Weniger", tint = BrutusRedBright)
+            Icon(
+                Icons.Default.Remove,
+                contentDescription = "Weniger",
+                tint = MaterialTheme.colorScheme.primary
+            )
         }
-        Text(label, color = BrutusTextSecondary, fontSize = 12.sp)
+        Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
     }
 }
 
@@ -265,17 +280,10 @@ private fun QuickPresets(onPick: (Int) -> Unit) {
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         presets.forEach { s ->
-            Button(
+            AssistChip(
                 onClick = { onPick(s) },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    contentColor = BrutusRedBright
-                ),
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.height(40.dp)
-            ) {
-                Text(labelForPreset(s), fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-            }
+                label = { Text(labelForPreset(s)) },
+            )
         }
     }
 }
@@ -284,23 +292,6 @@ private fun labelForPreset(seconds: Int): String = when {
     seconds % 60 != 0 -> "${seconds}s"
     seconds < 60 -> "${seconds}s"
     else -> "${seconds / 60}m"
-}
-
-@Composable
-private fun CircleActionButton(
-    label: String,
-    container: Color,
-    content: Color,
-    onClick: () -> Unit,
-) {
-    Button(
-        onClick = onClick,
-        modifier = Modifier.size(96.dp),
-        shape = CircleShape,
-        colors = ButtonDefaults.buttonColors(containerColor = container, contentColor = content)
-    ) {
-        Text(label, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
-    }
 }
 
 private fun formatCountdown(ms: Long): String {
@@ -312,4 +303,37 @@ private fun formatCountdown(ms: Long): String {
         "%02d:%02d:%02d".format(hours, minutes, seconds)
     else
         "%02d:%02d".format(minutes, seconds)
+}
+
+// ---------------------------------------------------------------------------
+// Previews
+// ---------------------------------------------------------------------------
+
+@Preview(name = "Ring dark", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
+@Composable
+private fun TimerRingPreviewDark() {
+    BrutusTheme(darkTheme = true) {
+        TimerRing(remainingMs = 154_000L, totalMs = 300_000L, finished = false)
+    }
+}
+
+@Preview(name = "Ring light", uiMode = Configuration.UI_MODE_NIGHT_NO, showBackground = true)
+@Composable
+private fun TimerRingPreviewLight() {
+    BrutusTheme(darkTheme = false) {
+        TimerRing(remainingMs = 154_000L, totalMs = 300_000L, finished = false)
+    }
+}
+
+@Preview(
+    name = "Ring dynamic",
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true,
+    wallpaper = androidx.compose.ui.tooling.preview.Wallpapers.RED_DOMINATED_EXAMPLE,
+)
+@Composable
+private fun TimerRingPreviewDynamic() {
+    BrutusTheme(darkTheme = true) {
+        TimerRing(remainingMs = 30_000L, totalMs = 300_000L, finished = false)
+    }
 }
