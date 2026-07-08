@@ -13,7 +13,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,15 +28,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.pepperonas.brutus.ui.theme.BrutusOrange
-import com.pepperonas.brutus.ui.theme.BrutusRed
-import com.pepperonas.brutus.ui.theme.BrutusRedBright
 import com.pepperonas.brutus.util.ChallengeDifficulty
 import kotlin.math.sqrt
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ShakeChallenge(
     requiredShakes: Int = 30,
@@ -109,23 +107,22 @@ fun ShakeChallenge(
 
         Spacer(modifier = Modifier.height(40.dp))
 
-        // Circular progress
+        // Wavy ring: the physical exertion made visible — the wave keeps
+        // rolling while progress fills.
         androidx.compose.foundation.layout.Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier.size(200.dp)
         ) {
-            CircularProgressIndicator(
+            CircularWavyProgressIndicator(
                 progress = { progress },
                 modifier = Modifier.size(200.dp),
-                color = BrutusOrange,
+                color = MaterialTheme.colorScheme.tertiary,
                 trackColor = Color.White.copy(alpha = 0.1f),
-                strokeWidth = 12.dp,
             )
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = "$shakeCount",
-                    fontSize = 64.sp,
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.displayMedium.copy(fontSize = 64.sp),
                     color = Color.White
                 )
                 Text(
@@ -142,7 +139,7 @@ fun ShakeChallenge(
             Text(
                 text = "Noch ${requiredShakes - shakeCount} mal!",
                 style = MaterialTheme.typography.titleLarge,
-                color = BrutusRedBright
+                color = MaterialTheme.colorScheme.error
             )
         }
     }

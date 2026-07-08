@@ -1,10 +1,17 @@
 package com.pepperonas.brutus.ui.alarm
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,7 +27,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,9 +46,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pepperonas.brutus.ui.theme.BrutusDarkRed
-import com.pepperonas.brutus.ui.theme.BrutusOrange
-import com.pepperonas.brutus.ui.theme.BrutusRed
 import com.pepperonas.brutus.ui.theme.BrutusRedBright
+import com.pepperonas.brutus.ui.theme.rememberReducedMotion
 import com.pepperonas.brutus.util.ChallengeDifficulty
 import com.pepperonas.brutus.util.ChallengeFlags
 import com.pepperonas.brutus.util.rememberBrutusHaptics
@@ -88,12 +94,32 @@ fun AlarmScreen(
         }
     }
 
+    // Breathing brand gradient: the red core slowly swells and settles (~5 s
+    // cycle, small alpha delta — deliberately far from any flicker/strobe).
+    // Static when system animations are disabled.
+    val reducedMotion = rememberReducedMotion()
+    val breathe = if (reducedMotion) {
+        0.3f
+    } else {
+        val transition = rememberInfiniteTransition(label = "alarmBreathe")
+        val value by transition.animateFloat(
+            initialValue = 0.22f,
+            targetValue = 0.40f,
+            animationSpec = infiniteRepeatable(
+                tween(2500, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+                RepeatMode.Reverse
+            ),
+            label = "breatheAlpha"
+        )
+        value
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(Color.Black, BrutusDarkRed.copy(alpha = 0.3f), Color.Black)
+                    colors = listOf(Color.Black, BrutusDarkRed.copy(alpha = breathe), Color.Black)
                 )
             )
     ) {
@@ -115,8 +141,9 @@ fun AlarmScreen(
             ) {
                 Text(
                     text = currentTime,
-                    fontSize = 72.sp,
-                    fontWeight = FontWeight.Bold,
+                    // displayLarge = Space Grotesk + tabular numerals: the hero
+                    // readout ticks without horizontal jitter.
+                    style = MaterialTheme.typography.displayLarge.copy(fontSize = 76.sp),
                     color = Color.White,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
@@ -132,13 +159,16 @@ fun AlarmScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                     Box(
                         modifier = Modifier
-                            .background(BrutusRed, RoundedCornerShape(6.dp))
+                            .background(
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.shapes.extraSmall
+                            )
                             .padding(horizontal = 10.dp, vertical = 4.dp)
                     ) {
                         Text(
                             text = if (ultraHardcoreMode) "ULTRA HARDCORE MODE" else "HARDCORE MODE",
                             style = MaterialTheme.typography.labelLarge,
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onPrimary,
                             letterSpacing = 2.sp
                         )
                     }
@@ -149,7 +179,7 @@ fun AlarmScreen(
                     Text(
                         text = "Re-Alarm $followupSeq/2 — du bist nicht entkommen",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = BrutusOrange,
+                        color = MaterialTheme.colorScheme.tertiary,
                         letterSpacing = 1.sp
                     )
                 }
@@ -205,7 +235,7 @@ fun AlarmScreen(
                     Text(
                         text = "Guten Morgen",
                         style = MaterialTheme.typography.titleLarge,
-                        color = BrutusOrange
+                        color = MaterialTheme.colorScheme.tertiary
                     )
                 }
             }
@@ -215,20 +245,7 @@ fun AlarmScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (allDone) {
-                    Button(
-                        onClick = onDismiss,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(64.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = BrutusRed),
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Text(
-                            text = "ALARM STOPPEN",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                    DismissButton(onDismiss = onDismiss)
                 }
 
                 if (snoozeEnabled) {
@@ -242,13 +259,43 @@ fun AlarmScreen(
     }
 }
 
+/**
+ * The emotional payoff button — a big primary CTA whose shape relaxes under
+ * the finger (pill → squircle) with a spatial spring.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun DismissButton(onDismiss: () -> Unit) {
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val corner by animateDpAsState(
+        targetValue = if (pressed) 12.dp else 32.dp,
+        animationSpec = MaterialTheme.motionScheme.fastSpatialSpec(),
+        label = "dismissCorner"
+    )
+    Button(
+        onClick = onDismiss,
+        interactionSource = interaction,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(64.dp),
+        shape = RoundedCornerShape(corner),
+    ) {
+        Text(
+            text = "ALARM STOPPEN",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
 @Composable
 private fun ChallengeProgressDots(total: Int, current: Int) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         repeat(total) { i ->
             val color = when {
-                i < current -> BrutusOrange
-                i == current -> BrutusRed
+                i < current -> MaterialTheme.colorScheme.tertiary
+                i == current -> MaterialTheme.colorScheme.primary
                 else -> Color.White.copy(alpha = 0.2f)
             }
             Box(

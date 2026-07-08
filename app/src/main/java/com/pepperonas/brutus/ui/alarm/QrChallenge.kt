@@ -43,9 +43,6 @@ import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
-import com.pepperonas.brutus.ui.theme.BrutusOrange
-import com.pepperonas.brutus.ui.theme.BrutusRed
-import com.pepperonas.brutus.ui.theme.BrutusRedBright
 import java.util.concurrent.Executors
 
 @Composable
@@ -118,10 +115,17 @@ fun QrChallenge(expectedQrData: String, onComplete: () -> Unit) {
         Spacer(modifier = Modifier.height(24.dp))
 
         if (hasCameraPermission) {
+            // Target frame: expressive squircle, wrong scans flash the border
+            // toward error before it settles back.
+            val borderColor by androidx.compose.animation.animateColorAsState(
+                targetValue = if (scannedWrong) MaterialTheme.colorScheme.error
+                else MaterialTheme.colorScheme.tertiary,
+                label = "qrBorder"
+            )
             Box(
                 modifier = Modifier
                     .size(280.dp)
-                    .border(3.dp, BrutusOrange, RoundedCornerShape(16.dp)),
+                    .border(3.dp, borderColor, RoundedCornerShape(28.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 AndroidView(
@@ -196,7 +200,7 @@ fun QrChallenge(expectedQrData: String, onComplete: () -> Unit) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "Falscher QR-Code! Scanne den richtigen.",
-                    color = BrutusRedBright,
+                    color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodyLarge
                 )
             }
@@ -204,7 +208,7 @@ fun QrChallenge(expectedQrData: String, onComplete: () -> Unit) {
             Box(
                 modifier = Modifier
                     .size(280.dp)
-                    .background(Color.DarkGray, RoundedCornerShape(16.dp)),
+                    .background(Color.White.copy(alpha = 0.08f), RoundedCornerShape(28.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(

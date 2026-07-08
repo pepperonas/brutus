@@ -21,8 +21,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,14 +38,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import com.pepperonas.brutus.ui.theme.BrutusOrange
-import com.pepperonas.brutus.ui.theme.BrutusRed
-import com.pepperonas.brutus.ui.theme.BrutusRedBright
 
 /**
  * The Ultra Hardcore "anti-snooze" task: walk a configurable number of steps within the
@@ -53,6 +49,7 @@ import com.pepperonas.brutus.ui.theme.BrutusRedBright
  * neither STEP_COUNTER nor STEP_DETECTOR (rare, very old hardware) we fall back to the
  * accelerometer-based shake heuristic so the user can never get fully locked out.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun StepChallenge(
     requiredSteps: Int,
@@ -142,18 +139,16 @@ fun StepChallenge(
             contentAlignment = Alignment.Center,
             modifier = Modifier.size(220.dp)
         ) {
-            CircularProgressIndicator(
+            CircularWavyProgressIndicator(
                 progress = { progress },
                 modifier = Modifier.size(220.dp),
-                color = BrutusOrange,
+                color = MaterialTheme.colorScheme.tertiary,
                 trackColor = Color.White.copy(alpha = 0.1f),
-                strokeWidth = 14.dp,
             )
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = "$steps",
-                    fontSize = 72.sp,
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.displayLarge.copy(fontSize = 72.sp),
                     color = Color.White
                 )
                 Text(
@@ -170,7 +165,7 @@ fun StepChallenge(
             Text(
                 text = "Berechtigung 'Körperliche Aktivität' wird benötigt, damit der Schrittzähler arbeitet.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = BrutusRedBright,
+                color = MaterialTheme.colorScheme.error,
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -182,14 +177,13 @@ fun StepChallenge(
                         permissionGranted = true
                     }
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = BrutusRed),
                 shape = RoundedCornerShape(12.dp)
             ) { Text("Berechtigung anfragen") }
         } else if (steps in 1 until requiredSteps) {
             Text(
                 text = "Noch ${requiredSteps - steps} Schritte!",
                 style = MaterialTheme.typography.titleLarge,
-                color = BrutusRedBright
+                color = MaterialTheme.colorScheme.error
             )
         }
     }

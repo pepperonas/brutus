@@ -1,18 +1,27 @@
 package com.pepperonas.brutus.ui.alarm
 
+import android.content.res.Configuration
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Backspace
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,13 +32,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.pepperonas.brutus.ui.theme.BrutusRed
-import com.pepperonas.brutus.ui.theme.BrutusRedBright
+import com.pepperonas.brutus.ui.theme.BrutusTheme
 import com.pepperonas.brutus.util.ChallengeDifficulty
 import kotlin.random.Random
 
@@ -84,6 +91,11 @@ fun generateProblem(difficulty: Int): MathProblem = when (difficulty) {
     }
 }
 
+/**
+ * Math gate with its own on-screen keypad — no system keyboard popping over
+ * the alarm (and no autocorrect nonsense at 6 a.m.). Every key morphs slightly
+ * squarer under the finger; the confirm key sits on primary.
+ */
 @Composable
 fun MathChallenge(
     totalRequired: Int = 3,
@@ -95,10 +107,23 @@ fun MathChallenge(
     var userInput by remember { mutableStateOf("") }
     var showError by remember { mutableStateOf(false) }
 
+    val submit: () -> Unit = {
+        if (userInput.toIntOrNull() == problem.answer) {
+            solvedCount++
+            userInput = ""
+            showError = false
+            if (solvedCount >= totalRequired) onComplete()
+            else problem = generateProblem(difficulty)
+        } else {
+            showError = true
+            userInput = ""
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(32.dp),
+            .padding(horizontal = 32.dp, vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -108,7 +133,7 @@ fun MathChallenge(
             color = Color.White
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
         Text(
             text = "Lösung ${solvedCount + 1} von $totalRequired · ${ChallengeDifficulty.mathLabel(difficulty)}",
@@ -116,72 +141,154 @@ fun MathChallenge(
             color = Color.White.copy(alpha = 0.7f)
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         Text(
             text = problem.display,
-            fontSize = 48.sp,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.displaySmall.copy(fontSize = 40.sp),
             color = Color.White,
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-        OutlinedTextField(
-            value = userInput,
-            onValueChange = {
-                userInput = it.filter { c -> c.isDigit() || c == '-' }
-                showError = false
-            },
-            label = { Text("Antwort") },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            keyboardActions = KeyboardActions(onDone = { checkAnswer(userInput, problem, onCorrect = {
-                solvedCount++
-                userInput = ""
-                if (solvedCount >= totalRequired) onComplete()
-                else problem = generateProblem(difficulty)
-            }, onWrong = { showError = true; userInput = "" }) }),
-            isError = showError,
-            modifier = Modifier.fillMaxWidth(0.6f)
-        )
-
-        if (showError) {
+        // Answer readout
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.6f)
+                .background(
+                    Color.White.copy(alpha = 0.08f),
+                    MaterialTheme.shapes.medium
+                )
+                .padding(vertical = 10.dp),
+            contentAlignment = Alignment.Center
+        ) {
             Text(
-                text = "Falsch! Versuch es nochmal.",
-                color = BrutusRedBright,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(top = 8.dp)
+                text = userInput.ifEmpty { " " },
+                style = MaterialTheme.typography.displaySmall,
+                color = if (showError) MaterialTheme.colorScheme.error else Color.White,
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = if (showError) "Falsch! Versuch es nochmal." else " ",
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(top = 6.dp, bottom = 6.dp)
+        )
 
-        Button(
-            onClick = {
-                checkAnswer(userInput, problem, onCorrect = {
-                    solvedCount++
-                    userInput = ""
-                    if (solvedCount >= totalRequired) onComplete()
-                    else problem = generateProblem(difficulty)
-                }, onWrong = { showError = true; userInput = "" })
+        NumberPad(
+            onDigit = { d ->
+                if (userInput.length < 7) {
+                    userInput += d
+                    showError = false
+                }
             },
-            colors = ButtonDefaults.buttonColors(containerColor = BrutusRed),
-            shape = RoundedCornerShape(12.dp),
-            modifier = Modifier.fillMaxWidth(0.6f)
+            onBackspace = { userInput = userInput.dropLast(1) },
+            onSubmit = submit,
+            submitEnabled = userInput.isNotEmpty(),
+        )
+    }
+}
+
+@Composable
+private fun NumberPad(
+    onDigit: (Char) -> Unit,
+    onBackspace: () -> Unit,
+    onSubmit: () -> Unit,
+    submitEnabled: Boolean,
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        listOf("123", "456", "789").forEach { rowKeys ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                rowKeys.forEach { key ->
+                    KeypadButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = { onDigit(key) },
+                    ) {
+                        Text(key.toString(), style = MaterialTheme.typography.headlineSmall)
+                    }
+                }
+            }
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text("Prüfen", style = MaterialTheme.typography.titleLarge)
+            KeypadButton(modifier = Modifier.weight(1f), onClick = onBackspace) {
+                Icon(
+                    Icons.AutoMirrored.Filled.Backspace,
+                    contentDescription = "Löschen",
+                )
+            }
+            KeypadButton(modifier = Modifier.weight(1f), onClick = { onDigit('0') }) {
+                Text("0", style = MaterialTheme.typography.headlineSmall)
+            }
+            KeypadButton(
+                modifier = Modifier.weight(1f),
+                onClick = onSubmit,
+                enabled = submitEnabled,
+                primary = true,
+            ) {
+                Icon(Icons.Default.Check, contentDescription = "Prüfen")
+            }
         }
     }
 }
 
-private fun checkAnswer(
-    input: String,
-    problem: MathProblem,
-    onCorrect: () -> Unit,
-    onWrong: () -> Unit
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun KeypadButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+    primary: Boolean = false,
+    content: @Composable () -> Unit,
 ) {
-    val answer = input.toIntOrNull()
-    if (answer == problem.answer) onCorrect() else onWrong()
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val corner by animateDpAsState(
+        targetValue = if (pressed) 10.dp else 22.dp,
+        animationSpec = MaterialTheme.motionScheme.fastSpatialSpec(),
+        label = "keyCorner"
+    )
+    val colors = if (primary) {
+        ButtonDefaults.buttonColors()
+    } else {
+        // Tonal keys on the black alarm gradient — the theme's tonal
+        // containers would vanish here, so keys use translucent white.
+        ButtonDefaults.buttonColors(
+            containerColor = Color.White.copy(alpha = 0.1f),
+            contentColor = Color.White,
+            disabledContainerColor = Color.White.copy(alpha = 0.04f),
+            disabledContentColor = Color.White.copy(alpha = 0.3f),
+        )
+    }
+    Button(
+        onClick = onClick,
+        enabled = enabled,
+        colors = colors,
+        shape = RoundedCornerShape(corner),
+        interactionSource = interaction,
+        contentPadding = ButtonDefaults.TextButtonContentPadding,
+        modifier = modifier.height(56.dp),
+    ) {
+        content()
+    }
+}
+
+// Alarm surfaces are pinned dark by design (black/red brand gradient),
+// so there is no light variant to preview.
+@Preview(name = "Math keypad", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true, backgroundColor = 0xFF000000)
+@Composable
+private fun MathChallengePreview() {
+    BrutusTheme(darkTheme = true) {
+        MathChallenge(totalRequired = 3, onComplete = {})
+    }
 }

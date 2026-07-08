@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardDoubleArrowRight
@@ -41,7 +40,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -53,8 +51,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.pepperonas.brutus.ui.theme.BrutusOrange
-import com.pepperonas.brutus.ui.theme.BrutusOrangeBright
+import androidx.compose.material3.MaterialTheme
+import com.pepperonas.brutus.ui.theme.rememberReducedMotion
 import com.pepperonas.brutus.util.rememberBrutusHaptics
 import kotlinx.coroutines.launch
 
@@ -81,27 +79,43 @@ fun SwipeToSnoozeButton(
 
     val maxOffset = (trackWidthPx - thumbSizePx).coerceAtLeast(0f)
     val progress = if (maxOffset > 0f) (offsetX.value / maxOffset).coerceIn(0f, 1f) else 0f
+    val accent = MaterialTheme.colorScheme.tertiary
+    val onAccent = MaterialTheme.colorScheme.onTertiary
 
-    // Pulsing hint when idle
-    val infinite = rememberInfiniteTransition(label = "snoozeHint")
-    val hintAlpha by infinite.animateFloat(
-        initialValue = 0.35f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            tween(1000, easing = FastOutSlowInEasing),
-            RepeatMode.Reverse
-        ),
-        label = "hintAlpha"
-    )
-    val hintShift by infinite.animateFloat(
-        initialValue = 0f,
-        targetValue = 8f,
-        animationSpec = infiniteRepeatable(
-            tween(1200, easing = FastOutSlowInEasing),
-            RepeatMode.Reverse
-        ),
-        label = "hintShift"
-    )
+    // Pulsing hint when idle — static when system animations are disabled.
+    val reducedMotion = rememberReducedMotion()
+    val hintAlpha: Float
+    val hintShift: Float
+    if (reducedMotion) {
+        hintAlpha = 1f
+        hintShift = 0f
+    } else {
+        val infinite = rememberInfiniteTransition(label = "snoozeHint")
+        val alphaAnim by infinite.animateFloat(
+            initialValue = 0.35f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                tween(1000, easing = FastOutSlowInEasing),
+                RepeatMode.Reverse
+            ),
+            label = "hintAlpha"
+        )
+        val shiftAnim by infinite.animateFloat(
+            initialValue = 0f,
+            targetValue = 8f,
+            animationSpec = infiniteRepeatable(
+                tween(1200, easing = FastOutSlowInEasing),
+                RepeatMode.Reverse
+            ),
+            label = "hintShift"
+        )
+        hintAlpha = alphaAnim
+        hintShift = shiftAnim
+    }
+
+    // The thumb morphs from circle toward a squircle over the last stretch —
+    // the shape itself announces "gleich rastet es ein".
+    val thumbCornerPercent = (50 - ((progress - 0.55f).coerceAtLeast(0f) / 0.45f * 22f)).toInt()
 
     // Reset after trigger (for re-use; AlarmScreen finishes anyway)
     LaunchedEffect(triggered) {
@@ -132,10 +146,10 @@ fun SwipeToSnoozeButton(
                 )
             }
             .clip(RoundedCornerShape(height / 2))
-            .background(BrutusOrange.copy(alpha = 0.12f))
+            .background(accent.copy(alpha = 0.12f))
             .border(
                 1.dp,
-                BrutusOrange.copy(alpha = 0.35f + 0.4f * progress),
+                accent.copy(alpha = 0.35f + 0.4f * progress),
                 RoundedCornerShape(height / 2)
             )
             .onSizeChanged { trackWidthPx = it.width.toFloat() }
@@ -148,8 +162,8 @@ fun SwipeToSnoozeButton(
                 .background(
                     Brush.horizontalGradient(
                         listOf(
-                            BrutusOrange.copy(alpha = 0.25f),
-                            BrutusOrange.copy(alpha = 0.55f)
+                            accent.copy(alpha = 0.25f),
+                            accent.copy(alpha = 0.55f)
                         )
                     )
                 )
@@ -166,7 +180,7 @@ fun SwipeToSnoozeButton(
         ) {
             Text(
                 text = "Zum Snoozen wischen",
-                color = BrutusOrangeBright.copy(alpha = hintAlpha),
+                color = accent.copy(alpha = hintAlpha),
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 15.sp,
                 modifier = Modifier.padding(end = 6.dp)
@@ -174,7 +188,7 @@ fun SwipeToSnoozeButton(
             Icon(
                 Icons.Default.KeyboardDoubleArrowRight,
                 contentDescription = null,
-                tint = BrutusOrangeBright.copy(alpha = hintAlpha),
+                tint = accent.copy(alpha = hintAlpha),
                 modifier = Modifier
                     .size(20.dp)
                     .offset { IntOffset(hintShift.toInt(), 0) }
@@ -187,8 +201,8 @@ fun SwipeToSnoozeButton(
                 .padding(thumbPadding)
                 .offset { IntOffset(offsetX.value.toInt(), 0) }
                 .size(thumbSize)
-                .clip(CircleShape)
-                .background(BrutusOrange)
+                .clip(RoundedCornerShape(percent = thumbCornerPercent))
+                .background(accent)
                 .pointerInput(maxOffset) {
                     if (maxOffset <= 0f) return@pointerInput
                     detectHorizontalDragGestures(
@@ -232,10 +246,23 @@ fun SwipeToSnoozeButton(
             Icon(
                 Icons.Default.KeyboardDoubleArrowRight,
                 contentDescription = "Snooze",
-                tint = Color.White,
+                tint = onAccent,
                 modifier = Modifier.size(28.dp)
             )
         }
+    }
+}
+
+// Alarm surfaces are pinned dark by design — no light variant.
+@androidx.compose.ui.tooling.preview.Preview(
+    name = "Snooze slider",
+    showBackground = true,
+    backgroundColor = 0xFF000000,
+)
+@Composable
+private fun SwipeToSnoozePreview() {
+    com.pepperonas.brutus.ui.theme.BrutusTheme(darkTheme = true) {
+        SwipeToSnoozeButton(onSnooze = {})
     }
 }
 
