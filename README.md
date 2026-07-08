@@ -498,9 +498,13 @@ app/src/main/java/com/pepperonas/brutus/
 │   └── StopwatchViewModel.kt        Stopwatch state + laps, survives tab switches (v1.8.0)
 ├── ui/
 │   ├── theme/
-│   │   ├── Color.kt                 Dark palette with BrutusRed + BrutusRedBright
-│   │   ├── Type.kt                  Typography (M3 defaults for TimePicker clarity)
-│   │   └── Theme.kt                 Dark-only color scheme
+│   │   ├── Color.kt                 Full M3 color-role sets (dark + light) from the BrutusRed seed
+│   │   ├── Type.kt                  Expressive type scale — Space Grotesk display + tabular numerals
+│   │   ├── Shape.kt                 Expressive shape scale (8/12/16/24/32 dp)
+│   │   ├── Theme.kt                 MaterialExpressiveTheme: springs, dark/light, Material You opt-in
+│   │   ├── ThemeSettings.kt         DataStore-backed theme prefs (dynamic color)
+│   │   ├── Motion.kt                rememberReducedMotion() — gates decorative loops
+│   │   └── ThemePreview.kt          Dark/light/dynamic theme specimen previews
 │   ├── screens/
 │   │   ├── HomeScreen.kt            Bottom-nav shell with NavHost across the four tabs
 │   │   ├── AlarmListScreen.kt       Expressive alarm list: tonal cards, swipe-to-delete, FAB, MDMDFSS strip
@@ -693,6 +697,7 @@ Planned, no specific timeline:
 - [x] GUI polish: delete-all confirmation, one-line weekday picker in the edit sheet, pinned save CTA, 48 dp delete target, TalkBack snooze action, search placeholder (v1.8.0)
 - [x] Undo snackbar for deletions (single + delete-all, restores scheduling) (v1.9.0)
 - [x] Copy alarms — prefilled "Alarm kopieren" edit sheet per card (v1.9.0)
+- [x] **Material 3 Expressive redesign** — full color-role system (dark + light + Material You opt-in), `MaterialExpressiveTheme` with spatial springs, Space Grotesk display type with tabular numerals, tonal card hierarchy, swipe-to-delete, morphing FAB/CTAs, on-screen math keypad, wavy progress rings, day/night world-clock roles, shared-axis tab transitions, reduced-motion support (v2.0.0)
 - [ ] Per-alarm sound override at runtime
 - [ ] Multi-QR support (different codes for different alarms)
 - [ ] Wear OS companion
