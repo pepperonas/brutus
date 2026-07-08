@@ -1,12 +1,16 @@
 package com.pepperonas.brutus.ui.screens
 
+import android.content.res.Configuration
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,11 +27,15 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.outlined.AlarmAdd
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,9 +44,11 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -53,18 +63,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.pepperonas.brutus.data.AlarmEntity
-import com.pepperonas.brutus.ui.theme.BrutusOrange
-import com.pepperonas.brutus.ui.theme.BrutusRed
-import com.pepperonas.brutus.ui.theme.BrutusRedBright
-import com.pepperonas.brutus.ui.theme.BrutusTextSecondary
+import com.pepperonas.brutus.ui.theme.BrutusTheme
 import com.pepperonas.brutus.ui.theme.ThemeSettings
 import com.pepperonas.brutus.util.BatteryOptimizationPermission
 import com.pepperonas.brutus.util.ExactAlarmPermission
@@ -125,6 +135,7 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
             delay(30_000L)
         }
     }
+    val nextAlarm = remember(alarms, nowMillis) { NextAlarmCalculator.findNext(alarms, nowMillis) }
 
     // Re-check exact-alarm + battery + full-screen-intent permissions on resume
     var exactGranted by remember { mutableStateOf(ExactAlarmPermission.isGranted(context)) }
@@ -144,158 +155,148 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp)
-    ) {
-        NextAlarmHeader(alarms = alarms, now = nowMillis)
-
-        if (!exactGranted) {
-            ExactAlarmBanner(onFix = {
-                ExactAlarmPermission.settingsIntent(context)?.let { context.startActivity(it) }
-            })
-            Spacer(modifier = Modifier.height(12.dp))
-        }
-
-        if (!batteryIgnoring) {
-            BatteryOptimizationBanner(onFix = {
-                try {
-                    context.startActivity(BatteryOptimizationPermission.settingsIntent(context))
-                } catch (_: Exception) {
-                    context.startActivity(BatteryOptimizationPermission.fallbackSettingsIntent())
-                }
-            })
-            Spacer(modifier = Modifier.height(12.dp))
-        }
-
-        if (!fsiGranted) {
-            FullScreenIntentBanner(onFix = {
-                FullScreenIntentPermission.settingsIntent(context)?.let { context.startActivity(it) }
-            })
-            Spacer(modifier = Modifier.height(12.dp))
-        }
-
-        Row(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically,
+                .fillMaxSize()
+                .padding(horizontal = 16.dp)
         ) {
-            IconButton(onClick = {
-                editingAlarm = null
-                showDialog = true
-            }) {
-                Icon(
-                    Icons.Default.Add,
-                    contentDescription = "Alarm hinzufügen",
-                    tint = MaterialTheme.colorScheme.onBackground
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                NextAlarmHeader(
+                    next = nextAlarm,
+                    now = nowMillis,
+                    modifier = Modifier.weight(1f),
                 )
-            }
-            Box {
-                IconButton(onClick = { menuOpen = true }) {
-                    Icon(
-                        Icons.Default.MoreVert,
-                        contentDescription = "Mehr",
-                        tint = MaterialTheme.colorScheme.onBackground
-                    )
-                }
-                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                    DropdownMenuItem(
-                        text = { Text("Alle löschen") },
-                        enabled = alarms.isNotEmpty(),
-                        onClick = {
-                            menuOpen = false
-                            confirmDeleteAll = true
-                        }
-                    )
-                    // Material You opt-in (API 31+): wallpaper-based dynamic color
-                    // instead of the red brand scheme.
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                        val dynamicOn by ThemeSettings.dynamicColorFlow(context)
-                            .collectAsState(initial = false)
+                Box {
+                    IconButton(onClick = { menuOpen = true }) {
+                        Icon(
+                            Icons.Default.MoreVert,
+                            contentDescription = "Mehr",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                         DropdownMenuItem(
-                            text = { Text("Material You Farben") },
-                            trailingIcon = {
-                                Switch(
-                                    checked = dynamicOn,
-                                    onCheckedChange = null,
-                                    modifier = Modifier.scale(0.8f)
-                                )
-                            },
+                            text = { Text("Alle löschen") },
+                            enabled = alarms.isNotEmpty(),
                             onClick = {
-                                haptics.tap()
-                                scope.launch {
-                                    ThemeSettings.setDynamicColor(context, !dynamicOn)
-                                }
+                                menuOpen = false
+                                confirmDeleteAll = true
                             }
                         )
+                        // Material You opt-in (API 31+): wallpaper-based dynamic color
+                        // instead of the red brand scheme.
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                            val dynamicOn by ThemeSettings.dynamicColorFlow(context)
+                                .collectAsState(initial = false)
+                            DropdownMenuItem(
+                                text = { Text("Material You Farben") },
+                                trailingIcon = {
+                                    Switch(
+                                        checked = dynamicOn,
+                                        onCheckedChange = null,
+                                        modifier = Modifier.scale(0.8f)
+                                    )
+                                },
+                                onClick = {
+                                    haptics.tap()
+                                    scope.launch {
+                                        ThemeSettings.setDynamicColor(context, !dynamicOn)
+                                    }
+                                }
+                            )
+                        }
                     }
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.height(8.dp))
+            if (!exactGranted) {
+                ExactAlarmBanner(onFix = {
+                    ExactAlarmPermission.settingsIntent(context)?.let { context.startActivity(it) }
+                })
+                Spacer(modifier = Modifier.height(12.dp))
+            }
 
-        if (alarms.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = "Keine Alarme",
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = BrutusTextSecondary
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Tippe + um einen Alarm zu erstellen",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = BrutusTextSecondary
-                    )
+            if (!batteryIgnoring) {
+                BatteryOptimizationBanner(onFix = {
+                    try {
+                        context.startActivity(BatteryOptimizationPermission.settingsIntent(context))
+                    } catch (_: Exception) {
+                        context.startActivity(BatteryOptimizationPermission.fallbackSettingsIntent())
+                    }
+                })
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+
+            if (!fsiGranted) {
+                FullScreenIntentBanner(onFix = {
+                    FullScreenIntentPermission.settingsIntent(context)?.let { context.startActivity(it) }
+                })
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            if (alarms.isEmpty()) {
+                EmptyState(onCreate = {
+                    editingAlarm = null
+                    showDialog = true
+                })
+            } else {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(alarms, key = { it.id }) { alarm ->
+                        DismissableAlarmCard(
+                            alarm = alarm,
+                            isNext = nextAlarm?.id == alarm.id,
+                            modifier = Modifier.animateItem(),
+                            onToggle = {
+                                haptics.tap()
+                                viewModel.toggleAlarm(alarm)
+                            },
+                            onDelete = {
+                                haptics.warn()
+                                deleteWithUndo(listOf(alarm))
+                            },
+                            onCopy = {
+                                haptics.tap()
+                                // id = 0 marks the dialog payload as a copy template:
+                                // everything prefilled, saving creates a NEW alarm.
+                                editingAlarm = alarm.copy(id = 0)
+                                showDialog = true
+                            },
+                            onClick = {
+                                editingAlarm = alarm
+                                showDialog = true
+                            }
+                        )
+                    }
+                    // Keep the FAB from covering the last card's actions.
+                    item { Spacer(modifier = Modifier.height(96.dp)) }
                 }
             }
-        } else {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(alarms, key = { it.id }) { alarm ->
-                    AlarmCard(
-                        alarm = alarm,
-                        onToggle = {
-                            haptics.tap()
-                            viewModel.toggleAlarm(alarm)
-                        },
-                        onDelete = {
-                            haptics.warn()
-                            deleteWithUndo(listOf(alarm))
-                        },
-                        onCopy = {
-                            haptics.tap()
-                            // id = 0 marks the dialog payload as a copy template:
-                            // everything prefilled, saving creates a NEW alarm.
-                            editingAlarm = alarm.copy(id = 0)
-                            showDialog = true
-                        },
-                        onClick = {
-                            editingAlarm = alarm
-                            showDialog = true
-                        }
-                    )
-                }
-                item { Spacer(modifier = Modifier.height(16.dp)) }
-            }
         }
-    }
 
-    SnackbarHost(
-        hostState = snackbarHostState,
-        modifier = Modifier
-            .align(Alignment.BottomCenter)
-            .padding(bottom = 8.dp)
-    )
+        AddAlarmFab(
+            onClick = {
+                haptics.tap()
+                editingAlarm = null
+                showDialog = true
+            },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = 16.dp, bottom = 16.dp)
+        )
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 8.dp)
+        )
     }
 
     if (confirmDeleteAll) {
@@ -314,7 +315,11 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
                     haptics.warn()
                     deleteWithUndo(alarms.toList())
                 }) {
-                    Text("Löschen", color = BrutusRedBright, fontWeight = FontWeight.SemiBold)
+                    Text(
+                        "Löschen",
+                        color = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.SemiBold
+                    )
                 }
             },
             dismissButton = {
@@ -376,39 +381,61 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
     }
 }
 
+/** Brand FAB with a press shape-morph: pill relaxes toward a squircle under the finger. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun NextAlarmHeader(alarms: List<AlarmEntity>, now: Long) {
-    val next = remember(alarms, now) { NextAlarmCalculator.findNext(alarms, now) }
+private fun AddAlarmFab(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val corner by animateDpAsState(
+        targetValue = if (pressed) 12.dp else 20.dp,
+        animationSpec = MaterialTheme.motionScheme.fastSpatialSpec(),
+        label = "fabCorner"
+    )
+    FloatingActionButton(
+        onClick = onClick,
+        shape = RoundedCornerShape(corner),
+        containerColor = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary,
+        interactionSource = interaction,
+        modifier = modifier,
+    ) {
+        Icon(Icons.Default.Add, contentDescription = "Alarm hinzufügen")
+    }
+}
+
+@Composable
+private fun NextAlarmHeader(next: AlarmEntity?, now: Long, modifier: Modifier = Modifier) {
     val triggerMillis = remember(next, now) { next?.let { NextAlarmCalculator.nextTrigger(it, now) } }
 
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 40.dp, bottom = 24.dp),
-        contentAlignment = Alignment.Center
+    Column(
+        modifier = modifier.padding(top = 28.dp, bottom = 20.dp),
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            if (triggerMillis != null) {
-                Text(
-                    text = NextAlarmCalculator.formatCountdown(now, triggerMillis),
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = formatTriggerDate(triggerMillis),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = BrutusTextSecondary
-                )
-            } else {
-                Text(
-                    text = "Kein Alarm aktiv",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = BrutusTextSecondary
-                )
-            }
+        if (triggerMillis != null) {
+            Text(
+                text = "NÄCHSTER ALARM",
+                style = MaterialTheme.typography.labelMedium,
+                letterSpacing = 2.sp,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = NextAlarmCalculator.formatCountdown(now, triggerMillis),
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = formatTriggerDate(triggerMillis),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        } else {
+            Text(
+                text = "Kein Alarm aktiv",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
@@ -418,25 +445,106 @@ private fun formatTriggerDate(millis: Long): String {
     return fmt.format(Date(millis))
 }
 
+/** Swipe-to-delete wrapper: drag the card off to the left, undo via snackbar. */
+@Composable
+private fun DismissableAlarmCard(
+    alarm: AlarmEntity,
+    isNext: Boolean,
+    modifier: Modifier = Modifier,
+    onToggle: () -> Unit,
+    onDelete: () -> Unit,
+    onCopy: () -> Unit,
+    onClick: () -> Unit,
+) {
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { value ->
+            if (value == SwipeToDismissBoxValue.EndToStart) {
+                onDelete()
+                true
+            } else {
+                false
+            }
+        }
+    )
+    SwipeToDismissBox(
+        state = dismissState,
+        modifier = modifier,
+        enableDismissFromStartToEnd = false,
+        backgroundContent = {
+            val revealed = dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(MaterialTheme.shapes.large)
+                    .background(
+                        if (revealed) MaterialTheme.colorScheme.errorContainer
+                        else Color.Transparent
+                    ),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                if (revealed) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier.padding(end = 28.dp)
+                    )
+                }
+            }
+        }
+    ) {
+        AlarmCard(
+            alarm = alarm,
+            isNext = isNext,
+            onToggle = onToggle,
+            onDelete = onDelete,
+            onCopy = onCopy,
+            onClick = onClick,
+        )
+    }
+}
+
+/**
+ * Tonal card hierarchy: the NEXT firing alarm sits on primaryContainer, other
+ * enabled alarms on surfaceContainerHigh, disabled ones sink to
+ * surfaceContainerLow with dimmed content.
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun AlarmCard(
     alarm: AlarmEntity,
+    isNext: Boolean,
     onToggle: () -> Unit,
     onDelete: () -> Unit,
     onCopy: () -> Unit,
     onClick: () -> Unit
 ) {
-    val cardColor by animateColorAsState(
-        targetValue = MaterialTheme.colorScheme.surfaceVariant,
+    val cs = MaterialTheme.colorScheme
+    val dim = !alarm.enabled
+
+    val containerColor by animateColorAsState(
+        targetValue = when {
+            isNext && alarm.enabled -> cs.primaryContainer
+            alarm.enabled -> cs.surfaceContainerHigh
+            else -> cs.surfaceContainerLow
+        },
         label = "cardColor"
     )
-    val dim = !alarm.enabled
+    val timeColor = when {
+        isNext && alarm.enabled -> cs.onPrimaryContainer
+        alarm.enabled -> cs.onSurface
+        else -> cs.onSurfaceVariant.copy(alpha = 0.6f)
+    }
+    val subColor = when {
+        isNext && alarm.enabled -> cs.onPrimaryContainer.copy(alpha = 0.75f)
+        alarm.enabled -> cs.onSurfaceVariant
+        else -> cs.onSurfaceVariant.copy(alpha = 0.5f)
+    }
 
     Card(
         onClick = onClick,
-        colors = CardDefaults.cardColors(containerColor = cardColor),
-        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = containerColor),
+        shape = MaterialTheme.shapes.large,
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(
@@ -448,24 +556,20 @@ private fun AlarmCard(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = alarm.timeString(),
-                        fontSize = 44.sp,
-                        fontWeight = FontWeight.Light,
-                        color = if (alarm.enabled) MaterialTheme.colorScheme.onSurface
-                        else BrutusTextSecondary
+                        style = MaterialTheme.typography.displayMedium,
+                        color = timeColor
                     )
                     Text(
                         text = alarm.repeatDaysString(),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = BrutusTextSecondary
+                        color = subColor
                     )
                     if (alarm.label.isNotBlank()) {
                         Text(
                             text = alarm.label,
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurface.copy(
-                                alpha = if (dim) 0.5f else 0.85f
-                            )
+                            color = timeColor.copy(alpha = if (dim) 0.6f else 0.9f)
                         )
                     }
                 }
@@ -473,7 +577,7 @@ private fun AlarmCard(
                     Icon(
                         Icons.Default.ContentCopy,
                         contentDescription = "Kopieren",
-                        tint = BrutusTextSecondary,
+                        tint = subColor,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -481,21 +585,21 @@ private fun AlarmCard(
                     Icon(
                         Icons.Default.Delete,
                         contentDescription = "Löschen",
-                        tint = BrutusTextSecondary
+                        tint = subColor
                     )
                 }
                 Switch(
                     checked = alarm.enabled,
                     onCheckedChange = { onToggle() },
-                    colors = SwitchDefaults.colors(
-                        checkedTrackColor = BrutusRed,
-                        checkedThumbColor = androidx.compose.ui.graphics.Color.White,
-                    )
                 )
             }
 
             Spacer(modifier = Modifier.height(14.dp))
-            WeekdayStrip(repeatDays = alarm.repeatDays, enabled = alarm.enabled)
+            WeekdayStrip(
+                repeatDays = alarm.repeatDays,
+                enabled = alarm.enabled,
+                inactiveColor = subColor,
+            )
             Spacer(modifier = Modifier.height(14.dp))
 
             // Info chips: mode, sunrise, challenge, snooze, sound
@@ -504,16 +608,16 @@ private fun AlarmCard(
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 if (alarm.ultraHardcoreMode) {
-                    InfoChip("ULTRA HC", BrutusOrange, filled = true, dim = dim)
+                    InfoChip("ULTRA HC", cs.error, cs.onError, dim = dim)
                 } else if (alarm.hardcoreMode) {
-                    InfoChip("HARDCORE", BrutusRed, filled = true, dim = dim)
+                    InfoChip("HARDCORE", cs.errorContainer, cs.onErrorContainer, dim = dim)
                 }
                 if (alarm.sunriseEnabled) {
-                    InfoChip("☀ Sunrise", BrutusOrange, dim = dim)
+                    InfoChip("☀ Sunrise", cs.tertiaryContainer, cs.onTertiaryContainer, dim = dim)
                 }
-                InfoChip(alarm.challengeName(), BrutusRedBright, dim = dim)
-                InfoChip("Snooze ${alarm.snoozeDuration}m", BrutusTextSecondary, dim = dim)
-                InfoChip("♪ ${alarm.soundName()}", BrutusTextSecondary, dim = dim)
+                InfoChip(alarm.challengeName(), cs.secondaryContainer, cs.onSecondaryContainer, dim = dim)
+                InfoChip("Snooze ${alarm.snoozeDuration}m", cs.surfaceContainerHighest, cs.onSurfaceVariant, dim = dim)
+                InfoChip("♪ ${alarm.soundName()}", cs.surfaceContainerHighest, cs.onSurfaceVariant, dim = dim)
             }
         }
     }
@@ -521,7 +625,12 @@ private fun AlarmCard(
 
 /** Full-width weekday strip — always a single row, each day gets an equal slice. */
 @Composable
-private fun WeekdayStrip(repeatDays: Int, enabled: Boolean) {
+private fun WeekdayStrip(
+    repeatDays: Int,
+    enabled: Boolean,
+    inactiveColor: Color,
+) {
+    val cs = MaterialTheme.colorScheme
     val labels = listOf("Mo", "Di", "Mi", "Do", "Fr", "Sa", "So")
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -530,26 +639,26 @@ private fun WeekdayStrip(repeatDays: Int, enabled: Boolean) {
         labels.forEachIndexed { index, label ->
             val isOn = (repeatDays and (1 shl index)) != 0
             val textColor = when {
-                !enabled -> BrutusTextSecondary.copy(alpha = 0.35f)
-                isOn -> androidx.compose.ui.graphics.Color.White
-                else -> BrutusTextSecondary.copy(alpha = 0.6f)
+                !enabled -> inactiveColor.copy(alpha = 0.5f)
+                isOn -> cs.onPrimary
+                else -> inactiveColor
             }
             val bg = when {
-                isOn && enabled -> BrutusRed
-                isOn -> BrutusRed.copy(alpha = 0.3f)
-                else -> androidx.compose.ui.graphics.Color.Transparent
+                isOn && enabled -> cs.primary
+                isOn -> cs.primary.copy(alpha = 0.25f)
+                else -> Color.Transparent
             }
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .clip(RoundedCornerShape(8.dp))
+                    .clip(MaterialTheme.shapes.extraSmall)
                     .background(bg)
                     .padding(vertical = 5.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = label,
-                    fontSize = 12.sp,
+                    style = MaterialTheme.typography.labelMedium,
                     fontWeight = if (isOn) FontWeight.Bold else FontWeight.Normal,
                     color = textColor
                 )
@@ -561,33 +670,53 @@ private fun WeekdayStrip(repeatDays: Int, enabled: Boolean) {
 @Composable
 private fun InfoChip(
     text: String,
-    color: androidx.compose.ui.graphics.Color,
-    filled: Boolean = false,
+    container: Color,
+    content: Color,
     dim: Boolean = false,
 ) {
-    val alpha = if (dim) 0.5f else 1f
-    if (filled) {
-        Text(
-            text = text,
-            fontSize = 10.sp,
-            fontWeight = FontWeight.Bold,
-            color = androidx.compose.ui.graphics.Color.White.copy(alpha = alpha),
-            modifier = Modifier
-                .clip(RoundedCornerShape(6.dp))
-                .background(color.copy(alpha = alpha))
-                .padding(horizontal = 8.dp, vertical = 3.dp)
-        )
-    } else {
-        Text(
-            text = text,
-            fontSize = 10.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = color.copy(alpha = alpha),
-            modifier = Modifier
-                .clip(RoundedCornerShape(6.dp))
-                .background(color.copy(alpha = 0.14f * alpha))
-                .padding(horizontal = 8.dp, vertical = 3.dp)
-        )
+    val alpha = if (dim) 0.55f else 1f
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelSmall,
+        color = content.copy(alpha = alpha),
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.extraSmall)
+            .background(container.copy(alpha = alpha))
+            .padding(horizontal = 8.dp, vertical = 3.dp)
+    )
+}
+
+@Composable
+private fun EmptyState(onCreate: () -> Unit) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                Icons.Outlined.AlarmAdd,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(72.dp)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Noch kein Alarm",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Brutus weckt dich — garantiert.\nLeg deinen ersten Alarm an.",
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            FilledTonalButton(onClick = onCreate) {
+                Text("Alarm erstellen")
+            }
+        }
     }
 }
 
@@ -607,7 +736,7 @@ private fun BatteryOptimizationBanner(onFix: () -> Unit) {
         title = "Akku-Optimierung aktiv",
         body = "Aggressive Akkusparmaßnahmen können Alarme verschlucken. Whiteliste Brutus, damit er garantiert klingelt.",
         actionLabel = "Whitelisten",
-        accent = BrutusOrange,
+        warning = true,
         onFix = onFix,
     )
 }
@@ -622,17 +751,21 @@ private fun FullScreenIntentBanner(onFix: () -> Unit) {
     )
 }
 
+/** Error container for hard blockers, tertiary (warm orange) for soft warnings. */
 @Composable
 private fun PermissionBanner(
     title: String,
     body: String,
     actionLabel: String,
-    accent: androidx.compose.ui.graphics.Color = BrutusRedBright,
+    warning: Boolean = false,
     onFix: () -> Unit,
 ) {
+    val cs = MaterialTheme.colorScheme
+    val container = if (warning) cs.tertiaryContainer else cs.errorContainer
+    val content = if (warning) cs.onTertiaryContainer else cs.onErrorContainer
     Card(
-        colors = CardDefaults.cardColors(containerColor = accent.copy(alpha = 0.18f)),
-        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = container),
+        shape = MaterialTheme.shapes.medium,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -644,22 +777,78 @@ private fun PermissionBanner(
             Icon(
                 Icons.Default.Warning,
                 contentDescription = null,
-                tint = accent,
+                tint = content,
                 modifier = Modifier.size(24.dp)
             )
             Spacer(modifier = Modifier.size(12.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = title, fontWeight = FontWeight.SemiBold, color = accent)
+                Text(text = title, fontWeight = FontWeight.SemiBold, color = content)
                 Text(
                     text = body,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = content.copy(alpha = 0.85f),
                 )
             }
             Spacer(modifier = Modifier.size(8.dp))
             TextButton(onClick = onFix) {
-                Text(actionLabel, color = accent, fontWeight = FontWeight.SemiBold)
+                Text(actionLabel, color = content, fontWeight = FontWeight.SemiBold)
             }
         }
     }
+}
+
+// ---------------------------------------------------------------------------
+// Previews
+// ---------------------------------------------------------------------------
+
+private val previewNextAlarm = AlarmEntity(
+    id = 1, hour = 6, minute = 30, label = "Frühschicht",
+    repeatDays = 0b0011111, ultraHardcoreMode = true, sunriseEnabled = true,
+)
+private val previewAlarm = AlarmEntity(
+    id = 2, hour = 9, minute = 15, repeatDays = 0b1100000, hardcoreMode = true,
+)
+private val previewDisabledAlarm = AlarmEntity(
+    id = 3, hour = 14, minute = 0, label = "Powernap", enabled = false,
+)
+
+@Composable
+private fun CardStack() {
+    Column(
+        modifier = Modifier.padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        AlarmCard(previewNextAlarm, isNext = true, {}, {}, {}, {})
+        AlarmCard(previewAlarm, isNext = false, {}, {}, {}, {})
+        AlarmCard(previewDisabledAlarm, isNext = false, {}, {}, {}, {})
+    }
+}
+
+@Preview(name = "Cards dark", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
+@Composable
+private fun AlarmCardsPreviewDark() {
+    BrutusTheme(darkTheme = true) { CardStack() }
+}
+
+@Preview(name = "Cards light", uiMode = Configuration.UI_MODE_NIGHT_NO, showBackground = true)
+@Composable
+private fun AlarmCardsPreviewLight() {
+    BrutusTheme(darkTheme = false) { CardStack() }
+}
+
+@Preview(
+    name = "Cards dynamic",
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true,
+    wallpaper = androidx.compose.ui.tooling.preview.Wallpapers.RED_DOMINATED_EXAMPLE,
+)
+@Composable
+private fun AlarmCardsPreviewDynamic() {
+    BrutusTheme(darkTheme = true) { CardStack() }
+}
+
+@Preview(name = "Empty dark", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
+@Composable
+private fun EmptyStatePreviewDark() {
+    BrutusTheme(darkTheme = true) { EmptyState(onCreate = {}) }
 }
