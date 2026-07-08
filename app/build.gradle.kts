@@ -77,6 +77,14 @@ android {
     buildFeatures {
         compose = true
     }
+
+    lint {
+        // AGP 8.7.3's bundled lint crashes (IncompatibleClassChangeError in
+        // NonNullableMutableLiveDataDetector) against the newer AndroidX
+        // artifacts pulled by material3 1.5.0-alpha18 — the app uses no
+        // LiveData at all, so disabling the check loses nothing.
+        disable += "NullSafeMutableLiveData"
+    }
 }
 
 ksp {
