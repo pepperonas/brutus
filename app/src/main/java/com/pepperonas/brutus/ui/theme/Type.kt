@@ -33,8 +33,9 @@ private val SpaceGrotesk = FontFamily(
     ),
 )
 
-// Tabular numerals so ticking clocks (alarm ring, timer, stopwatch) don't
-// jitter horizontally as digits change.
+// Tabular numerals — applied to EVERY style in the scale so all numbers in
+// the app read like the stopwatch: fixed-width digits, no horizontal jitter
+// while ticking (clocks, countdowns, counters, chips).
 private const val TABULAR_NUMS = "tnum"
 
 /**
@@ -69,71 +70,83 @@ val BrutusTypography = Typography(
         fontWeight = FontWeight.Bold,
         fontSize = 32.sp,
         lineHeight = 40.sp,
+        fontFeatureSettings = TABULAR_NUMS,
     ),
     headlineMedium = TextStyle(
         fontFamily = SpaceGrotesk,
         fontWeight = FontWeight.SemiBold,
         fontSize = 24.sp,
         lineHeight = 32.sp,
+        fontFeatureSettings = TABULAR_NUMS,
     ),
     headlineSmall = TextStyle(
         fontFamily = SpaceGrotesk,
         fontWeight = FontWeight.SemiBold,
         fontSize = 20.sp,
         lineHeight = 28.sp,
+        fontFeatureSettings = TABULAR_NUMS,
     ),
     titleLarge = TextStyle(
         fontFamily = SpaceGrotesk,
         fontWeight = FontWeight.SemiBold,
         fontSize = 20.sp,
         lineHeight = 28.sp,
+        fontFeatureSettings = TABULAR_NUMS,
     ),
     titleMedium = TextStyle(
         fontWeight = FontWeight.SemiBold,
         fontSize = 16.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.15.sp,
+        fontFeatureSettings = TABULAR_NUMS,
     ),
     titleSmall = TextStyle(
         fontWeight = FontWeight.Medium,
         fontSize = 14.sp,
         lineHeight = 20.sp,
         letterSpacing = 0.1.sp,
+        fontFeatureSettings = TABULAR_NUMS,
     ),
     bodyLarge = TextStyle(
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.5.sp,
+        fontFeatureSettings = TABULAR_NUMS,
     ),
     bodyMedium = TextStyle(
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
         lineHeight = 20.sp,
         letterSpacing = 0.25.sp,
+        fontFeatureSettings = TABULAR_NUMS,
     ),
     bodySmall = TextStyle(
         fontWeight = FontWeight.Normal,
         fontSize = 12.sp,
         lineHeight = 16.sp,
         letterSpacing = 0.4.sp,
+        fontFeatureSettings = TABULAR_NUMS,
     ),
     labelLarge = TextStyle(
         fontWeight = FontWeight.Medium,
         fontSize = 14.sp,
         lineHeight = 20.sp,
         letterSpacing = 0.1.sp,
+        fontFeatureSettings = TABULAR_NUMS,
     ),
     labelMedium = TextStyle(
         fontWeight = FontWeight.Medium,
         fontSize = 12.sp,
         lineHeight = 16.sp,
         letterSpacing = 0.5.sp,
+        fontFeatureSettings = TABULAR_NUMS,
     ),
     labelSmall = TextStyle(
         fontWeight = FontWeight.Medium,
         fontSize = 11.sp,
         lineHeight = 16.sp,
         letterSpacing = 0.5.sp,
+        fontFeatureSettings = TABULAR_NUMS,
     ),
 )

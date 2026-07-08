@@ -30,6 +30,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,6 +41,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,6 +53,7 @@ import androidx.compose.ui.unit.sp
 import com.pepperonas.brutus.ui.theme.BrutusTheme
 import com.pepperonas.brutus.util.WorldClockStore
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -60,12 +66,40 @@ fun WorldClockScreen() {
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
     var showSheet by remember { mutableStateOf(false) }
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    // Removing a zone is undoable — the snackbar puts it back at its old spot.
+    val removeWithUndo: (String) -> Unit = { zone ->
+        val index = zones.indexOf(zone)
+        if (index >= 0) {
+            val updated = zones - zone
+            zones = updated
+            WorldClockStore.save(context, updated)
+            scope.launch {
+                snackbarHostState.currentSnackbarData?.dismiss()
+                val result = snackbarHostState.showSnackbar(
+                    message = "Zeitzone entfernt",
+                    actionLabel = "Rückgängig",
+                    duration = SnackbarDuration.Long,
+                )
+                if (result == SnackbarResult.ActionPerformed) {
+                    val restored = zones.toMutableList()
+                        .apply { add(index.coerceIn(0, size), zone) }
+                    zones = restored
+                    WorldClockStore.save(context, restored)
+                }
+            }
+        }
+    }
+
     LaunchedEffect(Unit) {
         while (true) {
             now = System.currentTimeMillis()
             delay(1000L)
         }
     }
+
+    Box(modifier = Modifier.fillMaxSize()) {
 
     Column(
         modifier = Modifier
@@ -119,16 +153,20 @@ fun WorldClockScreen() {
                         zoneId = zone,
                         now = now,
                         modifier = Modifier.animateItem(),
-                        onRemove = {
-                            val updated = zones - zone
-                            zones = updated
-                            WorldClockStore.save(context, updated)
-                        }
+                        onRemove = { removeWithUndo(zone) }
                     )
                 }
                 item { Spacer(modifier = Modifier.height(16.dp)) }
             }
         }
+    }
+
+    SnackbarHost(
+        hostState = snackbarHostState,
+        modifier = Modifier
+            .align(Alignment.BottomCenter)
+            .padding(bottom = 8.dp)
+    )
     }
 
     if (showSheet) {

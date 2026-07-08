@@ -26,11 +26,17 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.WavyProgressIndicatorDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -43,6 +49,7 @@ import com.pepperonas.brutus.ui.theme.rememberReducedMotion
 import com.pepperonas.brutus.util.AlarmSound
 import com.pepperonas.brutus.viewmodel.TimerState
 import com.pepperonas.brutus.viewmodel.TimerViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun TimerScreen(viewModel: TimerViewModel = viewModel()) {
@@ -52,6 +59,28 @@ fun TimerScreen(viewModel: TimerViewModel = viewModel()) {
     val liveRemaining = viewModel.liveRemaining
     val selectedSound = viewModel.selectedSound
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    // Aborting a live countdown is undoable — the snackbar resumes it with
+    // the remaining time intact. Stopping a FINISHED timer is not.
+    val cancelWithUndo: () -> Unit = {
+        val undoable = viewModel.state == TimerState.RUNNING ||
+            viewModel.state == TimerState.PAUSED
+        viewModel.cancel()
+        if (undoable) {
+            scope.launch {
+                snackbarHostState.currentSnackbarData?.dismiss()
+                val result = snackbarHostState.showSnackbar(
+                    message = "Timer abgebrochen",
+                    actionLabel = "Rückgängig",
+                    duration = SnackbarDuration.Long,
+                )
+                if (result == SnackbarResult.ActionPerformed) viewModel.undoCancel()
+            }
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -116,7 +145,7 @@ fun TimerScreen(viewModel: TimerViewModel = viewModel()) {
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 FilledTonalButton(
-                    onClick = { viewModel.cancel() },
+                    onClick = cancelWithUndo,
                     shape = MaterialTheme.shapes.large,
                     modifier = Modifier
                         .weight(1f)
@@ -141,6 +170,14 @@ fun TimerScreen(viewModel: TimerViewModel = viewModel()) {
             }
             Spacer(modifier = Modifier.height(24.dp))
         }
+    }
+
+    SnackbarHost(
+        hostState = snackbarHostState,
+        modifier = Modifier
+            .align(Alignment.BottomCenter)
+            .padding(bottom = 8.dp)
+    )
     }
 }
 

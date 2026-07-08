@@ -132,7 +132,7 @@ fun ShakeChallenge(
                 )
                 Text(
                     text = "/ $requiredShakes",
-                    fontSize = 20.sp,
+                    style = MaterialTheme.typography.titleLarge,
                     color = Color.White.copy(alpha = 0.5f)
                 )
             }

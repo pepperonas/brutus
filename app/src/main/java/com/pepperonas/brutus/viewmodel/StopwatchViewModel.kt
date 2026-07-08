@@ -49,13 +49,29 @@ class StopwatchViewModel : ViewModel() {
         }
     }
 
+    // Snapshot of the measurement discarded by the last reset — feeds the
+    // undo snackbar on the screen.
+    private var resetSnapshot: Pair<Long, List<Long>>? = null
+
     fun lapOrReset() {
         if (running) {
             laps.add(0, elapsed)
         } else {
+            if (accumulated > 0L || laps.isNotEmpty()) {
+                resetSnapshot = accumulated to laps.toList()
+            }
             accumulated = 0L
             laps.clear()
         }
+    }
+
+    /** Restores the measurement (elapsed time + laps) discarded by the last reset. */
+    fun undoReset() {
+        val (acc, savedLaps) = resetSnapshot ?: return
+        resetSnapshot = null
+        accumulated = acc
+        laps.clear()
+        laps.addAll(savedLaps)
     }
 
     private fun startTicker() {

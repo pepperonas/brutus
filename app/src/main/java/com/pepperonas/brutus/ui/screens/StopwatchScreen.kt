@@ -3,6 +3,7 @@ package com.pepperonas.brutus.ui.screens
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,8 +16,14 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pepperonas.brutus.ui.theme.BrutusTheme
 import com.pepperonas.brutus.viewmodel.StopwatchViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun StopwatchScreen(viewModel: StopwatchViewModel = viewModel()) {
@@ -35,6 +43,28 @@ fun StopwatchScreen(viewModel: StopwatchViewModel = viewModel()) {
     val laps = viewModel.laps
     val elapsed = viewModel.elapsed
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    // Reset discards the measurement — undoable via snackbar (restores
+    // elapsed time and all laps from the ViewModel snapshot).
+    val lapOrResetWithUndo: () -> Unit = {
+        val wasReset = !viewModel.running &&
+            (viewModel.elapsed > 0L || viewModel.laps.isNotEmpty())
+        viewModel.lapOrReset()
+        if (wasReset) {
+            scope.launch {
+                snackbarHostState.currentSnackbarData?.dismiss()
+                val result = snackbarHostState.showSnackbar(
+                    message = "Stoppuhr zurückgesetzt",
+                    actionLabel = "Rückgängig",
+                    duration = SnackbarDuration.Long,
+                )
+                if (result == SnackbarResult.ActionPerformed) viewModel.undoReset()
+            }
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -68,7 +98,7 @@ fun StopwatchScreen(viewModel: StopwatchViewModel = viewModel()) {
         ) {
             // Left: Reset / Lap
             FilledTonalButton(
-                onClick = { viewModel.lapOrReset() },
+                onClick = lapOrResetWithUndo,
                 shape = MaterialTheme.shapes.large,
                 modifier = Modifier
                     .weight(1f)
@@ -109,12 +139,21 @@ fun StopwatchScreen(viewModel: StopwatchViewModel = viewModel()) {
             }
         }
     }
+
+    SnackbarHost(
+        hostState = snackbarHostState,
+        modifier = Modifier
+            .align(Alignment.BottomCenter)
+            .padding(bottom = 8.dp)
+    )
+    }
 }
 
 /** Tonal lap entry — newest lap springs in at the top via animateItem(). */
 @Composable
 private fun LapRow(number: Int, diff: Long, total: Long, modifier: Modifier = Modifier) {
-    val numStyle = MaterialTheme.typography.bodyLarge.copy(fontFeatureSettings = "tnum")
+    // Tabular numerals come with every scale style now (Type.kt).
+    val numStyle = MaterialTheme.typography.bodyLarge
     Row(
         modifier = modifier
             .fillMaxWidth()

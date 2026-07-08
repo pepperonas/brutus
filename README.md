@@ -698,6 +698,8 @@ Planned, no specific timeline:
 - [x] Undo snackbar for deletions (single + delete-all, restores scheduling) (v1.9.0)
 - [x] Copy alarms — prefilled "Alarm kopieren" edit sheet per card (v1.9.0)
 - [x] **Material 3 Expressive redesign** — full color-role system (dark + light + Material You opt-in), `MaterialExpressiveTheme` with spatial springs, Space Grotesk display type with tabular numerals, tonal card hierarchy, swipe-to-delete, morphing FAB/CTAs, on-screen math keypad, wavy progress rings, day/night world-clock roles, shared-axis tab transitions, reduced-motion support (v2.0.0)
+- [x] Tabular numerals on the entire type scale — every number in the app ticks like the stopwatch, zero jitter (v2.1.0)
+- [x] Undo everywhere — world-clock zone removal (restored in place), stopwatch reset (elapsed + laps), timer abort (resumes with remaining time), on top of the existing alarm-delete undo (v2.1.0)
 - [ ] Per-alarm sound override at runtime
 - [ ] Multi-QR support (different codes for different alarms)
 - [ ] Wear OS companion

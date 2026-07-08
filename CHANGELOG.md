@@ -2,6 +2,30 @@
 
 All notable changes to Brutus are documented here. Versions follow [SemVer](https://semver.org).
 
+## [2.1.0] — 2026-07-08 · Tabellarische Ziffern überall + Undo überall
+
+### Changed
+- **Alle Zahlen im Stoppuhr-Look**: `fontFeatureSettings = "tnum"` sitzt jetzt
+  auf **jedem** Stil der Type-Scale (display → label) — jede Zahl in der App
+  läuft mit tabellarischen Ziffern (Countdown-Header, Chips, Steppers,
+  Sunrise-Countdown, Keypad, Runden, …), nichts wackelt mehr beim Ticken.
+  Die letzten stillosen Zahlen-Texte (Shake-/Step-"/ x") auf Scale-Stile
+  gehoben; redundante lokale `tnum`-Kopien entfernt.
+
+### Added — Undo überall
+Bisher gab es Undo nur fürs Löschen von Alarmen. Jetzt ist jede verwerfende
+Aktion per Snackbar ("Rückgängig", 10 s) umkehrbar:
+- **Weltuhr**: entfernte Zeitzone kommt an ihrer alten Position zurück.
+- **Stoppuhr**: Reset ist umkehrbar — Messung **inkl. aller Runden** wird aus
+  einem ViewModel-Snapshot wiederhergestellt.
+- **Timer**: Abbruch eines laufenden/pausierten Countdowns ist umkehrbar —
+  läuft mit der Restzeit weiter (bzw. bleibt pausiert). Das Stoppen eines
+  **abgelaufenen** Timers ist bewusst nicht undoable (würde den Alarmton
+  wiederbeleben).
+- Alarm-Löschen (einzeln + alle) hatte Undo bereits seit v1.9.0.
+
+versionCode 14.
+
 ## [2.0.0] — 2026-07-08 · M3 Expressive, Phase 4: Motion-Polish & Konsistenz (final)
 
 The Expressive redesign is complete — this closes the 2.0.0-alpha series.

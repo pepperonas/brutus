@@ -82,11 +82,38 @@ class TimerViewModel(application: Application) : AndroidViewModel(application) {
         startTicker()
     }
 
+    // Snapshot of a mid-flight timer killed by cancel() — feeds the undo
+    // snackbar. Stopping a FINISHED timer is not undoable (nothing left to
+    // resume; resurrecting the alarm sound would be hostile).
+    private var cancelSnapshot: Pair<Long, Boolean>? = null // remaining ms, wasRunning
+
     fun cancel() {
+        cancelSnapshot = when (state) {
+            TimerState.RUNNING ->
+                (endAt - SystemClock.elapsedRealtime()).coerceAtLeast(0L) to true
+            TimerState.PAUSED -> remaining to false
+            else -> null
+        }
         player.stop()
         stopTicker()
         state = TimerState.IDLE
         remaining = 0L
+    }
+
+    /** True right after cancel() aborted a running/paused countdown. */
+    val lastCancelUndoable: Boolean get() = cancelSnapshot != null
+
+    /** Restores the countdown aborted by the last cancel(), resuming if it ran. */
+    fun undoCancel() {
+        val (rem, wasRunning) = cancelSnapshot ?: return
+        cancelSnapshot = null
+        if (rem <= 0L) return
+        remaining = rem
+        if (wasRunning) {
+            resume()
+        } else {
+            state = TimerState.PAUSED
+        }
     }
 
     private fun startTicker() {
