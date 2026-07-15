@@ -85,7 +85,7 @@ Starting with v1.2.0 Brutus ships as a full clock suite. A persistent bottom nav
 
 | Tab | Icon | Purpose |
 |-----|------|---------|
-| **Alarm** | ⏰ | Expressive alarm list with countdown header, tonal card hierarchy (next alarm highlighted), swipe-to-delete + undo, per-alarm edit sheet, all the brutal wake modes |
+| **Alarm** | ⏰ | Expressive alarm list with countdown header, state-coded cards (enabled = muted red, disabled = gray; next alarm ringed by a primary outline), swipe-to-delete + undo, per-alarm edit sheet, all the brutal wake modes |
 | **Weltuhr** | 🌐 | Live multi-time-zone board powered by `java.time.ZoneId` — add/remove cities, ticks every second |
 | **Stoppuhr** | ⏱ | Start / Stop / Lap stopwatch with centisecond precision via `SystemClock.elapsedRealtime()` |
 | **Timer** | ⌛ | HMS-picker countdown timer with quick presets (1m, 3m, 5m, 10m, 15m, 30m) — rings system alarm tone on finish |
@@ -544,14 +544,24 @@ Tests live alongside the production code under `app/src/test/java/...`:
 
 ```
 app/src/test/java/com/pepperonas/brutus/
+├── data/
+│   └── AlarmEntityTest.kt              6 tests — timeString padding, repeatDaysString cases, day bitmask, hardcoreEffective (v2.1.1)
 ├── scheduler/
 │   └── AlarmSchedulerConstantsTest.kt  4 tests — UHC offsets, sunrise lead, intent extra uniqueness (v1.6.0)
-└── util/
-    ├── AlarmSoundGeneratorTest.kt      7 tests — PCM length, peak amplitudes, loop-boundary fade, gentle vs harsh + extreme list (v1.7.0)
-    ├── ChallengeFlagsTest.kt           7 tests — describe / activeList / has / sanitize bitmask edge cases
-    ├── ChallengeDifficultyTest.kt      6 tests — math operand ranges, shake threshold ordering, label coverage (v1.4.0)
-    └── NextAlarmCalculatorTest.kt     17 tests — one-shot today/tomorrow, repeating wrap, weekend selection, formatCountdown
+├── util/
+│   ├── AlarmSoundGeneratorTest.kt      7 tests — PCM length, peak amplitudes, loop-boundary fade, gentle vs harsh + extreme list (v1.7.0)
+│   ├── ChallengeFlagsTest.kt           7 tests — describe / activeList / has / sanitize bitmask edge cases
+│   ├── ChallengeDifficultyTest.kt      6 tests — math operand ranges, shake threshold ordering, label coverage (v1.4.0)
+│   └── NextAlarmCalculatorTest.kt     17 tests — one-shot today/tomorrow, repeating wrap, weekend selection, formatCountdown
+└── viewmodel/
+    ├── StopwatchViewModelTest.kt       6 tests — segment accumulation, laps, reset-undo snapshot semantics (v2.1.1)
+    └── TimerViewModelTest.kt           8 tests — countdown/pause math, cancel-undo state machine, finished-not-undoable (v2.1.1, Robolectric)
 ```
+
+**61 tests** in total. Both ViewModels take an injectable `now: () -> Long` clock
+(defaulting to `SystemClock::elapsedRealtime`), so the timing state machines are tested
+deterministically on the JVM; `TimerViewModelTest` runs under **Robolectric** for its
+`Application`/`SharedPreferences` needs, everything else is plain JUnit.
 
 Run them with `./gradlew :app:testDebugUnitTest`. The `tests.yml` GitHub workflow runs them on every push to `main` and every pull request.
 
@@ -700,6 +710,8 @@ Planned, no specific timeline:
 - [x] **Material 3 Expressive redesign** — full color-role system (dark + light + Material You opt-in), `MaterialExpressiveTheme` with spatial springs, Space Grotesk display type with tabular numerals, tonal card hierarchy, swipe-to-delete, morphing FAB/CTAs, on-screen math keypad, wavy progress rings, day/night world-clock roles, shared-axis tab transitions, reduced-motion support (v2.0.0)
 - [x] Tabular numerals on the entire type scale — every number in the app ticks like the stopwatch, zero jitter (v2.1.0)
 - [x] Undo everywhere — world-clock zone removal (restored in place), stopwatch reset (elapsed + laps), timer abort (resumes with remaining time), on top of the existing alarm-delete undo (v2.1.0)
+- [x] Alarm-card color encodes the enabled state — all active alarms share one muted red, disabled ones sink to gray, the next alarm wears a thin primary outline instead of a confusing different fill (v2.1.1)
+- [x] ViewModel unit tests — injectable clock, 20 new tests for the stopwatch/timer state machines (incl. undo snapshots) + AlarmEntity helpers, Robolectric for the timer (v2.1.1)
 - [ ] Per-alarm sound override at runtime
 - [ ] Multi-QR support (different codes for different alarms)
 - [ ] Wear OS companion

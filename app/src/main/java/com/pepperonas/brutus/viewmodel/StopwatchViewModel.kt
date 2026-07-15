@@ -16,8 +16,13 @@ import kotlinx.coroutines.launch
  * active measurement (including laps) survives bottom-nav tab switches.
  * Time is wall-clock based (elapsedRealtime), so it stays correct even while
  * the ticker is throttled or the screen is elsewhere.
+ *
+ * [now] is injectable for unit tests; since every parameter has a default the
+ * compiler emits the no-arg constructor `viewModel()` needs.
  */
-class StopwatchViewModel : ViewModel() {
+class StopwatchViewModel(
+    private val now: () -> Long = SystemClock::elapsedRealtime,
+) : ViewModel() {
 
     // When `startAt` > 0 the stopwatch is running. `accumulated` holds time
     // from all prior run segments.
@@ -39,11 +44,11 @@ class StopwatchViewModel : ViewModel() {
 
     fun startStop() {
         if (running) {
-            accumulated += SystemClock.elapsedRealtime() - startAt
+            accumulated += now() - startAt
             startAt = 0L
             stopTicker()
         } else {
-            startAt = SystemClock.elapsedRealtime()
+            startAt = now()
             tick = startAt
             startTicker()
         }
@@ -78,7 +83,7 @@ class StopwatchViewModel : ViewModel() {
         stopTicker()
         tickerJob = viewModelScope.launch {
             while (running) {
-                tick = SystemClock.elapsedRealtime()
+                tick = now()
                 delay(25L)
             }
         }

@@ -78,6 +78,14 @@ android {
         compose = true
     }
 
+    testOptions {
+        unitTests {
+            // Robolectric (TimerViewModelTest needs a real-ish Application +
+            // SharedPreferences on the JVM).
+            isIncludeAndroidResources = true
+        }
+    }
+
     lint {
         // AGP 8.7.3's bundled lint crashes (IncompatibleClassChangeError in
         // NonNullableMutableLiveDataDetector) against the newer AndroidX
@@ -139,4 +147,7 @@ dependencies {
     // Test dependencies
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlin:kotlin-test:2.1.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
+    testImplementation("org.robolectric:robolectric:4.14.1")
+    testImplementation("androidx.test:core:1.6.1")
 }

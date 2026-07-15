@@ -23,8 +23,14 @@ enum class TimerState { IDLE, RUNNING, PAUSED, FINISHED }
  * running timer survives bottom-nav tab switches (the screen composable gets
  * disposed on every tab change) and still fires its finish sound while the user
  * is on another tab.
+ *
+ * [now] is injectable for unit tests; @JvmOverloads keeps the (Application)
+ * constructor the AndroidViewModelFactory instantiates via reflection.
  */
-class TimerViewModel(application: Application) : AndroidViewModel(application) {
+class TimerViewModel @JvmOverloads constructor(
+    application: Application,
+    private val now: () -> Long = SystemClock::elapsedRealtime,
+) : AndroidViewModel(application) {
 
     var hours by mutableIntStateOf(0)
     var minutes by mutableIntStateOf(5)
@@ -62,7 +68,7 @@ class TimerViewModel(application: Application) : AndroidViewModel(application) {
         player.stop()
         val totalMs = (hours * 3600L + minutes * 60L + seconds) * 1000L
         if (totalMs <= 0L) return
-        tick = SystemClock.elapsedRealtime()
+        tick = now()
         endAt = tick + totalMs
         remaining = totalMs
         state = TimerState.RUNNING
@@ -70,13 +76,13 @@ class TimerViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun pause() {
-        remaining = (endAt - SystemClock.elapsedRealtime()).coerceAtLeast(0L)
+        remaining = (endAt - now()).coerceAtLeast(0L)
         state = TimerState.PAUSED
         stopTicker()
     }
 
     fun resume() {
-        tick = SystemClock.elapsedRealtime()
+        tick = now()
         endAt = tick + remaining
         state = TimerState.RUNNING
         startTicker()
@@ -90,7 +96,7 @@ class TimerViewModel(application: Application) : AndroidViewModel(application) {
     fun cancel() {
         cancelSnapshot = when (state) {
             TimerState.RUNNING ->
-                (endAt - SystemClock.elapsedRealtime()).coerceAtLeast(0L) to true
+                (endAt - now()).coerceAtLeast(0L) to true
             TimerState.PAUSED -> remaining to false
             else -> null
         }
@@ -120,7 +126,7 @@ class TimerViewModel(application: Application) : AndroidViewModel(application) {
         stopTicker()
         tickerJob = viewModelScope.launch {
             while (state == TimerState.RUNNING) {
-                tick = SystemClock.elapsedRealtime()
+                tick = now()
                 if (tick >= endAt) {
                     state = TimerState.FINISHED
                     remaining = 0L

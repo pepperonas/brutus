@@ -15,6 +15,19 @@ All notable changes to Brutus are documented here. Versions follow [SemVer](http
   wird stattdessen durch eine schmale primary-Outline markiert (der Header
   nennt ihn ohnehin).
 
+### Added — Unit-Tests für die ViewModel-Zustandsmaschinen
+- **20 neue Tests** (insgesamt 61): `StopwatchViewModelTest` (6 — Segment-
+  Akkumulation, Runden, Reset-Undo-Snapshot inkl. Single-Shot-Semantik),
+  `TimerViewModelTest` (8 — Countdown-/Pause-Mathematik, Cancel-Undo-Automat,
+  abgelaufener Timer bewusst nicht undoable; läuft unter Robolectric) und
+  `AlarmEntityTest` (6 — timeString-Padding, repeatDaysString-Fälle,
+  Wochentags-Bitmaske, hardcoreEffective).
+- Dafür bekamen beide ViewModels eine **injizierbare Clock**
+  (`now: () -> Long`, Default `SystemClock::elapsedRealtime`) — kein
+  Verhaltensunterschied in der App, aber die Timing-Logik ist jetzt
+  deterministisch auf der JVM testbar. Neue Test-Dependencies:
+  kotlinx-coroutines-test, Robolectric, androidx.test:core.
+
 versionCode 15.
 
 ## [2.1.0] — 2026-07-08 · Tabellarische Ziffern überall + Undo überall
