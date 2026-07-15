@@ -3,6 +3,7 @@ package com.pepperonas.brutus.ui.screens
 import android.content.res.Configuration
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -64,6 +65,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -505,9 +507,11 @@ private fun DismissableAlarmCard(
 }
 
 /**
- * Tonal card hierarchy: the NEXT firing alarm sits on primaryContainer, other
- * enabled alarms on surfaceContainerHigh, disabled ones sink to
- * surfaceContainerLow with dimmed content.
+ * Card color encodes the ENABLED state only: every enabled alarm sits on the
+ * same muted red container (primaryContainer blended toward the surface so a
+ * list full of alarms stays calm), disabled ones sink to surfaceContainerLow.
+ * The next firing alarm keeps its color and is marked by a thin primary
+ * outline instead — same state, same color; the header names it anyway.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -522,22 +526,16 @@ private fun AlarmCard(
     val cs = MaterialTheme.colorScheme
     val dim = !alarm.enabled
 
+    // Muted red: primaryContainer pulled halfway toward the neutral surface —
+    // clearly "armed", but a screen full of enabled alarms doesn't scream.
+    val enabledContainer = lerp(cs.surfaceContainerHigh, cs.primaryContainer, 0.45f)
     val containerColor by animateColorAsState(
-        targetValue = when {
-            isNext && alarm.enabled -> cs.primaryContainer
-            alarm.enabled -> cs.surfaceContainerHigh
-            else -> cs.surfaceContainerLow
-        },
+        targetValue = if (alarm.enabled) enabledContainer else cs.surfaceContainerLow,
         label = "cardColor"
     )
-    val timeColor = when {
-        isNext && alarm.enabled -> cs.onPrimaryContainer
-        alarm.enabled -> cs.onSurface
-        else -> cs.onSurfaceVariant.copy(alpha = 0.6f)
-    }
+    val timeColor = if (alarm.enabled) cs.onSurface else cs.onSurfaceVariant.copy(alpha = 0.6f)
     val subColor = when {
-        isNext && alarm.enabled -> cs.onPrimaryContainer.copy(alpha = 0.75f)
-        alarm.enabled -> cs.onSurfaceVariant
+        alarm.enabled -> lerp(cs.onSurfaceVariant, cs.onPrimaryContainer, 0.5f)
         else -> cs.onSurfaceVariant.copy(alpha = 0.5f)
     }
 
@@ -545,6 +543,7 @@ private fun AlarmCard(
         onClick = onClick,
         colors = CardDefaults.cardColors(containerColor = containerColor),
         shape = MaterialTheme.shapes.large,
+        border = if (isNext && alarm.enabled) BorderStroke(2.dp, cs.primary) else null,
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(

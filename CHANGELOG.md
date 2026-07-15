@@ -2,6 +2,21 @@
 
 All notable changes to Brutus are documented here. Versions follow [SemVer](https://semver.org).
 
+## [2.1.1] — 2026-07-15 · Card-Farbe = Aktiv-Zustand
+
+### Fixed
+- **Alarm-Cards kodieren jetzt den Aktiv-Zustand, nicht den nächsten Alarm**:
+  vorher bekam nur der als Nächstes klingelnde Wecker die volle
+  primaryContainer-Fläche — drei aktive Wecker sahen dreifach unterschiedlich
+  aus, obwohl sie im selben Zustand waren. Jetzt liegen **alle aktiven** Wecker
+  auf demselben gedämpften Rot (primaryContainer zur Surface hin abgemischt,
+  ruhig auch bei vielen Alarmen), **inaktive** sinken wie bisher auf
+  grau/dunkel (surfaceContainerLow). Der nächste Alarm behält seine Farbe und
+  wird stattdessen durch eine schmale primary-Outline markiert (der Header
+  nennt ihn ohnehin).
+
+versionCode 15.
+
 ## [2.1.0] — 2026-07-08 · Tabellarische Ziffern überall + Undo überall
 
 ### Changed
