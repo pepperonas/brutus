@@ -2,6 +2,15 @@
 
 All notable changes to Brutus are documented here. Versions follow [SemVer](https://semver.org).
 
+## [Unreleased]
+
+### Added
+- **14 weitere Unit-Tests** (insgesamt 75): `MathProblemTest` (8 — Antwort-/
+  Display-Logik, Range- und Vorzeichen-Invarianten des Aufgaben-Generators je
+  Schwierigkeitsgrad über 500 Samples, Operator-/Difficulty-Fallbacks) und
+  `WorldClockStoreTest` (6 — Default-Seeding beim ersten Start, Roundtrips,
+  leere Liste fällt nicht auf Defaults zurück, Blank-Filterung; Robolectric).
+
 ## [2.1.1] — 2026-07-15 · Card-Farbe = Aktiv-Zustand
 
 ### Fixed

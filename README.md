@@ -548,20 +548,23 @@ app/src/test/java/com/pepperonas/brutus/
 │   └── AlarmEntityTest.kt              6 tests — timeString padding, repeatDaysString cases, day bitmask, hardcoreEffective (v2.1.1)
 ├── scheduler/
 │   └── AlarmSchedulerConstantsTest.kt  4 tests — UHC offsets, sunrise lead, intent extra uniqueness (v1.6.0)
+├── ui/alarm/
+│   └── MathProblemTest.kt              8 tests — answer/display, per-difficulty range + sign invariants (500 samples), operator fallback
 ├── util/
 │   ├── AlarmSoundGeneratorTest.kt      7 tests — PCM length, peak amplitudes, loop-boundary fade, gentle vs harsh + extreme list (v1.7.0)
 │   ├── ChallengeFlagsTest.kt           7 tests — describe / activeList / has / sanitize bitmask edge cases
 │   ├── ChallengeDifficultyTest.kt      6 tests — math operand ranges, shake threshold ordering, label coverage (v1.4.0)
-│   └── NextAlarmCalculatorTest.kt     17 tests — one-shot today/tomorrow, repeating wrap, weekend selection, formatCountdown
+│   ├── NextAlarmCalculatorTest.kt     17 tests — one-shot today/tomorrow, repeating wrap, weekend selection, formatCountdown
+│   └── WorldClockStoreTest.kt          6 tests — default seeding, round-trips, empty list sticks, blank filtering (Robolectric)
 └── viewmodel/
     ├── StopwatchViewModelTest.kt       6 tests — segment accumulation, laps, reset-undo snapshot semantics (v2.1.1)
     └── TimerViewModelTest.kt           8 tests — countdown/pause math, cancel-undo state machine, finished-not-undoable (v2.1.1, Robolectric)
 ```
 
-**61 tests** in total. Both ViewModels take an injectable `now: () -> Long` clock
+**75 tests** in total. Both ViewModels take an injectable `now: () -> Long` clock
 (defaulting to `SystemClock::elapsedRealtime`), so the timing state machines are tested
-deterministically on the JVM; `TimerViewModelTest` runs under **Robolectric** for its
-`Application`/`SharedPreferences` needs, everything else is plain JUnit.
+deterministically on the JVM; `TimerViewModelTest` and `WorldClockStoreTest` run under
+**Robolectric** for their `Application`/`SharedPreferences` needs, everything else is plain JUnit.
 
 Run them with `./gradlew :app:testDebugUnitTest`. The `tests.yml` GitHub workflow runs them on every push to `main` and every pull request.
 
