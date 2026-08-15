@@ -26,7 +26,7 @@
 [![targetSdk](https://img.shields.io/badge/targetSdk-35%20%C2%B7%20Android%2015-3DDC84?logo=android&logoColor=white)](https://apilevels.com)
 [![compileSdk](https://img.shields.io/badge/compileSdk-35-3DDC84?logo=android&logoColor=white)](https://developer.android.com/tools/releases/platforms)
 [![JDK](https://img.shields.io/badge/JDK-17-437291?logo=openjdk&logoColor=white)](https://adoptium.net)
-[![APK size](https://img.shields.io/badge/APK-4.1%20MB-blueviolet?logo=android&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
+[![APK size](https://img.shields.io/badge/APK-4.2%20MB-blueviolet?logo=android&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
 
 <!-- Sprache, Build & Toolchain -->
 
@@ -129,7 +129,7 @@ Alles steckt in einer Bottom-Navigation mit vier Tabs, die den brutalen Wecker-K
 
 ## Screenshots
 
-Aufgenommen mit **v2.1.1**, dunkles Theme, Marken-Farbschema (Material You aus). Die App gibt es auf Englisch und Deutsch — siehe [Sprachen](#sprachen).
+Aufgenommen mit **v2.2.0**, dunkles Theme, Marken-Farbschema (Material You aus). Die App gibt es auf Englisch und Deutsch — siehe [Sprachen](#sprachen).
 
 <table>
   <tr>
@@ -504,13 +504,13 @@ Sideloading heißt, einer Datei aus dem Internet zu vertrauen — hier ist alles
 | Schlüssel | RSA 4096, gültig 2026-04-12 → 2053-08-28 (10.000 Tage) |
 | Signaturschema | APK Signature Scheme v2 |
 | **Zertifikat-SHA-256** | `69d67a10a826cf4050da4b271af9b5ed500c962bfab07a8f8fe863e3d7600382` |
-| APK v2.1.1 | 4.314.121 Bytes · SHA-256 `58efab61ea970121cb1cb505f0e757d1a57eac212ee13a5c55e1034f4882aea1` |
+| APK v2.2.0 | 4.414.213 Bytes · SHA-256 `48cf9cfc85dffe864273ab4732468029d8a3dff2b4cb01e41b8007534cbab7a4` |
 
 Der **Zertifikats**-Fingerabdruck ist der dauerhafte — er bleibt über alle Releases identisch, eine Abweichung bedeutet also, dass das APK nicht von hier stammt. Der APK-Hash ändert sich mit jeder Version.
 
 ```bash
-shasum -a 256 brutus-v2.1.1.apk
-$ANDROID_HOME/build-tools/35.0.0/apksigner verify --print-certs -v brutus-v2.1.1.apk
+shasum -a 256 brutus-v2.2.0.apk
+$ANDROID_HOME/build-tools/35.0.0/apksigner verify --print-certs -v brutus-v2.2.0.apk
 ```
 
 ### Hinweis für Samsung
@@ -878,7 +878,7 @@ T + 15m AlarmReceiver feuert mit EXTRA_IS_FOLLOWUP=true, seq=2
 - **Jede Entscheidung stellt das Aufwachen über UX-Höflichkeit.** Wer einen höflichen Wecker braucht, nimmt die System-Uhr.
 - **Aufgaben sind konfigurierbar, weil Gehirne verschieden sind.** Manche brauchen Mathe, andere nur Bewegung. Manche beides.
 - **Kein Konto, kein Netz, kein Tracking.** Brutus fasst das Internet nie an.
-- **APK-Größe zählt mehr als anfangs gedacht.** v1.2.0 wog 35 MB wegen des gebündelten ML Kit; v1.3.0 wechselte auf die unbundled-Variante und schaltete R8-Minifizierung + Resource-Shrinking ein — rund 88 % weniger Download ohne Funktionsverlust. v2.1.1 liegt bei **4.314.121 Bytes (≈ 4,1 MiB)**, und darin steckt inzwischen die vollständige Material-3-Expressive-Theme-Schicht.
+- **APK-Größe zählt mehr als anfangs gedacht.** v1.2.0 wog 35 MB wegen des gebündelten ML Kit; v1.3.0 wechselte auf die unbundled-Variante und schaltete R8-Minifizierung + Resource-Shrinking ein — rund 88 % weniger Download ohne Funktionsverlust. v2.2.0 liegt bei **4.414.213 Bytes (≈ 4,2 MiB)**, und darin steckt inzwischen die vollständige Material-3-Expressive-Theme-Schicht *und* eine zweite Sprache.
 - **Prozedurales Audio schlägt lizenzierte Samples.** Synthetisierte Sounds bedeuten keine Urheberrechtsfragen, kein Laden von Assets, keinen Datei-Cache — und die Töne lassen sich so fies stimmen, wie es nötig ist.
 - **Destruktive DB-Migration war in der Vor-1.0-Zeit akzeptabel.** Seit v1.3.0 gibt es echte Room-Migrationen; nur die Entwickler-Versionen 1–3 fallen noch auf ein sauberes Neuanlegen zurück.
 

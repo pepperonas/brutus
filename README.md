@@ -26,7 +26,7 @@
 [![targetSdk](https://img.shields.io/badge/targetSdk-35%20%C2%B7%20Android%2015-3DDC84?logo=android&logoColor=white)](https://apilevels.com)
 [![compileSdk](https://img.shields.io/badge/compileSdk-35-3DDC84?logo=android&logoColor=white)](https://developer.android.com/tools/releases/platforms)
 [![JDK](https://img.shields.io/badge/JDK-17-437291?logo=openjdk&logoColor=white)](https://adoptium.net)
-[![APK size](https://img.shields.io/badge/APK-4.1%20MB-blueviolet?logo=android&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
+[![APK size](https://img.shields.io/badge/APK-4.2%20MB-blueviolet?logo=android&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
 
 <!-- Language, build & toolchain -->
 
@@ -129,7 +129,7 @@ Everything is packed into a four-tab bottom navigation that keeps the brutal ala
 
 ## Screenshots
 
-Captured on **v2.1.1**, dark theme, brand color scheme (Material You off). The app ships in English and German — see [Languages](#languages).
+Captured on **v2.2.0**, dark theme, brand color scheme (Material You off). The app ships in English and German — see [Languages](#languages).
 
 <table>
   <tr>
@@ -522,14 +522,14 @@ check that it is really the one this repository published.
 | Key | RSA 4096, valid 2026-04-12 → 2053-08-28 (10,000 days) |
 | Signature scheme | APK Signature Scheme v2 |
 | **Certificate SHA-256** | `69d67a10a826cf4050da4b271af9b5ed500c962bfab07a8f8fe863e3d7600382` |
-| v2.1.1 APK | 4,314,121 bytes · SHA-256 `58efab61ea970121cb1cb505f0e757d1a57eac212ee13a5c55e1034f4882aea1` |
+| v2.2.0 APK | 4,414,213 bytes · SHA-256 `48cf9cfc85dffe864273ab4732468029d8a3dff2b4cb01e41b8007534cbab7a4` |
 
 The **certificate** fingerprint is the durable one — it stays identical across every release,
 so a mismatch means the APK did not come from here. The APK hash changes with every version.
 
 ```bash
-shasum -a 256 brutus-v2.1.1.apk
-$ANDROID_HOME/build-tools/35.0.0/apksigner verify --print-certs -v brutus-v2.1.1.apk
+shasum -a 256 brutus-v2.2.0.apk
+$ANDROID_HOME/build-tools/35.0.0/apksigner verify --print-certs -v brutus-v2.2.0.apk
 ```
 
 ### Samsung note
@@ -956,7 +956,7 @@ T + 15m AlarmReceiver fires with EXTRA_IS_FOLLOWUP=true, seq=2
 - **Every decision favors waking the user up over UX politeness.** If you need a polite alarm, use the system clock.
 - **Challenges are configurable because brains are different.** Some people need math; others just need physical movement. Some need both.
 - **No account, no network, no tracking.** Brutus never touches the internet.
-- **APK size matters more than we initially thought.** v1.2.0 was 35 MB because of bundled ML Kit; v1.3.0 switched to the unbundled variant and turned on R8 minification + resource shrinking, cutting the download by roughly 88 % without losing any functionality. v2.1.1 ships at **4,314,121 bytes (≈ 4.1 MiB)** — and that now includes the full Material 3 Expressive theme layer.
+- **APK size matters more than we initially thought.** v1.2.0 was 35 MB because of bundled ML Kit; v1.3.0 switched to the unbundled variant and turned on R8 minification + resource shrinking, cutting the download by roughly 88 % without losing any functionality. v2.2.0 ships at **4,414,213 bytes (≈ 4.2 MiB)** — and that now includes the full Material 3 Expressive theme layer *and* a second language.
 - **Procedural audio beats licensed samples.** Synthesized sounds mean no copyright issues, no asset loading, no file cache — and the sounds can be tuned to be as nasty as needed.
 - **Destructive DB migration is acceptable during pre-1.0 development.** Once Brutus hits a real release cadence, proper Room migrations will replace the current fallback.
 

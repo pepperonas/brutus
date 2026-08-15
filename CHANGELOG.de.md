@@ -4,7 +4,7 @@
 
 Alle nennenswerten Änderungen an Brutus stehen hier. Versionen folgen [SemVer](https://semver.org).
 
-## [Unreleased]
+## [2.2.0] — 2026-08-15 · Englisch + Deutsch, und 168 weitere Tests
 
 ### Hinzugefügt — Lokalisierung Englisch und Deutsch
 - **Die App gibt es jetzt in zwei Sprachen.** Jeder sichtbare String ist aus dem
@@ -48,46 +48,43 @@ Alle nennenswerten Änderungen an Brutus stehen hier. Versionen folgen [SemVer](
   String mehr, sondern fällt auf „Keine" / „None" zurück — ein korrupter oder
   zukünftiger Wert kann so keinen leeren Chip erzeugen.
 
-## [Unreleased — davor]
-
-### Hinzugefügt
-- **144 weitere Unit-Tests** (75 → **219**), zwölf neue Suites entlang der bisher
-  ungetesteten Pfade:
-  - `AlarmSchedulerTest` (23, Robolectric/`ShadowAlarmManager`) — was
-    **tatsächlich in AlarmManager landet**: Trigger auf der konfigurierten
-    Uhrzeit und in der Zukunft, verstrichene Zeit rutscht auf morgen,
-    Wochentags-Treffer, Sunrise exakt 10 min davor und nur solange er noch in der
-    Zukunft liegt, `setExactAndAllowWhileIdle` (Doze), **Regressionsschutz für
-    den Stale-Sunrise-Fix aus v1.8.0**, Snooze-Intervalle und die
-    Request-Code-Trennung: Hauptalarm + Sunrise + zwei Re-Alarme desselben Alarms
-    koexistieren, ohne sich gegenseitig zu überschreiben.
-  - `AlarmDaoTest` (15, In-Memory-Room) — echtes SQL statt Mock: Sortierung,
-    `getEnabledAlarms` fürs Boot-Rescheduling, Vollfeld-Roundtrip,
-    REPLACE-Konflikt, Undo-Restore mit `id = 0`, Repository-Durchreiche.
-  - `ClockFormattingTest` (14) — Stoppuhr-/Timer-Ablesungen inkl. **konstanter
-    Stringbreite** (Grundlage der Tabellenziffern aus v2.1.0), Trunkierung statt
-    Aufrunden, Stunden-Spalte exakt an der Stundengrenze.
-  - `UltraHardcoreStoreTest` (12) — die Buchführung, die einen Reboot überleben
-    muss: Sequenzen unabhängig, `clearAllFor` trifft nur einen Alarm,
-    Step-Target-/Baseline-Keys lecken nie in `listPending`.
-  - `NextAlarmWidgetFormatTest` (12) — die Widget-Strings.
-  - `NextAlarmCalendarEdgeTest` (11) — **Sommerzeit**: 23 h zwischen zwei Weckern
-    in der kurzen, 25 h in der langen Nacht (Wanduhrzeit bleibt), übersprungene
-    und doppelte Stunde, Monats-/Jahreswechsel, 29. Februar.
-  - `AlarmSoundTest` (9) — die **persistierten Sound-Ids** als Goldene Map; ein
-    Umnummerieren würde bestehende Wecker still umklingeln.
-  - `BrutusApplicationTest` (8) — Notification-Channels sind write-once:
-    Importance, DND-Bypass und Stummheit der Kanäle festgenagelt.
-  - `PermissionDeepLinkTest` (7) — die drei Reliability-Banner landen auf der
-    richtigen Settings-Seite (Action + `package:`-URI + `NEW_TASK`).
-  - `AlarmSoundGeneratorPropertiesTest` (7) — Invarianten für **jeden** Sound
-    (Loop-Länge, Determinismus, DC-Offset, Headroom); neue Enum-Einträge fallen
-    automatisch hinein.
-  - `RoomSchemaExportTest` (7) — vergleicht den **Identity-Hash der laufenden
-    Datenbank mit dem committeten `7.json`**; ein Feld ohne Migration fällt damit
-    in CI auf statt beim Nutzer um 6 Uhr morgens.
-  - `AlarmEntityDefaultsTest` (7) + `GlobalQrStoreTest` (6, der Code darf sich nie
-    ändern — sonst ist jeder Ausdruck wertlos) + `TimerSoundStoreTest` (6).
+### Hinzugefügt — 144 Unit-Tests davor (75 → 219)
+Zwölf neue Suites entlang der bisher ungetesteten Pfade:
+- `AlarmSchedulerTest` (23, Robolectric/`ShadowAlarmManager`) — was
+  **tatsächlich in AlarmManager landet**: Trigger auf der konfigurierten
+  Uhrzeit und in der Zukunft, verstrichene Zeit rutscht auf morgen,
+  Wochentags-Treffer, Sunrise exakt 10 min davor und nur solange er noch in der
+  Zukunft liegt, `setExactAndAllowWhileIdle` (Doze), **Regressionsschutz für
+  den Stale-Sunrise-Fix aus v1.8.0**, Snooze-Intervalle und die
+  Request-Code-Trennung: Hauptalarm + Sunrise + zwei Re-Alarme desselben Alarms
+  koexistieren, ohne sich gegenseitig zu überschreiben.
+- `AlarmDaoTest` (15, In-Memory-Room) — echtes SQL statt Mock: Sortierung,
+  `getEnabledAlarms` fürs Boot-Rescheduling, Vollfeld-Roundtrip,
+  REPLACE-Konflikt, Undo-Restore mit `id = 0`, Repository-Durchreiche.
+- `ClockFormattingTest` (14) — Stoppuhr-/Timer-Ablesungen inkl. **konstanter
+  Stringbreite** (Grundlage der Tabellenziffern aus v2.1.0), Trunkierung statt
+  Aufrunden, Stunden-Spalte exakt an der Stundengrenze.
+- `UltraHardcoreStoreTest` (12) — die Buchführung, die einen Reboot überleben
+  muss: Sequenzen unabhängig, `clearAllFor` trifft nur einen Alarm,
+  Step-Target-/Baseline-Keys lecken nie in `listPending`.
+- `NextAlarmWidgetFormatTest` (12) — die Widget-Strings.
+- `NextAlarmCalendarEdgeTest` (11) — **Sommerzeit**: 23 h zwischen zwei Weckern
+  in der kurzen, 25 h in der langen Nacht (Wanduhrzeit bleibt), übersprungene
+  und doppelte Stunde, Monats-/Jahreswechsel, 29. Februar.
+- `AlarmSoundTest` (9) — die **persistierten Sound-Ids** als Goldene Map; ein
+  Umnummerieren würde bestehende Wecker still umklingeln.
+- `BrutusApplicationTest` (8) — Notification-Channels sind write-once:
+  Importance, DND-Bypass und Stummheit der Kanäle festgenagelt.
+- `PermissionDeepLinkTest` (7) — die drei Reliability-Banner landen auf der
+  richtigen Settings-Seite (Action + `package:`-URI + `NEW_TASK`).
+- `AlarmSoundGeneratorPropertiesTest` (7) — Invarianten für **jeden** Sound
+  (Loop-Länge, Determinismus, DC-Offset, Headroom); neue Enum-Einträge fallen
+  automatisch hinein.
+- `RoomSchemaExportTest` (7) — vergleicht den **Identity-Hash der laufenden
+  Datenbank mit dem committeten `7.json`**; ein Feld ohne Migration fällt damit
+  in CI auf statt beim Nutzer um 6 Uhr morgens.
+- `AlarmEntityDefaultsTest` (7) + `GlobalQrStoreTest` (6, der Code darf sich nie
+  ändern — sonst ist jeder Ausdruck wertlos) + `TimerSoundStoreTest` (6).
 
 ### Behoben
 - **Widget: „in 1 Tagen" → „in 1 Tag"** — der Countdown des Homescreen-Widgets
@@ -102,6 +99,8 @@ Alle nennenswerten Änderungen an Brutus stehen hier. Versionen folgen [SemVer](
   Schwierigkeitsgrad über 500 Samples, Operator-/Difficulty-Fallbacks) und
   `WorldClockStoreTest` (6 — Default-Seeding beim ersten Start, Roundtrips,
   leere Liste fällt nicht auf Defaults zurück, Blank-Filterung; Robolectric).
+
+versionCode 16.
 
 ## [2.1.1] — 2026-07-15 · Card-Farbe = Aktiv-Zustand
 

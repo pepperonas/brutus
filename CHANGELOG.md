@@ -4,7 +4,7 @@
 
 All notable changes to Brutus are documented here. Versions follow [SemVer](https://semver.org).
 
-## [Unreleased]
+## [2.2.0] — 2026-08-15 · English + German, and 168 more tests
 
 ### Added — English and German localization
 - **The app now ships in two languages.** Every user-visible string moved out of
@@ -46,44 +46,41 @@ All notable changes to Brutus are documented here. Versions follow [SemVer](http
   flag bit — it falls back to "None" / "Keine", so a corrupt or future value
   cannot render an empty chip.
 
-## [Unreleased — earlier]
-
-### Added
-- **144 more unit tests** (75 → **219**), twelve new suites along the paths that
-  had no coverage at all:
-  - `AlarmSchedulerTest` (23, Robolectric/`ShadowAlarmManager`) — **what actually
-    reaches AlarmManager**: trigger on the configured wall-clock time and in the
-    future, passed times roll to tomorrow, weekday matching, sunrise exactly
-    10 min ahead and only while it is still in the future,
-    `setExactAndAllowWhileIdle` (Doze), **a regression guard for the v1.8.0
-    stale-sunrise fix**, snooze intervals, and the request-code carve-out that
-    keeps a main alarm, its sunrise and both follow-ups from overwriting each
-    other.
-  - `AlarmDaoTest` (15, in-memory Room) — real SQL instead of a mock, including
-    the REPLACE conflict and the `id = 0` undo-restore path.
-  - `ClockFormattingTest` (14) — stopwatch/timer readouts including **constant
-    string width**, the premise the tabular numerals rest on.
-  - `UltraHardcoreStoreTest` (12) — the follow-up bookkeeping that has to survive
-    a reboot.
-  - `NextAlarmWidgetFormatTest` (12) — the widget strings.
-  - `NextAlarmCalendarEdgeTest` (11) — **daylight saving**: 23 real hours between
-    two alarms on the short night, 25 on the long one (wall-clock time
-    preserved), the skipped and the duplicated hour, month/year rollovers,
-    February 29th.
-  - `AlarmSoundTest` (9) — the **persisted sound ids** as a golden map;
-    renumbering would silently change what existing alarms play.
-  - `BrutusApplicationTest` (8) — notification channels are write-once:
-    importance, DND bypass and silence are pinned.
-  - `PermissionDeepLinkTest` (7) — the three reliability banners land on the
-    right settings page (action + `package:` URI + `NEW_TASK`).
-  - `AlarmSoundGeneratorPropertiesTest` (7) — invariants for **every** sound
-    (loop length, determinism, DC offset, headroom); new enum entries are
-    covered automatically.
-  - `RoomSchemaExportTest` (7) — compares the **identity hash of the running
-    database with the committed `7.json`**, so a field added without a migration
-    fails in CI instead of at 6 a.m. on a user's phone.
-  - `AlarmEntityDefaultsTest` (7) + `GlobalQrStoreTest` (6, the code must never
-    change or every printout is worthless) + `TimerSoundStoreTest` (6).
+### Added — 144 unit tests before that (75 → 219)
+Twelve new suites along the paths that had no coverage at all:
+- `AlarmSchedulerTest` (23, Robolectric/`ShadowAlarmManager`) — **what actually
+  reaches AlarmManager**: trigger on the configured wall-clock time and in the
+  future, passed times roll to tomorrow, weekday matching, sunrise exactly
+  10 min ahead and only while it is still in the future,
+  `setExactAndAllowWhileIdle` (Doze), **a regression guard for the v1.8.0
+  stale-sunrise fix**, snooze intervals, and the request-code carve-out that
+  keeps a main alarm, its sunrise and both follow-ups from overwriting each
+  other.
+- `AlarmDaoTest` (15, in-memory Room) — real SQL instead of a mock, including
+  the REPLACE conflict and the `id = 0` undo-restore path.
+- `ClockFormattingTest` (14) — stopwatch/timer readouts including **constant
+  string width**, the premise the tabular numerals rest on.
+- `UltraHardcoreStoreTest` (12) — the follow-up bookkeeping that has to survive
+  a reboot.
+- `NextAlarmWidgetFormatTest` (12) — the widget strings.
+- `NextAlarmCalendarEdgeTest` (11) — **daylight saving**: 23 real hours between
+  two alarms on the short night, 25 on the long one (wall-clock time
+  preserved), the skipped and the duplicated hour, month/year rollovers,
+  February 29th.
+- `AlarmSoundTest` (9) — the **persisted sound ids** as a golden map;
+  renumbering would silently change what existing alarms play.
+- `BrutusApplicationTest` (8) — notification channels are write-once:
+  importance, DND bypass and silence are pinned.
+- `PermissionDeepLinkTest` (7) — the three reliability banners land on the
+  right settings page (action + `package:` URI + `NEW_TASK`).
+- `AlarmSoundGeneratorPropertiesTest` (7) — invariants for **every** sound
+  (loop length, determinism, DC offset, headroom); new enum entries are
+  covered automatically.
+- `RoomSchemaExportTest` (7) — compares the **identity hash of the running
+  database with the committed `7.json`**, so a field added without a migration
+  fails in CI instead of at 6 a.m. on a user's phone.
+- `AlarmEntityDefaultsTest` (7) + `GlobalQrStoreTest` (6, the code must never
+  change or every printout is worthless) + `TimerSoundStoreTest` (6).
 
 ### Fixed
 - **Widget: "in 1 Tagen" → "in 1 Tag"** — the home-screen countdown had no
@@ -98,6 +95,8 @@ All notable changes to Brutus are documented here. Versions follow [SemVer](http
   samples, operator/difficulty fallbacks) and `WorldClockStoreTest` (6 — default
   seeding on first launch, round-trips, an empty list does not fall back to the
   defaults, blank filtering; Robolectric).
+
+versionCode 16.
 
 ## [2.1.1] — 2026-07-15 · Card color = enabled state
 
