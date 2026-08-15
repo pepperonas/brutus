@@ -19,7 +19,11 @@ jobs:
     env:
       RELEASE_STORE_BASE64: ${{ secrets.RELEASE_STORE_BASE64 }}
       RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
-      RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+      # A repository *variable*, not a secret: the alias is public (the README
+      # prints it in the keytool command), and as a secret GitHub masked the
+      # literal string "brutus" in every log line — even the APK filename read
+      # "***-v2.2.0.apk", which makes a failed release build hard to read.
+      RELEASE_KEY_ALIAS: ${{ vars.RELEASE_KEY_ALIAS || 'brutus' }}
       RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
