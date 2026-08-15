@@ -5,11 +5,54 @@ All notable changes to Brutus are documented here. Versions follow [SemVer](http
 ## [Unreleased]
 
 ### Added
-- **14 weitere Unit-Tests** (insgesamt 75): `MathProblemTest` (8 — Antwort-/
-  Display-Logik, Range- und Vorzeichen-Invarianten des Aufgaben-Generators je
-  Schwierigkeitsgrad über 500 Samples, Operator-/Difficulty-Fallbacks) und
-  `WorldClockStoreTest` (6 — Default-Seeding beim ersten Start, Roundtrips,
-  leere Liste fällt nicht auf Defaults zurück, Blank-Filterung; Robolectric).
+- **144 weitere Unit-Tests** (75 → **219**), zwölf neue Suites entlang der
+  bisher ungetesteten Pfade:
+  - `AlarmSchedulerTest` (23, Robolectric/`ShadowAlarmManager`) — was
+    **tatsächlich in AlarmManager landet**: Trigger auf der konfigurierten
+    Uhrzeit und in der Zukunft, verstrichene Zeit rutscht auf morgen,
+    Wochentags-Treffer, Sunrise exakt 10 min davor und nur wenn es noch in der
+    Zukunft liegt, `setExactAndAllowWhileIdle` (Doze), **Regressionsschutz für
+    den Stale-Sunrise-Fix aus v1.8.0**, Snooze-Intervalle, und die
+    Request-Code-Trennung: Hauptalarm + Sunrise + zwei Follow-ups desselben
+    Alarms koexistieren, ohne sich gegenseitig zu überschreiben.
+  - `AlarmDaoTest` (15, In-Memory-Room) — echte SQL statt Mock: Sortierung,
+    `getEnabledAlarms` fürs Boot-Rescheduling, Vollfeld-Roundtrip,
+    REPLACE-Konflikt, Undo-Restore mit `id = 0`, Repository-Durchreiche.
+  - `ClockFormattingTest` (14) — Stoppuhr-/Timer-Ablesungen inkl.
+    **konstanter Stringbreite** (Grundlage der Tabellenziffern aus v2.1.0),
+    Trunkierung statt Aufrunden, Stunden-Spalte exakt an der Stundengrenze.
+  - `UltraHardcoreStoreTest` (12) — die Buchführung, die einen Reboot
+    überleben muss: Sequenzen unabhängig, `clearAllFor` trifft nur einen
+    Alarm, Step-Target-/Baseline-Keys lecken nie in `listPending`.
+  - `NextAlarmWidgetFormatTest` (12) — die Widget-Strings.
+  - `NextAlarmCalendarEdgeTest` (11) — **Sommerzeit**: 23 h zwischen zwei
+    Weckern in der kurzen, 25 h in der langen Nacht (Wanduhrzeit bleibt),
+    übersprungene und doppelte Stunde, Monats-/Jahreswechsel, 29. Februar.
+  - `AlarmSoundTest` (9) — die **persistierten Sound-Ids** sind als
+    Goldene Map gepinnt; ein Umnummerieren würde bestehende Wecker still
+    umklingeln.
+  - `BrutusApplicationTest` (8) — Notification-Channels sind write-once:
+    Importance, DND-Bypass und Stummheit der Kanäle festgenagelt.
+  - `PermissionDeepLinkTest` (7) — die drei Reliability-Banner landen auf der
+    richtigen Settings-Seite (Action + `package:`-URI + NEW_TASK).
+  - `AlarmSoundGeneratorPropertiesTest` (7) — Invarianten für **jeden**
+    Sound (Loop-Länge, Determinismus, DC-Offset, Headroom); neue Enum-Einträge
+    fallen automatisch hinein.
+  - `RoomSchemaExportTest` (7) — vergleicht den **Identity-Hash der laufenden
+    Datenbank mit dem committeten `7.json`**; ein Feld ohne Migration fällt
+    damit in CI auf statt beim Nutzer um 6 Uhr morgens.
+  - `AlarmEntityDefaultsTest` (7) + `GlobalQrStoreTest` (6, der Code darf sich
+    nie ändern — sonst ist jeder Ausdruck wertlos) + `TimerSoundStoreTest` (6).
+
+### Fixed
+- **Widget: „in 1 Tagen" → „in 1 Tag"** — der Countdown des Home-Screen-Widgets
+  hatte bei exakt einem Tag keinen Singular (die In-App-Anzeige schon).
+
+### Changed
+- `formatStopwatch`, `formatCountdown`, `labelForPreset` sowie die beiden
+  Widget-Formatierer sind `internal` statt `private`, damit die Tests die
+  Strings prüfen können, die der Nutzer wirklich liest. Kein Verhaltens-
+  unterschied.
 
 ## [2.1.1] — 2026-07-15 · Card-Farbe = Aktiv-Zustand
 

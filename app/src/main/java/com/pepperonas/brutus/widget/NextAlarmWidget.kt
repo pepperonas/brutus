@@ -104,20 +104,23 @@ class NextAlarmWidget : AppWidgetProvider() {
             context.sendBroadcast(intent)
         }
 
-        private fun formatRelative(target: Long, now: Long): String {
+        // internal (not private) so the unit tests can exercise the exact strings
+        // the user reads on the home screen.
+        internal fun formatRelative(target: Long, now: Long): String {
             val diff = (target - now).coerceAtLeast(0L)
             val mins = diff / 60_000L
             val hours = mins / 60
             val days = hours / 24
             return when {
-                days >= 1 -> "in ${days} Tagen"
+                days == 1L -> "in 1 Tag"
+                days >= 1 -> "in $days Tagen"
                 hours >= 1 -> "in $hours Std ${mins % 60} Min"
                 mins >= 1 -> "in $mins Min"
                 else -> "gleich"
             }
         }
 
-        private fun formatDays(bitmask: Int, triggerAt: Long): String {
+        internal fun formatDays(bitmask: Int, triggerAt: Long): String {
             if (bitmask == 0) {
                 val fmt = SimpleDateFormat("EEE", Locale.GERMAN)
                 return fmt.format(Date(triggerAt))

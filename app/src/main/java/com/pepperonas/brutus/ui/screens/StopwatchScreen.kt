@@ -182,7 +182,8 @@ private fun LapRow(number: Int, diff: Long, total: Long, modifier: Modifier = Mo
     }
 }
 
-private fun formatStopwatch(ms: Long): String {
+// internal (not private) so unit tests can pin the readout format.
+internal fun formatStopwatch(ms: Long): String {
     val totalMs = ms.coerceAtLeast(0)
     val hours = totalMs / 3_600_000L
     val minutes = (totalMs / 60_000L) % 60

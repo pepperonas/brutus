@@ -331,13 +331,14 @@ private fun QuickPresets(onPick: (Int) -> Unit) {
     }
 }
 
-private fun labelForPreset(seconds: Int): String = when {
+// internal (not private) so unit tests can pin the preset labels and the readout.
+internal fun labelForPreset(seconds: Int): String = when {
     seconds % 60 != 0 -> "${seconds}s"
     seconds < 60 -> "${seconds}s"
     else -> "${seconds / 60}m"
 }
 
-private fun formatCountdown(ms: Long): String {
+internal fun formatCountdown(ms: Long): String {
     val total = ms.coerceAtLeast(0)
     val hours = total / 3_600_000L
     val minutes = (total / 60_000L) % 60
