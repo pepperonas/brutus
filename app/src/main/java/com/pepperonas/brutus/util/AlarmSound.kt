@@ -1,30 +1,45 @@
 package com.pepperonas.brutus.util
 
+import android.content.Context
+import androidx.annotation.StringRes
+import com.pepperonas.brutus.R
+
+/**
+ * The catalogue of alarm sounds.
+ *
+ * [id] is **persisted** in `alarms.soundId` — it is the wire format and must
+ * never be renumbered. The visible name and description are localized, so they
+ * are resource ids rather than literals.
+ */
 enum class AlarmSound(
     val id: Int,
-    val displayName: String,
-    val description: String,
+    @StringRes val labelRes: Int,
+    @StringRes val descriptionRes: Int,
     /** Soft sounds are intended for the timer / gentle wake-up, harsh ones for hardcore alarms. */
     val gentle: Boolean = false,
 ) {
-    SILENT(6, "Stumm", "Kein Ton — ideal zum Testen der Weckmodi"),
-    SYSTEM(0, "System-Alarm", "Standard Android Alarm-Ton"),
-    KLAXON(1, "Klaxon", "Pulsierender Zwei-Ton Alarm"),
-    SIREN(2, "Sirene", "Auf- und abschwellender Sweep"),
-    NUCLEAR(3, "Nuclear Alert", "Schnelles, scharfes Piepen"),
-    PIERCING(5, "Durchdringend", "Ultra-hohes Piepen — maximal nervig"),
+    SILENT(6, R.string.sound_silent, R.string.sound_silent_description),
+    SYSTEM(0, R.string.sound_system, R.string.sound_system_description),
+    KLAXON(1, R.string.sound_klaxon, R.string.sound_klaxon_description),
+    SIREN(2, R.string.sound_siren, R.string.sound_siren_description),
+    NUCLEAR(3, R.string.sound_nuclear, R.string.sound_nuclear_description),
+    PIERCING(5, R.string.sound_piercing, R.string.sound_piercing_description),
 
     // v1.7.0 — five extra extreme sounds for the hardcore crowd.
-    AIRHORN(10, "Stadion-Horn", "Brüllendes Air-Horn aus verstimmten Sägezähnen"),
-    JACKHAMMER(11, "Presslufthammer", "Pochende Tiefton-Salven wie eine Baustelle"),
-    FIRE_ALARM(12, "Feueralarm", "Temporal-3 Rauchmelder-Muster bei 3,1 kHz"),
-    DENTIST(13, "Bohrer", "FM-modulierter Zahnarzt-Bohrer — kreischendes Schleifen"),
-    BANSHEE(14, "Banshee", "Dissonanter, aufsteigender Schwebungs-Cluster"),
+    AIRHORN(10, R.string.sound_airhorn, R.string.sound_airhorn_description),
+    JACKHAMMER(11, R.string.sound_jackhammer, R.string.sound_jackhammer_description),
+    FIRE_ALARM(12, R.string.sound_fire_alarm, R.string.sound_fire_alarm_description),
+    DENTIST(13, R.string.sound_dentist, R.string.sound_dentist_description),
+    BANSHEE(14, R.string.sound_banshee, R.string.sound_banshee_description),
 
     // v1.5.0 — gentle sounds, designed for the timer and casual wake-ups.
-    CHIME(7, "Glockenspiel", "Sanftes 3-Ton-Glockenspiel mit Nachklang", gentle = true),
-    MARIMBA(8, "Marimba", "Holziges Anschlag-Pattern", gentle = true),
-    MORNING(9, "Morgensonne", "Langsam an- und abschwellender Akkord", gentle = true);
+    CHIME(7, R.string.sound_chime, R.string.sound_chime_description, gentle = true),
+    MARIMBA(8, R.string.sound_marimba, R.string.sound_marimba_description, gentle = true),
+    MORNING(9, R.string.sound_morning, R.string.sound_morning_description, gentle = true);
+
+    fun label(context: Context): String = context.getString(labelRes)
+
+    fun description(context: Context): String = context.getString(descriptionRes)
 
     companion object {
         fun fromId(id: Int): AlarmSound = entries.firstOrNull { it.id == id } ?: SYSTEM

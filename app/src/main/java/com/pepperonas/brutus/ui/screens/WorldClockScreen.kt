@@ -57,6 +57,9 @@ import kotlinx.coroutines.launch
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Locale
+import androidx.compose.ui.res.stringResource
+import com.pepperonas.brutus.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,6 +71,8 @@ fun WorldClockScreen() {
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val removedMessage = stringResource(R.string.world_removed)
+    val undoLabel = stringResource(R.string.action_undo)
     // Removing a zone is undoable — the snackbar puts it back at its old spot.
     val removeWithUndo: (String) -> Unit = { zone ->
         val index = zones.indexOf(zone)
@@ -78,8 +83,8 @@ fun WorldClockScreen() {
             scope.launch {
                 snackbarHostState.currentSnackbarData?.dismiss()
                 val result = snackbarHostState.showSnackbar(
-                    message = "Zeitzone entfernt",
-                    actionLabel = "Rückgängig",
+                    message = removedMessage,
+                    actionLabel = undoLabel,
                     duration = SnackbarDuration.Long,
                 )
                 if (result == SnackbarResult.ActionPerformed) {
@@ -113,7 +118,7 @@ fun WorldClockScreen() {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "Weltuhr",
+                text = stringResource(R.string.world_title),
                 style = MaterialTheme.typography.headlineLarge,
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.weight(1f)
@@ -121,7 +126,7 @@ fun WorldClockScreen() {
             IconButton(onClick = { showSheet = true }) {
                 Icon(
                     Icons.Default.Add,
-                    contentDescription = "Zeitzone hinzufügen",
+                    contentDescription = stringResource(R.string.world_add),
                     tint = MaterialTheme.colorScheme.onBackground
                 )
             }
@@ -141,7 +146,7 @@ fun WorldClockScreen() {
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        "Tippe +, um eine Zeitzone hinzuzufügen",
+                        stringResource(R.string.world_empty),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -205,8 +210,10 @@ private fun ZoneCard(
     val time = remember(zoned) {
         zoned?.format(DateTimeFormatter.ofPattern("HH:mm")) ?: "--:--"
     }
-    val date = remember(zoned) {
-        zoned?.format(DateTimeFormatter.ofPattern("EEE, d. MMM")) ?: ""
+    // Pattern comes from resources: German writes "Mo, 17. Aug", English "Mon, Aug 17".
+    val datePattern = stringResource(R.string.format_world_clock_date)
+    val date = remember(zoned, datePattern) {
+        zoned?.format(DateTimeFormatter.ofPattern(datePattern, Locale.getDefault())) ?: ""
     }
     // Day/night at the remote location, told through color roles: warm
     // tertiary sun vs. muted secondary moon.
@@ -227,7 +234,9 @@ private fun ZoneCard(
         ) {
             Icon(
                 imageVector = if (isDay) Icons.Default.WbSunny else Icons.Default.DarkMode,
-                contentDescription = if (isDay) "Tag" else "Nacht",
+                contentDescription = stringResource(
+                    if (isDay) R.string.world_day else R.string.world_night
+                ),
                 tint = if (isDay) MaterialTheme.colorScheme.tertiary
                 else MaterialTheme.colorScheme.secondary,
                 modifier = Modifier
@@ -241,7 +250,7 @@ private fun ZoneCard(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "$region  ·  UTC$offsetLabel",
+                    text = stringResource(R.string.world_region_offset, region, offsetLabel),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -259,7 +268,7 @@ private fun ZoneCard(
             IconButton(onClick = onRemove) {
                 Icon(
                     Icons.Default.Close,
-                    contentDescription = "Entfernen",
+                    contentDescription = stringResource(R.string.world_remove),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -294,7 +303,7 @@ private fun AddZoneSheet(
                 .padding(bottom = 24.dp)
         ) {
             Text(
-                "Zeitzone hinzufügen",
+                stringResource(R.string.world_add),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -329,7 +338,7 @@ private fun AddZoneSheet(
                         Box {
                             if (query.isEmpty()) {
                                 Text(
-                                    text = "Stadt oder Region suchen…",
+                                    text = stringResource(R.string.world_search_hint),
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     fontSize = 16.sp
                                 )
@@ -362,7 +371,7 @@ private fun AddZoneSheet(
                             )
                             if (disabled) {
                                 Text(
-                                    text = "bereits hinzugefügt",
+                                    text = stringResource(R.string.world_already_added),
                                     fontSize = 11.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -373,7 +382,7 @@ private fun AddZoneSheet(
                 if (filtered.isEmpty()) {
                     item {
                         Text(
-                            "Keine Treffer",
+                            stringResource(R.string.world_no_matches),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center,
                             modifier = Modifier

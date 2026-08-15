@@ -42,6 +42,8 @@ import com.pepperonas.brutus.ui.theme.BrutusDarkRed
 import com.pepperonas.brutus.ui.theme.BrutusTheme
 import com.pepperonas.brutus.util.UltraHardcoreStore
 import kotlinx.coroutines.delay
+import androidx.compose.ui.res.stringResource
+import com.pepperonas.brutus.R
 
 /**
  * Anti-snooze task screen launched from the Ultra Hardcore reminder notification.
@@ -121,7 +123,7 @@ class UltraHardcoreTaskActivity : ComponentActivity() {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                text = "ULTRA HARDCORE",
+                text = stringResource(R.string.uhc_title),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 4.sp,
@@ -129,7 +131,7 @@ class UltraHardcoreTaskActivity : ComponentActivity() {
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = "Re-Alarme stoppen",
+                text = stringResource(R.string.uhc_stop_realarms),
                 fontSize = 28.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = Color.White,
@@ -145,14 +147,14 @@ class UltraHardcoreTaskActivity : ComponentActivity() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Geschafft!",
+                text = stringResource(R.string.uhc_done),
                 fontSize = 36.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.tertiary
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Re-Alarme deaktiviert. Du bist wach.",
+                text = stringResource(R.string.uhc_done_body),
                 style = MaterialTheme.typography.titleMedium,
                 color = Color.White.copy(alpha = 0.8f),
                 textAlign = TextAlign.Center
@@ -176,7 +178,7 @@ class UltraHardcoreTaskActivity : ComponentActivity() {
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
-                        text = "Später — Re-Alarme akzeptieren",
+                        text = stringResource(R.string.uhc_later),
                         fontSize = 14.sp
                     )
                 }
@@ -189,7 +191,7 @@ class UltraHardcoreTaskActivity : ComponentActivity() {
                     // Theme primary IS the brand red on the pinned-dark alarm surfaces.
                     shape = RoundedCornerShape(16.dp)
                 ) {
-                    Text("Schliessen", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.action_close), fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 }
             }
             Spacer(modifier = Modifier.height(24.dp))

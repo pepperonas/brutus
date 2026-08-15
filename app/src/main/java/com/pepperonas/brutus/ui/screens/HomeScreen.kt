@@ -43,17 +43,20 @@ import com.pepperonas.brutus.ui.theme.BrutusTheme
 import com.pepperonas.brutus.viewmodel.AlarmViewModel
 import com.pepperonas.brutus.viewmodel.StopwatchViewModel
 import com.pepperonas.brutus.viewmodel.TimerViewModel
+import androidx.annotation.StringRes
+import androidx.compose.ui.res.stringResource
+import com.pepperonas.brutus.R
 
 private enum class HomeTab(
     val route: String,
-    val label: String,
+    @StringRes val labelRes: Int,
     val iconFilled: ImageVector,
     val iconOutlined: ImageVector,
 ) {
-    ALARM("alarm", "Alarm", Icons.Filled.Alarm, Icons.Outlined.Alarm),
-    WORLD("world", "Weltuhr", Icons.Filled.Language, Icons.Outlined.Language),
-    STOPWATCH("stopwatch", "Stoppuhr", Icons.Filled.Timer, Icons.Outlined.Timer),
-    TIMER("timer", "Timer", Icons.Filled.HourglassBottom, Icons.Outlined.HourglassBottom),
+    ALARM("alarm", R.string.nav_alarm, Icons.Filled.Alarm, Icons.Outlined.Alarm),
+    WORLD("world", R.string.nav_world_clock, Icons.Filled.Language, Icons.Outlined.Language),
+    STOPWATCH("stopwatch", R.string.nav_stopwatch, Icons.Filled.Timer, Icons.Outlined.Timer),
+    TIMER("timer", R.string.nav_timer, Icons.Filled.HourglassBottom, Icons.Outlined.HourglassBottom),
 }
 
 @Composable
@@ -166,7 +169,7 @@ private fun BrutusNavigationBar(
                         modifier = Modifier.scale(iconScale)
                     )
                 },
-                label = { Text(tab.label) },
+                label = { Text(stringResource(tab.labelRes)) },
             )
         }
     }

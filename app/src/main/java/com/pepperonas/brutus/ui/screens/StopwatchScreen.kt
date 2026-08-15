@@ -34,6 +34,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pepperonas.brutus.ui.theme.BrutusTheme
 import com.pepperonas.brutus.viewmodel.StopwatchViewModel
 import kotlinx.coroutines.launch
+import androidx.compose.ui.res.stringResource
+import com.pepperonas.brutus.R
 
 @Composable
 fun StopwatchScreen(viewModel: StopwatchViewModel = viewModel()) {
@@ -45,6 +47,8 @@ fun StopwatchScreen(viewModel: StopwatchViewModel = viewModel()) {
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val resetMessage = stringResource(R.string.stopwatch_reset_undo)
+    val undoLabel = stringResource(R.string.action_undo)
     // Reset discards the measurement — undoable via snackbar (restores
     // elapsed time and all laps from the ViewModel snapshot).
     val lapOrResetWithUndo: () -> Unit = {
@@ -55,8 +59,8 @@ fun StopwatchScreen(viewModel: StopwatchViewModel = viewModel()) {
             scope.launch {
                 snackbarHostState.currentSnackbarData?.dismiss()
                 val result = snackbarHostState.showSnackbar(
-                    message = "Stoppuhr zurückgesetzt",
-                    actionLabel = "Rückgängig",
+                    message = resetMessage,
+                    actionLabel = undoLabel,
                     duration = SnackbarDuration.Long,
                 )
                 if (result == SnackbarResult.ActionPerformed) viewModel.undoReset()
@@ -72,7 +76,7 @@ fun StopwatchScreen(viewModel: StopwatchViewModel = viewModel()) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Stoppuhr",
+            text = stringResource(R.string.stopwatch_title),
             style = MaterialTheme.typography.headlineLarge,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier
@@ -104,7 +108,12 @@ fun StopwatchScreen(viewModel: StopwatchViewModel = viewModel()) {
                     .weight(1f)
                     .height(64.dp),
             ) {
-                Text(if (running) "Runde" else "Reset", fontSize = 16.sp)
+                Text(
+                    stringResource(
+                        if (running) R.string.stopwatch_lap else R.string.stopwatch_reset
+                    ),
+                    fontSize = 16.sp
+                )
             }
             // Right: Start / Stop
             Button(
@@ -114,7 +123,12 @@ fun StopwatchScreen(viewModel: StopwatchViewModel = viewModel()) {
                     .weight(1f)
                     .height(64.dp),
             ) {
-                Text(if (running) "Stopp" else "Start", fontSize = 16.sp)
+                Text(
+                    stringResource(
+                        if (running) R.string.stopwatch_stop else R.string.stopwatch_start
+                    ),
+                    fontSize = 16.sp
+                )
             }
         }
 
@@ -163,7 +177,7 @@ private fun LapRow(number: Int, diff: Long, total: Long, modifier: Modifier = Mo
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "Runde $number",
+            text = stringResource(R.string.stopwatch_lap_number, number),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.weight(1f)

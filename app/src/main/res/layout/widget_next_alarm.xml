@@ -37,7 +37,7 @@
         android:layout_marginTop="2dp"
         android:textColor="#FFB4AB"
         android:textSize="12sp"
-        android:text="in 7 Std"
+        android:text="@string/widget_preview_countdown"
         android:maxLines="1"
         android:ellipsize="end" />
 
@@ -48,7 +48,7 @@
         android:layout_marginTop="6dp"
         android:textColor="#A08C8A"
         android:textSize="11sp"
-        android:text="Mo Di Mi Do Fr"
+        android:text="@string/widget_preview_days"
         android:maxLines="1"
         android:ellipsize="end" />
 

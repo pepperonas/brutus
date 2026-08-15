@@ -1,8 +1,14 @@
 package com.pepperonas.brutus.util
 
+import androidx.annotation.StringRes
+import com.pepperonas.brutus.R
+
 /**
  * Difficulty / sensitivity presets for the configurable challenge types.
  * Values match the stored integer fields on AlarmEntity.
+ *
+ * The label/description accessors return **resource ids**: the levels are
+ * persisted numbers, their names are localized text.
  */
 object ChallengeDifficulty {
 
@@ -11,16 +17,18 @@ object ChallengeDifficulty {
     const val MATH_HARD = 1
     const val MATH_BRUTAL = 2
 
-    fun mathLabel(level: Int): String = when (level) {
-        MATH_EASY -> "Einfach"
-        MATH_BRUTAL -> "Brutal"
-        else -> "Hart"
+    @StringRes
+    fun mathLabel(level: Int): Int = when (level) {
+        MATH_EASY -> R.string.math_difficulty_easy
+        MATH_BRUTAL -> R.string.math_difficulty_brutal
+        else -> R.string.math_difficulty_hard
     }
 
-    fun mathDescription(level: Int): String = when (level) {
-        MATH_EASY -> "Addition und Subtraktion bis 20"
-        MATH_BRUTAL -> "Zweistellige Multiplikation und große Zahlen"
-        else -> "Mix mit Multiplikation bis 50 × 20"
+    @StringRes
+    fun mathDescription(level: Int): Int = when (level) {
+        MATH_EASY -> R.string.math_difficulty_easy_description
+        MATH_BRUTAL -> R.string.math_difficulty_brutal_description
+        else -> R.string.math_difficulty_hard_description
     }
 
     // Shake
@@ -28,16 +36,18 @@ object ChallengeDifficulty {
     const val SHAKE_NORMAL = 1
     const val SHAKE_HARD = 2
 
-    fun shakeLabel(level: Int): String = when (level) {
-        SHAKE_LIGHT -> "Empfindlich"
-        SHAKE_HARD -> "Stark"
-        else -> "Normal"
+    @StringRes
+    fun shakeLabel(level: Int): Int = when (level) {
+        SHAKE_LIGHT -> R.string.shake_sensitivity_light
+        SHAKE_HARD -> R.string.shake_sensitivity_hard
+        else -> R.string.shake_sensitivity_normal
     }
 
-    fun shakeDescription(level: Int): String = when (level) {
-        SHAKE_LIGHT -> "Schon leichte Bewegungen zählen"
-        SHAKE_HARD -> "Nur kräftiges Schütteln zählt"
-        else -> "Standard-Schwellwert (delta ≥ 12)"
+    @StringRes
+    fun shakeDescription(level: Int): Int = when (level) {
+        SHAKE_LIGHT -> R.string.shake_sensitivity_light_description
+        SHAKE_HARD -> R.string.shake_sensitivity_hard_description
+        else -> R.string.shake_sensitivity_normal_description
     }
 
     /** Acceleration delta threshold (m/s²) — anything above counts as one shake. */

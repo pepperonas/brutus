@@ -1,7 +1,9 @@
 package com.pepperonas.brutus.data
 
+import android.content.Context
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.pepperonas.brutus.R
 import com.pepperonas.brutus.util.AlarmSound
 import com.pepperonas.brutus.util.ChallengeFlags
 
@@ -28,16 +30,18 @@ data class AlarmEntity(
 
     fun timeString(): String = "%02d:%02d".format(hour, minute)
 
-    fun repeatDaysString(): String {
-        if (repeatDays == 0) return "Einmalig"
-        if (repeatDays == 0x7F) return "Jeden Tag"
-        val days = listOf("Mo", "Di", "Mi", "Do", "Fr", "Sa", "So")
+    /** "Once" / "Every day" / "Mon, Wed, Fri" — localized. */
+    fun repeatDaysString(context: Context): String {
+        if (repeatDays == 0) return context.getString(R.string.repeat_once)
+        if (repeatDays == 0x7F) return context.getString(R.string.repeat_daily)
+        val days = context.resources.getStringArray(R.array.weekday_short)
         return days.filterIndexed { i, _ -> isDayEnabled(i) }.joinToString(", ")
     }
 
-    fun challengeName(): String = ChallengeFlags.describe(challengeFlags)
+    fun challengeName(context: Context): String =
+        ChallengeFlags.describe(context, challengeFlags)
 
-    fun soundName(): String = AlarmSound.fromId(soundId).displayName
+    fun soundName(context: Context): String = AlarmSound.fromId(soundId).label(context)
 
     /** Effective hardcore behavior: ultraHardcoreMode always implies the volume-lock too. */
     val hardcoreEffective: Boolean get() = hardcoreMode || ultraHardcoreMode

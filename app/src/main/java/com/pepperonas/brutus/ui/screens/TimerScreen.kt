@@ -50,6 +50,8 @@ import com.pepperonas.brutus.util.AlarmSound
 import com.pepperonas.brutus.viewmodel.TimerState
 import com.pepperonas.brutus.viewmodel.TimerViewModel
 import kotlinx.coroutines.launch
+import androidx.compose.ui.res.stringResource
+import com.pepperonas.brutus.R
 
 @Composable
 fun TimerScreen(viewModel: TimerViewModel = viewModel()) {
@@ -61,6 +63,8 @@ fun TimerScreen(viewModel: TimerViewModel = viewModel()) {
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val cancelledMessage = stringResource(R.string.timer_cancelled)
+    val undoLabel = stringResource(R.string.action_undo)
     // Aborting a live countdown is undoable — the snackbar resumes it with
     // the remaining time intact. Stopping a FINISHED timer is not.
     val cancelWithUndo: () -> Unit = {
@@ -71,8 +75,8 @@ fun TimerScreen(viewModel: TimerViewModel = viewModel()) {
             scope.launch {
                 snackbarHostState.currentSnackbarData?.dismiss()
                 val result = snackbarHostState.showSnackbar(
-                    message = "Timer abgebrochen",
-                    actionLabel = "Rückgängig",
+                    message = cancelledMessage,
+                    actionLabel = undoLabel,
                     duration = SnackbarDuration.Long,
                 )
                 if (result == SnackbarResult.ActionPerformed) viewModel.undoCancel()
@@ -88,7 +92,7 @@ fun TimerScreen(viewModel: TimerViewModel = viewModel()) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Timer",
+            text = stringResource(R.string.timer_title),
             style = MaterialTheme.typography.headlineLarge,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier
@@ -126,7 +130,7 @@ fun TimerScreen(viewModel: TimerViewModel = viewModel()) {
                     .height(56.dp),
                 shape = MaterialTheme.shapes.large,
             ) {
-                Text("Start", fontSize = 18.sp)
+                Text(stringResource(R.string.timer_start), fontSize = 18.sp)
             }
             Spacer(modifier = Modifier.height(24.dp))
         } else {
@@ -151,12 +155,15 @@ fun TimerScreen(viewModel: TimerViewModel = viewModel()) {
                         .weight(1f)
                         .height(64.dp),
                 ) {
-                    Text("Abbruch", fontSize = 16.sp)
+                    Text(stringResource(R.string.timer_abort), fontSize = 16.sp)
                 }
                 val (mainLabel, mainAction) = when (state) {
-                    TimerState.RUNNING -> "Pause" to { viewModel.pause() }
-                    TimerState.PAUSED -> "Weiter" to { viewModel.resume() }
-                    else -> "Stopp" to { viewModel.cancel() }
+                    TimerState.RUNNING ->
+                        stringResource(R.string.timer_pause) to { viewModel.pause() }
+                    TimerState.PAUSED ->
+                        stringResource(R.string.timer_resume) to { viewModel.resume() }
+                    else ->
+                        stringResource(R.string.timer_stop) to { viewModel.cancel() }
                 }
                 Button(
                     onClick = mainAction,
@@ -225,7 +232,7 @@ private fun TimerSoundPicker(
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
-            text = "Endton",
+            text = stringResource(R.string.timer_end_sound),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(bottom = 8.dp)
@@ -238,7 +245,7 @@ private fun TimerSoundPicker(
                 FilterChip(
                     selected = selected == snd,
                     onClick = { onSelect(snd) },
-                    label = { Text(snd.displayName) },
+                    label = { Text(stringResource(snd.labelRes)) },
                 )
             }
         }
@@ -247,13 +254,16 @@ private fun TimerSoundPicker(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = selected.description + " — Tippe zum Vorhören",
+                text = stringResource(
+                    R.string.edit_sound_hint,
+                    stringResource(selected.descriptionRes)
+                ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f)
             )
             TextButton(onClick = onStopPreview) {
-                Text("Stopp", fontSize = 12.sp)
+                Text(stringResource(R.string.timer_stop), fontSize = 12.sp)
             }
         }
     }
@@ -270,9 +280,9 @@ private fun TimerConfigurator(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
-        TimeUnitStepper("Std.", hours, 0, 23) { onHours(it) }
-        TimeUnitStepper("Min.", minutes, 0, 59) { onMinutes(it) }
-        TimeUnitStepper("Sek.", seconds, 0, 59) { onSeconds(it) }
+        TimeUnitStepper(stringResource(R.string.timer_unit_hours), hours, 0, 23) { onHours(it) }
+        TimeUnitStepper(stringResource(R.string.timer_unit_minutes), minutes, 0, 59) { onMinutes(it) }
+        TimeUnitStepper(stringResource(R.string.timer_unit_seconds), seconds, 0, 59) { onSeconds(it) }
     }
 }
 
@@ -288,7 +298,7 @@ private fun TimeUnitStepper(
         IconButton(onClick = { if (value + 1 <= max) onChange(value + 1) }) {
             Icon(
                 Icons.Default.Add,
-                contentDescription = "Mehr",
+                contentDescription = stringResource(R.string.action_more),
                 tint = MaterialTheme.colorScheme.primary
             )
         }
@@ -305,7 +315,7 @@ private fun TimeUnitStepper(
         IconButton(onClick = { if (value - 1 >= min) onChange(value - 1) }) {
             Icon(
                 Icons.Default.Remove,
-                contentDescription = "Weniger",
+                contentDescription = stringResource(R.string.action_less),
                 tint = MaterialTheme.colorScheme.primary
             )
         }

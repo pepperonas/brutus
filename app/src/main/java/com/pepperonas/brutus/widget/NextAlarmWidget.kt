@@ -65,12 +65,15 @@ class NextAlarmWidget : AppWidgetProvider() {
         val views = RemoteViews(context.packageName, R.layout.widget_next_alarm)
         if (next == null || triggerAt == null) {
             views.setTextViewText(R.id.widget_time, "—")
-            views.setTextViewText(R.id.widget_countdown, "kein Alarm")
+            views.setTextViewText(R.id.widget_countdown, context.getString(R.string.widget_no_alarm))
             views.setTextViewText(R.id.widget_days, "")
         } else {
             views.setTextViewText(R.id.widget_time, next.timeString())
-            views.setTextViewText(R.id.widget_countdown, formatRelative(triggerAt, now))
-            views.setTextViewText(R.id.widget_days, formatDays(next.repeatDays, triggerAt))
+            views.setTextViewText(R.id.widget_countdown, formatRelative(context, triggerAt, now))
+            views.setTextViewText(
+                R.id.widget_days,
+                formatDays(context, next.repeatDays, triggerAt)
+            )
         }
 
         val intent = Intent(context, MainActivity::class.java).apply {
@@ -106,27 +109,35 @@ class NextAlarmWidget : AppWidgetProvider() {
 
         // internal (not private) so the unit tests can exercise the exact strings
         // the user reads on the home screen.
-        internal fun formatRelative(target: Long, now: Long): String {
+        internal fun formatRelative(context: Context, target: Long, now: Long): String {
             val diff = (target - now).coerceAtLeast(0L)
             val mins = diff / 60_000L
             val hours = mins / 60
-            val days = hours / 24
+            val days = (hours / 24).toInt()
             return when {
-                days == 1L -> "in 1 Tag"
-                days >= 1 -> "in $days Tagen"
-                hours >= 1 -> "in $hours Std ${mins % 60} Min"
-                mins >= 1 -> "in $mins Min"
-                else -> "gleich"
+                days >= 1 -> context.resources.getQuantityString(
+                    R.plurals.widget_in_days, days, days
+                )
+                hours >= 1 -> context.getString(
+                    R.string.widget_in_hours, hours.toInt(), (mins % 60).toInt()
+                )
+                mins >= 1 -> context.getString(R.string.widget_in_minutes, mins.toInt())
+                else -> context.getString(R.string.widget_now)
             }
         }
 
-        internal fun formatDays(bitmask: Int, triggerAt: Long): String {
+        internal fun formatDays(context: Context, bitmask: Int, triggerAt: Long): String {
             if (bitmask == 0) {
-                val fmt = SimpleDateFormat("EEE", Locale.GERMAN)
+                // Pattern and locale both come from resources so the weekday
+                // reads natively in whichever language the widget is showing.
+                val fmt = SimpleDateFormat(
+                    context.getString(R.string.format_widget_weekday),
+                    Locale.getDefault()
+                )
                 return fmt.format(Date(triggerAt))
             }
-            if (bitmask == 0x7F) return "täglich"
-            val labels = listOf("Mo", "Di", "Mi", "Do", "Fr", "Sa", "So")
+            if (bitmask == 0x7F) return context.getString(R.string.widget_daily)
+            val labels = context.resources.getStringArray(R.array.weekday_short)
             return labels.filterIndexed { i, _ -> (bitmask and (1 shl i)) != 0 }
                 .joinToString(" ")
         }

@@ -16,6 +16,7 @@ import com.google.zxing.qrcode.QRCodeWriter
 import java.io.File
 import java.io.FileOutputStream
 import java.util.UUID
+import com.pepperonas.brutus.R
 
 object QrGenerator {
 
@@ -92,11 +93,11 @@ object QrGenerator {
             val send = Intent(Intent.ACTION_SEND).apply {
                 type = "image/png"
                 putExtra(Intent.EXTRA_STREAM, uri)
-                putExtra(Intent.EXTRA_SUBJECT, "Brutus QR-Code")
-                putExtra(Intent.EXTRA_TEXT, "Mein Brutus QR-Code zum Wecker-Ausschalten.")
+                putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.qr_share_subject))
+                putExtra(Intent.EXTRA_TEXT, context.getString(R.string.qr_share_text))
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
-            val chooser = Intent.createChooser(send, "QR-Code teilen").apply {
+            val chooser = Intent.createChooser(send, context.getString(R.string.qr_share_chooser)).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             context.startActivity(chooser)

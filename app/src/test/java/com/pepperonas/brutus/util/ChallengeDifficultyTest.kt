@@ -1,11 +1,15 @@
 package com.pepperonas.brutus.util
 
+import com.pepperonas.brutus.LocaleContexts
 import com.pepperonas.brutus.ui.alarm.MathProblem
 import com.pepperonas.brutus.ui.alarm.generateProblem
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+@RunWith(RobolectricTestRunner::class)
 class ChallengeDifficultyTest {
 
     @Test
@@ -56,16 +60,57 @@ class ChallengeDifficultyTest {
     }
 
     @Test
-    fun `labels exist for all valid difficulty levels`() {
-        listOf(
+    fun `labels exist for all valid difficulty levels, in both languages`() {
+        val mathLevels = listOf(
             ChallengeDifficulty.MATH_EASY,
             ChallengeDifficulty.MATH_HARD,
             ChallengeDifficulty.MATH_BRUTAL,
-        ).forEach { assertTrue(ChallengeDifficulty.mathLabel(it).isNotBlank()) }
-        listOf(
+        )
+        val shakeLevels = listOf(
             ChallengeDifficulty.SHAKE_LIGHT,
             ChallengeDifficulty.SHAKE_NORMAL,
             ChallengeDifficulty.SHAKE_HARD,
-        ).forEach { assertTrue(ChallengeDifficulty.shakeLabel(it).isNotBlank()) }
+        )
+        listOf(LocaleContexts.english(), LocaleContexts.german()).forEach { ctx ->
+            mathLevels.forEach {
+                assertTrue(ctx.getString(ChallengeDifficulty.mathLabel(it)).isNotBlank())
+                assertTrue(ctx.getString(ChallengeDifficulty.mathDescription(it)).isNotBlank())
+            }
+            shakeLevels.forEach {
+                assertTrue(ctx.getString(ChallengeDifficulty.shakeLabel(it)).isNotBlank())
+                assertTrue(ctx.getString(ChallengeDifficulty.shakeDescription(it)).isNotBlank())
+            }
+        }
+    }
+
+    @Test
+    fun `each difficulty level has its own distinct label`() {
+        // A copy-paste in the when-branches would silently show "Hard" for
+        // every level; distinct resource ids catch that without hardcoding text.
+        val math = listOf(
+            ChallengeDifficulty.MATH_EASY,
+            ChallengeDifficulty.MATH_HARD,
+            ChallengeDifficulty.MATH_BRUTAL,
+        ).map { ChallengeDifficulty.mathLabel(it) }
+        assertEquals(math.size, math.toSet().size)
+
+        val shake = listOf(
+            ChallengeDifficulty.SHAKE_LIGHT,
+            ChallengeDifficulty.SHAKE_NORMAL,
+            ChallengeDifficulty.SHAKE_HARD,
+        ).map { ChallengeDifficulty.shakeLabel(it) }
+        assertEquals(shake.size, shake.toSet().size)
+    }
+
+    @Test
+    fun `an out-of-range level falls back to the normal preset`() {
+        assertEquals(
+            ChallengeDifficulty.mathLabel(ChallengeDifficulty.MATH_HARD),
+            ChallengeDifficulty.mathLabel(99)
+        )
+        assertEquals(
+            ChallengeDifficulty.shakeLabel(ChallengeDifficulty.SHAKE_NORMAL),
+            ChallengeDifficulty.shakeLabel(-1)
+        )
     }
 }

@@ -1,8 +1,11 @@
 package com.pepperonas.brutus.data
 
+import com.pepperonas.brutus.LocaleContexts
 import com.pepperonas.brutus.util.AlarmSound
 import com.pepperonas.brutus.util.ChallengeFlags
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -13,6 +16,7 @@ import kotlin.test.assertTrue
  * existing rows (`DEFAULT 0` in the ALTER TABLE statements). Silently changing
  * one of them changes alarms that users already created.
  */
+@RunWith(RobolectricTestRunner::class)
 class AlarmEntityDefaultsTest {
 
     private val fresh = AlarmEntity(hour = 6, minute = 30)
@@ -50,7 +54,8 @@ class AlarmEntityDefaultsTest {
 
     @Test
     fun `soundName falls back instead of crashing on a corrupt stored id`() {
-        assertEquals(AlarmSound.SYSTEM.displayName, fresh.copy(soundId = 4711).soundName())
+        val en = LocaleContexts.english()
+        assertEquals(en.getString(AlarmSound.SYSTEM.labelRes), fresh.copy(soundId = 4711).soundName(en))
     }
 
     @Test
@@ -58,7 +63,8 @@ class AlarmEntityDefaultsTest {
         val all = fresh.copy(
             challengeFlags = ChallengeFlags.MATH or ChallengeFlags.SHAKE or ChallengeFlags.QR
         )
-        assertEquals("Mathe + Schütteln + QR-Code", all.challengeName())
+        assertEquals("Math + Shake + QR code", all.challengeName(LocaleContexts.english()))
+        assertEquals("Mathe + Schütteln + QR-Code", all.challengeName(LocaleContexts.german()))
     }
 
     @Test

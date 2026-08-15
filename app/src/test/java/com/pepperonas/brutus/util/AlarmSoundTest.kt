@@ -1,7 +1,10 @@
 package com.pepperonas.brutus.util
 
+import com.pepperonas.brutus.LocaleContexts
 import com.pepperonas.brutus.data.AlarmEntity
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -13,6 +16,7 @@ import kotlin.test.assertTrue
  * These tests pin the wire format; the display strings are covered because a
  * duplicate name makes the picker ambiguous.
  */
+@RunWith(RobolectricTestRunner::class)
 class AlarmSoundTest {
 
     /** Golden map. Changing an id here means migrating the `alarms.soundId` column. */
@@ -63,17 +67,46 @@ class AlarmSoundTest {
     }
 
     @Test
-    fun `display names are unique and non-blank — the picker shows them raw`() {
-        val names = AlarmSound.entries.map { it.displayName }
-        assertTrue(names.none { it.isBlank() }, "blank display name in $names")
-        assertEquals(names.size, names.toSet().size, "duplicate display name: $names")
+    fun `display names are unique and non-blank in every language`() {
+        listOf("en" to LocaleContexts.english(), "de" to LocaleContexts.german())
+            .forEach { (tag, ctx) ->
+                val names = AlarmSound.entries.map { it.label(ctx) }
+                assertTrue(names.none { it.isBlank() }, "blank display name in $tag: $names")
+                assertEquals(names.size, names.toSet().size, "duplicate display name in $tag: $names")
+            }
     }
 
     @Test
     fun `every sound carries a description for the picker subtitle`() {
-        AlarmSound.entries.forEach {
-            assertTrue(it.description.isNotBlank(), "${it.name} has no description")
+        listOf(LocaleContexts.english(), LocaleContexts.german()).forEach { ctx ->
+            AlarmSound.entries.forEach {
+                assertTrue(it.description(ctx).isNotBlank(), "${it.name} has no description")
+            }
         }
+    }
+
+    @Test
+    fun `every sound points at its own label and description resource`() {
+        val labels = AlarmSound.entries.map { it.labelRes }
+        val descriptions = AlarmSound.entries.map { it.descriptionRes }
+        assertEquals(labels.size, labels.toSet().size, "two sounds share one label resource")
+        assertEquals(
+            descriptions.size, descriptions.toSet().size,
+            "two sounds share one description resource"
+        )
+    }
+
+    @Test
+    fun `the translated names differ where the languages differ`() {
+        val en = LocaleContexts.english()
+        val de = LocaleContexts.german()
+        // Proper nouns stay put …
+        assertEquals(AlarmSound.KLAXON.label(en), AlarmSound.KLAXON.label(de))
+        // … while translated ones actually change.
+        assertEquals("Chime", AlarmSound.CHIME.label(en))
+        assertEquals("Glockenspiel", AlarmSound.CHIME.label(de))
+        assertEquals("Silent", AlarmSound.SILENT.label(en))
+        assertEquals("Stumm", AlarmSound.SILENT.label(de))
     }
 
     @Test

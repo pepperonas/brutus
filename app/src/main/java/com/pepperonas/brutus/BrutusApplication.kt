@@ -17,28 +17,28 @@ class BrutusApplication : Application() {
     private fun createNotificationChannels() {
         val alarmChannel = NotificationChannel(
             CHANNEL_ALARM,
-            "Alarm",
+            getString(R.string.channel_alarm_name),
             NotificationManager.IMPORTANCE_HIGH
         ).apply {
-            description = "Active alarm notifications"
+            description = getString(R.string.channel_alarm_description)
             setBypassDnd(true)
             setSound(null, null)
         }
 
         val serviceChannel = NotificationChannel(
             CHANNEL_SERVICE,
-            "Alarm Service",
+            getString(R.string.channel_service_name),
             NotificationManager.IMPORTANCE_LOW
         ).apply {
-            description = "Background alarm service"
+            description = getString(R.string.channel_service_description)
         }
 
         val ultraHardcoreChannel = NotificationChannel(
             CHANNEL_ULTRA_HARDCORE,
-            "Ultra Hardcore Reminder",
+            getString(R.string.channel_ultra_hardcore_name),
             NotificationManager.IMPORTANCE_HIGH
         ).apply {
-            description = "Persistent reminder while two follow-up alarms are armed"
+            description = getString(R.string.channel_ultra_hardcore_description)
             setBypassDnd(true)
             setSound(null, null)
             enableVibration(false)

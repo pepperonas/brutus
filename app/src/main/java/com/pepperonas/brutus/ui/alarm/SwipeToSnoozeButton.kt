@@ -55,6 +55,8 @@ import androidx.compose.material3.MaterialTheme
 import com.pepperonas.brutus.ui.theme.rememberReducedMotion
 import com.pepperonas.brutus.util.rememberBrutusHaptics
 import kotlinx.coroutines.launch
+import androidx.compose.ui.res.stringResource
+import com.pepperonas.brutus.R
 
 /**
  * Slide-to-unlock style snooze button. User must drag the thumb from the left
@@ -81,6 +83,11 @@ fun SwipeToSnoozeButton(
     val progress = if (maxOffset > 0f) (offsetX.value / maxOffset).coerceIn(0f, 1f) else 0f
     val accent = MaterialTheme.colorScheme.tertiary
     val onAccent = MaterialTheme.colorScheme.onTertiary
+
+    // Hoisted out of the modifier chain: semantics {} is not a composable scope,
+    // so stringResource() cannot be called inside it.
+    val swipeHint = stringResource(R.string.snooze_swipe_hint)
+    val snoozeAction = stringResource(R.string.snooze_action)
 
     // Pulsing hint when idle — static when system animations are disabled.
     val reducedMotion = rememberReducedMotion()
@@ -133,9 +140,9 @@ fun SwipeToSnoozeButton(
             // Accessibility fallback: TalkBack / switch-access users can't
             // perform the drag gesture — expose snooze as a custom action.
             .semantics {
-                contentDescription = "Zum Snoozen wischen"
+                contentDescription = swipeHint
                 customActions = listOf(
-                    CustomAccessibilityAction("Snoozen") {
+                    CustomAccessibilityAction(snoozeAction) {
                         if (!triggered) {
                             triggered = true
                             haptics.success()
@@ -179,7 +186,7 @@ fun SwipeToSnoozeButton(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "Zum Snoozen wischen",
+                text = swipeHint,
                 color = accent.copy(alpha = hintAlpha),
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 15.sp,
@@ -245,7 +252,7 @@ fun SwipeToSnoozeButton(
         ) {
             Icon(
                 Icons.Default.KeyboardDoubleArrowRight,
-                contentDescription = "Snooze",
+                contentDescription = snoozeAction,
                 tint = onAccent,
                 modifier = Modifier.size(28.dp)
             )

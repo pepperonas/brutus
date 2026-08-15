@@ -1,5 +1,9 @@
 package com.pepperonas.brutus.util
 
+import android.content.Context
+import androidx.annotation.StringRes
+import com.pepperonas.brutus.R
+
 object ChallengeFlags {
     const val MATH = 1 shl 0
     const val SHAKE = 1 shl 1
@@ -14,13 +18,20 @@ object ChallengeFlags {
      */
     fun sanitize(flags: Int): Int = if (flags == 0) MATH else flags
 
-    fun describe(flags: Int): String {
-        if (flags == 0) return "Keine"
-        val parts = mutableListOf<String>()
-        if (has(flags, MATH)) parts += "Mathe"
-        if (has(flags, SHAKE)) parts += "Schütteln"
-        if (has(flags, QR)) parts += "QR-Code"
-        return parts.joinToString(" + ")
+    /** Name of a single challenge flag, as a string resource. */
+    @StringRes
+    fun labelOf(flag: Int): Int = when (flag) {
+        MATH -> R.string.challenge_math
+        SHAKE -> R.string.challenge_shake
+        else -> R.string.challenge_qr
+    }
+
+    /** Human-readable list of the active challenges, e.g. "Math + Shake". */
+    fun describe(context: Context, flags: Int): String {
+        if (flags == 0) return context.getString(R.string.challenge_none)
+        val parts = activeList(flags).map { context.getString(labelOf(it)) }
+        if (parts.isEmpty()) return context.getString(R.string.challenge_none)
+        return parts.joinToString(context.getString(R.string.challenge_separator))
     }
 
     /** Ordered list of active challenge flags (for sequential execution). */

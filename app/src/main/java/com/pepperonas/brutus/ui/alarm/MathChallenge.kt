@@ -39,6 +39,8 @@ import androidx.compose.ui.unit.sp
 import com.pepperonas.brutus.ui.theme.BrutusTheme
 import com.pepperonas.brutus.util.ChallengeDifficulty
 import kotlin.random.Random
+import androidx.compose.ui.res.stringResource
+import com.pepperonas.brutus.R
 
 data class MathProblem(val a: Int, val b: Int, val operator: Char) {
     val answer: Int = when (operator) {
@@ -128,7 +130,7 @@ fun MathChallenge(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Mathe-Challenge",
+            text = stringResource(R.string.math_title),
             style = MaterialTheme.typography.headlineMedium,
             color = Color.White
         )
@@ -136,7 +138,12 @@ fun MathChallenge(
         Spacer(modifier = Modifier.height(4.dp))
 
         Text(
-            text = "Lösung ${solvedCount + 1} von $totalRequired · ${ChallengeDifficulty.mathLabel(difficulty)}",
+            text = stringResource(
+                R.string.math_progress,
+                solvedCount + 1,
+                totalRequired,
+                stringResource(ChallengeDifficulty.mathLabel(difficulty))
+            ),
             style = MaterialTheme.typography.bodyLarge,
             color = Color.White.copy(alpha = 0.7f)
         )
@@ -171,7 +178,7 @@ fun MathChallenge(
         }
 
         Text(
-            text = if (showError) "Falsch! Versuch es nochmal." else " ",
+            text = if (showError) stringResource(R.string.math_wrong) else " ",
             color = MaterialTheme.colorScheme.error,
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(top = 6.dp, bottom = 6.dp)
@@ -224,7 +231,7 @@ private fun NumberPad(
             KeypadButton(modifier = Modifier.weight(1f), onClick = onBackspace) {
                 Icon(
                     Icons.AutoMirrored.Filled.Backspace,
-                    contentDescription = "Löschen",
+                    contentDescription = stringResource(R.string.action_delete),
                 )
             }
             KeypadButton(modifier = Modifier.weight(1f), onClick = { onDigit('0') }) {
@@ -236,7 +243,7 @@ private fun NumberPad(
                 enabled = submitEnabled,
                 primary = true,
             ) {
-                Icon(Icons.Default.Check, contentDescription = "Prüfen")
+                Icon(Icons.Default.Check, contentDescription = stringResource(R.string.math_check))
             }
         }
     }

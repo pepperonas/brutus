@@ -77,6 +77,10 @@ import com.pepperonas.brutus.util.ChallengeFlags
 import com.pepperonas.brutus.util.GlobalQrStore
 import com.pepperonas.brutus.util.QrGenerator
 import com.pepperonas.brutus.util.rememberBrutusHaptics
+import androidx.annotation.StringRes
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.stringArrayResource
+import com.pepperonas.brutus.R
 
 data class AlarmEditResult(
     val hour: Int,
@@ -132,7 +136,7 @@ fun AlarmEditDialog(
     val qrCodeData = remember { GlobalQrStore.get(ctxForQr) }
     val qrBitmap = remember(qrCodeData) { QrGenerator.generateBitmap(qrCodeData) }
 
-    val days = listOf("Mo", "Di", "Mi", "Do", "Fr", "Sa", "So")
+    val days = stringArrayResource(R.array.weekday_short)
     val snoozeOptions = listOf(0, 2, 5, 10, 15)
     val qrEnabled = ChallengeFlags.has(challengeFlags, ChallengeFlags.QR)
     val mathEnabled = ChallengeFlags.has(challengeFlags, ChallengeFlags.MATH)
@@ -147,7 +151,7 @@ fun AlarmEditDialog(
 
     val shareQr: () -> Unit = {
         if (!QrGenerator.shareQr(ctx, qrCodeData)) {
-            Toast.makeText(ctx, "Teilen fehlgeschlagen", Toast.LENGTH_SHORT).show()
+            Toast.makeText(ctx, R.string.toast_share_failed, Toast.LENGTH_SHORT).show()
         }
     }
     val launchTest: () -> Unit = {
@@ -170,15 +174,15 @@ fun AlarmEditDialog(
     val saveQr: () -> Unit = {
         val uri = QrGenerator.savePng(ctx, qrCodeData)
         if (uri != null) {
-            Toast.makeText(ctx, "QR-Code in Pictures/Brutus gespeichert", Toast.LENGTH_LONG).show()
+            Toast.makeText(ctx, R.string.toast_qr_saved, Toast.LENGTH_LONG).show()
         } else {
-            Toast.makeText(ctx, "Speichern fehlgeschlagen", Toast.LENGTH_SHORT).show()
+            Toast.makeText(ctx, R.string.toast_save_failed, Toast.LENGTH_SHORT).show()
         }
     }
     val storagePermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted -> if (granted) saveQr() else
-        Toast.makeText(ctx, "Speicher-Berechtigung benötigt", Toast.LENGTH_SHORT).show()
+        Toast.makeText(ctx, R.string.toast_storage_permission, Toast.LENGTH_SHORT).show()
     }
     val onSaveQrClick: () -> Unit = {
         val needsPermission = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q &&
@@ -211,11 +215,13 @@ fun AlarmEditDialog(
         ) {
             Text(
                 // id == 0 with a non-null alarm means "prefilled copy template".
-                text = when {
-                    existingAlarm == null -> "Neuer Alarm"
-                    existingAlarm.id == 0L -> "Alarm kopieren"
-                    else -> "Alarm bearbeiten"
-                },
+                text = stringResource(
+                    when {
+                        existingAlarm == null -> R.string.edit_title_new
+                        existingAlarm.id == 0L -> R.string.edit_title_copy
+                        else -> R.string.edit_title_edit
+                    }
+                ),
                 style = MaterialTheme.typography.headlineMedium
             )
 
@@ -231,7 +237,7 @@ fun AlarmEditDialog(
             TextField(
                 value = label,
                 onValueChange = { label = it },
-                label = { Text("Bezeichnung") },
+                label = { Text(stringResource(R.string.edit_label)) },
                 singleLine = true,
                 shape = MaterialTheme.shapes.medium,
                 colors = TextFieldDefaults.colors(
@@ -246,7 +252,7 @@ fun AlarmEditDialog(
 
             // Repeat days — equal-weight pills so all seven always fit one row,
             // even on ~360 dp screens (fixed 44 dp circles used to wrap "So").
-            Text("Wiederholen", style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.edit_repeat), style = MaterialTheme.typography.titleLarge)
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -281,7 +287,7 @@ fun AlarmEditDialog(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Sound picker
-            Text("Wecker-Sound", style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.edit_sound), style = MaterialTheme.typography.titleLarge)
             Spacer(modifier = Modifier.height(8.dp))
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -295,12 +301,15 @@ fun AlarmEditDialog(
                             soundId = snd.id
                             onPreviewSound(snd)
                         },
-                        label = { Text(snd.displayName) },
+                        label = { Text(stringResource(snd.labelRes)) },
                     )
                 }
             }
             Text(
-                text = AlarmSound.fromId(soundId).description + " — Tippe zum Vorhören",
+                text = stringResource(
+                    R.string.edit_sound_hint,
+                    stringResource(AlarmSound.fromId(soundId).descriptionRes)
+                ),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 6.dp)
@@ -309,44 +318,44 @@ fun AlarmEditDialog(
                 onClick = { onStopPreview() },
                 modifier = Modifier.align(Alignment.End),
             ) {
-                Text("Vorschau stoppen")
+                Text(stringResource(R.string.edit_stop_preview))
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
             // Challenges (multi-select)
-            Text("Weckmodi (kombinierbar)", style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.edit_modes), style = MaterialTheme.typography.titleLarge)
             Text(
-                text = "Alle ausgewählten Challenges müssen nacheinander bestanden werden",
+                text = stringResource(R.string.edit_modes_hint),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(8.dp))
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ChallengeChip("Mathe", Icons.Default.Calculate, challengeFlags, ChallengeFlags.MATH) {
+                ChallengeChip(stringResource(R.string.challenge_math), Icons.Default.Calculate, challengeFlags, ChallengeFlags.MATH) {
                     challengeFlags = challengeFlags xor ChallengeFlags.MATH
                 }
-                ChallengeChip("Schütteln", Icons.Default.Vibration, challengeFlags, ChallengeFlags.SHAKE) {
+                ChallengeChip(stringResource(R.string.challenge_shake), Icons.Default.Vibration, challengeFlags, ChallengeFlags.SHAKE) {
                     challengeFlags = challengeFlags xor ChallengeFlags.SHAKE
                 }
-                ChallengeChip("QR-Code", Icons.Default.QrCodeScanner, challengeFlags, ChallengeFlags.QR) {
+                ChallengeChip(stringResource(R.string.challenge_qr), Icons.Default.QrCodeScanner, challengeFlags, ChallengeFlags.QR) {
                     challengeFlags = challengeFlags xor ChallengeFlags.QR
                 }
             }
             // The "chain": combined challenges run strictly in this order.
-            val chainNames = remember(challengeFlags) {
+            val chainCtx = LocalContext.current
+            val chainNames = remember(challengeFlags, chainCtx) {
                 ChallengeFlags.activeList(challengeFlags).map { flag ->
-                    when (flag) {
-                        ChallengeFlags.MATH -> "Mathe"
-                        ChallengeFlags.SHAKE -> "Schütteln"
-                        else -> "QR-Code"
-                    }
+                    chainCtx.getString(ChallengeFlags.labelOf(flag))
                 }
             }
             if (chainNames.size > 1) {
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = "Reihenfolge: " + chainNames.joinToString("  →  "),
+                    text = stringResource(
+                        R.string.edit_chain_order,
+                        chainNames.joinToString("  →  ")
+                    ),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -355,7 +364,7 @@ fun AlarmEditDialog(
             if (mathEnabled) {
                 Spacer(modifier = Modifier.height(12.dp))
                 CountStepper(
-                    label = "Aufgaben",
+                    label = stringResource(R.string.edit_math_count),
                     value = mathProblemCount,
                     onChange = { mathProblemCount = it },
                     min = 1,
@@ -365,7 +374,7 @@ fun AlarmEditDialog(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 DifficultyChips(
-                    title = "Mathe-Schwierigkeit",
+                    title = stringResource(R.string.edit_math_difficulty),
                     options = listOf(
                         ChallengeDifficulty.MATH_EASY,
                         ChallengeDifficulty.MATH_HARD,
@@ -381,7 +390,7 @@ fun AlarmEditDialog(
             if (shakeEnabled) {
                 Spacer(modifier = Modifier.height(12.dp))
                 CountStepper(
-                    label = "Schüttel-Anzahl",
+                    label = stringResource(R.string.edit_shake_count),
                     value = shakeCount,
                     onChange = { shakeCount = it },
                     min = 10,
@@ -391,7 +400,7 @@ fun AlarmEditDialog(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 DifficultyChips(
-                    title = "Schüttel-Empfindlichkeit",
+                    title = stringResource(R.string.edit_shake_sensitivity),
                     options = listOf(
                         ChallengeDifficulty.SHAKE_LIGHT,
                         ChallengeDifficulty.SHAKE_NORMAL,
@@ -407,14 +416,14 @@ fun AlarmEditDialog(
             if (qrEnabled) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = "Dein globaler QR-Code — gilt für alle Alarme. Einmal ausdrucken, immer gültig.",
+                    text = stringResource(R.string.edit_qr_hint),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Image(
                     bitmap = qrBitmap.asImageBitmap(),
-                    contentDescription = "QR Code",
+                    contentDescription = stringResource(R.string.edit_qr_content_description),
                     modifier = Modifier
                         .size(220.dp)
                         .clip(RoundedCornerShape(12.dp))
@@ -422,7 +431,7 @@ fun AlarmEditDialog(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "ID: ${qrCodeData.takeLast(8)}",
+                    text = stringResource(R.string.edit_qr_id, qrCodeData.takeLast(8)),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -432,14 +441,14 @@ fun AlarmEditDialog(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    FilledTonalButton(onClick = onSaveQrClick) { Text("Als PNG speichern") }
-                    FilledTonalButton(onClick = shareQr) { Text("Teilen") }
+                    FilledTonalButton(onClick = onSaveQrClick) { Text(stringResource(R.string.edit_qr_save)) }
+                    FilledTonalButton(onClick = shareQr) { Text(stringResource(R.string.action_share)) }
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text("Snooze-Dauer", style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.edit_snooze), style = MaterialTheme.typography.titleLarge)
             Spacer(modifier = Modifier.height(8.dp))
             SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
                 snoozeOptions.forEachIndexed { index, minutes ->
@@ -448,7 +457,10 @@ fun AlarmEditDialog(
                         onClick = { snoozeDuration = minutes },
                         shape = SegmentedButtonDefaults.itemShape(index, snoozeOptions.size)
                     ) {
-                        Text(if (minutes == 0) "Aus" else "${minutes}min")
+                        Text(
+                            if (minutes == 0) stringResource(R.string.edit_snooze_off)
+                            else stringResource(R.string.edit_snooze_minutes, minutes)
+                        )
                     }
                 }
             }
@@ -457,9 +469,9 @@ fun AlarmEditDialog(
 
             // Sunrise pre-alarm toggle
             ModeToggleRow(
-                title = "Sunrise (10 Min Vorlauf)",
+                title = stringResource(R.string.edit_sunrise_title),
                 danger = false,
-                description = "10 Minuten vor dem Wecker startet ein sanfter Vorlauf: Bildschirm wird langsam heller, leises Glockenspiel schwillt an. Der Hauptalarm klingelt danach normal.",
+                description = stringResource(R.string.edit_sunrise_description),
                 checked = sunriseEnabled,
                 onCheckedChange = {
                     haptics.tap()
@@ -471,9 +483,9 @@ fun AlarmEditDialog(
 
             // Hardcore Mode toggle
             ModeToggleRow(
-                title = "Hardcore Mode",
+                title = stringResource(R.string.edit_hardcore_title),
                 danger = true,
-                description = "Sperrt die Lautstärke auf Maximum — Lautstärke-Tasten sind während des Alarms wirkungslos.",
+                description = stringResource(R.string.edit_hardcore_description),
                 checked = hardcoreMode || ultraHardcoreMode,
                 enabled = !ultraHardcoreMode, // Ultra forces this on
                 onCheckedChange = {
@@ -486,9 +498,9 @@ fun AlarmEditDialog(
 
             // Ultra Hardcore Mode toggle
             ModeToggleRow(
-                title = "Ultra Hardcore Mode",
+                title = stringResource(R.string.edit_ultra_hardcore_title),
                 danger = true,
-                description = "Nach dem Dismiss feuert Brutus zweimal nach (+10 und +15 Minuten). Eine Schritt-Aufgabe in der Notification stoppt beide.",
+                description = stringResource(R.string.edit_ultra_hardcore_description),
                 checked = ultraHardcoreMode,
                 onCheckedChange = {
                     haptics.warn()
@@ -514,7 +526,7 @@ fun AlarmEditDialog(
                     .fillMaxWidth()
                     .height(48.dp),
             ) {
-                Text("Weckmodi jetzt testen")
+                Text(stringResource(R.string.edit_test_modes))
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -556,8 +568,10 @@ fun AlarmEditDialog(
                 shape = MaterialTheme.shapes.large,
             ) {
                 Text(
-                    text = if (existingAlarm != null && existingAlarm.id != 0L) "Speichern"
-                    else "Alarm erstellen",
+                    text = stringResource(
+                        if (existingAlarm != null && existingAlarm.id != 0L) R.string.action_save
+                        else R.string.edit_create_alarm
+                    ),
                     style = MaterialTheme.typography.titleLarge
                 )
             }
@@ -630,8 +644,10 @@ private fun DifficultyChips(
     title: String,
     options: List<Int>,
     selected: Int,
-    label: (Int) -> String,
-    description: String,
+    /** Maps a preset level to its label string resource. */
+    label: (Int) -> Int,
+    /** Description string resource of the selected level. */
+    @StringRes description: Int,
     onSelect: (Int) -> Unit,
 ) {
     Column(
@@ -650,13 +666,13 @@ private fun DifficultyChips(
                     onClick = { onSelect(opt) },
                     shape = SegmentedButtonDefaults.itemShape(index, options.size)
                 ) {
-                    Text(label(opt))
+                    Text(stringResource(label(opt)))
                 }
             }
         }
         Spacer(modifier = Modifier.height(6.dp))
         Text(
-            text = description,
+            text = stringResource(description),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -692,7 +708,7 @@ private fun CountStepper(
         ) {
             Icon(
                 Icons.Default.Remove,
-                contentDescription = "Weniger",
+                contentDescription = stringResource(R.string.action_less),
                 tint = MaterialTheme.colorScheme.primary
             )
         }
@@ -708,7 +724,7 @@ private fun CountStepper(
         ) {
             Icon(
                 Icons.Default.Add,
-                contentDescription = "Mehr",
+                contentDescription = stringResource(R.string.action_more),
                 tint = MaterialTheme.colorScheme.primary
             )
         }
@@ -748,12 +764,21 @@ private fun EditControlsSpecimen() {
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            ChallengeChip("Mathe", Icons.Default.Calculate, ChallengeFlags.MATH, ChallengeFlags.MATH) {}
-            ChallengeChip("Schütteln", Icons.Default.Vibration, ChallengeFlags.MATH, ChallengeFlags.SHAKE) {}
-            ChallengeChip("QR-Code", Icons.Default.QrCodeScanner, ChallengeFlags.MATH, ChallengeFlags.QR) {}
+            ChallengeChip(
+                stringResource(R.string.challenge_math),
+                Icons.Default.Calculate, ChallengeFlags.MATH, ChallengeFlags.MATH
+            ) {}
+            ChallengeChip(
+                stringResource(R.string.challenge_shake),
+                Icons.Default.Vibration, ChallengeFlags.MATH, ChallengeFlags.SHAKE
+            ) {}
+            ChallengeChip(
+                stringResource(R.string.challenge_qr),
+                Icons.Default.QrCodeScanner, ChallengeFlags.MATH, ChallengeFlags.QR
+            ) {}
         }
         DifficultyChips(
-            title = "Mathe-Schwierigkeit",
+            title = stringResource(R.string.edit_math_difficulty),
             options = listOf(
                 ChallengeDifficulty.MATH_EASY,
                 ChallengeDifficulty.MATH_HARD,
@@ -764,20 +789,23 @@ private fun EditControlsSpecimen() {
             description = ChallengeDifficulty.mathDescription(ChallengeDifficulty.MATH_HARD),
             onSelect = {}
         )
-        CountStepper(label = "Aufgaben", value = 3, onChange = {}, min = 1, max = 10, step = 1, suffix = "")
+        CountStepper(
+            label = stringResource(R.string.edit_math_count),
+            value = 3, onChange = {}, min = 1, max = 10, step = 1, suffix = ""
+        )
         ModeToggleRow(
-            title = "Sunrise (10 Min Vorlauf)", danger = false,
-            description = "Sanfter Vorlauf mit Licht und Glockenspiel.",
+            title = stringResource(R.string.edit_sunrise_title), danger = false,
+            description = stringResource(R.string.edit_sunrise_short_description),
             checked = true, onCheckedChange = {}
         )
         ModeToggleRow(
-            title = "Ultra Hardcore Mode", danger = true,
-            description = "Feuert nach dem Dismiss zweimal nach.",
+            title = stringResource(R.string.edit_ultra_hardcore_title), danger = true,
+            description = stringResource(R.string.edit_ultra_hardcore_short_description),
             checked = true, onCheckedChange = {}
         )
         ModeToggleRow(
-            title = "Hardcore Mode", danger = true,
-            description = "Sperrt die Lautstärke auf Maximum.",
+            title = stringResource(R.string.edit_hardcore_title), danger = true,
+            description = stringResource(R.string.edit_hardcore_short_description),
             checked = false, onCheckedChange = {}
         )
     }

@@ -51,6 +51,8 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.compose.ui.res.stringResource
+import com.pepperonas.brutus.R
 
 /**
  * Pre-alarm "Sunrise" — fires up to [AlarmScheduler.SUNRISE_LEAD_MIN] minutes before
@@ -195,7 +197,7 @@ private fun SunriseScreen(
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = "SUNRISE",
+                    text = stringResource(R.string.sunrise_title),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
                     letterSpacing = 6.sp,
@@ -214,8 +216,12 @@ private fun SunriseScreen(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = if (mainTriggerAt > 0L) "Wecker in ${remaining(mainTriggerAt, nowMillis)}"
-                    else "Sanfter Weckvorlauf läuft",
+                    text = if (mainTriggerAt > 0L)
+                        stringResource(
+                            R.string.sunrise_countdown,
+                            remaining(mainTriggerAt, nowMillis)
+                        )
+                    else stringResource(R.string.sunrise_running),
                     style = MaterialTheme.typography.titleMedium,
                     color = Color.White.copy(alpha = 0.55f),
                 )
@@ -233,7 +239,7 @@ private fun SunriseScreen(
                     shape = MaterialTheme.shapes.large,
                 ) {
                     Text(
-                        "Wecker stoppen",
+                        stringResource(R.string.sunrise_stop_alarm),
                         fontSize = 17.sp,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -250,7 +256,7 @@ private fun SunriseScreen(
                     shape = MaterialTheme.shapes.large,
                 ) {
                     Text(
-                        "Schon wach — Sunrise schliessen",
+                        stringResource(R.string.sunrise_close),
                         fontSize = 14.sp,
                         textAlign = TextAlign.Center
                     )

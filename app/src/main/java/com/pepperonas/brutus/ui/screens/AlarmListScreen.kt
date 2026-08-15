@@ -90,6 +90,10 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.res.pluralStringResource
+import com.pepperonas.brutus.R
 
 @Composable
 fun AlarmListScreen(viewModel: AlarmViewModel) {
@@ -101,6 +105,8 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val resources = LocalContext.current.resources
+    val undoLabel = stringResource(R.string.action_undo)
 
     // Deletes with an undo affordance: the removed alarms are held here until
     // the snackbar is dismissed or its "Rückgängig" action restores them.
@@ -111,9 +117,10 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
                 // A newer delete replaces a still-visible undo snackbar.
                 snackbarHostState.currentSnackbarData?.dismiss()
                 val result = snackbarHostState.showSnackbar(
-                    message = if (toDelete.size == 1) "Alarm gelöscht"
-                    else "${toDelete.size} Alarme gelöscht",
-                    actionLabel = "Rückgängig",
+                    message = resources.getQuantityString(
+                        R.plurals.alarm_deleted, toDelete.size, toDelete.size
+                    ),
+                    actionLabel = undoLabel,
                     duration = SnackbarDuration.Long,
                 )
                 if (result == SnackbarResult.ActionPerformed) {
@@ -175,13 +182,13 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
                     IconButton(onClick = { menuOpen = true }) {
                         Icon(
                             Icons.Default.MoreVert,
-                            contentDescription = "Mehr",
+                            contentDescription = stringResource(R.string.action_more),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                         DropdownMenuItem(
-                            text = { Text("Alle löschen") },
+                            text = { Text(stringResource(R.string.alarm_list_delete_all)) },
                             enabled = alarms.isNotEmpty(),
                             onClick = {
                                 menuOpen = false
@@ -194,7 +201,7 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
                             val dynamicOn by ThemeSettings.dynamicColorFlow(context)
                                 .collectAsState(initial = false)
                             DropdownMenuItem(
-                                text = { Text("Material You Farben") },
+                                text = { Text(stringResource(R.string.alarm_list_material_you)) },
                                 trailingIcon = {
                                     Switch(
                                         checked = dynamicOn,
@@ -304,11 +311,12 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
     if (confirmDeleteAll) {
         AlertDialog(
             onDismissRequest = { confirmDeleteAll = false },
-            title = { Text("Alle Alarme löschen?") },
+            title = { Text(stringResource(R.string.alarm_list_delete_all_title)) },
             text = {
                 Text(
-                    if (alarms.size == 1) "1 Alarm wird gelöscht."
-                    else "${alarms.size} Alarme werden gelöscht."
+                    pluralStringResource(
+                        R.plurals.alarm_delete_all_body, alarms.size, alarms.size
+                    )
                 )
             },
             confirmButton = {
@@ -318,7 +326,7 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
                     deleteWithUndo(alarms.toList())
                 }) {
                     Text(
-                        "Löschen",
+                        stringResource(R.string.action_delete),
                         color = MaterialTheme.colorScheme.error,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -326,7 +334,7 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
             },
             dismissButton = {
                 TextButton(onClick = { confirmDeleteAll = false }) {
-                    Text("Abbrechen")
+                    Text(stringResource(R.string.action_cancel))
                 }
             }
         )
@@ -402,7 +410,7 @@ private fun AddAlarmFab(onClick: () -> Unit, modifier: Modifier = Modifier) {
         interactionSource = interaction,
         modifier = modifier,
     ) {
-        Icon(Icons.Default.Add, contentDescription = "Alarm hinzufügen")
+        Icon(Icons.Default.Add, contentDescription = stringResource(R.string.alarm_list_add))
     }
 }
 
@@ -415,26 +423,31 @@ private fun NextAlarmHeader(next: AlarmEntity?, now: Long, modifier: Modifier = 
     ) {
         if (triggerMillis != null) {
             Text(
-                text = "NÄCHSTER ALARM",
+                text = stringResource(R.string.alarm_list_next_alarm),
                 style = MaterialTheme.typography.labelMedium,
                 letterSpacing = 2.sp,
                 color = MaterialTheme.colorScheme.primary,
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = NextAlarmCalculator.formatCountdown(now, triggerMillis),
+                text = NextAlarmCalculator.formatCountdown(
+                    LocalContext.current, now, triggerMillis
+                ),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = formatTriggerDate(triggerMillis),
+                text = formatTriggerDate(
+                    triggerMillis,
+                    stringResource(R.string.format_next_alarm_date)
+                ),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         } else {
             Text(
-                text = "Kein Alarm aktiv",
+                text = stringResource(R.string.alarm_list_no_alarm),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -442,8 +455,10 @@ private fun NextAlarmHeader(next: AlarmEntity?, now: Long, modifier: Modifier = 
     }
 }
 
-private fun formatTriggerDate(millis: Long): String {
-    val fmt = SimpleDateFormat("EEE, d. MMM, HH:mm", Locale.GERMAN)
+private fun formatTriggerDate(millis: Long, pattern: String): String {
+    // Pattern comes from resources — German writes "Mo, 17. Aug, 06:30",
+    // English "Mon, Aug 17, 06:30".
+    val fmt = SimpleDateFormat(pattern, Locale.getDefault())
     return fmt.format(Date(millis))
 }
 
@@ -559,7 +574,7 @@ private fun AlarmCard(
                         color = timeColor
                     )
                     Text(
-                        text = alarm.repeatDaysString(),
+                        text = alarm.repeatDaysString(LocalContext.current),
                         style = MaterialTheme.typography.bodyMedium,
                         color = subColor
                     )
@@ -575,7 +590,7 @@ private fun AlarmCard(
                 IconButton(onClick = onCopy) {
                     Icon(
                         Icons.Default.ContentCopy,
-                        contentDescription = "Kopieren",
+                        contentDescription = stringResource(R.string.alarm_card_copy),
                         tint = subColor,
                         modifier = Modifier.size(20.dp)
                     )
@@ -583,7 +598,7 @@ private fun AlarmCard(
                 IconButton(onClick = onDelete) {
                     Icon(
                         Icons.Default.Delete,
-                        contentDescription = "Löschen",
+                        contentDescription = stringResource(R.string.alarm_card_delete),
                         tint = subColor
                     )
                 }
@@ -607,16 +622,35 @@ private fun AlarmCard(
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 if (alarm.ultraHardcoreMode) {
-                    InfoChip("ULTRA HC", cs.error, cs.onError, dim = dim)
+                    InfoChip(
+                        stringResource(R.string.chip_ultra_hardcore),
+                        cs.error, cs.onError, dim = dim
+                    )
                 } else if (alarm.hardcoreMode) {
-                    InfoChip("HARDCORE", cs.errorContainer, cs.onErrorContainer, dim = dim)
+                    InfoChip(
+                        stringResource(R.string.chip_hardcore),
+                        cs.errorContainer, cs.onErrorContainer, dim = dim
+                    )
                 }
                 if (alarm.sunriseEnabled) {
-                    InfoChip("☀ Sunrise", cs.tertiaryContainer, cs.onTertiaryContainer, dim = dim)
+                    InfoChip(
+                        stringResource(R.string.chip_sunrise),
+                        cs.tertiaryContainer, cs.onTertiaryContainer, dim = dim
+                    )
                 }
-                InfoChip(alarm.challengeName(), cs.secondaryContainer, cs.onSecondaryContainer, dim = dim)
-                InfoChip("Snooze ${alarm.snoozeDuration}m", cs.surfaceContainerHighest, cs.onSurfaceVariant, dim = dim)
-                InfoChip("♪ ${alarm.soundName()}", cs.surfaceContainerHighest, cs.onSurfaceVariant, dim = dim)
+                val ctx = LocalContext.current
+                InfoChip(
+                    alarm.challengeName(ctx),
+                    cs.secondaryContainer, cs.onSecondaryContainer, dim = dim
+                )
+                InfoChip(
+                    stringResource(R.string.chip_snooze, alarm.snoozeDuration),
+                    cs.surfaceContainerHighest, cs.onSurfaceVariant, dim = dim
+                )
+                InfoChip(
+                    stringResource(R.string.chip_sound, alarm.soundName(ctx)),
+                    cs.surfaceContainerHighest, cs.onSurfaceVariant, dim = dim
+                )
             }
         }
     }
@@ -630,7 +664,7 @@ private fun WeekdayStrip(
     inactiveColor: Color,
 ) {
     val cs = MaterialTheme.colorScheme
-    val labels = listOf("Mo", "Di", "Mi", "Do", "Fr", "Sa", "So")
+    val labels = stringArrayResource(R.array.weekday_short)
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -700,20 +734,20 @@ private fun EmptyState(onCreate: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Noch kein Alarm",
+                text = stringResource(R.string.alarm_list_empty_title),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Brutus weckt dich — garantiert.\nLeg deinen ersten Alarm an.",
+                text = stringResource(R.string.alarm_list_empty_body),
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(20.dp))
             FilledTonalButton(onClick = onCreate) {
-                Text("Alarm erstellen")
+                Text(stringResource(R.string.alarm_list_create))
             }
         }
     }
@@ -722,9 +756,9 @@ private fun EmptyState(onCreate: () -> Unit) {
 @Composable
 private fun ExactAlarmBanner(onFix: () -> Unit) {
     PermissionBanner(
-        title = "Exakte Alarme deaktiviert",
-        body = "Brutus kann ohne diese Berechtigung nicht zur exakten Minute klingeln.",
-        actionLabel = "Aktivieren",
+        title = stringResource(R.string.banner_exact_alarm_title),
+        body = stringResource(R.string.banner_exact_alarm_body),
+        actionLabel = stringResource(R.string.banner_exact_alarm_action),
         onFix = onFix,
     )
 }
@@ -732,9 +766,9 @@ private fun ExactAlarmBanner(onFix: () -> Unit) {
 @Composable
 private fun BatteryOptimizationBanner(onFix: () -> Unit) {
     PermissionBanner(
-        title = "Akku-Optimierung aktiv",
-        body = "Aggressive Akkusparmaßnahmen können Alarme verschlucken. Whiteliste Brutus, damit er garantiert klingelt.",
-        actionLabel = "Whitelisten",
+        title = stringResource(R.string.banner_battery_title),
+        body = stringResource(R.string.banner_battery_body),
+        actionLabel = stringResource(R.string.banner_battery_action),
         warning = true,
         onFix = onFix,
     )
@@ -743,9 +777,9 @@ private fun BatteryOptimizationBanner(onFix: () -> Unit) {
 @Composable
 private fun FullScreenIntentBanner(onFix: () -> Unit) {
     PermissionBanner(
-        title = "Vollbild-Alarm blockiert",
-        body = "Ohne diese Berechtigung erscheint der Alarm nur als Benachrichtigung — die App poppt nicht in den Vordergrund.",
-        actionLabel = "Erlauben",
+        title = stringResource(R.string.banner_fullscreen_title),
+        body = stringResource(R.string.banner_fullscreen_body),
+        actionLabel = stringResource(R.string.banner_fullscreen_action),
         onFix = onFix,
     )
 }

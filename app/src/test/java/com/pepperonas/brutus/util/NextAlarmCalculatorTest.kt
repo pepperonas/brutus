@@ -1,7 +1,11 @@
 package com.pepperonas.brutus.util
 
+import android.content.Context
+import com.pepperonas.brutus.LocaleContexts
 import com.pepperonas.brutus.data.AlarmEntity
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.util.Calendar
 import java.util.TimeZone
 import kotlin.test.assertEquals
@@ -9,7 +13,11 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
+@RunWith(RobolectricTestRunner::class)
 class NextAlarmCalculatorTest {
+
+    private val en: Context get() = LocaleContexts.english()
+    private val de: Context get() = LocaleContexts.german()
 
     private fun atTime(year: Int, month: Int, day: Int, hour: Int, minute: Int): Long {
         val c = Calendar.getInstance()
@@ -177,44 +185,40 @@ class NextAlarmCalculatorTest {
 
     @Test
     fun `formatCountdown minutes only`() {
-        assertEquals(
-            "Alarm in 5 Minuten",
-            NextAlarmCalculator.formatCountdown(0L, 5 * 60_000L)
-        )
+        assertEquals("Alarm in 5 minutes", NextAlarmCalculator.formatCountdown(en, 0L, 5 * 60_000L))
+        assertEquals("Alarm in 5 Minuten", NextAlarmCalculator.formatCountdown(de, 0L, 5 * 60_000L))
     }
 
     @Test
     fun `formatCountdown hours and minutes`() {
         val delta = (3 * 60 + 17) * 60_000L
         assertEquals(
+            "Alarm in 3 hours, 17 minutes",
+            NextAlarmCalculator.formatCountdown(en, 0L, delta)
+        )
+        assertEquals(
             "Alarm in 3 Stunden, 17 Minuten",
-            NextAlarmCalculator.formatCountdown(0L, delta)
+            NextAlarmCalculator.formatCountdown(de, 0L, delta)
         )
     }
 
     @Test
-    fun `formatCountdown days uses singular form for 1 day`() {
+    fun `formatCountdown days uses the singular form for 1 day`() {
         val delta = (24L + 5) * 60 * 60_000L           // 1d 5h
-        assertEquals(
-            "Alarm in 1 Tag, 5 Std.",
-            NextAlarmCalculator.formatCountdown(0L, delta)
-        )
+        assertEquals("Alarm in 1 day, 5 h", NextAlarmCalculator.formatCountdown(en, 0L, delta))
+        assertEquals("Alarm in 1 Tag, 5 Std.", NextAlarmCalculator.formatCountdown(de, 0L, delta))
     }
 
     @Test
     fun `formatCountdown plural days`() {
         val delta = (3 * 24L + 7) * 60 * 60_000L
-        assertEquals(
-            "Alarm in 3 Tagen, 7 Std.",
-            NextAlarmCalculator.formatCountdown(0L, delta)
-        )
+        assertEquals("Alarm in 3 days, 7 h", NextAlarmCalculator.formatCountdown(en, 0L, delta))
+        assertEquals("Alarm in 3 Tagen, 7 Std.", NextAlarmCalculator.formatCountdown(de, 0L, delta))
     }
 
     @Test
     fun `formatCountdown clamps negative delta to zero`() {
-        assertEquals(
-            "Alarm in 0 Minuten",
-            NextAlarmCalculator.formatCountdown(1_000L, 500L)
-        )
+        assertEquals("Alarm in 0 minutes", NextAlarmCalculator.formatCountdown(en, 1_000L, 500L))
+        assertEquals("Alarm in 0 Minuten", NextAlarmCalculator.formatCountdown(de, 1_000L, 500L))
     }
 }

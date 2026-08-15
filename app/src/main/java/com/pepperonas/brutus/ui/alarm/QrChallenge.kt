@@ -44,6 +44,8 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import java.util.concurrent.Executors
+import androidx.compose.ui.res.stringResource
+import com.pepperonas.brutus.R
 
 @Composable
 fun QrChallenge(expectedQrData: String, onComplete: () -> Unit) {
@@ -99,7 +101,7 @@ fun QrChallenge(expectedQrData: String, onComplete: () -> Unit) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "QR-Code scannen",
+            text = stringResource(R.string.qr_title),
             style = MaterialTheme.typography.headlineMedium,
             color = Color.White
         )
@@ -107,7 +109,7 @@ fun QrChallenge(expectedQrData: String, onComplete: () -> Unit) {
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Scanne deinen Brutus QR-Code",
+            text = stringResource(R.string.qr_instruction),
             style = MaterialTheme.typography.bodyLarge,
             color = Color.White.copy(alpha = 0.7f)
         )
@@ -199,7 +201,7 @@ fun QrChallenge(expectedQrData: String, onComplete: () -> Unit) {
             if (scannedWrong) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Falscher QR-Code! Scanne den richtigen.",
+                    text = stringResource(R.string.qr_wrong),
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodyLarge
                 )
@@ -212,7 +214,7 @@ fun QrChallenge(expectedQrData: String, onComplete: () -> Unit) {
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Kamera-Berechtigung erforderlich",
+                    text = stringResource(R.string.qr_permission_required),
                     color = Color.White,
                     style = MaterialTheme.typography.bodyLarge
                 )

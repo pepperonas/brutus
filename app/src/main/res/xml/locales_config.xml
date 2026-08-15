@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Declares the languages Brutus ships. Android 13+ reads this to offer a
+    per-app language picker in system settings ("App languages"), so a user with
+    a German phone can still run Brutus in English and vice versa.
+-->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="en" />
+    <locale android:name="de" />
+</locale-config>

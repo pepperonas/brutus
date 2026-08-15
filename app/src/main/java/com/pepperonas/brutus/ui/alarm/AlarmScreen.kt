@@ -55,6 +55,8 @@ import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.compose.ui.res.stringResource
+import com.pepperonas.brutus.R
 
 @Composable
 fun AlarmScreen(
@@ -149,7 +151,7 @@ fun AlarmScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
                 Text(
-                    text = "BRUTUS ALARM",
+                    text = stringResource(R.string.alarm_banner),
                     style = MaterialTheme.typography.titleLarge,
                     // Deliberate raw brand color: the wordmark stays BrutusRedBright
                     // even under Material You — this screen IS the brand.
@@ -168,7 +170,10 @@ fun AlarmScreen(
                             .padding(horizontal = 10.dp, vertical = 4.dp)
                     ) {
                         Text(
-                            text = if (ultraHardcoreMode) "ULTRA HARDCORE MODE" else "HARDCORE MODE",
+                            text = stringResource(
+                                if (ultraHardcoreMode) R.string.alarm_badge_ultra_hardcore
+                                else R.string.alarm_badge_hardcore
+                            ),
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.onPrimary,
                             letterSpacing = 2.sp
@@ -179,7 +184,7 @@ fun AlarmScreen(
                 if (isFollowup && followupSeq > 0) {
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        text = "Re-Alarm $followupSeq/2 — du bist nicht entkommen",
+                        text = stringResource(R.string.alarm_followup, followupSeq),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.tertiary,
                         letterSpacing = 1.sp
@@ -190,7 +195,11 @@ fun AlarmScreen(
                     Spacer(modifier = Modifier.height(12.dp))
                     ChallengeProgressDots(total = active.size, current = currentIndex)
                     Text(
-                        text = "Challenge ${minOf(currentIndex + 1, active.size)} von ${active.size}",
+                        text = stringResource(
+                            R.string.alarm_challenge_progress,
+                            minOf(currentIndex + 1, active.size),
+                            active.size
+                        ),
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White.copy(alpha = 0.6f),
                         modifier = Modifier.padding(top = 6.dp)
@@ -230,12 +239,12 @@ fun AlarmScreen(
                     modifier = Modifier.padding(32.dp)
                 ) {
                     Text(
-                        text = "Geschafft!",
+                        text = stringResource(R.string.alarm_done),
                         style = MaterialTheme.typography.headlineLarge,
                         color = Color.White
                     )
                     Text(
-                        text = "Guten Morgen",
+                        text = stringResource(R.string.alarm_good_morning),
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.tertiary
                     )
@@ -284,7 +293,7 @@ private fun DismissButton(onDismiss: () -> Unit) {
         shape = RoundedCornerShape(corner),
     ) {
         Text(
-            text = "ALARM STOPPEN",
+            text = stringResource(R.string.alarm_stop),
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold
         )

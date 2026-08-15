@@ -1,4 +1,305 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Default (English) strings.
+
+    German lives in values-de/. Keep the two files in the same order and keep
+    every key in both — ResourceParityTest fails the build otherwise.
+-->
 <resources>
     <string name="app_name">Brutus</string>
+
+    <!-- ===================== Generic actions ===================== -->
+    <string name="action_cancel">Cancel</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_undo">Undo</string>
+    <string name="action_save">Save</string>
+    <string name="action_close">Close</string>
+    <string name="action_share">Share</string>
+    <string name="action_more">More</string>
+    <string name="action_less">Less</string>
+
+    <!-- ===================== Bottom navigation ===================== -->
+    <string name="nav_alarm">Alarm</string>
+    <string name="nav_world_clock">World Clock</string>
+    <string name="nav_stopwatch">Stopwatch</string>
+    <string name="nav_timer">Timer</string>
+
+    <!-- ===================== Repeat / weekdays ===================== -->
+    <string name="repeat_once">Once</string>
+    <string name="repeat_daily">Every day</string>
+    <string-array name="weekday_short">
+        <item>Mon</item>
+        <item>Tue</item>
+        <item>Wed</item>
+        <item>Thu</item>
+        <item>Fri</item>
+        <item>Sat</item>
+        <item>Sun</item>
+    </string-array>
+
+    <!-- ===================== Alarm list ===================== -->
+    <string name="alarm_list_next_alarm">NEXT ALARM</string>
+    <string name="alarm_list_no_alarm">No alarm set</string>
+    <string name="alarm_list_empty_title">No alarms yet</string>
+    <string name="alarm_list_empty_body">Brutus wakes you up — guaranteed.\nSet your first alarm.</string>
+    <string name="alarm_list_create">Create alarm</string>
+    <string name="alarm_list_add">Add alarm</string>
+    <string name="alarm_list_delete_all">Delete all</string>
+    <string name="alarm_list_delete_all_title">Delete all alarms?</string>
+    <string name="alarm_list_material_you">Material You colors</string>
+    <string name="alarm_card_copy">Copy</string>
+    <string name="alarm_card_delete">Delete</string>
+    <!-- Date shown under the next-alarm countdown, e.g. "Mon, Aug 17, 06:30" -->
+    <string name="format_next_alarm_date">EEE, MMM d, HH:mm</string>
+
+    <plurals name="alarm_deleted">
+        <item quantity="one">Alarm deleted</item>
+        <item quantity="other">%d alarms deleted</item>
+    </plurals>
+    <plurals name="alarm_delete_all_body">
+        <item quantity="one">1 alarm will be deleted.</item>
+        <item quantity="other">%d alarms will be deleted.</item>
+    </plurals>
+
+    <!-- Info chips on an alarm card -->
+    <string name="chip_ultra_hardcore">ULTRA HC</string>
+    <string name="chip_hardcore">HARDCORE</string>
+    <string name="chip_sunrise">☀ Sunrise</string>
+    <string name="chip_snooze">Snooze %1$dm</string>
+    <string name="chip_sound">♪ %1$s</string>
+
+    <!-- ===================== Reliability banners ===================== -->
+    <string name="banner_exact_alarm_title">Exact alarms disabled</string>
+    <string name="banner_exact_alarm_body">Without this permission Brutus cannot ring to the exact minute.</string>
+    <string name="banner_exact_alarm_action">Enable</string>
+    <string name="banner_battery_title">Battery optimization active</string>
+    <string name="banner_battery_body">Aggressive battery savers can swallow alarms. Whitelist Brutus so it rings for sure.</string>
+    <string name="banner_battery_action">Whitelist</string>
+    <string name="banner_fullscreen_title">Full-screen alarm blocked</string>
+    <string name="banner_fullscreen_body">Without this permission the alarm only shows as a notification — the app will not come to the foreground.</string>
+    <string name="banner_fullscreen_action">Allow</string>
+
+    <!-- ===================== Edit sheet ===================== -->
+    <string name="edit_title_new">New alarm</string>
+    <string name="edit_title_copy">Copy alarm</string>
+    <string name="edit_title_edit">Edit alarm</string>
+    <string name="edit_label">Label</string>
+    <string name="edit_repeat">Repeat</string>
+    <string name="edit_sound">Alarm sound</string>
+    <string name="edit_sound_hint">%1$s — tap to preview</string>
+    <string name="edit_stop_preview">Stop preview</string>
+    <string name="edit_modes">Wake modes (combinable)</string>
+    <string name="edit_modes_hint">Every selected challenge has to be completed, one after the other</string>
+    <string name="edit_chain_order">Order: %1$s</string>
+    <string name="edit_math_count">Problems</string>
+    <string name="edit_math_difficulty">Math difficulty</string>
+    <string name="edit_shake_count">Shake count</string>
+    <string name="edit_shake_sensitivity">Shake sensitivity</string>
+    <string name="edit_qr_hint">Your global QR code — valid for every alarm. Print it once, valid forever.</string>
+    <string name="edit_qr_content_description">QR code</string>
+    <string name="edit_qr_id">ID: %1$s</string>
+    <string name="edit_qr_save">Save as PNG</string>
+    <string name="edit_snooze">Snooze duration</string>
+    <string name="edit_snooze_off">Off</string>
+    <string name="edit_snooze_minutes">%1$dmin</string>
+    <string name="edit_sunrise_title">Sunrise (10 min lead)</string>
+    <string name="edit_sunrise_description">Ten minutes before the alarm a gentle lead-in starts: the screen slowly brightens, a quiet chime swells. The main alarm rings normally afterwards.</string>
+    <string name="edit_sunrise_short_description">Gentle lead-in with light and a chime.</string>
+    <string name="edit_hardcore_title">Hardcore Mode</string>
+    <string name="edit_hardcore_description">Locks the volume at maximum — the volume keys do nothing while the alarm rings.</string>
+    <string name="edit_hardcore_short_description">Locks the volume at maximum.</string>
+    <string name="edit_ultra_hardcore_title">Ultra Hardcore Mode</string>
+    <string name="edit_ultra_hardcore_description">After you dismiss it, Brutus fires twice more (+10 and +15 minutes). A step task in the notification stops both.</string>
+    <string name="edit_ultra_hardcore_short_description">Fires twice more after you dismiss it.</string>
+    <string name="edit_test_modes">Test wake modes now</string>
+    <string name="edit_create_alarm">Create alarm</string>
+
+    <!-- ===================== Toasts ===================== -->
+    <string name="toast_share_failed">Sharing failed</string>
+    <string name="toast_qr_saved">QR code saved to Pictures/Brutus</string>
+    <string name="toast_save_failed">Saving failed</string>
+    <string name="toast_storage_permission">Storage permission required</string>
+
+    <!-- ===================== Challenges ===================== -->
+    <string name="challenge_none">None</string>
+    <string name="challenge_math">Math</string>
+    <string name="challenge_shake">Shake</string>
+    <string name="challenge_qr">QR code</string>
+    <!-- Quoted: Android trims leading/trailing whitespace in string resources. -->
+    <string name="challenge_separator">" + "</string>
+
+    <string name="math_title">Math challenge</string>
+    <string name="math_progress">Solution %1$d of %2$d · %3$s</string>
+    <string name="math_wrong">Wrong! Try again.</string>
+    <string name="math_check">Check</string>
+
+    <string name="shake_title">Shake challenge</string>
+    <string name="shake_instruction">Shake your phone!</string>
+    <plurals name="shake_remaining">
+        <item quantity="one">One more shake!</item>
+        <item quantity="other">%d more shakes!</item>
+    </plurals>
+
+    <string name="qr_title">Scan QR code</string>
+    <string name="qr_instruction">Scan your Brutus QR code</string>
+    <string name="qr_wrong">Wrong QR code! Scan the right one.</string>
+    <string name="qr_permission_required">Camera permission required</string>
+    <string name="qr_share_subject">Brutus QR code</string>
+    <string name="qr_share_text">My Brutus QR code for switching the alarm off.</string>
+    <string name="qr_share_chooser">Share QR code</string>
+
+    <!-- ===================== Alarm screen ===================== -->
+    <string name="alarm_banner">BRUTUS ALARM</string>
+    <string name="alarm_badge_hardcore">HARDCORE MODE</string>
+    <string name="alarm_badge_ultra_hardcore">ULTRA HARDCORE MODE</string>
+    <string name="alarm_followup">Re-alarm %1$d/2 — you did not get away</string>
+    <string name="alarm_challenge_progress">Challenge %1$d of %2$d</string>
+    <string name="alarm_done">Done!</string>
+    <string name="alarm_good_morning">Good morning</string>
+    <string name="alarm_stop">STOP ALARM</string>
+    <string name="snooze_swipe_hint">Swipe to snooze</string>
+    <string name="snooze_action">Snooze</string>
+
+    <!-- ===================== Ultra Hardcore task ===================== -->
+    <string name="step_title">Anti-snooze task</string>
+    <string name="step_instruction">Get up and walk %1$d steps. Only then are the re-alarms cancelled.</string>
+    <string name="step_permission_required">The \'Physical activity\' permission is required for the step counter to work.</string>
+    <string name="step_request_permission">Request permission</string>
+    <plurals name="step_remaining">
+        <item quantity="one">One more step!</item>
+        <item quantity="other">%d more steps!</item>
+    </plurals>
+    <string name="uhc_title">ULTRA HARDCORE</string>
+    <string name="uhc_stop_realarms">Stop the re-alarms</string>
+    <string name="uhc_done">Done!</string>
+    <string name="uhc_done_body">Re-alarms cancelled. You are awake.</string>
+    <string name="uhc_later">Later — accept the re-alarms</string>
+
+    <!-- ===================== Sunrise ===================== -->
+    <string name="sunrise_title">SUNRISE</string>
+    <string name="sunrise_countdown">Alarm in %1$s</string>
+    <string name="sunrise_running">Gentle lead-in running</string>
+    <string name="sunrise_stop_alarm">Stop alarm</string>
+    <string name="sunrise_close">Already awake — close sunrise</string>
+
+    <!-- ===================== World clock ===================== -->
+    <string name="world_title">World Clock</string>
+    <string name="world_add">Add time zone</string>
+    <string name="world_empty">Tap + to add a time zone</string>
+    <string name="world_day">Day</string>
+    <string name="world_night">Night</string>
+    <string name="world_remove">Remove</string>
+    <string name="world_search_hint">Search city or region…</string>
+    <string name="world_already_added">already added</string>
+    <string name="world_no_matches">No matches</string>
+    <string name="world_removed">Time zone removed</string>
+    <string name="world_region_offset">%1$s  ·  UTC%2$s</string>
+    <!-- Date under a world-clock city, e.g. "Mon, Aug 17" -->
+    <string name="format_world_clock_date">EEE, MMM d</string>
+
+    <!-- ===================== Stopwatch ===================== -->
+    <string name="stopwatch_title">Stopwatch</string>
+    <string name="stopwatch_lap">Lap</string>
+    <string name="stopwatch_reset">Reset</string>
+    <string name="stopwatch_start">Start</string>
+    <string name="stopwatch_stop">Stop</string>
+    <string name="stopwatch_lap_number">Lap %1$d</string>
+    <string name="stopwatch_reset_undo">Stopwatch reset</string>
+
+    <!-- ===================== Timer ===================== -->
+    <string name="timer_title">Timer</string>
+    <string name="timer_start">Start</string>
+    <string name="timer_abort">Abort</string>
+    <string name="timer_pause">Pause</string>
+    <string name="timer_resume">Resume</string>
+    <string name="timer_stop">Stop</string>
+    <string name="timer_end_sound">End tone</string>
+    <string name="timer_unit_hours">Hrs</string>
+    <string name="timer_unit_minutes">Min</string>
+    <string name="timer_unit_seconds">Sec</string>
+    <string name="timer_cancelled">Timer cancelled</string>
+
+    <!-- ===================== Countdown header ===================== -->
+    <plurals name="countdown_days">
+        <item quantity="one">Alarm in %1$d day, %2$d h</item>
+        <item quantity="other">Alarm in %1$d days, %2$d h</item>
+    </plurals>
+    <string name="countdown_hours">Alarm in %1$d hours, %2$d minutes</string>
+    <string name="countdown_minutes">Alarm in %1$d minutes</string>
+
+    <!-- ===================== Notifications ===================== -->
+    <string name="channel_alarm_name">Alarm</string>
+    <string name="channel_alarm_description">Active alarm notifications</string>
+    <string name="channel_service_name">Alarm service</string>
+    <string name="channel_service_description">Background alarm service</string>
+    <string name="channel_ultra_hardcore_name">Ultra Hardcore reminder</string>
+    <string name="channel_ultra_hardcore_description">Persistent reminder while two follow-up alarms are armed</string>
+    <string name="notification_alarm_title">Brutus alarm</string>
+    <string name="notification_realarm_title">Brutus re-alarm</string>
+    <string name="notification_alarm_text">Alarm active! Get up!</string>
+    <string name="notification_realarm_text">Re-alarm %1$d/2 — you did not get away!</string>
+    <string name="notification_uhc_title">Ultra Hardcore active</string>
+    <string name="notification_uhc_text">Re-alarm in 10 + 15 min — solve the task to cancel both.</string>
+    <string name="notification_uhc_big_text">Brutus rings again in 10 minutes and in 15 minutes. Tap here and finish the step challenge to cancel both re-alarms.</string>
+    <string name="notification_uhc_action">Solve task</string>
+
+    <!-- ===================== Home-screen widget ===================== -->
+    <string name="widget_description">Shows the next alarm with a countdown</string>
+    <string name="widget_no_alarm">no alarm</string>
+    <string name="widget_now">now</string>
+    <string name="widget_in_minutes">in %1$d min</string>
+    <string name="widget_in_hours">in %1$dh %2$dm</string>
+    <plurals name="widget_in_days">
+        <item quantity="one">in %d day</item>
+        <item quantity="other">in %d days</item>
+    </plurals>
+    <string name="widget_daily">daily</string>
+    <string name="widget_preview_countdown">in 7h 0m</string>
+    <string name="widget_preview_days">Mon Tue Wed Thu Fri</string>
+    <!-- Weekday of a one-shot alarm on the widget, e.g. "Mon" -->
+    <string name="format_widget_weekday">EEE</string>
+
+    <!-- ===================== Alarm sounds ===================== -->
+    <string name="sound_silent">Silent</string>
+    <string name="sound_silent_description">No audio — ideal for rehearsing the wake modes</string>
+    <string name="sound_system">System alarm</string>
+    <string name="sound_system_description">The default Android alarm tone</string>
+    <string name="sound_klaxon">Klaxon</string>
+    <string name="sound_klaxon_description">Pulsing two-tone alarm</string>
+    <string name="sound_siren">Siren</string>
+    <string name="sound_siren_description">Rising and falling sweep</string>
+    <string name="sound_nuclear">Nuclear alert</string>
+    <string name="sound_nuclear_description">Fast, sharp beeping</string>
+    <string name="sound_piercing">Piercing</string>
+    <string name="sound_piercing_description">Ultra-high beep — maximum annoyance</string>
+    <string name="sound_airhorn">Stadium horn</string>
+    <string name="sound_airhorn_description">Blaring air horn made of detuned sawtooths</string>
+    <string name="sound_jackhammer">Jackhammer</string>
+    <string name="sound_jackhammer_description">Pounding low-end bursts like a construction site</string>
+    <string name="sound_fire_alarm">Fire alarm</string>
+    <string name="sound_fire_alarm_description">Temporal-3 smoke-detector pattern at 3.1 kHz</string>
+    <string name="sound_dentist">Dental drill</string>
+    <string name="sound_dentist_description">FM-modulated dental drill — screeching grind</string>
+    <string name="sound_banshee">Banshee</string>
+    <string name="sound_banshee_description">Dissonant, rising cluster of beating tones</string>
+    <string name="sound_chime">Chime</string>
+    <string name="sound_chime_description">Soft three-note chime with a tail</string>
+    <string name="sound_marimba">Marimba</string>
+    <string name="sound_marimba_description">Woody plucking pattern</string>
+    <string name="sound_morning">Morning sun</string>
+    <string name="sound_morning_description">Slowly swelling and fading chord</string>
+
+    <!-- ===================== Difficulty presets ===================== -->
+    <string name="math_difficulty_easy">Easy</string>
+    <string name="math_difficulty_easy_description">Addition and subtraction up to 20</string>
+    <string name="math_difficulty_hard">Hard</string>
+    <string name="math_difficulty_hard_description">Mixed, with multiplication up to 50 × 20</string>
+    <string name="math_difficulty_brutal">Brutal</string>
+    <string name="math_difficulty_brutal_description">Two-digit multiplication and large numbers</string>
+    <string name="shake_sensitivity_light">Sensitive</string>
+    <string name="shake_sensitivity_light_description">Even light movements count</string>
+    <string name="shake_sensitivity_normal">Normal</string>
+    <string name="shake_sensitivity_normal_description">Standard threshold (delta ≥ 12)</string>
+    <string name="shake_sensitivity_hard">Strong</string>
+    <string name="shake_sensitivity_hard_description">Only vigorous shaking counts</string>
 </resources>

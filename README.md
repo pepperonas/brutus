@@ -1,25 +1,81 @@
 # Brutus
 
+**English** · [Deutsch](README.de.md)
+
 <p align="center">
   <img src="docs/hero.png" alt="Brutus — Killer Alarm Clock" width="100%" />
 </p>
 
-[![Android](https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white)](https://developer.android.com)
+<!-- Project status — these badges are live and update themselves. -->
+
+[![Tests](https://img.shields.io/github/actions/workflow/status/pepperonas/brutus/tests.yml?branch=main&label=tests&logo=githubactions&logoColor=white)](https://github.com/pepperonas/brutus/actions/workflows/tests.yml)
+[![Unit tests](https://img.shields.io/badge/unit%20tests-243-brightgreen)](#tests-and-ci)
+[![Release](https://img.shields.io/github/v/release/pepperonas/brutus?color=FF5252&logo=github&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/pepperonas/brutus/total?label=APK%20downloads&color=success&logo=github&logoColor=white)](https://github.com/pepperonas/brutus/releases)
+[![Last commit](https://img.shields.io/github/last-commit/pepperonas/brutus?logo=git&logoColor=white)](https://github.com/pepperonas/brutus/commits/main)
+[![Code size](https://img.shields.io/github/languages/code-size/pepperonas/brutus?logo=files&logoColor=white)](#project-structure)
+[![Top language](https://img.shields.io/github/languages/top/pepperonas/brutus?logo=kotlin&logoColor=white)](https://kotlinlang.org)
+[![Open issues](https://img.shields.io/github/issues/pepperonas/brutus?logo=github&logoColor=white)](https://github.com/pepperonas/brutus/issues)
+[![Stars](https://img.shields.io/github/stars/pepperonas/brutus?logo=github&logoColor=white)](https://github.com/pepperonas/brutus/stargazers)
+[![License](https://img.shields.io/github/license/pepperonas/brutus?color=blue)](LICENSE)
+
+<!-- Platform & runtime -->
+
+[![Platform](https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white)](https://developer.android.com)
+[![minSdk](https://img.shields.io/badge/minSdk-26%20%C2%B7%20Android%208.0-3DDC84?logo=android&logoColor=white)](https://apilevels.com)
+[![targetSdk](https://img.shields.io/badge/targetSdk-35%20%C2%B7%20Android%2015-3DDC84?logo=android&logoColor=white)](https://apilevels.com)
+[![compileSdk](https://img.shields.io/badge/compileSdk-35-3DDC84?logo=android&logoColor=white)](https://developer.android.com/tools/releases/platforms)
+[![JDK](https://img.shields.io/badge/JDK-17-437291?logo=openjdk&logoColor=white)](https://adoptium.net)
+[![APK size](https://img.shields.io/badge/APK-4.1%20MB-blueviolet?logo=android&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
+
+<!-- Language, build & toolchain -->
+
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.1.0-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org)
-[![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-material3%201.5.0--alpha18-4285F4?logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
-[![API](https://img.shields.io/badge/API-26%2B-brightgreen)](https://developer.android.com/about/versions/oreo)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Release](https://img.shields.io/github/v/release/pepperonas/brutus?color=FF5252)](https://github.com/pepperonas/brutus/releases/latest)
-[![Build](https://img.shields.io/badge/Build-Gradle%208.11-02303A?logo=gradle&logoColor=white)](https://gradle.org)
-[![AGP](https://img.shields.io/badge/AGP-8.7.3-success)](https://developer.android.com/build)
-[![Room](https://img.shields.io/badge/Room-2.6.1-FF6F00)](https://developer.android.com/training/data-storage/room)
-[![CameraX](https://img.shields.io/badge/CameraX-1.4.1-00BCD4)](https://developer.android.com/training/camerax)
-[![ML Kit](https://img.shields.io/badge/ML%20Kit-Barcode-EA4335?logo=google&logoColor=white)](https://developers.google.com/ml-kit/vision/barcode-scanning)
+[![Coroutines](https://img.shields.io/badge/Coroutines-StateFlow-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/docs/coroutines-overview.html)
+[![Gradle](https://img.shields.io/badge/Gradle-8.11.1-02303A?logo=gradle&logoColor=white)](https://gradle.org)
+[![AGP](https://img.shields.io/badge/AGP-8.7.3-02303A?logo=androidstudio&logoColor=white)](https://developer.android.com/build)
+[![KSP](https://img.shields.io/badge/KSP-2.1.0--1.0.29-7F52FF?logo=kotlin&logoColor=white)](https://github.com/google/ksp)
+[![R8](https://img.shields.io/badge/R8-minify%20%2B%20shrink-02303A?logo=android&logoColor=white)](https://developer.android.com/build/shrink-code)
+
+<!-- UI layer -->
+
+[![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-BOM%202026.06.01-4285F4?logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
+[![Material 3](https://img.shields.io/badge/Material%203-Expressive-6750A4?logo=materialdesign&logoColor=white)](https://m3.material.io)
+[![material3](https://img.shields.io/badge/material3-1.5.0--alpha18-6750A4?logo=materialdesign&logoColor=white)](https://developer.android.com/jetpack/androidx/releases/compose-material3)
+[![Navigation](https://img.shields.io/badge/Navigation%20Compose-2.8.5-4285F4?logo=android&logoColor=white)](https://developer.android.com/jetpack/androidx/releases/navigation)
+[![Icons](https://img.shields.io/badge/Icons-Material%20Extended-6750A4?logo=materialdesign&logoColor=white)](https://developer.android.com/reference/kotlin/androidx/compose/material/icons/package-summary)
+[![Type](https://img.shields.io/badge/Type-Space%20Grotesk%20%C2%B7%20OFL-FF5252?logo=googlefonts&logoColor=white)](THIRD_PARTY_LICENSES/SpaceGrotesk-OFL.txt)
+[![Languages](https://img.shields.io/badge/Languages-English%20%C2%B7%20Deutsch-4285F4?logo=googletranslate&logoColor=white)](#languages)
+
+<!-- Data & device APIs -->
+
+[![Room](https://img.shields.io/badge/Room-2.6.1%20%C2%B7%20schema%20v7-FF6F00?logo=sqlite&logoColor=white)](https://developer.android.com/training/data-storage/room)
+[![DataStore](https://img.shields.io/badge/DataStore-1.1.1-FF6F00?logo=android&logoColor=white)](https://developer.android.com/topic/libraries/architecture/datastore)
+[![Lifecycle](https://img.shields.io/badge/Lifecycle-2.8.7-FF6F00?logo=android&logoColor=white)](https://developer.android.com/jetpack/androidx/releases/lifecycle)
+[![CameraX](https://img.shields.io/badge/CameraX-1.4.1-00BCD4?logo=android&logoColor=white)](https://developer.android.com/training/camerax)
+[![ML Kit](https://img.shields.io/badge/ML%20Kit%20Barcode-18.3.1%20unbundled-EA4335?logo=google&logoColor=white)](https://developers.google.com/ml-kit/vision/barcode-scanning)
 [![ZXing](https://img.shields.io/badge/ZXing-3.5.3-000000)](https://github.com/zxing/zxing)
-[![Material Design](https://img.shields.io/badge/Material%203-Expressive-6750A4?logo=materialdesign&logoColor=white)](https://m3.material.io)
-[![minSdk](https://img.shields.io/badge/minSdk-26-green)](https://apilevels.com)
-[![targetSdk](https://img.shields.io/badge/targetSdk-35-green)](https://apilevels.com)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
+[![AlarmManager](https://img.shields.io/badge/AlarmManager-setAlarmClock-3DDC84?logo=android&logoColor=white)](https://developer.android.com/reference/android/app/AlarmManager#setAlarmClock)
+[![Audio](https://img.shields.io/badge/Audio-AudioTrack%20PCM-3DDC84?logo=android&logoColor=white)](https://developer.android.com/reference/android/media/AudioTrack)
+
+<!-- Engineering practice -->
+
+[![Architecture](https://img.shields.io/badge/Architecture-MVVM-795548)](#project-structure)
+[![JUnit](https://img.shields.io/badge/JUnit-4.13.2-25A162)](https://junit.org/junit4/)
+[![Robolectric](https://img.shields.io/badge/Robolectric-4.14.1-25A162)](https://robolectric.org)
+[![Coroutines Test](https://img.shields.io/badge/coroutines--test-1.9.0-25A162?logo=kotlin&logoColor=white)](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-test/)
+[![Conventional Commits](https://img.shields.io/badge/Commits-Conventional-FE5196?logo=conventionalcommits&logoColor=white)](https://www.conventionalcommits.org)
+[![SemVer](https://img.shields.io/badge/SemVer-2.0.0-303030?logo=semver&logoColor=white)](https://semver.org)
+[![Changelog](https://img.shields.io/badge/Changelog-Keep%20a%20Changelog-E05735?logo=keepachangelog&logoColor=white)](CHANGELOG.md)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](http://makeapullrequest.com)
+
+<!-- What Brutus deliberately does not do -->
+
+[![Offline](https://img.shields.io/badge/Offline-first-2E7D32)](#permissions)
+[![No INTERNET permission](https://img.shields.io/badge/INTERNET%20permission-none-2E7D32)](#permissions)
+[![No trackers](https://img.shields.io/badge/Trackers-none-2E7D32)](#permissions)
+[![No ads](https://img.shields.io/badge/Ads-none-2E7D32)](#permissions)
+[![No account](https://img.shields.io/badge/Account-not%20required-2E7D32)](#permissions)
 
 > **The alarm clock that makes sure you actually wake up.**
 
@@ -31,6 +87,7 @@ Everything is packed into a four-tab bottom navigation that keeps the brutal ala
 
 ## Table of Contents
 
+- [Screenshots](#screenshots)
 - [Why Brutus?](#why-brutus)
 - [App structure](#app-structure)
 - [Features](#features)
@@ -48,6 +105,8 @@ Everything is packed into a four-tab bottom navigation that keeps the brutal ala
   - [World Clock](#world-clock)
   - [Stopwatch](#stopwatch)
   - [Timer](#timer)
+  - [Theming and Material You](#theming-and-material-you)
+  - [Languages](#languages)
   - [Scheduling](#scheduling)
   - [Lock-screen overlay](#lock-screen-overlay)
   - [Reliability](#reliability)
@@ -57,6 +116,7 @@ Everything is packed into a four-tab bottom navigation that keeps the brutal ala
 - [Release signing](#release-signing)
 - [Tech stack](#tech-stack)
 - [Project structure](#project-structure)
+- [Tests and CI](#tests-and-ci)
 - [How it works](#how-it-works)
 - [Design philosophy](#design-philosophy)
 - [Troubleshooting](#troubleshooting)
@@ -64,6 +124,73 @@ Everything is packed into a four-tab bottom navigation that keeps the brutal ala
 - [Developer](#developer)
 - [Donate](#donate)
 - [License](#license)
+
+---
+
+## Screenshots
+
+Captured on **v2.1.1**, dark theme, brand color scheme (Material You off). The app ships in English and German — see [Languages](#languages).
+
+<table>
+  <tr>
+    <td width="33%" valign="top">
+      <img src="docs/screenshots/01-alarm-list.png" alt="Alarm list with countdown header and state-coded cards" width="100%" />
+      <br /><sub><b>Alarm list</b> — countdown header, one muted red for every active alarm, weekday strip, mode/challenge/snooze chips.</sub>
+    </td>
+    <td width="33%" valign="top">
+      <img src="docs/screenshots/02-alarm-edit.png" alt="Alarm edit bottom sheet" width="100%" />
+      <br /><sub><b>Edit sheet</b> — time, repeat days, sound picker with preview, challenge chain, snooze interval, Hardcore toggles.</sub>
+    </td>
+    <td width="33%" valign="top">
+      <img src="docs/screenshots/03-alarm-ring.png" alt="Full-screen alarm over the lock screen" width="100%" />
+      <br /><sub><b>Alarm ringing</b> — full-screen lock-screen overlay, HARDCORE badge, no dismiss button until the chain is done.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td width="33%" valign="top">
+      <img src="docs/screenshots/04-math-challenge.png" alt="Math challenge with on-screen keypad" width="100%" />
+      <br /><sub><b>Math challenge</b> — 1–10 generated problems, three difficulty presets, dedicated on-screen keypad.</sub>
+    </td>
+    <td width="33%" valign="top">
+      <img src="docs/screenshots/05-shake-challenge.png" alt="Shake challenge with progress ring" width="100%" />
+      <br /><sub><b>Shake challenge</b> — 10–100 shakes against a wavy progress ring, three sensitivity presets.</sub>
+    </td>
+    <td width="33%" valign="top">
+      <img src="docs/screenshots/06-qr-challenge.png" alt="QR scan challenge with camera preview" width="100%" />
+      <br /><sub><b>QR challenge</b> — CameraX preview + ML Kit scanner; only the installation's own global code unlocks it.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td width="33%" valign="top">
+      <img src="docs/screenshots/07-world-clock.png" alt="World clock with multiple time zones" width="100%" />
+      <br /><sub><b>World Clock</b> — live board over <code>java.time.ZoneId</code>, day/night color roles, ticks every second.</sub>
+    </td>
+    <td width="33%" valign="top">
+      <img src="docs/screenshots/08-stopwatch.png" alt="Stopwatch with lap list" width="100%" />
+      <br /><sub><b>Stopwatch</b> — centisecond precision on <code>elapsedRealtime()</code>, laps with per-lap and cumulative columns.</sub>
+    </td>
+    <td width="33%" valign="top">
+      <img src="docs/screenshots/09-timer.png" alt="Timer countdown" width="100%" />
+      <br /><sub><b>Timer</b> — HMS picker, quick presets, gentle finish sound, survives tab switches.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td width="33%" valign="top">
+      <img src="docs/screenshots/10-sunrise.png" alt="Sunrise pre-alarm screen" width="100%" />
+      <br /><sub><b>Sunrise pre-alarm</b> — 10 minutes of brightness ramp and dawn gradient before the brutal part starts.</sub>
+    </td>
+    <td width="33%" valign="top">
+      <img src="docs/screenshots/11-widget.png" alt="Home-screen widget showing the next alarm" width="100%" />
+      <br /><sub><b>Home-screen widget</b> — next alarm time, countdown and repeat days, straight from the same Room database.</sub>
+    </td>
+    <td width="33%" valign="top">
+      <img src="docs/screenshots/12-ultra-hardcore-task.png" alt="Ultra Hardcore step counter task" width="100%" />
+      <br /><sub><b>Ultra Hardcore task</b> — walk 30 steps to cancel the two follow-up alarms armed after you dismissed.</sub>
+    </td>
+  </tr>
+</table>
+
+> Reproducing these shots (state to put the app in, `adb` commands, naming): [`docs/screenshots/SHOTLIST.md`](docs/screenshots/SHOTLIST.md).
 
 ---
 
@@ -86,13 +213,13 @@ Starting with v1.2.0 Brutus ships as a full clock suite. A persistent bottom nav
 | Tab | Icon | Purpose |
 |-----|------|---------|
 | **Alarm** | ⏰ | Expressive alarm list with countdown header, state-coded cards (enabled = muted red, disabled = gray; next alarm ringed by a primary outline), swipe-to-delete + undo, per-alarm edit sheet, all the brutal wake modes |
-| **Weltuhr** | 🌐 | Live multi-time-zone board powered by `java.time.ZoneId` — add/remove cities, ticks every second |
-| **Stoppuhr** | ⏱ | Start / Stop / Lap stopwatch with centisecond precision via `SystemClock.elapsedRealtime()` |
+| **World Clock** | 🌐 | Live multi-time-zone board powered by `java.time.ZoneId` — add/remove cities, ticks every second |
+| **Stopwatch** | ⏱ | Start / Stop / Lap stopwatch with centisecond precision via `SystemClock.elapsedRealtime()` |
 | **Timer** | ⌛ | HMS-picker countdown timer with quick presets (1m, 3m, 5m, 10m, 15m, 30m) — rings system alarm tone on finish |
 
-The Alarm tab stays the heart of the app: its cards show a large thin time reading, the repeat summary (_Einmalig_ / _Jeden Tag_ / explicit day list), an optional label, and a toggle switch on the right. Below sits a **full-width weekday strip** — seven equal `Mo Di Mi Do Fr Sa So` pills that always render on a single line, active days filled bright red. A row of **info chips** underneath surfaces the mode (`ULTRA HC` / `HARDCORE`), `☀ Sunrise`, the challenge (`Mathe + Schütteln`…), the snooze interval (`Snooze 5m`) and the `♪` sound at a glance _(redesigned in v1.7.0)_. A countdown header (e.g. _"Alarm in 13 Stunden, 29 Minuten"_) sits above the list and refreshes every 30 s.
+The Alarm tab stays the heart of the app: its cards show a large thin time reading, the repeat summary (_Once_ / _Every day_ / explicit day list), an optional label, and a toggle switch on the right. Below sits a **full-width weekday strip** — seven equal `Mon Tue Wed Thu Fri Sat Sun` pills that always render on a single line, active days filled bright red. A row of **info chips** underneath surfaces the mode (`ULTRA HC` / `HARDCORE`), `☀ Sunrise`, the challenge (`Math + Shake`…), the snooze interval (`Snooze 5m`) and the `♪` sound at a glance _(redesigned in v1.7.0)_. A countdown header (e.g. _"Alarm in 13 hours, 29 minutes"_) sits above the list and refreshes every 30 s.
 
-Since **v1.9.0** every card also has a **copy button** (⧉): it opens the edit sheet prefilled with all of the source alarm's settings ("Alarm kopieren") — adjust the time, save, done; no confusing identical duplicate is created behind your back. And every delete — single or _Alle löschen_ — shows an **undo snackbar** ("Rückgängig") that restores the alarm(s) including their scheduling.
+Since **v1.9.0** every card also has a **copy button** (⧉): it opens the edit sheet prefilled with all of the source alarm's settings ("Copy alarm") — adjust the time, save, done; no confusing identical duplicate is created behind your back. And every delete — single or _Delete all_ — shows an **undo snackbar** ("Undo") that restores the alarm(s) including their scheduling.
 
 A premium **monogram app icon** (radial dark-red gradient + gradient-filled "B" with hairline highlight) replaces the previous alarm-bell icon.
 
@@ -121,15 +248,15 @@ Both Math and Shake now ship with a 3-step preset selector that appears inline i
 
 | Math difficulty | Operator pool | Operand range |
 |-----------------|---------------|---------------|
-| **Einfach** | `+`, `-` | 1–20 (subtraction always ≥ 0) |
-| **Hart** _(default)_ | `+`, `-`, `*` | up to 50 × 20 or three-digit add/sub |
+| **Easy** | `+`, `-` | 1–20 (subtraction always ≥ 0) |
+| **Hard** _(default)_ | `+`, `-`, `*` | up to 50 × 20 or three-digit add/sub |
 | **Brutal** | `+`, `-`, `*` (biased) | two-digit × two-digit, four-digit sums |
 
 | Shake sensitivity | Accelerometer delta threshold (m/s²) |
 |-------------------|--------------------------------------|
-| **Empfindlich** | ≥ 9 — even light wrist flicks count |
+| **Sensitive** | ≥ 9 — even light wrist flicks count |
 | **Normal** _(default)_ | ≥ 12 — the previous behavior |
-| **Stark** | ≥ 16 — only deliberate, vigorous shakes register |
+| **Strong** | ≥ 16 — only deliberate, vigorous shakes register |
 
 Settings are per-alarm and persist in the same Room row.
 
@@ -141,34 +268,34 @@ Every synthesized sound is generated on-device in real time using `AudioTrack` w
 
 | Sound | Character | Signal |
 |-------|-----------|--------|
-| **Stumm** | No audio — useful for rehearsing wake modes quietly | — |
-| **System-Alarm** | Android default alarm (fallback) | `RingtoneManager.TYPE_ALARM` |
+| **Silent** | No audio — useful for rehearsing wake modes quietly | — |
+| **System alarm** | Android default alarm (fallback) | `RingtoneManager.TYPE_ALARM` |
 | **Klaxon** | Pulsing two-tone alarm | 600/900 Hz square wave, 300 ms each |
-| **Sirene** | Sweeping siren | 400 → 1200 Hz sine sweep, 2 s cycle |
+| **Siren** | Sweeping siren | 400 → 1200 Hz sine sweep, 2 s cycle |
 | **Nuclear Alert** | Rapid sharp beeping | 1 kHz square, 100 ms on / 100 ms off |
-| **Durchdringend** | Piercing continuous beep | 3.5 kHz square wave with 8 Hz pulse — the most annoying one by design |
+| **Piercing** | Piercing continuous beep | 3.5 kHz square wave with 8 Hz pulse — the most annoying one by design |
 
 **Extreme sounds** _(v1.7.0)_ — five more ways to be ripped out of bed:
 
 | Sound | Character | Signal |
 |-------|-----------|--------|
-| **Stadion-Horn** | Brash stadium air-horn blat | Three detuned sawtooth voices (Bb3 / ~Eb4 / Bb4) stacked, 0.9 s |
-| **Presslufthammer** | Pounding construction-site rattle | ~73 Hz square gated 28 ms on / 22 ms off, with a clattering 5th-harmonic grit |
-| **Feueralarm** | Standardized T-3 smoke-alarm cadence | 3.1 kHz square, three 0.5 s beeps + 1.5 s pause, looped |
-| **Bohrer** | Screeching dental drill | 1.6 kHz FM carrier, 42 Hz modulator (index 9) with a slow ±220 Hz wail |
+| **Stadium horn** | Brash stadium air-horn blat | Three detuned sawtooth voices (Bb3 / ~Eb4 / Bb4) stacked, 0.9 s |
+| **Jackhammer** | Pounding construction-site rattle | ~73 Hz square gated 28 ms on / 22 ms off, with a clattering 5th-harmonic grit |
+| **Fire alarm** | Standardized T-3 smoke-alarm cadence | 3.1 kHz square, three 0.5 s beeps + 1.5 s pause, looped |
+| **Dental drill** | Screeching dental drill | 1.6 kHz FM carrier, 42 Hz modulator (index 9) with a slow ±220 Hz wail |
 | **Banshee** | Dissonant rising wail | Four tightly-detuned voices (620–652 Hz) beating while the cluster sweeps +90 % up |
 
 **Gentle sounds** _(v1.5.0)_ — for the timer and casual wake-ups, capped at ~50–60 % amplitude:
 
 | Sound | Character | Signal |
 |-------|-----------|--------|
-| **Glockenspiel** | Soft 3-note descending bell with overtones | E5 → C5 → G4 sine + 2nd/3rd harmonics, exp decay |
+| **Chime** | Soft 3-note descending bell with overtones | E5 → C5 → G4 sine + 2nd/3rd harmonics, exp decay |
 | **Marimba** | Woody pluck pattern | 440 Hz sine + 4th harmonic, three plucks/loop, fast envelope |
-| **Morgensonne** | Slow swelling A-major triad | A4 + C♯5 + E5, triangular envelope over 3 s |
+| **Morning sun** | Slow swelling A-major triad | A4 + C♯5 + E5, triangular envelope over 3 s |
 
-Choosing **Stumm** skips the audio path entirely; vibration still runs so the alarm is noticeable if you need it.
+Choosing **Silent** skips the audio path entirely; vibration still runs so the alarm is noticeable if you need it.
 
-Sound preview works directly inside the edit dialog — tap a chip to hear it, tap _Stop preview_ when you're done. The Timer screen has its own sound picker (gentle sounds only) — defaults to **Glockenspiel**, persists in `SharedPreferences`.
+Sound preview works directly inside the edit dialog — tap a chip to hear it, tap _Stop preview_ when you're done. The Timer screen has its own sound picker (gentle sounds only) — defaults to **Chime**, persists in `SharedPreferences`.
 
 ### Hardcore Mode
 
@@ -192,12 +319,12 @@ When enabled per alarm:
 
 1. **Ultra Hardcore implies Hardcore.** The volume lock + volume-key consumption apply automatically while either the main alarm or a follow-up is ringing.
 2. **As soon as you dismiss the main alarm, Brutus schedules two follow-up alarms** via `AlarmManager.setAlarmClock()` — one at **+10 minutes** from dismiss, another at **+15 minutes**. Both run the same challenge chain, the same sound, and the same Hardcore guard.
-3. **A persistent reminder notification** is posted from a dedicated `IMPORTANCE_HIGH` / bypass-DND channel. Title: _"Ultra Hardcore aktiv"_. It has a `Aufgabe lösen` action — tapping it opens the **Anti-Schlummer-Aufgabe**.
+3. **A persistent reminder notification** is posted from a dedicated `IMPORTANCE_HIGH` / bypass-DND channel. Title: _"Ultra Hardcore active"_. It has a `Solve task` action — tapping it opens the **anti-snooze task**.
 4. **The anti-snooze task** is a step-counter challenge: walk **30 steps** (configurable per install) with the phone in your hand or pocket. Uses `Sensor.TYPE_STEP_COUNTER` when available, falls back to `TYPE_STEP_DETECTOR`, and finally to an accelerometer impulse heuristic on older hardware that lacks a pedometer.
 5. **Completing the task cancels both pending follow-ups** and clears the reminder notification. Cancelling _without_ completing it leaves both follow-ups armed — Brutus will ring again.
 6. **Reboot survives.** Pending follow-ups are mirrored to `SharedPreferences` (`UltraHardcoreStore`). After `BOOT_COMPLETED`, any follow-up whose trigger time is still in the future is re-registered with `AlarmManager`; expired ones are cleaned out.
 
-The alarm screen shows a brighter **`ULTRA HARDCORE MODE`** badge instead of the regular Hardcore one, and the follow-up firings display _"Re-Alarm 1/2 — du bist nicht entkommen"_ above the clock. Cards in the list carry an orange **`ULTRA HC`** tag.
+The alarm screen shows a brighter **`ULTRA HARDCORE MODE`** badge instead of the regular Hardcore one, and the follow-up firings display _"Re-alarm 1/2 — you did not get away"_ above the clock. Cards in the list carry an orange **`ULTRA HC`** tag.
 
 Requires the **`ACTIVITY_RECOGNITION`** runtime permission (API 29+) for the step counter. If the user denies it, the step challenge degrades to the accelerometer fallback automatically — no Ultra Hardcore alarm ever locks the user out.
 
@@ -209,9 +336,9 @@ A per-alarm opt-in (v1.6.0) that gives you a 10-minute gentle wake-up window _be
 
 - A separate `setExactAndAllowWhileIdle` registration fires 10 min before the main trigger and launches `SunriseActivity` on top of the lock screen.
 - The activity ramps the **screen brightness** linearly from ~5 % to 100 % and the background gradient shifts from black to dawn-orange.
-- A soft **Glockenspiel** loops at the picker's amplitude — no max-volume override, no Hardcore guard. Just an ambient cue.
+- A soft **Chime** loops at the picker's amplitude — no max-volume override, no Hardcore guard. Just an ambient cue.
 - The clock continues to tick centered on the screen with a live countdown to the main alarm.
-- Two buttons: **Wecker stoppen** (disables the alarm entirely, same effect as toggling it off in the list) and **Schon wach — Sunrise schliessen** (closes the pre-alarm; main alarm still fires at the configured time).
+- Two buttons: **Stop alarm** (disables the alarm entirely, same effect as toggling it off in the list) and **Already awake — close sunrise** (closes the pre-alarm; main alarm still fires at the configured time).
 - Sunrise has _no_ challenge requirements and _no_ Hardcore behavior. The brutal alarm path takes over exactly at the configured time regardless of whether the Sunrise activity is still open.
 
 Sunrise is intentionally lightweight (~70 lines of Compose, no schema work beyond a single `sunriseEnabled` column on `AlarmEntity` v6→v7) so it can be layered on top of any challenge / Hardcore / Ultra Hardcore combo.
@@ -221,7 +348,7 @@ Sunrise is intentionally lightweight (~70 lines of Compose, no schema work beyon
 A 2×1 cell widget (resizable horizontally / vertically) added in v1.6.0. Shows:
 
 - **Time** of the next upcoming alarm (large, light-weight)
-- **Countdown** — "in 7 Std 12 Min" / "in 23 Min" / "in 2 Tagen"
+- **Countdown** — "in 7h 12m" / "in 23 min" / "in 2 days" (localized)
 - **Day strip** — repeat-day shorthand for repeating alarms, or the weekday name for one-shot alarms
 - A small **BRUTUS** marker in the brand red
 
@@ -233,9 +360,9 @@ The widget reads from the same Room database the app uses, so widgets always agr
 
 The alarm list shows _two_ red/orange banners when system state would silently break alarms:
 
-1. **Exakte Alarme deaktiviert** _(v1.3.0)_ — `AlarmManager.canScheduleExactAlarms()` is false (Samsung's default on Android 12+). Deep-links to `ACTION_REQUEST_SCHEDULE_EXACT_ALARM`.
-2. **Akku-Optimierung aktiv** _(v1.6.0)_ — `PowerManager.isIgnoringBatteryOptimizations()` is false (default on every install). Aggressive battery managers on Xiaomi/Huawei/Samsung devices routinely kill background apps and silently swallow alarm broadcasts. Deep-links to `ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` so the user can whitelist Brutus with two taps. Falls back to the general battery-optimization list if the per-app dialog isn't supported.
-3. **Vollbild-Alarm blockiert** _(v1.6.1)_ — Android 14+ no longer grants `USE_FULL_SCREEN_INTENT` by default to apps outside the Calling / Default Alarm categories. Without it, Brutus's lock-screen overlay is silently downgraded to a heads-up notification and the app does _not_ pop to the foreground when the alarm fires. The banner uses `NotificationManager.canUseFullScreenIntent()` and deep-links to `ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT` so the user can flip the switch.
+1. **Exact alarms disabled** _(v1.3.0)_ — `AlarmManager.canScheduleExactAlarms()` is false (Samsung's default on Android 12+). Deep-links to `ACTION_REQUEST_SCHEDULE_EXACT_ALARM`.
+2. **Battery optimization active** _(v1.6.0)_ — `PowerManager.isIgnoringBatteryOptimizations()` is false (default on every install). Aggressive battery managers on Xiaomi/Huawei/Samsung devices routinely kill background apps and silently swallow alarm broadcasts. Deep-links to `ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` so the user can whitelist Brutus with two taps. Falls back to the general battery-optimization list if the per-app dialog isn't supported.
+3. **Full-screen alarm blocked** _(v1.6.1)_ — Android 14+ no longer grants `USE_FULL_SCREEN_INTENT` by default to apps outside the Calling / Default Alarm categories. Without it, Brutus's lock-screen overlay is silently downgraded to a heads-up notification and the app does _not_ pop to the foreground when the alarm fires. The banner uses `NotificationManager.canUseFullScreenIntent()` and deep-links to `ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT` so the user can flip the switch.
 
 All three banners disappear automatically as soon as the corresponding system state is fixed — re-checks run on every `ON_RESUME`.
 
@@ -256,7 +383,7 @@ The code format is `brutus:{UUIDv4}`, ~43 characters. Any ML Kit-compatible QR s
 Snoozing is available during every phase of the alarm (including while a challenge is running) — but only by swiping an orange thumb horizontally across a track past the 85% threshold. A tap does nothing. Features:
 
 - Animated gradient fill behind the thumb grows with drag progress
-- Pulsing _"Zum Snoozen wischen"_ hint with a drifting chevron icon, fades out as you drag
+- Pulsing _"Swipe to snooze"_ hint with a drifting chevron icon, fades out as you drag
 - Springs back on incomplete swipe (damping 0.55)
 - Snaps to the end on successful trigger, then fires the snooze
 - Snooze duration configurable per alarm: **Off, 2, 5, 10, or 15 minutes** (default 5). Set to _Off_ to hide the snooze button entirely on the alarm screen — no escape except finishing the challenge
@@ -284,9 +411,55 @@ Since **v1.8.0** the stopwatch (and the timer) keep their entire state — inclu
 
 ### Timer
 
-HMS picker (hours 0–23, minutes 0–59, seconds 0–59) with up/down steppers on each column. Quick-preset row for common durations (1m, 3m, 5m, 10m, 15m, 30m). A **gentle-sound picker** (added in v1.5.0) below the presets lets you pick the finish tone — defaults to **Glockenspiel**, choice persists across launches via `TimerSoundStore`. Tapping a chip previews the sound; **Stopp** halts the preview.
+HMS picker (hours 0–23, minutes 0–59, seconds 0–59) with up/down steppers on each column. Quick-preset row for common durations (1m, 3m, 5m, 10m, 15m, 30m). A **gentle-sound picker** (added in v1.5.0) below the presets lets you pick the finish tone — defaults to **Chime**, choice persists across launches via `TimerSoundStore`. Tapping a chip previews the sound; **Stop** halts the preview.
 
-During the countdown the screen switches to a large 64 sp time readout and two circle buttons (**Abbruch / Pause-Weiter**). When the timer expires the chosen synthesized sound (or the system ringtone if **System-Alarm** is picked) plays in a loop with `USAGE_ALARM` audio attributes until **Stopp** is pressed — behavior mirrors a classic kitchen timer rather than a brutal wake mode.
+During the countdown the screen switches to a large 64 sp time readout and two circle buttons (**Abort / Pause-Resume**). When the timer expires the chosen synthesized sound (or the system ringtone if **System alarm** is picked) plays in a loop with `USAGE_ALARM` audio attributes until **Stop** is pressed — behavior mirrors a classic kitchen timer rather than a brutal wake mode.
+
+### Theming and Material You
+
+The whole app runs on `MaterialExpressiveTheme` with `MotionScheme.expressive()` — the tonal
+surfaces, spatial springs and shape scale come from one place (`ui/theme/`), not from
+per-screen styling.
+
+- **Dark / light follows the system setting.** The three alarm-facing activities (ring, Sunrise,
+  Ultra Hardcore task) deliberately pass `darkTheme = true` regardless — their layered black/red
+  gradients assume light-on-dark content, and a white flash at 6 a.m. is its own kind of cruelty.
+- **Material You is an opt-in, not the default.** Alarm tab → **⋮** → *Material You colors*
+  swaps the red brand scheme for the wallpaper-derived one. Shown only on API 31+, persisted in
+  DataStore, applied instantly across every screen.
+- **Space Grotesk** carries the display scale, with **tabular numerals on the entire type scale**
+  since v2.1.0 — every clock, countdown and lap time ticks without the digits jittering sideways.
+- **Reduced motion is respected.** `rememberReducedMotion()` reads `ANIMATOR_DURATION_SCALE` and
+  gates the decorative loops (breathing backgrounds, pulsing snooze hint); state-driven
+  transitions simply snap instead.
+
+### Languages
+
+Brutus ships in **English and German**. English is the default resource set
+(`values/`), German is a full translation (`values-de/`) — there is no partial
+coverage and no silent fallback: every single string, plural and weekday label
+exists in both.
+
+- **Follows the system language** out of the box.
+- **Per-app language on Android 13+**: the app declares
+  [`res/xml/locales_config.xml`](app/src/main/res/xml/locales_config.xml), so
+  *Settings → Apps → Brutus → Language* lets you run Brutus in English on a
+  German phone (or the other way round) without touching the system language.
+- **Plurals are real plurals**, not string concatenation: `1 day` / `2 days`,
+  `in 1 Tag` / `in 2 Tagen`, `One more shake!` / `4 more shakes!`. The widget
+  countdown used to read "in 1 Tagen" — that bug class is now structurally
+  impossible.
+- **Date patterns are localized too**, not just the words: the next-alarm line
+  renders as `Mon, Aug 17, 06:30` in English and `Mo, 17. Aug, 06:30` in German,
+  because the pattern itself is a string resource.
+
+Everything the user can read comes from resources — including notification
+channel names, the share sheet subject, accessibility labels and the widget.
+
+Adding a third language is a translation job only, no code change: copy
+`values/strings.xml` to `values-<lang>/`, translate, add the locale to
+`locales_config.xml`. [`ResourceParityTest`](#tests-and-ci) then enforces that
+the new file stays complete and that its format specifiers match.
 
 ### Scheduling
 
@@ -336,11 +509,32 @@ https://github.com/pepperonas/brutus/releases/latest
 2. Open the file — Android will prompt to allow install from this source if not already enabled
 3. Tap **Install**
 
-The APK is signed with a permanent keystore (`CN=Brutus, O=Pepperonas`, RSA 4096, 10,000-day validity). Future updates install cleanly over this one.
+The APK is signed with a permanent keystore, so future updates install cleanly over this one.
+
+### Verify what you downloaded
+
+Sideloading means you are trusting a file from the internet — here is everything you need to
+check that it is really the one this repository published.
+
+| Property | Value |
+|----------|-------|
+| Signing certificate | `CN=Brutus, OU=Pepperonas, O=Pepperonas, L=Berlin, ST=Berlin, C=DE` |
+| Key | RSA 4096, valid 2026-04-12 → 2053-08-28 (10,000 days) |
+| Signature scheme | APK Signature Scheme v2 |
+| **Certificate SHA-256** | `69d67a10a826cf4050da4b271af9b5ed500c962bfab07a8f8fe863e3d7600382` |
+| v2.1.1 APK | 4,314,121 bytes · SHA-256 `58efab61ea970121cb1cb505f0e757d1a57eac212ee13a5c55e1034f4882aea1` |
+
+The **certificate** fingerprint is the durable one — it stays identical across every release,
+so a mismatch means the APK did not come from here. The APK hash changes with every version.
+
+```bash
+shasum -a 256 brutus-v2.1.1.apk
+$ANDROID_HOME/build-tools/35.0.0/apksigner verify --print-certs -v brutus-v2.1.1.apk
+```
 
 ### Samsung note
 
-Samsung's One UI by default revokes `SCHEDULE_EXACT_ALARM` for third-party apps. **v1.3.0 detects this automatically** and shows a red _"Exakte Alarme deaktiviert"_ banner above the alarm list with an _Aktivieren_ button that deep-links straight into the right settings page (`ACTION_REQUEST_SCHEDULE_EXACT_ALARM`). Tap it once, toggle the switch, and you're back. The banner re-checks on every app resume and disappears as soon as the permission is granted.
+Samsung's One UI by default revokes `SCHEDULE_EXACT_ALARM` for third-party apps. **v1.3.0 detects this automatically** and shows a red _"Exact alarms disabled"_ banner above the alarm list with an _Enable_ button that deep-links straight into the right settings page (`ACTION_REQUEST_SCHEDULE_EXACT_ALARM`). Tap it once, toggle the switch, and you're back. The banner re-checks on every app resume and disappears as soon as the permission is granted.
 
 If you'd rather do it manually:
 
@@ -358,12 +552,14 @@ If you'd rather do it manually:
 | `RECEIVE_BOOT_COMPLETED` | Re-register alarms after reboot | Install time |
 | `CAMERA` | QR code scanning challenge | Runtime, when the alarm fires and QR challenge is active |
 | `ACTIVITY_RECOGNITION` (since v1.4.0) | Step counter for the Ultra Hardcore anti-snooze task | Runtime, when enabling Ultra Hardcore Mode or opening the task screen |
-| `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` (since v1.6.0) | Lets the Akku-Optimierung banner deep-link the system whitelist dialog | Install time (the dialog itself is opt-in per device) |
+| `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` (since v1.6.0) | Lets the battery-optimization banner deep-link the system whitelist dialog | Install time (the dialog itself is opt-in per device) |
 | `VIBRATE` | Vibration pattern during alarm | Install time |
 | `USE_FULL_SCREEN_INTENT` | Lock-screen alarm overlay | Install time |
 | `FOREGROUND_SERVICE` / `FOREGROUND_SERVICE_MEDIA_PLAYBACK` | Alarm playback service | Install time |
 | `WRITE_EXTERNAL_STORAGE` (API ≤ 28 only) | Save QR PNG on legacy Android | Runtime, when saving QR |
-| `ACCESS_NETWORK_STATE` (since v1.3.0) | Lets Play Services check connectivity for the one-time ML Kit Barcode model download | Install time |
+| `ACCESS_NETWORK_STATE` (since v1.3.0) | Lets Play Services check connectivity for the one-time ML Kit Barcode model download. **Not declared by Brutus** — it is merged into the final manifest from the ML Kit dependency | Install time |
+
+Everything in that table except the last row is declared in [`app/src/main/AndroidManifest.xml`](app/src/main/AndroidManifest.xml); you can diff it against this list in ten seconds.
 
 Brutus does **not** request `INTERNET` and never sends data anywhere. Starting with v1.3.0 the ML Kit Barcode model is shipped _unbundled_ — the model itself is delivered via Google Play Services and pre-fetched at install time (`com.google.mlkit.vision.DEPENDENCIES = barcode` meta-data). This adds an `ACCESS_NETWORK_STATE` permission so Play Services can check connectivity for the one-time model download, but the app itself never opens a socket.
 
@@ -427,14 +623,22 @@ brutus.keyPassword=your_key_password
 
 Set these repository secrets, then expose them as env vars in the workflow:
 
-| Secret | Maps to |
-|--------|---------|
-| `RELEASE_STORE_FILE` | path to the decoded keystore file |
-| `RELEASE_STORE_PASSWORD` | store password |
-| `RELEASE_KEY_ALIAS` | key alias (`brutus`) |
-| `RELEASE_KEY_PASSWORD` | key password |
+| Secret | Contents | Used by |
+|--------|----------|---------|
+| `RELEASE_STORE_BASE64` | the `.jks` keystore, base64-encoded (`base64 -i brutus-release.jks \| pbcopy`) | decoded to disk by `release.yml`, which then exports `RELEASE_STORE_FILE` |
+| `RELEASE_STORE_PASSWORD` | store password | Gradle `signingConfigs.release` |
+| `RELEASE_KEY_ALIAS` | key alias (`brutus`) | Gradle `signingConfigs.release` |
+| `RELEASE_KEY_PASSWORD` | key password | Gradle `signingConfigs.release` |
 
-The keystore itself is typically base64-encoded into a secret, decoded to disk at workflow start.
+`RELEASE_STORE_FILE` is **not** a secret you set — the workflow writes it into `$GITHUB_ENV`
+after decoding `RELEASE_STORE_BASE64`. Gradle prefers those environment variables over
+`local.properties` whenever `RELEASE_STORE_FILE` is present, which is what makes the same
+`build.gradle.kts` work locally and in CI.
+
+> **Note:** without `RELEASE_STORE_BASE64` set, `:app:assembleRelease` does **not** fall back to
+> an unsigned APK — the `release` signing config exists unconditionally, so packaging fails with
+> `SigningConfig "release" is missing required property "storeFile"`. Forks that only want an
+> unsigned build should guard the `signingConfig = …` assignment on `storeFile != null`.
 
 ### Creating a new keystore (for forks)
 
@@ -453,20 +657,35 @@ keytool -genkeypair -v \
 
 | Layer | Technology |
 |-------|-----------|
-| Language | Kotlin 2.1.0 |
-| UI | Jetpack Compose + Material 3 + Material Icons Extended |
-| Architecture | MVVM (AndroidViewModel + Repository) |
-| Database | Room 2.6.1 with KSP code generation |
+| Language | Kotlin 2.1.0 (JVM target 17) |
+| UI toolkit | Jetpack Compose — BOM 2026.06.01 |
+| Design system | Material 3 **Expressive** — `material3` pinned to 1.5.0-alpha18 (see note below) + Material Icons Extended |
+| Type | Space Grotesk (bundled, [SIL OFL](THIRD_PARTY_LICENSES/SpaceGrotesk-OFL.txt)) with tabular numerals |
+| Languages | English (default) + German, `locales_config.xml` for the Android 13+ per-app picker |
+| Navigation | Navigation Compose 2.8.5 — one `NavHost` across the four tabs |
+| Architecture | MVVM (AndroidViewModel + Repository), `StateFlow` + `stateIn` |
+| Lifecycle | androidx.lifecycle 2.8.7 (runtime-ktx + viewmodel-compose) |
+| Database | Room 2.6.1 with KSP code generation, schema v7 exported to `app/schemas/` |
+| Preferences | DataStore Preferences 1.1.1 (theme) + `SharedPreferences` (QR, world clock, timer sound, UHC follow-ups) |
 | Scheduling | `AlarmManager.setAlarmClock()` |
-| Background | Foreground Service (media playback type) + `PARTIAL_WAKE_LOCK` |
-| Audio | `AudioTrack` (synthesized) + `MediaPlayer` (system ringtone) |
+| Background | Foreground Service (`mediaPlayback` type) + `PARTIAL_WAKE_LOCK` |
+| Audio | `AudioTrack` (procedural PCM synthesis) + `MediaPlayer` (system ringtone) |
+| Sensors | Accelerometer (shake), `TYPE_STEP_COUNTER` / `TYPE_STEP_DETECTOR` (Ultra Hardcore) |
 | Camera | CameraX 1.4.1 |
 | Barcode scanning | Google ML Kit Barcode Scanning (unbundled) 18.3.1 |
 | QR generation | ZXing Core 3.5.3 |
-| Gradle | 8.11.1 with AGP 8.7.3 |
-| Min / Target SDK | 26 (Android 8.0) / 35 (Android 15) |
+| Tests | JUnit 4.13.2, kotlinx-coroutines-test 1.9.0, Robolectric 4.14.1, androidx.test:core 1.6.1 |
+| Build | Gradle 8.11.1, AGP 8.7.3, KSP 2.1.0-1.0.29, R8 (`minify` + `shrinkResources`) |
+| SDK levels | min 26 (Android 8.0) · target/compile 35 (Android 15) |
 
-No Hilt, no Koin, no Dagger — manual DI via the Application class. No Retrofit, no coroutines channels, no Flow operators beyond `stateIn`. The codebase is small on purpose.
+**Why `material3` is pinned past the BOM:** BOM 2026.06.01 maps `material3` 1.4.0, where the
+Expressive APIs (`MaterialExpressiveTheme`, `MotionScheme`, `expressiveLightColorScheme`) are
+still `internal`. They graduate in the 1.5.0-alpha channel, and **1.5.0-alpha18 is the newest
+alpha still built against Compose 1.11** — alpha19+ pulls Compose 1.12 and would force
+compileSdk 37 + AGP 9.1. Components that had not graduated by alpha18 (`ButtonGroup`,
+`FloatingToolbar`) are used behind an explicit `@OptIn(ExperimentalMaterial3ExpressiveApi)`.
+
+No Hilt, no Koin, no Dagger — manual DI via the Application class. No Retrofit, no coroutines channels, no Flow operators beyond `stateIn`. The codebase is small on purpose: **80 Kotlin files, ~12,000 lines** — 53 of them production code.
 
 ---
 
@@ -490,7 +709,7 @@ app/src/main/java/com/pepperonas/brutus/
 ├── data/
 │   ├── AlarmEntity.kt               Room entity — time, days bitmask, challenge flags, counts, hardcoreMode
 │   ├── AlarmDao.kt                  DAO with Flow-based reactive queries
-│   ├── AlarmDatabase.kt             Room database singleton (v5)
+│   ├── AlarmDatabase.kt             Room database — schema v7, migrations 4→5→6→7
 │   └── AlarmRepository.kt           Single data access abstraction
 ├── viewmodel/
 │   ├── AlarmViewModel.kt            State container with StateFlow of alarms
@@ -540,33 +759,115 @@ app/src/main/java/com/pepperonas/brutus/
     └── WorldClockStore.kt           SharedPreferences-backed time-zone selection
 ```
 
-Tests live alongside the production code under `app/src/test/java/...`:
+Resources that matter for the two languages:
+
+```
+app/src/main/res/
+├── values/strings.xml          English — the default set: ~180 strings, 6 plurals, weekday array
+├── values-de/strings.xml       German — full translation, identical key set
+├── xml/locales_config.xml      Declares en + de for the Android 13+ per-app language picker
+└── layout/widget_next_alarm.xml  Widget layout; its preview texts are resources too
+```
+
+**80 Kotlin files, ~12,000 lines** — 53 in `main`, 27 in `test`.
+
+---
+
+## Tests and CI
+
+243 JVM unit tests guard the parts where a bug means someone oversleeps: what actually lands in
+`AlarmManager`, the alarm-time arithmetic, persistence, the completeness of both translations, and
+every string the user reads on a clock face. There are no instrumented tests — the whole suite runs
+on the JVM in seconds.
+
+| Suite | Tests | What it pins down |
+|-------|-------|-------------------|
+| `scheduler/AlarmSchedulerTest` | 23 | the registrations that actually reach `AlarmManager`: trigger on the configured wall-clock time, passed times roll to tomorrow, weekday matching, sunrise exactly 10 min ahead (and skipped when it would be in the past), `setExactAndAllowWhileIdle` against Doze, the v1.8.0 stale-sunrise fix, snooze intervals, and the request-code carve-out that keeps main / sunrise / two follow-ups from overwriting each other (Robolectric) |
+| `util/NextAlarmCalculatorTest` | 17 | one-shot today vs. tomorrow, repeating wrap-around, weekend selection, `formatCountdown` |
+| `data/AlarmDaoTest` | 15 | real SQL on an in-memory Room database: ordering, `getEnabledAlarms` for boot recovery, full-field round-trip, REPLACE on conflict, undo-restore via `id = 0`, repository pass-through (Robolectric) |
+| `ui/screens/ClockFormattingTest` | 14 | stopwatch and timer readouts: truncation instead of rounding up, the hour column appearing exactly at the hour, and a **constant string width** — the premise of the tabular numerals |
+| `util/UltraHardcoreStoreTest` | 12 | the follow-up bookkeeping that has to survive a reboot: sequences tracked independently, `clearAllFor` scoped to one alarm, step-target keys never leaking into the pending list (Robolectric) |
+| `widget/NextAlarmWidgetFormatTest` | 12 | the two strings on the home screen in both languages, including singular/plural and the no-rounding-up rule (Robolectric) |
+| `util/NextAlarmCalendarEdgeTest` | 11 | **daylight saving**: 23 real hours between triggers on the short night, 25 on the long one, wall-clock time preserved; the skipped and the duplicated hour; month, year and leap-day rollovers |
+| `util/AlarmSoundTest` | 11 | the **persisted** sound ids as a golden map — renumbering would silently change what existing alarms play — plus the display names in both languages |
+| `ResourceParityTest` | 11 | the two languages cannot drift: identical key sets, no blank values, **matching format specifiers**, complete plurals, seven weekdays each, no German left in the default file, and `locales_config.xml` in sync with the `values-*` folders |
+| `BrutusApplicationTest` | 8 | notification channels are write-once: importance, DND bypass, silence (Robolectric) |
+| `ui/alarm/MathProblemTest` | 8 | answer/display correctness, per-difficulty operand range and sign invariants across 500 samples, operator fallback |
+| `viewmodel/TimerViewModelTest` | 8 | countdown/pause math, cancel-undo state machine, an expired timer is deliberately *not* undoable (Robolectric) |
+| `util/ChallengeFlagsTest` | 8 | `describe` / `activeList` / `has` / `sanitize` bitmask edge cases, incl. the unknown-bit fallback |
+| `util/ChallengeDifficultyTest` | 8 | math operand ranges, shake threshold ordering (9 / 12 / 16 m/s²), distinct labels per preset in both languages |
+| `util/AlarmSoundGeneratorTest` | 7 | PCM buffer length, peak amplitudes, loop-boundary fade, gentle vs. harsh vs. extreme classification |
+| `util/AlarmSoundGeneratorPropertiesTest` | 7 | invariants every synthesized sound must hold — loop length budget, determinism, DC offset, gentle headroom; a new enum entry is covered automatically |
+| `util/PermissionDeepLinkTest` | 7 | the three reliability banners land on the right settings page (action + `package:` URI + `NEW_TASK`) (Robolectric) |
+| `data/RoomSchemaExportTest` | 7 | the running database's **identity hash against the committed `7.json`** — a field added without a migration fails here instead of on a user's device |
+| `LocalizedRuntimeTest` | 7 | resolves every declared string through the resource system in **both** locales and renders a complete alarm card in each |
+| `data/AlarmEntityDefaultsTest` | 7 | the constructor defaults, which are a persisted contract |
+| `data/AlarmEntityTest` | 7 | `timeString` padding, `repeatDaysString` / `soundName` / `challengeName` in English **and** German, weekday bitmask, `hardcoreEffective` |
+| `util/GlobalQrStoreTest` | 6 | the installation's QR code never changes — every printed copy depends on it (Robolectric) |
+| `util/WorldClockStoreTest` | 6 | default seeding on first launch, round-trips, an empty list stays empty, blank filtering (Robolectric) |
+| `util/TimerSoundStoreTest` | 6 | timer tone persistence, id 0 vs. "unset", corrupt id degrades to the system tone (Robolectric) |
+| `viewmodel/StopwatchViewModelTest` | 6 | segment accumulation, laps, reset-undo snapshot semantics |
+| `scheduler/AlarmSchedulerConstantsTest` | 4 | Ultra Hardcore offsets, sunrise lead time, intent-extra uniqueness |
+
+```bash
+./gradlew :app:testDebugUnitTest          # all 243
+./gradlew :app:testDebugUnitTest --tests '*NextAlarmCalculatorTest'
+# HTML report: app/build/reports/tests/testDebugUnitTest/index.html
+```
+
+**Testability by design:** both ViewModels take an injectable clock (`now: () -> Long`,
+defaulting to `SystemClock::elapsedRealtime`), so the timing state machines run
+deterministically on the JVM — no `Thread.sleep`, no flakiness. Calendar-sensitive suites pin
+`TimeZone.setDefault(Europe/Berlin)` rather than trusting the host zone, and the
+Android-dependent suites run under **Robolectric** against real shadows — `ShadowAlarmManager`
+records the actual registrations, Room runs in-memory against the generated implementation. No
+mocking framework is used anywhere; the code under test is exercised, not simulated.
+
+### Workflows
+
+| Workflow | Trigger | Does |
+|----------|---------|------|
+| [`tests.yml`](.github/workflows/tests.yml) | push to `main`, every PR | JDK 17 + Gradle cache → `:app:testDebugUnitTest`, uploads the HTML report as an artifact when it fails |
+| [`release.yml`](.github/workflows/release.yml) | tag `v*` | runs the tests, decodes the keystore from `RELEASE_STORE_BASE64`, builds `assembleRelease`, renames the APK to `brutus-<tag>.apk` and attaches it to the GitHub release |
+
+### Test layout
 
 ```
 app/src/test/java/com/pepperonas/brutus/
+├── BrutusApplicationTest.kt            8 — notification channels: importance, DND bypass, silence
+├── LocaleContexts.kt                       test helper: a Context pinned to en / de
+├── LocalizedRuntimeTest.kt             7 — every string resolves in both languages, full card render
+├── ResourceParityTest.kt              11 — values/ vs. values-de/: keys, plurals, format specifiers
 ├── data/
-│   └── AlarmEntityTest.kt              6 tests — timeString padding, repeatDaysString cases, day bitmask, hardcoreEffective (v2.1.1)
+│   ├── AlarmDaoTest.kt                15 — in-memory Room: ordering, enabled filter, round-trip, REPLACE, undo-restore
+│   ├── AlarmEntityTest.kt              7 — timeString, repeatDaysString / soundName / challengeName in en + de
+│   ├── AlarmEntityDefaultsTest.kt      7 — the persisted constructor defaults
+│   └── RoomSchemaExportTest.kt         7 — runtime identity hash vs. committed schema, per-version columns
 ├── scheduler/
-│   └── AlarmSchedulerConstantsTest.kt  4 tests — UHC offsets, sunrise lead, intent extra uniqueness (v1.6.0)
-├── ui/alarm/
-│   └── MathProblemTest.kt              8 tests — answer/display, per-difficulty range + sign invariants (500 samples), operator fallback
+│   ├── AlarmSchedulerTest.kt          23 — what reaches AlarmManager: triggers, sunrise, snooze, follow-up request codes
+│   └── AlarmSchedulerConstantsTest.kt  4 — UHC offsets, sunrise lead, intent extra uniqueness
+├── ui/
+│   ├── alarm/MathProblemTest.kt        8 — answer/display, per-difficulty range + sign invariants (500 samples)
+│   └── screens/ClockFormattingTest.kt 14 — stopwatch/timer readouts, hour column, constant string width
 ├── util/
-│   ├── AlarmSoundGeneratorTest.kt      7 tests — PCM length, peak amplitudes, loop-boundary fade, gentle vs harsh + extreme list (v1.7.0)
-│   ├── ChallengeFlagsTest.kt           7 tests — describe / activeList / has / sanitize bitmask edge cases
-│   ├── ChallengeDifficultyTest.kt      6 tests — math operand ranges, shake threshold ordering, label coverage (v1.4.0)
-│   ├── NextAlarmCalculatorTest.kt     17 tests — one-shot today/tomorrow, repeating wrap, weekend selection, formatCountdown
-│   └── WorldClockStoreTest.kt          6 tests — default seeding, round-trips, empty list sticks, blank filtering (Robolectric)
-└── viewmodel/
-    ├── StopwatchViewModelTest.kt       6 tests — segment accumulation, laps, reset-undo snapshot semantics (v2.1.1)
-    └── TimerViewModelTest.kt           8 tests — countdown/pause math, cancel-undo state machine, finished-not-undoable (v2.1.1, Robolectric)
+│   ├── AlarmSoundTest.kt              11 — golden map of the persisted sound ids, names per language
+│   ├── AlarmSoundGeneratorTest.kt      7 — PCM length, peak amplitudes, loop-boundary fade, gentle vs harsh
+│   ├── AlarmSoundGeneratorPropertiesTest.kt  7 — invariants across every synthesized sound
+│   ├── ChallengeFlagsTest.kt           8 — describe / activeList / has / sanitize, unknown-bit fallback
+│   ├── ChallengeDifficultyTest.kt      8 — operand ranges, threshold ordering, distinct labels
+│   ├── GlobalQrStoreTest.kt            6 — the installation QR code is generated once and never changes
+│   ├── NextAlarmCalculatorTest.kt     17 — one-shot today/tomorrow, repeating wrap, weekend selection
+│   ├── NextAlarmCalendarEdgeTest.kt   11 — DST nights (23 h / 25 h), skipped + duplicated hour, rollovers
+│   ├── PermissionDeepLinkTest.kt       7 — the three reliability banners land on the right settings page
+│   ├── TimerSoundStoreTest.kt          6 — timer tone persistence and corrupt-id fallback
+│   ├── UltraHardcoreStoreTest.kt      12 — reboot-surviving follow-up bookkeeping
+│   └── WorldClockStoreTest.kt          6 — default seeding, round-trips, empty list sticks
+├── viewmodel/
+│   ├── StopwatchViewModelTest.kt       6 — segment accumulation, laps, reset-undo snapshot semantics
+│   └── TimerViewModelTest.kt           8 — countdown/pause math, cancel-undo, finished-not-undoable
+└── widget/
+    └── NextAlarmWidgetFormatTest.kt   12 — the home-screen countdown and repeat-day strip
 ```
-
-**75 tests** in total. Both ViewModels take an injectable `now: () -> Long` clock
-(defaulting to `SystemClock::elapsedRealtime`), so the timing state machines are tested
-deterministically on the JVM; `TimerViewModelTest` and `WorldClockStoreTest` run under
-**Robolectric** for their `Application`/`SharedPreferences` needs, everything else is plain JUnit.
-
-Run them with `./gradlew :app:testDebugUnitTest`. The `tests.yml` GitHub workflow runs them on every push to `main` and every pull request.
 
 ---
 
@@ -655,7 +956,7 @@ T + 15m AlarmReceiver fires with EXTRA_IS_FOLLOWUP=true, seq=2
 - **Every decision favors waking the user up over UX politeness.** If you need a polite alarm, use the system clock.
 - **Challenges are configurable because brains are different.** Some people need math; others just need physical movement. Some need both.
 - **No account, no network, no tracking.** Brutus never touches the internet.
-- **APK size matters more than we initially thought.** v1.2.0 was 35 MB because of bundled ML Kit; v1.3.0 ships the unbundled variant and ships R8 minification, dropping the APK to under 4 MB without losing any functionality.
+- **APK size matters more than we initially thought.** v1.2.0 was 35 MB because of bundled ML Kit; v1.3.0 switched to the unbundled variant and turned on R8 minification + resource shrinking, cutting the download by roughly 88 % without losing any functionality. v2.1.1 ships at **4,314,121 bytes (≈ 4.1 MiB)** — and that now includes the full Material 3 Expressive theme layer.
 - **Procedural audio beats licensed samples.** Synthesized sounds mean no copyright issues, no asset loading, no file cache — and the sounds can be tuned to be as nasty as needed.
 - **Destructive DB migration is acceptable during pre-1.0 development.** Once Brutus hits a real release cadence, proper Room migrations will replace the current fallback.
 
@@ -699,12 +1000,12 @@ Planned, no specific timeline:
 - [x] Configurable shake sensitivity (v1.4.0)
 - [x] Math difficulty presets (easy / hard / brutal) (v1.4.0)
 - [x] Gentle alarm sounds + configurable timer finish tone (v1.5.0)
-- [x] Sunrise pre-alarm with screen brightness ramp + Glockenspiel fade-in (v1.6.0)
+- [x] Sunrise pre-alarm with screen brightness ramp + chime fade-in (v1.6.0)
 - [x] Home-screen widget showing next upcoming alarm (v1.6.0)
 - [x] Battery-optimization detection banner with deep-link to system whitelist (v1.6.0)
 - [x] Pop alarm to the foreground via full-screen-intent banner + hardened activity launch (v1.6.1)
 - [x] Redesigned alarm cards — full-width weekday strip + info chips (mode, sunrise, challenge, snooze, sound) (v1.7.0)
-- [x] Five extreme alarm sounds — Stadion-Horn, Presslufthammer, Feueralarm, Bohrer, Banshee (v1.7.0)
+- [x] Five extreme alarm sounds — stadium horn, jackhammer, fire alarm, dental drill, banshee (v1.7.0)
 - [x] Bug-fix pass: `goAsync()` in boot/widget receivers, overlapping-alarm session takeover, stale-sunrise cancel, camera release after QR scan, siren loop click (v1.8.0)
 - [x] Timer & stopwatch survive tab switches via Activity-scoped ViewModels (v1.8.0)
 - [x] GUI polish: delete-all confirmation, one-line weekday picker in the edit sheet, pinned save CTA, 48 dp delete target, TalkBack snooze action, search placeholder (v1.8.0)
@@ -718,7 +1019,8 @@ Planned, no specific timeline:
 - [ ] Per-alarm sound override at runtime
 - [ ] Multi-QR support (different codes for different alarms)
 - [ ] Wear OS companion
-- [ ] Localization beyond German
+- [x] **English + German localization** — every string in `values/` + `values-de/`, per-app language picker on Android 13+
+- [ ] Localization beyond English and German
 - [ ] Sleep statistics tab (how often, dismiss latency, snooze rate)
 - [ ] Backup / restore alarm list as JSON
 
@@ -771,3 +1073,15 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
+
+### Third-party components
+
+| Component | License |
+|-----------|---------|
+| [Space Grotesk](https://github.com/floriankarsten/space-grotesk) — bundled in `res/font/` | SIL Open Font License 1.1 · [full text](THIRD_PARTY_LICENSES/SpaceGrotesk-OFL.txt) |
+| AndroidX · Jetpack Compose · Material 3 · Room · CameraX · DataStore | Apache License 2.0 |
+| [ZXing Core](https://github.com/zxing/zxing) | Apache License 2.0 |
+| Google ML Kit Barcode Scanning (via Play Services) | Android SDK Terms + [ML Kit terms](https://developers.google.com/ml-kit/terms) |
+
+The bundled font is the only third-party asset shipped inside the APK — every alarm sound is
+synthesized at runtime, so there is no sample licensing to track.

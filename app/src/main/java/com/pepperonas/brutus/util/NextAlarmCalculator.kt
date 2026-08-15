@@ -1,5 +1,7 @@
 package com.pepperonas.brutus.util
 
+import android.content.Context
+import com.pepperonas.brutus.R
 import com.pepperonas.brutus.data.AlarmEntity
 import java.util.Calendar
 
@@ -50,16 +52,19 @@ object NextAlarmCalculator {
         return null
     }
 
-    fun formatCountdown(fromNow: Long, to: Long): String {
+    /** Localized "Alarm in 7 hours, 12 minutes" for the list header. */
+    fun formatCountdown(context: Context, fromNow: Long, to: Long): String {
         val delta = (to - fromNow).coerceAtLeast(0)
         val totalMinutes = delta / 60_000L
-        val days = totalMinutes / (60 * 24)
-        val hours = (totalMinutes / 60) % 24
-        val minutes = totalMinutes % 60
+        val days = (totalMinutes / (60 * 24)).toInt()
+        val hours = ((totalMinutes / 60) % 24).toInt()
+        val minutes = (totalMinutes % 60).toInt()
         return when {
-            days > 0 -> "Alarm in $days Tag${if (days == 1L) "" else "en"}, $hours Std."
-            hours > 0 -> "Alarm in $hours Stunden, $minutes Minuten"
-            else -> "Alarm in $minutes Minuten"
+            days > 0 -> context.resources.getQuantityString(
+                R.plurals.countdown_days, days, days, hours
+            )
+            hours > 0 -> context.getString(R.string.countdown_hours, hours, minutes)
+            else -> context.getString(R.string.countdown_minutes, minutes)
         }
     }
 }

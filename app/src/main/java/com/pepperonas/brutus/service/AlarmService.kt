@@ -19,6 +19,7 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import com.pepperonas.brutus.AlarmActivity
 import com.pepperonas.brutus.BrutusApplication
+import com.pepperonas.brutus.R
 import com.pepperonas.brutus.UltraHardcoreTaskActivity
 import com.pepperonas.brutus.data.AlarmEntity
 import com.pepperonas.brutus.data.AlarmRepository
@@ -100,12 +101,17 @@ class AlarmService : Service() {
         )
 
         val contentText = if (isFollowup)
-            "Re-Alarm $followupSeq/2 — du bist nicht entkommen!"
-        else "Alarm aktiv! Aufstehen!"
+            getString(R.string.notification_realarm_text, followupSeq)
+        else getString(R.string.notification_alarm_text)
 
         val notification = Notification.Builder(this, BrutusApplication.CHANNEL_ALARM)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setContentTitle(if (isFollowup) "Brutus Re-Alarm" else "Brutus Alarm")
+            .setContentTitle(
+                getString(
+                    if (isFollowup) R.string.notification_realarm_title
+                    else R.string.notification_alarm_title
+                )
+            )
             .setContentText(contentText)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
@@ -371,14 +377,11 @@ class AlarmService : Service() {
         val nm = getSystemService(NotificationManager::class.java)
         val notification = Notification.Builder(this, BrutusApplication.CHANNEL_ULTRA_HARDCORE)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setContentTitle("Ultra Hardcore aktiv")
-            .setContentText("Re-Alarm in 10 + 15 Min — Aufgabe lösen, um beide abzubrechen.")
+            .setContentTitle(getString(R.string.notification_uhc_title))
+            .setContentText(getString(R.string.notification_uhc_text))
             .setStyle(
-                Notification.BigTextStyle().bigText(
-                    "Brutus klingelt in 10 Minuten und 15 Minuten erneut. " +
-                        "Tippe hier und schliesse die Schritt-Challenge ab, " +
-                        "um beide Re-Alarme abzubrechen."
-                )
+                Notification.BigTextStyle()
+                    .bigText(getString(R.string.notification_uhc_big_text))
             )
             .setOngoing(true)
             .setOnlyAlertOnce(true)
@@ -386,7 +389,7 @@ class AlarmService : Service() {
             .setContentIntent(taskPi)
             .addAction(
                 Notification.Action.Builder(
-                    null, "Aufgabe lösen", taskPi
+                    null, getString(R.string.notification_uhc_action), taskPi
                 ).build()
             )
             .build()

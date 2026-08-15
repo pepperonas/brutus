@@ -34,6 +34,9 @@ import androidx.compose.ui.unit.sp
 import com.pepperonas.brutus.ui.theme.rememberReducedMotion
 import com.pepperonas.brutus.util.ChallengeDifficulty
 import kotlin.math.sqrt
+import androidx.compose.ui.res.stringResource
+import com.pepperonas.brutus.R
+import androidx.compose.ui.res.pluralStringResource
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -95,7 +98,7 @@ fun ShakeChallenge(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Schüttel-Challenge",
+            text = stringResource(R.string.shake_title),
             style = MaterialTheme.typography.headlineMedium,
             color = Color.White
         )
@@ -103,7 +106,7 @@ fun ShakeChallenge(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Schüttle dein Handy!",
+            text = stringResource(R.string.shake_instruction),
             style = MaterialTheme.typography.bodyLarge,
             color = Color.White.copy(alpha = 0.7f)
         )
@@ -142,7 +145,11 @@ fun ShakeChallenge(
 
         if (shakeCount > 0 && shakeCount < requiredShakes) {
             Text(
-                text = "Noch ${requiredShakes - shakeCount} mal!",
+                text = pluralStringResource(
+                    R.plurals.shake_remaining,
+                    requiredShakes - shakeCount,
+                    requiredShakes - shakeCount
+                ),
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.error
             )

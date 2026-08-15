@@ -44,6 +44,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.pepperonas.brutus.ui.theme.rememberReducedMotion
+import androidx.compose.ui.res.stringResource
+import com.pepperonas.brutus.R
+import androidx.compose.ui.res.pluralStringResource
 
 /**
  * The Ultra Hardcore "anti-snooze" task: walk a configurable number of steps within the
@@ -123,14 +126,14 @@ fun StepChallenge(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Anti-Schlummer-Aufgabe",
+            text = stringResource(R.string.step_title),
             style = MaterialTheme.typography.headlineMedium,
             color = Color.White,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Steh auf und lauf $requiredSteps Schritte. Erst dann werden die Re-Alarme abgebrochen.",
+            text = stringResource(R.string.step_instruction, requiredSteps),
             style = MaterialTheme.typography.bodyLarge,
             color = Color.White.copy(alpha = 0.7f),
             textAlign = TextAlign.Center
@@ -168,7 +171,7 @@ fun StepChallenge(
 
         if (!permissionGranted) {
             Text(
-                text = "Berechtigung 'Körperliche Aktivität' wird benötigt, damit der Schrittzähler arbeitet.",
+                text = stringResource(R.string.step_permission_required),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.error,
                 textAlign = TextAlign.Center
@@ -183,10 +186,14 @@ fun StepChallenge(
                     }
                 },
                 shape = RoundedCornerShape(12.dp)
-            ) { Text("Berechtigung anfragen") }
+            ) { Text(stringResource(R.string.step_request_permission)) }
         } else if (steps in 1 until requiredSteps) {
             Text(
-                text = "Noch ${requiredSteps - steps} Schritte!",
+                text = pluralStringResource(
+                    R.plurals.step_remaining,
+                    requiredSteps - steps,
+                    requiredSteps - steps
+                ),
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.error
             )
