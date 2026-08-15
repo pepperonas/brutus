@@ -129,6 +129,14 @@ Everything is packed into a four-tab bottom navigation that keeps the brutal ala
 
 ## Screenshots
 
+> **Coming with the next update.** The gallery below is wired up and waiting for
+> its twelve captures — the shot list (which screen, in which state, with which
+> `adb` command) lives in
+> [`docs/screenshots/SHOTLIST.md`](docs/screenshots/SHOTLIST.md). It is kept as a
+> comment here rather than as twelve broken image links.
+
+<!-- GALLERY: uncomment once docs/screenshots/*.png exist
+
 Captured on **v2.2.0**, dark theme, brand color scheme (Material You off). The app ships in English and German — see [Languages](#languages).
 
 <table>
@@ -189,8 +197,8 @@ Captured on **v2.2.0**, dark theme, brand color scheme (Material You off). The a
     </td>
   </tr>
 </table>
+-->
 
-> Reproducing these shots (state to put the app in, `adb` commands, naming): [`docs/screenshots/SHOTLIST.md`](docs/screenshots/SHOTLIST.md).
 
 ---
 
@@ -635,10 +643,17 @@ after decoding `RELEASE_STORE_BASE64`. Gradle prefers those environment variable
 `local.properties` whenever `RELEASE_STORE_FILE` is present, which is what makes the same
 `build.gradle.kts` work locally and in CI.
 
-> **Note:** without `RELEASE_STORE_BASE64` set, `:app:assembleRelease` does **not** fall back to
-> an unsigned APK — the `release` signing config exists unconditionally, so packaging fails with
-> `SigningConfig "release" is missing required property "storeFile"`. Forks that only want an
-> unsigned build should guard the `signingConfig = …` assignment on `storeFile != null`.
+The workflow can also be started by hand from the **Actions** tab
+(`workflow_dispatch`) — it then runs the full signed build and verifies the
+certificate, but skips the upload because there is no tag to attach to. That is
+the way to check the signing setup without cutting a release.
+
+> **Forks:** without any keystore, `:app:assembleRelease` produces a plain
+> **unsigned** APK — `signingConfig` is only assigned when a `storeFile` is
+> actually present. The release workflow additionally verifies that the built
+> APK carries the expected certificate (`69d67a10…`) and fails otherwise, so a
+> missing secret can never end up as a silently unsigned APK on the releases
+> page.
 
 ### Creating a new keystore (for forks)
 

@@ -61,7 +61,14 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("release")
+            // Sign only when credentials are actually present. Assigning the
+            // config unconditionally made `assembleRelease` die with
+            // "SigningConfig "release" is missing required property storeFile"
+            // on every fork and on CI without the keystore secret — now such a
+            // build produces a plain unsigned APK instead. The release workflow
+            // verifies the certificate afterwards, so an unsigned build can
+            // never reach the releases page.
+            signingConfig = signingConfigs.getByName("release").takeIf { it.storeFile != null }
         }
     }
 

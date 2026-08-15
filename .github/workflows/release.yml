@@ -4,6 +4,10 @@ on:
   push:
     tags:
       - 'v*'
+  # Lets the signed build be verified without cutting a release: run it from the
+  # Actions tab on any branch. Everything up to and including "verify signature"
+  # runs; only the upload is skipped because there is no tag to attach to.
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -38,21 +42,51 @@ jobs:
             echo "RELEASE_STORE_FILE=$RUNNER_TEMP/ks/brutus.jks" >> "$GITHUB_ENV"
             echo "Keystore decoded for signed build."
           else
-            echo "No keystore secret set — building unsigned release APK."
+            echo "::warning::No keystore secret set — building an UNSIGNED release APK."
           fi
 
       - name: Build release APK
-        run: ./gradlew :app:assembleRelease --stacktrace
+        # R8 + resource shrinking need more than the 2 GB configured in
+        # gradle.properties for local IDE work; the runner has 7 GB.
+        run: ./gradlew :app:assembleRelease --stacktrace -Dorg.gradle.jvmargs="-Xmx5g -Dfile.encoding=UTF-8"
 
-      - name: Rename APK with tag
+      - name: Verify the APK is signed with the release key
+        # A missing or wrong secret must never end as a quietly unsigned APK on
+        # the releases page — an unsigned build cannot be installed over an
+        # existing Brutus install, so it would look like data loss to users.
+        run: |
+          set -euo pipefail
+          APK=$(ls app/build/outputs/apk/release/app-release*.apk)
+          BUILD_TOOLS=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          echo "Using $BUILD_TOOLS"
+          "$BUILD_TOOLS/apksigner" verify --print-certs "$APK" | tee /tmp/signer.txt
+          EXPECTED=69d67a10a826cf4050da4b271af9b5ed500c962bfab07a8f8fe863e3d7600382
+          if ! grep -qi "$EXPECTED" /tmp/signer.txt; then
+            echo "::error::APK is not signed with the expected Brutus release certificate."
+            exit 1
+          fi
+          echo "Signing certificate matches ($EXPECTED)."
+
+      - name: Rename APK and publish its checksum
         env:
           TAG_NAME: ${{ github.ref_name }}
         run: |
+          set -euo pipefail
           mkdir -p out
           cp app/build/outputs/apk/release/app-release*.apk "out/brutus-${TAG_NAME}.apk"
+          sha256sum "out/brutus-${TAG_NAME}.apk" | tee -a "$GITHUB_STEP_SUMMARY"
           ls -la out/
 
+      - name: Upload APK as a build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: brutus-release-apk
+          path: out/*.apk
+          if-no-files-found: error
+
       - name: Attach APK to release
+        # Only on a tag — a manual dispatch has no release to attach to.
+        if: github.ref_type == 'tag'
         uses: softprops/action-gh-release@v2
         with:
           files: out/*.apk

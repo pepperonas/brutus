@@ -129,6 +129,14 @@ Alles steckt in einer Bottom-Navigation mit vier Tabs, die den brutalen Wecker-K
 
 ## Screenshots
 
+> **Kommt mit dem nächsten Update.** Die Galerie unten ist fertig verdrahtet und
+> wartet auf ihre zwölf Aufnahmen — welche Ansicht in welchem Zustand und mit
+> welchem `adb`-Befehl, steht in
+> [`docs/screenshots/SHOTLIST.de.md`](docs/screenshots/SHOTLIST.de.md). Sie liegt
+> hier als Kommentar, statt zwölf kaputte Bildlinks zu zeigen.
+
+<!-- GALLERY: uncomment once docs/screenshots/*.png exist
+
 Aufgenommen mit **v2.2.0**, dunkles Theme, Marken-Farbschema (Material You aus). Die App gibt es auf Englisch und Deutsch — siehe [Sprachen](#sprachen).
 
 <table>
@@ -189,8 +197,8 @@ Aufgenommen mit **v2.2.0**, dunkles Theme, Marken-Farbschema (Material You aus).
     </td>
   </tr>
 </table>
+-->
 
-> Wie diese Aufnahmen entstehen (Zustand der App, `adb`-Befehle, Dateinamen): [`docs/screenshots/SHOTLIST.de.md`](docs/screenshots/SHOTLIST.de.md).
 
 ---
 
@@ -613,7 +621,17 @@ Diese Repository-Secrets setzen und im Workflow als Umgebungsvariablen bereitste
 
 `RELEASE_STORE_FILE` ist **kein** Secret, das du setzt — der Workflow schreibt es nach dem Dekodieren von `RELEASE_STORE_BASE64` in `$GITHUB_ENV`. Gradle bevorzugt diese Umgebungsvariablen gegenüber `local.properties`, sobald `RELEASE_STORE_FILE` gesetzt ist; genau deshalb funktioniert dieselbe `build.gradle.kts` lokal und in der CI.
 
-> **Hinweis:** Ohne gesetztes `RELEASE_STORE_BASE64` fällt `:app:assembleRelease` **nicht** auf ein unsigniertes APK zurück — die `release`-Signing-Config existiert bedingungslos, das Packaging scheitert deshalb mit `SigningConfig "release" is missing required property "storeFile"`. Forks, die nur unsigniert bauen wollen, sollten die Zuweisung `signingConfig = …` auf `storeFile != null` absichern.
+Der Workflow lässt sich außerdem im **Actions**-Tab von Hand starten
+(`workflow_dispatch`) — dann läuft der vollständige signierte Build inklusive
+Zertifikatsprüfung, nur der Upload entfällt mangels Tag. So prüft man die
+Signatur-Einrichtung, ohne ein Release zu schneiden.
+
+> **Forks:** Ohne Keystore erzeugt `:app:assembleRelease` ein schlicht
+> **unsigniertes** APK — `signingConfig` wird nur zugewiesen, wenn tatsächlich
+> ein `storeFile` vorhanden ist. Der Release-Workflow prüft zusätzlich, ob das
+> gebaute APK das erwartete Zertifikat (`69d67a10…`) trägt, und schlägt sonst
+> fehl; ein fehlendes Secret kann also nie als stillschweigend unsigniertes APK
+> auf der Releases-Seite landen.
 
 ### Neuen Keystore erzeugen (für Forks)
 
