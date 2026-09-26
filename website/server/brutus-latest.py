@@ -13,15 +13,23 @@ and writes, each file only when its content changed:
                              e.g. lines of code and unit tests), formatted for the page
   <webroot>/ssi/features.*   the project's feature catalogue (site.json "feature_catalog", a text file in
                              the repo), rendered as HTML + Markdown — new features appear without a deploy
+  <webroot>/files/<name>     a verified copy of every release asset (site.json "mirror", default on)
   /etc/nginx/brutus-download.conf
                              /download/<target> -> 302 to that target's newest asset, and /download ->
                              the target the visitor's browser asks for (nginx map in the vhost)
+
+Why copies instead of redirects to GitHub: GitHub serves release assets through signed CDN URLs that
+expire after about an hour. An interrupted download (phone screen off, Wi-Fi to mobile data, a slow line)
+resumes with the same URL and fails once it has expired - the file stays incomplete. Found on Flipper the
+Ripper (2026-09-26). The copies have stable URLs with byte ranges + ETag, so a resume always works. A copy
+is published only after its size and SHA-256 match the release; an asset without a digest, above
+"mirror_max_mb" or failing verification keeps pointing at GitHub.
 
 A failed GitHub call, a release missing one of the configured assets, or an odd changelog changes
 nothing: the last good state stays online. nginx is reloaded only when the redirects changed, only after
 `nginx -t` passed, and never while certbot is running.
 """
-import datetime, html, json, os, re, subprocess, sys, tempfile, urllib.request
+import datetime, glob, hashlib, html, json, os, re, subprocess, sys, tempfile, urllib.request
 
 CONFIG = json.loads(r'''{
  "repo": "pepperonas/brutus",
@@ -32,6 +40,9 @@ CONFIG = json.loads(r'''{
  "nginx_include": "/etc/nginx/brutus-download.conf",
  "nginx_var": "brutus",
  "feature_catalog": null,
+ "release_tag": null,
+ "mirror": true,
+ "mirror_max_mb": 500,
  "repo_stats": null,
  "targets": [
   {
@@ -55,6 +66,11 @@ FEATURES_PATH = CONFIG.get("feature_catalog")
 FEATURES_URL = f"https://raw.githubusercontent.com/{REPO}/{BRANCH}/{FEATURES_PATH}" if FEATURES_PATH else None
 STATS_CFG = CONFIG.get("repo_stats") or None
 STATS_URL = f"https://raw.githubusercontent.com/{REPO}/{BRANCH}/{STATS_CFG['path']}" if STATS_CFG else None
+MIRROR = CONFIG.get("mirror", True)
+MIRROR_MAX = int(CONFIG.get("mirror_max_mb", 500)) * 1048576
+FILES_DIR = os.path.join(WEBROOT, "files")
+KEEP_RELEASES = 2  # the current and the previous release, so a download running across a release finishes
+SAFE_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._+-]*$")
 STAT_KEY = re.compile(r"^[a-z0-9_]{1,40}$")
 STAT_REF = re.compile(r"\{([a-z0-9_]+)(?::(k|int))?\}")
 
@@ -67,8 +83,27 @@ def get(url, accept=None):
         return r.read(CHANGELOG_MAX + 1)
 
 
+def pick_release(releases, tag_pattern):
+    """The newest published release whose tag matches `tag_pattern`, pre-releases included.
+
+    For a repository whose "latest" release is not the app — BeatByte publishes its ML models as a
+    release of their own and its game builds as pre-releases, so `/releases/latest` names the models.
+    GitHub lists releases newest first; drafts are skipped. Pure — tested.
+    """
+    pattern = re.compile(tag_pattern)
+    for rel in releases:
+        if not rel.get("draft") and pattern.search(rel.get("tag_name", "")):
+            return rel
+    raise ValueError(f"no release with a tag matching {tag_pattern!r}")
+
+
 def fetch_release():
-    rel = json.loads(get(f"https://api.github.com/repos/{REPO}/releases/latest", "application/vnd.github+json"))
+    if CONFIG.get("release_tag"):
+        releases = json.loads(get(f"https://api.github.com/repos/{REPO}/releases?per_page=30",
+                                  "application/vnd.github+json"))
+        rel = pick_release(releases, CONFIG["release_tag"])
+    else:
+        rel = json.loads(get(f"https://api.github.com/repos/{REPO}/releases/latest", "application/vnd.github+json"))
     assets = []
     for t in CONFIG["targets"]:
         pattern = re.compile(t["asset"])
@@ -270,11 +305,87 @@ def ssi_fragments(d):
     }
 
 
+def sha256_of(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def mirror_asset(a, files_dir=None, opener=None):
+    """Keep a verified copy of one asset in files/. Returns its path; raises if it cannot be verified."""
+    files_dir = files_dir or FILES_DIR
+    if not SAFE_NAME.match(a["name"]):
+        raise ValueError(f"unsafe asset name {a['name']!r}")
+    if not re.fullmatch(r"[0-9a-f]{64}", a.get("sha256") or ""):
+        raise ValueError(f"{a['name']}: no SHA-256 digest, cannot verify a copy")
+    if a["size"] > MIRROR_MAX:
+        raise ValueError(f"{a['name']}: larger than mirror_max_mb")
+    os.makedirs(files_dir, exist_ok=True)
+    target = os.path.join(files_dir, a["name"])
+    side = target + ".sha256"
+    if os.path.exists(target) and os.path.getsize(target) == a["size"] and same(side, a["sha256"] + "\n"):
+        return target
+    fd, tmp = tempfile.mkstemp(dir=files_dir, prefix=".latest-")
+    try:
+        h, n = hashlib.sha256(), 0
+        src = (opener or (lambda u: urllib.request.urlopen(
+            urllib.request.Request(u, headers={"User-Agent": f"{CONFIG['slug']}-latest"}), timeout=60)))(a["github_url"])
+        with os.fdopen(fd, "wb") as out, src as r:
+            for chunk in iter(lambda: r.read(1 << 20), b""):
+                out.write(chunk)
+                h.update(chunk)
+                n += len(chunk)
+        if n != a["size"] or h.hexdigest() != a["sha256"]:
+            raise ValueError(f"{a['name']}: copy does not match the release (size {n})")
+        os.chmod(tmp, 0o644)
+        os.replace(tmp, target)
+    finally:
+        if os.path.exists(tmp):
+            os.remove(tmp)
+    write_if_changed(side, a["sha256"] + "\n")
+    return target
+
+
+def prune_files(keep_names, files_dir=None):
+    """Delete copies that belong to neither the current nor the previous release (by mtime)."""
+    files_dir = files_dir or FILES_DIR
+    others = sorted((p for p in glob.glob(os.path.join(files_dir, "*")) if not p.endswith(".sha256")
+                     and os.path.basename(p) not in keep_names), key=os.path.getmtime, reverse=True)
+    # Everything older than the newest len(keep_names) * (KEEP_RELEASES - 1) other files goes.
+    for old in others[len(keep_names) * (KEEP_RELEASES - 1):]:
+        os.remove(old)
+        if os.path.exists(old + ".sha256"):
+            os.remove(old + ".sha256")
+
+
+def apply_mirror(d):
+    """Point each asset at its verified copy where one exists; GitHub stays the source otherwise."""
+    local = []
+    for a in d["assets"]:
+        a["github_url"] = a["url"]
+        if not MIRROR:
+            continue
+        try:
+            mirror_asset(a)
+        except Exception as e:  # noqa: BLE001 - one asset failing must not stop the others
+            print(f"{CONFIG['slug']}-latest: no local copy of {a['name']}, GitHub stays ({e})", file=sys.stderr)
+            continue
+        a["url"] = f"https://{CONFIG['domain']}/files/{a['name']}"
+        local.append(a["name"])
+    if local:
+        prune_files(set(local))
+    first = d["assets"][0]
+    d["url"], d["github_url"] = first["url"], first["github_url"]
+    return local
+
+
 def download_conf(d):
     lines = [f"# Written by {CONFIG['slug']}-latest.py - do not edit."]
     for a in d["assets"]:
         lines.append(f"location = /download/{a['target']} {{\n    add_header Cache-Control \"no-store\" always;\n"
-                     f"    return 302 {a['url']};\n}}")
+                     f"    return 302 {a['url'].replace('https://' + CONFIG['domain'], '')};\n}}")
     ids = {a["target"] for a in d["assets"]}
     var = CONFIG["nginx_var"]
     # /download follows the visitor's platform (map in the vhost); a platform without an asset in this
@@ -312,6 +423,7 @@ def main():
     except Exception as e:  # network, rate limit, malformed release: keep the last good state
         print(f"{CONFIG['slug']}-latest: keeping previous state ({e})", file=sys.stderr)
         return 1
+    local = apply_mirror(d)
     changed_json = write_if_changed(os.path.join(WEBROOT, "latest.json"), json.dumps(d, indent=2) + "\n")
     ssi_dir = os.path.join(WEBROOT, "ssi")
     os.makedirs(ssi_dir, exist_ok=True)
@@ -361,7 +473,7 @@ def main():
     elif os.environ.get("SITE_NO_NGINX"):
         write_if_changed(NGINX_INC, conf)
     print(
-        f"{CONFIG['slug']}-latest: {d['version']} targets={','.join(a['target'] for a in d['assets'])} "
+        f"{CONFIG['slug']}-latest: {d['version']} targets={','.join(a['target'] for a in d['assets'])} local={len(local)}/{len(d['assets'])} "
         f"json={'new' if changed_json else 'same'} ssi={'new' if changed_ssi else 'same'} "
         f"changelog={'new' if changed_log else 'same'} "
         f"features={'new' if changed_feat else ('off' if not FEATURES_URL else 'same')} "

@@ -9,7 +9,7 @@ ROOT=/var/www/brutus.celox.io
 SLUG=brutus
 
 # latest.json, changelog.md and ssi/ are written on the server by the timer — never delete them from here.
-rsync -avz --delete --exclude latest.json --exclude changelog.md --exclude ssi/ --exclude server/ \
+rsync -avz --delete --exclude latest.json --exclude changelog.md --exclude ssi/ --exclude files/ --exclude server/ \
   --exclude deploy.sh --exclude README.md --exclude site.json --exclude .gitignore --exclude download.conf --exclude .DS_Store ./ "$HOST:$ROOT/"
 ssh "$HOST" "chown -R root:root $ROOT && chmod -R u=rwX,go=rX $ROOT"
 

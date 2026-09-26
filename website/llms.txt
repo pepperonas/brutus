@@ -6,7 +6,7 @@ Everything below is also available without JavaScript: the page's HTML carries t
 
 ## Get the app
 
-- [Newest release](https://brutus.celox.io/download): the file for your platform — 302 to the current GitHub release asset
+- [Newest release](https://brutus.celox.io/download): the file for your platform — 302 to the newest file, a verified copy served from this site (resumable)
 - [APK](https://brutus.celox.io/download/android): Android 8.0+
 - [Newest release as JSON](https://brutus.celox.io/latest.json): `version`, `published`, `notes`, and `assets[]` with `target`, `name`, `url`, `size` (bytes), `sha256`; refreshed every 15 minutes
 - [All releases and notes](https://github.com/pepperonas/brutus/releases)

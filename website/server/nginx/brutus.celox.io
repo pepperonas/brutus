@@ -104,6 +104,27 @@ server {
         add_header Cache-Control "no-cache" always;
         add_header X-Content-Type-Options "nosniff" always;
     }
+    # Verified copies of the release assets (written by the timer). Versioned names never change:
+    # cache for good. Byte ranges + ETag let an interrupted download resume - the reason they exist.
+    location ^~ /files/ {
+        # The stock mime.types on the VPS has no entry for .apk (or .msi/.appimage) — without these the
+        # files go out as application/octet-stream instead of what GitHub sends.
+        types {
+            application/vnd.android.package-archive apk;
+            application/x-apple-diskimage dmg;
+            application/x-msi msi;
+            application/vnd.microsoft.portable-executable exe;
+            application/vnd.appimage AppImage;
+            application/vnd.debian.binary-package deb;
+            text/plain txt;
+        }
+        default_type application/octet-stream;
+        # An add_header here drops the server-level ones, so HSTS is repeated.
+        add_header Strict-Transport-Security "max-age=31536000" always;
+        add_header Content-Disposition "attachment" always;
+        add_header Cache-Control "public, max-age=31536000, immutable" always;
+        add_header X-Content-Type-Options "nosniff" always;
+    }
     location = /latest.json {
         add_header Cache-Control "no-cache" always;
         add_header X-Content-Type-Options "nosniff" always;
