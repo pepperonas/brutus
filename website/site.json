@@ -8,7 +8,7 @@
   "tagline": "You WILL wake up.",
   "license": "MIT",
   "year": 2026,
-  "asset_version": 1,
+  "asset_version": 2,
   "theme_source": "app/src/main/java/com/pepperonas/brutus/ui/theme/Color.kt — dark red-seed roles (primary lifted to red tone 80 for text contrast on the web)",
   "theme": {
     "bg": "#141110",

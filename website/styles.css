@@ -455,7 +455,10 @@ h1 {
   font: 700 1.05rem/1.3 var(--mono); color: var(--on-bg);
 }
 .changelog-body .cl-version:first-child { margin-top: 0; }
-.cl-version time { font-weight: 500; font-size: .85rem; color: var(--on-variant); }
+/* The version never shrinks or breaks ("2.4.0" was squeezed to one character per line next to a
+   long title — .changelog-body wraps anywhere); the date and title take the rest and wrap instead. */
+.cl-version > span { flex: none; white-space: nowrap; }
+.cl-version time { min-width: 0; font-weight: 500; font-size: .85rem; color: var(--on-variant); }
 .changelog-body h4 { margin: 16px 0 6px; font: 700 .8rem/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--primary); }
 .changelog-body p { margin: 8px 0; }
 .changelog-body ul, .changelog-body ol { margin: 6px 0; padding-left: 20px; }
