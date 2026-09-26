@@ -40,15 +40,25 @@ class BrutusApplicationTest {
         assertEquals("brutus_alarm", BrutusApplication.CHANNEL_ALARM)
         assertEquals("brutus_service", BrutusApplication.CHANNEL_SERVICE)
         assertEquals("brutus_ultra_hardcore", BrutusApplication.CHANNEL_ULTRA_HARDCORE)
+        assertEquals("brutus_updates", BrutusApplication.CHANNEL_UPDATES)
     }
 
     @Test
-    fun `all three channels exist after application start`() {
+    fun `all four channels exist after application start`() {
         listOf(
             BrutusApplication.CHANNEL_ALARM,
             BrutusApplication.CHANNEL_SERVICE,
             BrutusApplication.CHANNEL_ULTRA_HARDCORE,
+            BrutusApplication.CHANNEL_UPDATES,
         ).forEach { channel(it) }
+    }
+
+    @Test
+    fun `the update channel is an ordinary notice — it never breaks through Do Not Disturb`() {
+        val updates = channel(BrutusApplication.CHANNEL_UPDATES)
+
+        assertEquals(NotificationManager.IMPORTANCE_DEFAULT, updates.importance)
+        assertFalse(updates.canBypassDnd(), "a release note is not an alarm")
     }
 
     @Test

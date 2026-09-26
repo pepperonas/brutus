@@ -4,6 +4,7 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import com.pepperonas.brutus.data.AlarmDatabase
+import com.pepperonas.brutus.update.UpdateScheduler
 
 class BrutusApplication : Application() {
 
@@ -12,6 +13,7 @@ class BrutusApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         createNotificationChannels()
+        UpdateScheduler.ensureScheduled(this)
     }
 
     private fun createNotificationChannels() {
@@ -44,15 +46,26 @@ class BrutusApplication : Application() {
             enableVibration(false)
         }
 
+        // An ordinary notice: default importance, never through Do Not Disturb.
+        val updatesChannel = NotificationChannel(
+            CHANNEL_UPDATES,
+            getString(R.string.channel_updates_name),
+            NotificationManager.IMPORTANCE_DEFAULT
+        ).apply {
+            description = getString(R.string.channel_updates_description)
+        }
+
         val nm = getSystemService(NotificationManager::class.java)
         nm.createNotificationChannel(alarmChannel)
         nm.createNotificationChannel(serviceChannel)
         nm.createNotificationChannel(ultraHardcoreChannel)
+        nm.createNotificationChannel(updatesChannel)
     }
 
     companion object {
         const val CHANNEL_ALARM = "brutus_alarm"
         const val CHANNEL_SERVICE = "brutus_service"
         const val CHANNEL_ULTRA_HARDCORE = "brutus_ultra_hardcore"
+        const val CHANNEL_UPDATES = "brutus_updates"
     }
 }

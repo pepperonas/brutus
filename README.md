@@ -19,7 +19,7 @@
 <!-- Project status — these badges are live and update themselves. -->
 
 [![Tests](https://img.shields.io/github/actions/workflow/status/pepperonas/brutus/tests.yml?branch=main&label=tests&logo=githubactions&logoColor=white)](https://github.com/pepperonas/brutus/actions/workflows/tests.yml)
-[![Unit tests](https://img.shields.io/badge/unit%20tests-243-brightgreen)](#tests-and-ci)
+[![Unit tests](https://img.shields.io/badge/unit%20tests-278-brightgreen)](#tests-and-ci)
 [![Release](https://img.shields.io/github/v/release/pepperonas/brutus?color=FF5252&logo=github&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/pepperonas/brutus/total?label=APK%20downloads&color=success&logo=github&logoColor=white)](https://github.com/pepperonas/brutus/releases)
 [![Last commit](https://img.shields.io/github/last-commit/pepperonas/brutus?logo=git&logoColor=white)](https://github.com/pepperonas/brutus/commits/main)
@@ -82,7 +82,7 @@
 <!-- What Brutus deliberately does not do -->
 
 [![Offline](https://img.shields.io/badge/Offline-first-2E7D32)](#permissions)
-[![No INTERNET permission](https://img.shields.io/badge/INTERNET%20permission-none-2E7D32)](#permissions)
+[![Network: opt-in](https://img.shields.io/badge/network-opt--in%20update%20check%20only-2E7D32)](#update-notice)
 [![No trackers](https://img.shields.io/badge/Trackers-none-2E7D32)](#permissions)
 [![No ads](https://img.shields.io/badge/Ads-none-2E7D32)](#permissions)
 [![No account](https://img.shields.io/badge/Account-not%20required-2E7D32)](#permissions)
@@ -109,6 +109,7 @@ Everything is packed into a four-tab bottom navigation that keeps the brutal ala
   - [Sunrise pre-alarm](#sunrise-pre-alarm)
   - [Home-screen widget](#home-screen-widget)
   - [Reliability banners](#reliability-banners)
+  - [Update notice](#update-notice)
   - [Global QR code](#global-qr-code)
   - [Slide-to-snooze gesture](#slide-to-snooze-gesture)
   - [Test mode](#test-mode)
@@ -384,6 +385,21 @@ The alarm list shows _two_ red/orange banners when system state would silently b
 
 All three banners disappear automatically as soon as the corresponding system state is fixed — re-checks run on every `ON_RESUME`.
 
+### Update notice
+
+Opt-in since v2.3.0: **⋮ → Check for updates** (off by default, also for existing installs).
+
+- Switched **on**, Brutus asks once right away and then once a day — WorkManager, only with a
+  network — for the newest version: `GET https://brutus.celox.io/latest.json`, falling back to
+  `api.github.com/repos/pepperonas/brutus/releases/latest` when the product page is unreachable.
+  A plain request, no identifiers, nothing else is sent.
+- A newer version posts **one** notification per version on its own *App updates* channel (default
+  importance, never through Do Not Disturb) and shows a banner above the alarm list until it is
+  installed. Both open [brutus.celox.io/download](https://brutus.celox.io/download).
+- Switched **off**, all scheduled checks are cancelled — Brutus makes no network request at all.
+
+Brutus does not download or install anything by itself; you install the new APK over the old one.
+
 ### Global QR code
 
 Brutus generates **one unique QR code** per installation, stored once in `SharedPreferences`, valid for every alarm forever. You never need to regenerate it. Workflow:
@@ -571,6 +587,7 @@ If you'd rather do it manually:
 | `CAMERA` | QR code scanning challenge | Runtime, when the alarm fires and QR challenge is active |
 | `ACTIVITY_RECOGNITION` (since v1.4.0) | Step counter for the Ultra Hardcore anti-snooze task | Runtime, when enabling Ultra Hardcore Mode or opening the task screen |
 | `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` (since v1.6.0) | Lets the battery-optimization banner deep-link the system whitelist dialog | Install time (the dialog itself is opt-in per device) |
+| `INTERNET` (since v2.3.0) | Only for the opt-in update check (⋮ → Check for updates, off by default) | Install time — unused until you switch the check on |
 | `VIBRATE` | Vibration pattern during alarm | Install time |
 | `USE_FULL_SCREEN_INTENT` | Lock-screen alarm overlay | Install time |
 | `FOREGROUND_SERVICE` / `FOREGROUND_SERVICE_MEDIA_PLAYBACK` | Alarm playback service | Install time |
@@ -579,7 +596,7 @@ If you'd rather do it manually:
 
 Everything in that table except the last row is declared in [`app/src/main/AndroidManifest.xml`](app/src/main/AndroidManifest.xml); you can diff it against this list in ten seconds.
 
-Brutus does **not** request `INTERNET` and never sends data anywhere. Starting with v1.3.0 the ML Kit Barcode model is shipped _unbundled_ — the model itself is delivered via Google Play Services and pre-fetched at install time (`com.google.mlkit.vision.DEPENDENCIES = barcode` meta-data). This adds an `ACCESS_NETWORK_STATE` permission so Play Services can check connectivity for the one-time model download, but the app itself never opens a socket.
+Brutus sends no data anywhere. Since v2.3.0 it declares `INTERNET` for exactly one purpose: the [update notice](#update-notice), which is **off by default** — with it off, Brutus makes no network request; with it on, it fetches the newest version number once a day and nothing else. Starting with v1.3.0 the ML Kit Barcode model is shipped _unbundled_ — the model itself is delivered via Google Play Services and pre-fetched at install time (`com.google.mlkit.vision.DEPENDENCIES = barcode` meta-data). This adds an `ACCESS_NETWORK_STATE` permission so Play Services can check connectivity for the one-time model download, but that happens inside Play Services, not in Brutus.
 
 ---
 
@@ -800,7 +817,7 @@ app/src/main/res/
 
 ## Tests and CI
 
-243 JVM unit tests guard the parts where a bug means someone oversleeps: what actually lands in
+278 JVM unit tests guard the parts where a bug means someone oversleeps: what actually lands in
 `AlarmManager`, the alarm-time arithmetic, persistence, the completeness of both translations, and
 every string the user reads on a clock face. There are no instrumented tests — the whole suite runs
 on the JVM in seconds.
@@ -816,7 +833,12 @@ on the JVM in seconds.
 | `util/NextAlarmCalendarEdgeTest` | 11 | **daylight saving**: 23 real hours between triggers on the short night, 25 on the long one, wall-clock time preserved; the skipped and the duplicated hour; month, year and leap-day rollovers |
 | `util/AlarmSoundTest` | 11 | the **persisted** sound ids as a golden map — renumbering would silently change what existing alarms play — plus the display names in both languages |
 | `ResourceParityTest` | 11 | the two languages cannot drift: identical key sets, no blank values, **matching format specifiers**, complete plurals, seven weekdays each, no German left in the default file, and `locales_config.xml` in sync with the `values-*` folders |
-| `BrutusApplicationTest` | 8 | notification channels are write-once: importance, DND bypass, silence (Robolectric) |
+| `BrutusApplicationTest` | 9 | notification channels are write-once: importance, DND bypass, silence — and the update channel never breaks through DND (Robolectric) |
+| `update/UpdateCheckerTest` | 9 | the opt-in update check end to end with a fake source: off means **no request at all**, one notification per version, never for the installed or an older one, the tap opens the download page, the banner follows the switch (Robolectric) |
+| `update/ReleaseSourceTest` | 9 | reading the version from the product page's `latest.json` and GitHub's release, garbage never throws, GitHub only asked when the page fails |
+| `update/AppVersionTest` | 8 | release tags vs. the installed version: `2.10.0 > 2.9.1`, `v`-prefix and `-beta` suffix, garbage is never "newer" |
+| `update/UpdateCheckStoreTest` | 2 | every change reaches the screen (a constant emission is swallowed by `collectAsState`), switching off forgets the finding |
+| `update/UpdateSchedulerTest` | 6 | switching on schedules a daily, network-bound check plus one immediate check; off cancels everything; default stays off after updating (WorkManager test driver) |
 | `ui/alarm/MathProblemTest` | 8 | answer/display correctness, per-difficulty operand range and sign invariants across 500 samples, operator fallback |
 | `viewmodel/TimerViewModelTest` | 8 | countdown/pause math, cancel-undo state machine, an expired timer is deliberately *not* undoable (Robolectric) |
 | `util/ChallengeFlagsTest` | 8 | `describe` / `activeList` / `has` / `sanitize` bitmask edge cases, incl. the unknown-bit fallback |
@@ -835,7 +857,7 @@ on the JVM in seconds.
 | `scheduler/AlarmSchedulerConstantsTest` | 4 | Ultra Hardcore offsets, sunrise lead time, intent-extra uniqueness |
 
 ```bash
-./gradlew :app:testDebugUnitTest          # all 243
+./gradlew :app:testDebugUnitTest          # all 278
 ./gradlew :app:testDebugUnitTest --tests '*NextAlarmCalculatorTest'
 # HTML report: app/build/reports/tests/testDebugUnitTest/index.html
 ```
@@ -859,7 +881,7 @@ mocking framework is used anywhere; the code under test is exercised, not simula
 
 ```
 app/src/test/java/com/pepperonas/brutus/
-├── BrutusApplicationTest.kt            8 — notification channels: importance, DND bypass, silence
+├── BrutusApplicationTest.kt            9 — notification channels: importance, DND bypass, silence
 ├── LocaleContexts.kt                       test helper: a Context pinned to en / de
 ├── LocalizedRuntimeTest.kt             7 — every string resolves in both languages, full card render
 ├── ResourceParityTest.kt              11 — values/ vs. values-de/: keys, plurals, format specifiers
@@ -874,6 +896,12 @@ app/src/test/java/com/pepperonas/brutus/
 ├── ui/
 │   ├── alarm/MathProblemTest.kt        8 — answer/display, per-difficulty range + sign invariants (500 samples)
 │   └── screens/ClockFormattingTest.kt 14 — stopwatch/timer readouts, hour column, constant string width
+├── update/
+│   ├── AppVersionTest.kt               8 — tag vs. installed version, v-prefix, suffixes, garbage
+│   ├── ReleaseSourceTest.kt            9 — latest.json + GitHub release parsing, fallback order
+│   ├── UpdateCheckStoreTest.kt         2 — every change reaches the screen, off forgets the finding
+│   ├── UpdateCheckerTest.kt            9 — off = no request, notify once per version, banner, tap target
+│   └── UpdateSchedulerTest.kt          6 — daily network-bound work, immediate check, cancel on off
 ├── util/
 │   ├── AlarmSoundTest.kt              11 — golden map of the persisted sound ids, names per language
 │   ├── AlarmSoundGeneratorTest.kt      7 — PCM length, peak amplitudes, loop-boundary fade, gentle vs harsh
@@ -980,7 +1008,7 @@ T + 15m AlarmReceiver fires with EXTRA_IS_FOLLOWUP=true, seq=2
 
 - **Every decision favors waking the user up over UX politeness.** If you need a polite alarm, use the system clock.
 - **Challenges are configurable because brains are different.** Some people need math; others just need physical movement. Some need both.
-- **No account, no network, no tracking.** Brutus never touches the internet.
+- **No account, no tracking, offline by default.** Brutus only goes online if you switch on the update notice — and then only to read a version number.
 - **APK size matters more than we initially thought.** v1.2.0 was 35 MB because of bundled ML Kit; v1.3.0 switched to the unbundled variant and turned on R8 minification + resource shrinking, cutting the download by roughly 88 % without losing any functionality. v2.2.0 ships at **4,414,213 bytes (≈ 4.2 MiB)** — and that now includes the full Material 3 Expressive theme layer *and* a second language.
 - **Procedural audio beats licensed samples.** Synthesized sounds mean no copyright issues, no asset loading, no file cache — and the sounds can be tuned to be as nasty as needed.
 - **Destructive DB migration is acceptable during pre-1.0 development.** Once Brutus hits a real release cadence, proper Room migrations will replace the current fallback.
@@ -1069,7 +1097,7 @@ If Brutus actually gets you out of bed in the morning, consider buying me a coff
 
 [![Donate via PayPal](https://img.shields.io/badge/PayPal-Donate-00457C?logo=paypal&logoColor=white&style=for-the-badge)](https://www.paypal.com/paypalme/martinpfeffer)
 
-Donations are never expected — the app is and will stay free, ad-free, and offline. Every contribution funds more brutal alarm experiments.
+Donations are never expected — the app is and will stay free, ad-free, and offline by default. Every contribution funds more brutal alarm experiments.
 
 ---
 

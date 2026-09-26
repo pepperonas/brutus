@@ -6,6 +6,19 @@ Alle nennenswerten Änderungen an Brutus stehen hier. Versionen folgen [SemVer](
 
 ## [Unreleased]
 
+### Neu — Update-Hinweis (opt-in)
+- **⋮ → Nach Updates suchen** (standardmäßig aus, auch nach dem Update). Eingeschaltet fragt Brutus
+  `https://brutus.celox.io/latest.json` einmal sofort und dann einmal täglich ab (WorkManager, nur mit
+  Netz; GitHubs Releases-API als Ersatz) und meldet **eine** Benachrichtigung pro neuer Version über
+  den neuen Kanal *App-Updates* (normale Wichtigkeit, nie durch „Nicht stören“). Ein Banner über der
+  Weckerliste bietet den Download an, bis die neue Version installiert ist. Ausgeschaltet werden alle
+  geplanten Prüfungen gelöscht, und keine Anfrage verlässt das Handy.
+- Berechtigung `INTERNET` hinzugefügt — nur für diese Prüfung. README, Berechtigungstabelle und
+  Produktseite sagen jetzt „standardmäßig offline“ statt „kein Internetzugriff“.
+- 35 neue Unit-Tests (243 → 278): Versionsvergleich, beide JSON-Formate, Einmal-Benachrichtigung, Planung, der
+  neue Benachrichtigungskanal — und ein Pin für einen Fehler, den der Emulator fand: der Änderungs-Flow sendete
+  `Unit`, das `collectAsState` verschluckt, der Schalter blieb auf dem Bildschirm „aus“.
+
 ### Neu
 - **Produktseite unter [brutus.celox.io](https://brutus.celox.io)** auf Deutsch, Englisch, Spanisch, Italienisch und Französisch, gebaut mit dem celox-Produktseiten-Kit. Sie bietet immer die neueste Version an — ein Server-Timer spiegelt GitHub Releases alle 15 Minuten — samt SHA-256, Signaturzertifikat, Changelog und `/download` als festem Link. Der Quelltext liegt in `website/`.
 

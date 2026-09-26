@@ -19,7 +19,7 @@
 <!-- Projektstatus — diese Badges aktualisieren sich selbst. -->
 
 [![Tests](https://img.shields.io/github/actions/workflow/status/pepperonas/brutus/tests.yml?branch=main&label=tests&logo=githubactions&logoColor=white)](https://github.com/pepperonas/brutus/actions/workflows/tests.yml)
-[![Unit tests](https://img.shields.io/badge/unit%20tests-243-brightgreen)](#tests-und-ci)
+[![Unit tests](https://img.shields.io/badge/unit%20tests-278-brightgreen)](#tests-und-ci)
 [![Release](https://img.shields.io/github/v/release/pepperonas/brutus?color=FF5252&logo=github&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/pepperonas/brutus/total?label=APK%20downloads&color=success&logo=github&logoColor=white)](https://github.com/pepperonas/brutus/releases)
 [![Last commit](https://img.shields.io/github/last-commit/pepperonas/brutus?logo=git&logoColor=white)](https://github.com/pepperonas/brutus/commits/main)
@@ -82,7 +82,7 @@
 <!-- Was Brutus bewusst nicht tut -->
 
 [![Offline](https://img.shields.io/badge/Offline-first-2E7D32)](#berechtigungen)
-[![No INTERNET permission](https://img.shields.io/badge/INTERNET%20permission-none-2E7D32)](#berechtigungen)
+[![Netz: opt-in](https://img.shields.io/badge/Netz-nur%20Update--Check%20%28opt--in%29-2E7D32)](#update-hinweis)
 [![No trackers](https://img.shields.io/badge/Trackers-none-2E7D32)](#berechtigungen)
 [![No ads](https://img.shields.io/badge/Ads-none-2E7D32)](#berechtigungen)
 [![No account](https://img.shields.io/badge/Account-not%20required-2E7D32)](#berechtigungen)
@@ -109,6 +109,7 @@ Alles steckt in einer Bottom-Navigation mit vier Tabs, die den brutalen Wecker-K
   - [Sunrise-Vorlauf](#sunrise-vorlauf)
   - [Homescreen-Widget](#homescreen-widget)
   - [Zuverlässigkeits-Banner](#zuverlässigkeits-banner)
+  - [Update-Hinweis](#update-hinweis)
   - [Globaler QR-Code](#globaler-qr-code)
   - [Wisch-Geste zum Snoozen](#wisch-geste-zum-snoozen)
   - [Testmodus](#testmodus)
@@ -384,6 +385,21 @@ Die Weckerliste zeigt rote/orange Banner, wenn ein Systemzustand Alarme still ka
 
 Alle drei Banner verschwinden automatisch, sobald der jeweilige Systemzustand behoben ist — geprüft wird bei jedem `ON_RESUME`.
 
+### Update-Hinweis
+
+Seit v2.3.0 zum Einschalten: **⋮ → Nach Updates suchen** (standardmäßig aus, auch bei bestehenden Installationen).
+
+- **Eingeschaltet** fragt Brutus einmal sofort und dann einmal täglich — per WorkManager, nur mit
+  Netz — nach der neuesten Version: `GET https://brutus.celox.io/latest.json`, ersatzweise
+  `api.github.com/repos/pepperonas/brutus/releases/latest`, wenn die Produktseite nicht erreichbar ist.
+  Eine schlichte Anfrage ohne Kennungen, sonst wird nichts gesendet.
+- Eine neuere Version meldet sich mit **einer** Benachrichtigung pro Version über einen eigenen Kanal
+  *App-Updates* (normale Wichtigkeit, nie durch „Nicht stören“) und mit einem Banner über der
+  Weckerliste, bis sie installiert ist. Beides öffnet [brutus.celox.io/download](https://brutus.celox.io/download).
+- **Ausgeschaltet** werden alle geplanten Prüfungen gelöscht — Brutus stellt dann überhaupt keine Netzwerkanfrage.
+
+Brutus lädt und installiert nichts selbst; die neue APK installierst du über die alte.
+
 ### Globaler QR-Code
 
 Brutus erzeugt **einen einzigen QR-Code pro Installation**, einmal in `SharedPreferences` gespeichert, für alle Wecker gültig, für immer. Neu erzeugen musst du ihn nie. Ablauf:
@@ -552,6 +568,7 @@ Wer es lieber manuell macht:
 | `CAMERA` | QR-Scan-Aufgabe | Zur Laufzeit, wenn der Alarm mit aktiver QR-Aufgabe klingelt |
 | `ACTIVITY_RECOGNITION` (seit v1.4.0) | Schrittzähler für die Ultra-Hardcore-Anti-Schlummer-Aufgabe | Zur Laufzeit, beim Aktivieren von Ultra Hardcore oder Öffnen der Aufgabe |
 | `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` (seit v1.6.0) | Lässt das Akku-Banner auf den System-Whitelist-Dialog verlinken | Bei Installation (der Dialog selbst ist pro Gerät ein Opt-in) |
+| `INTERNET` (seit v2.3.0) | Nur für die optionale Update-Prüfung (⋮ → Nach Updates suchen, standardmäßig aus) | Bei Installation — ungenutzt, bis du die Prüfung einschaltest |
 | `VIBRATE` | Vibrationsmuster während des Alarms | Bei Installation |
 | `USE_FULL_SCREEN_INTENT` | Alarm-Overlay auf dem Sperrbildschirm | Bei Installation |
 | `FOREGROUND_SERVICE` / `FOREGROUND_SERVICE_MEDIA_PLAYBACK` | Service für die Alarm-Wiedergabe | Bei Installation |
@@ -560,7 +577,7 @@ Wer es lieber manuell macht:
 
 Alles in dieser Tabelle außer der letzten Zeile steht in [`app/src/main/AndroidManifest.xml`](app/src/main/AndroidManifest.xml); der Abgleich dauert zehn Sekunden.
 
-Brutus fordert **kein** `INTERNET` an und sendet niemals Daten irgendwohin. Seit v1.3.0 wird das ML-Kit-Barcode-Modell _unbundled_ ausgeliefert — das Modell kommt über die Google Play Services und wird bei der Installation vorgeladen (`com.google.mlkit.vision.DEPENDENCIES = barcode`-Metadatum). Dadurch kommt `ACCESS_NETWORK_STATE` hinzu, damit die Play Services die Verbindung für den einmaligen Modell-Download prüfen können — die App selbst öffnet nie einen Socket.
+Brutus sendet keine Daten irgendwohin. Seit v2.3.0 deklariert es `INTERNET` für genau einen Zweck: den [Update-Hinweis](#update-hinweis), der **standardmäßig aus** ist — ausgeschaltet stellt Brutus keine einzige Netzwerkanfrage, eingeschaltet holt es einmal täglich die neueste Versionsnummer und sonst nichts. Seit v1.3.0 wird das ML-Kit-Barcode-Modell _unbundled_ ausgeliefert — das Modell kommt über die Google Play Services und wird bei der Installation vorgeladen (`com.google.mlkit.vision.DEPENDENCIES = barcode`-Metadatum). Dadurch kommt `ACCESS_NETWORK_STATE` hinzu, damit die Play Services die Verbindung für den einmaligen Modell-Download prüfen können — das passiert in den Play Services, nicht in Brutus.
 
 ---
 
@@ -773,7 +790,7 @@ app/src/main/res/
 
 ## Tests und CI
 
-243 JVM-Unit-Tests sichern die Stellen, an denen ein Fehler bedeutet, dass jemand verschläft: was tatsächlich im `AlarmManager` landet, die Weckzeit-Arithmetik, die Persistenz, die Vollständigkeit beider Übersetzungen und jeden String, den der Nutzer auf einem Ziffernblatt liest. Es gibt keine Instrumentierungstests — die gesamte Suite läuft in Sekunden auf der JVM.
+278 JVM-Unit-Tests sichern die Stellen, an denen ein Fehler bedeutet, dass jemand verschläft: was tatsächlich im `AlarmManager` landet, die Weckzeit-Arithmetik, die Persistenz, die Vollständigkeit beider Übersetzungen und jeden String, den der Nutzer auf einem Ziffernblatt liest. Es gibt keine Instrumentierungstests — die gesamte Suite läuft in Sekunden auf der JVM.
 
 | Suite | Tests | Was sie festnagelt |
 |-------|-------|--------------------|
@@ -786,7 +803,12 @@ app/src/main/res/
 | `util/NextAlarmCalendarEdgeTest` | 11 | **Sommerzeit**: 23 echte Stunden zwischen zwei Auslösungen in der kurzen Nacht, 25 in der langen, Wanduhrzeit bleibt; übersprungene und doppelte Stunde; Monats-, Jahres- und Schaltjahreswechsel |
 | `ResourceParityTest` | 11 | die zwei Sprachen können nicht auseinanderlaufen: identische Schlüsselsätze, keine leeren Werte, **passende Format-Platzhalter**, vollständige Plurale, je sieben Wochentage, kein Deutsch im Standardsatz und `locales_config.xml` im Einklang mit den `values-*`-Ordnern |
 | `util/AlarmSoundTest` | 11 | die **persistierten** Sound-Ids als Goldene Map — ein Umnummerieren würde still ändern, was bestehende Wecker spielen — plus die Anzeigenamen in beiden Sprachen |
-| `BrutusApplicationTest` | 8 | Notification-Kanäle sind write-once: Wichtigkeit, DND-Bypass, Stummheit (Robolectric) |
+| `BrutusApplicationTest` | 9 | Notification-Kanäle sind write-once: Wichtigkeit, DND-Bypass, Stummheit — und der Update-Kanal geht nie durch „Nicht stören“ (Robolectric) |
+| `update/UpdateCheckerTest` | 9 | die optionale Update-Prüfung komplett mit Fake-Quelle: aus heißt **gar keine Anfrage**, eine Benachrichtigung pro Version, nie für die installierte oder eine ältere, Tippen öffnet die Download-Seite, der Banner folgt dem Schalter (Robolectric) |
+| `update/ReleaseSourceTest` | 9 | Version aus `latest.json` der Produktseite und aus GitHubs Release lesen, Müll wirft nie, GitHub nur, wenn die Seite scheitert |
+| `update/AppVersionTest` | 8 | Release-Tags gegen die installierte Version: `2.10.0 > 2.9.1`, `v`-Präfix und `-beta`-Suffix, Müll ist nie „neuer“ |
+| `update/UpdateCheckStoreTest` | 2 | jede Änderung erreicht den Bildschirm (ein konstanter Wert wird von `collectAsState` verschluckt), Ausschalten vergisst den Fund |
+| `update/UpdateSchedulerTest` | 6 | Einschalten plant eine tägliche, netzgebundene Prüfung plus eine sofortige; Aus löscht alles; nach dem Update bleibt es aus (WorkManager-Testtreiber) |
 | `ui/alarm/MathProblemTest` | 8 | Antwort-/Anzeigelogik, Range- und Vorzeichen-Invarianten je Schwierigkeitsgrad über 500 Samples, Operator-Fallback |
 | `viewmodel/TimerViewModelTest` | 8 | Countdown-/Pause-Mathematik, Cancel-Undo-Automat, ein abgelaufener Timer ist bewusst *nicht* undoable (Robolectric) |
 | `util/ChallengeFlagsTest` | 8 | `describe` / `activeList` / `has` / `sanitize`, inklusive Fallback bei unbekanntem Bit |
@@ -805,7 +827,7 @@ app/src/main/res/
 | `scheduler/AlarmSchedulerConstantsTest` | 4 | Ultra-Hardcore-Offsets, Sunrise-Vorlauf, Eindeutigkeit der Intent-Extras |
 
 ```bash
-./gradlew :app:testDebugUnitTest          # alle 243
+./gradlew :app:testDebugUnitTest          # alle 278
 ./gradlew :app:testDebugUnitTest --tests '*NextAlarmCalculatorTest'
 # HTML-Report: app/build/reports/tests/testDebugUnitTest/index.html
 ```
@@ -905,7 +927,7 @@ T + 15m AlarmReceiver feuert mit EXTRA_IS_FOLLOWUP=true, seq=2
 
 - **Jede Entscheidung stellt das Aufwachen über UX-Höflichkeit.** Wer einen höflichen Wecker braucht, nimmt die System-Uhr.
 - **Aufgaben sind konfigurierbar, weil Gehirne verschieden sind.** Manche brauchen Mathe, andere nur Bewegung. Manche beides.
-- **Kein Konto, kein Netz, kein Tracking.** Brutus fasst das Internet nie an.
+- **Kein Konto, kein Tracking, standardmäßig offline.** Brutus geht nur ins Netz, wenn du den Update-Hinweis einschaltest — und dann nur, um eine Versionsnummer zu lesen.
 - **APK-Größe zählt mehr als anfangs gedacht.** v1.2.0 wog 35 MB wegen des gebündelten ML Kit; v1.3.0 wechselte auf die unbundled-Variante und schaltete R8-Minifizierung + Resource-Shrinking ein — rund 88 % weniger Download ohne Funktionsverlust. v2.2.0 liegt bei **4.414.213 Bytes (≈ 4,2 MiB)**, und darin steckt inzwischen die vollständige Material-3-Expressive-Theme-Schicht *und* eine zweite Sprache.
 - **Prozedurales Audio schlägt lizenzierte Samples.** Synthetisierte Sounds bedeuten keine Urheberrechtsfragen, kein Laden von Assets, keinen Datei-Cache — und die Töne lassen sich so fies stimmen, wie es nötig ist.
 - **Destruktive DB-Migration war in der Vor-1.0-Zeit akzeptabel.** Seit v1.3.0 gibt es echte Room-Migrationen; nur die Entwickler-Versionen 1–3 fallen noch auf ein sauberes Neuanlegen zurück.
@@ -994,7 +1016,7 @@ Wenn Brutus dich morgens tatsächlich aus dem Bett holt, gib mir gern einen Kaff
 
 [![Donate via PayPal](https://img.shields.io/badge/PayPal-Donate-00457C?logo=paypal&logoColor=white&style=for-the-badge)](https://www.paypal.com/paypalme/martinpfeffer)
 
-Spenden werden nie erwartet — die App ist und bleibt kostenlos, werbefrei und offline. Jeder Beitrag finanziert weitere brutale Wecker-Experimente.
+Spenden werden nie erwartet — die App ist und bleibt kostenlos, werbefrei und standardmäßig offline. Jeder Beitrag finanziert weitere brutale Wecker-Experimente.
 
 ---
 

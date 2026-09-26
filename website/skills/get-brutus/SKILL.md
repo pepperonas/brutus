@@ -6,7 +6,7 @@ license: MIT
 
 # Get Brutus
 
-Brutus is a free, open-source (MIT) alarm clock for Android 8.0 and later. A ringing alarm only stops once you complete the challenges you chose for it: solve math problems, shake the phone, or scan a QR code you placed somewhere else in your home — in any combination, one after the other. Hardcore mode keeps the alarm at full volume while it rings; Ultra Hardcore mode re-rings 10 and 15 minutes later unless you walk 30 steps. It also has a world clock, stopwatch, timer and a home-screen widget, runs in English and German, requests no internet permission and has no ads or tracking. Distributed as a signed APK through GitHub Releases.
+Brutus is a free, open-source (MIT) alarm clock for Android 8.0 and later. A ringing alarm only stops once you complete the challenges you chose for it: solve math problems, shake the phone, or scan a QR code you placed somewhere else in your home — in any combination, one after the other. Hardcore mode keeps the alarm at full volume while it rings; Ultra Hardcore mode re-rings 10 and 15 minutes later unless you walk 30 steps. It also has a world clock, stopwatch, timer and a home-screen widget, runs in English and German, has no ads or tracking, and stays offline unless you switch on its update check, which then reads the newest version number once a day and notifies you. Distributed as a signed APK through GitHub Releases.
 
 ## 1. Find the newest release
 
@@ -38,5 +38,6 @@ page itself, browsers with WebMCP expose the same data as the tools `get_latest_
 - The QR challenge needs Google Play Services, which delivers the barcode model; math and shake work without it.
 - Available in English and German only.
 - Android offers no way to truly lock the volume: Hardcore mode snaps it back to maximum and swallows the volume keys while the alarm rings.
+- It does not download or install updates by itself — it only tells you, and you install the new APK over the old one.
 
 More: [product page](https://brutus.celox.io/) · [Markdown version](https://brutus.celox.io/index.md) · [changelog](https://brutus.celox.io/changelog.md) · [source](https://github.com/pepperonas/brutus)

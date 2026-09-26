@@ -1,7 +1,7 @@
 <!--# block name="none" --><!--# endblock -->
 # Brutus — Android Alarm Clock You Can't Ignore
 
-> Brutus is a free, open-source (MIT) alarm clock for Android 8.0 and later. A ringing alarm only stops once you complete the challenges you chose for it: solve math problems, shake the phone, or scan a QR code you placed somewhere else in your home — in any combination, one after the other. Hardcore mode keeps the alarm at full volume while it rings; Ultra Hardcore mode re-rings 10 and 15 minutes later unless you walk 30 steps. It also has a world clock, stopwatch, timer and a home-screen widget, runs in English and German, requests no internet permission and has no ads or tracking. Distributed as a signed APK through GitHub Releases.
+> Brutus is a free, open-source (MIT) alarm clock for Android 8.0 and later. A ringing alarm only stops once you complete the challenges you chose for it: solve math problems, shake the phone, or scan a QR code you placed somewhere else in your home — in any combination, one after the other. Hardcore mode keeps the alarm at full volume while it rings; Ultra Hardcore mode re-rings 10 and 15 minutes later unless you walk 30 steps. It also has a world clock, stopwatch, timer and a home-screen widget, runs in English and German, has no ads or tracking, and stays offline unless you switch on its update check, which then reads the newest version number once a day and notifies you. Distributed as a signed APK through GitHub Releases.
 
 This is the Markdown version of https://brutus.celox.io/ for agents and text tools. A short summary with every link lives at https://brutus.celox.io/llms.txt.
 
@@ -23,7 +23,7 @@ Files in the current release:
 - **No going back to bed** — Ultra Hardcore rings again 10 and 15 minutes after you dismiss it — unless you walk 30 steps with the phone. The follow-ups survive a reboot.
 - **Sounds made on the phone** — Eleven alarm sounds are synthesized in real time — from klaxon, siren and fire alarm to a gentle chime — plus the system tone. Preview each one while you set the alarm.
 - **Sunrise and widget** — An optional pre-alarm brightens the screen over the ten minutes before it rings. A home-screen widget shows the next alarm with a countdown.
-- **Reliable and offline** — Exact alarms that ring in Doze and come back after a reboot, with banners when the system would block them. Brutus requests no internet permission — plus world clock, stopwatch and timer.
+- **Reliable, offline by default** — Exact alarms that ring in Doze and come back after a reboot, with banners when the system would block them. Online only if you switch on update notices — then it reads the newest version once a day.
 
 ## Install
 
@@ -45,7 +45,7 @@ Files in the current release:
 
 **Which phones does it run on?** Android 8.0 or later. The QR challenge also needs Google Play Services, which supplies the barcode model; math and shake work on every device.
 
-**How do I update?** Download the newest APK from this page and install it over the existing app; your alarms and settings stay. Brutus has no internet access, so it does not check for updates itself.
+**How do I update?** Switch on *Check for updates* in the ⋮ menu of the alarm list: Brutus then looks once a day for a new release and notifies you. Download the APK from this page and install it over the existing app; your alarms and settings stay.
 
 **What does it do besides alarms?** A world clock, a stopwatch with laps, a timer with gentle finish sounds and a home-screen widget. The app is in English and German and follows the system language.
 
@@ -57,6 +57,7 @@ Files in the current release:
 - The QR challenge needs Google Play Services, which delivers the barcode model; math and shake work without it.
 - Available in English and German only.
 - Android offers no way to truly lock the volume: Hardcore mode snaps it back to maximum and swallows the volume keys while the alarm rings.
+- It does not download or install updates by itself — it only tells you, and you install the new APK over the old one.
 
 ## Links
 

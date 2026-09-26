@@ -1,6 +1,12 @@
 package com.pepperonas.brutus.ui.screens
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
@@ -27,6 +33,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.AlarmAdd
 import androidx.compose.material3.AlertDialog
@@ -66,6 +73,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -78,6 +86,9 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.pepperonas.brutus.data.AlarmEntity
 import com.pepperonas.brutus.ui.theme.BrutusTheme
 import com.pepperonas.brutus.ui.theme.ThemeSettings
+import com.pepperonas.brutus.update.UpdateCheckStore
+import com.pepperonas.brutus.update.UpdateChecker
+import com.pepperonas.brutus.update.UpdateScheduler
 import com.pepperonas.brutus.util.BatteryOptimizationPermission
 import com.pepperonas.brutus.util.ExactAlarmPermission
 import com.pepperonas.brutus.util.FullScreenIntentPermission
@@ -151,6 +162,17 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
     var batteryIgnoring by remember { mutableStateOf(BatteryOptimizationPermission.isIgnoring(context)) }
     var fsiGranted by remember { mutableStateOf(FullScreenIntentPermission.isGranted(context)) }
     val lifecycle = LocalLifecycleOwner.current.lifecycle
+    // Opt-in update check: the switch and the banner both follow the store live
+    // (the worker writes the finding in the background).
+    val updateTick by UpdateCheckStore.changes(context).collectAsState(initial = -1)
+    val installedVersion = remember { UpdateChecker.installedVersion(context) }
+    val updateCheckOn = remember(updateTick) { UpdateCheckStore.isEnabled(context) }
+    val updateVersion = remember(updateTick) { UpdateChecker.bannerVersion(context, installedVersion) }
+    // Asked only when the user switches the check on — the banner works without it.
+    val notificationPermission = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { }
+
     DisposableEffect(lifecycle) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
@@ -217,8 +239,42 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
                                 }
                             )
                         }
+                        // Off by default: with it off Brutus never touches the network.
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.alarm_list_update_check)) },
+                            trailingIcon = {
+                                Switch(
+                                    checked = updateCheckOn,
+                                    onCheckedChange = null,
+                                    modifier = Modifier.scale(0.8f)
+                                )
+                            },
+                            onClick = {
+                                haptics.tap()
+                                val enable = !updateCheckOn
+                                UpdateScheduler.setEnabled(context, enable)
+                                if (enable && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                                    ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+                                    != PackageManager.PERMISSION_GRANTED
+                                ) {
+                                    notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                }
+                            }
+                        )
                     }
                 }
+            }
+
+            if (updateVersion != null) {
+                PermissionBanner(
+                    title = stringResource(R.string.banner_update_title, updateVersion),
+                    body = stringResource(R.string.banner_update_body),
+                    actionLabel = stringResource(R.string.banner_update_action),
+                    info = true,
+                    icon = Icons.Default.SystemUpdate,
+                    onFix = { context.startActivity(UpdateChecker.downloadIntent()) },
+                )
+                Spacer(modifier = Modifier.height(12.dp))
             }
 
             if (!exactGranted) {
@@ -784,18 +840,31 @@ private fun FullScreenIntentBanner(onFix: () -> Unit) {
     )
 }
 
-/** Error container for hard blockers, tertiary (warm orange) for soft warnings. */
+/**
+ * Error container for hard blockers, tertiary (warm orange) for soft warnings,
+ * secondary for plain information (an available update).
+ */
 @Composable
 private fun PermissionBanner(
     title: String,
     body: String,
     actionLabel: String,
     warning: Boolean = false,
+    info: Boolean = false,
+    icon: ImageVector = Icons.Default.Warning,
     onFix: () -> Unit,
 ) {
     val cs = MaterialTheme.colorScheme
-    val container = if (warning) cs.tertiaryContainer else cs.errorContainer
-    val content = if (warning) cs.onTertiaryContainer else cs.onErrorContainer
+    val container = when {
+        info -> cs.secondaryContainer
+        warning -> cs.tertiaryContainer
+        else -> cs.errorContainer
+    }
+    val content = when {
+        info -> cs.onSecondaryContainer
+        warning -> cs.onTertiaryContainer
+        else -> cs.onErrorContainer
+    }
     Card(
         colors = CardDefaults.cardColors(containerColor = container),
         shape = MaterialTheme.shapes.medium,
@@ -808,7 +877,7 @@ private fun PermissionBanner(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                Icons.Default.Warning,
+                icon,
                 contentDescription = null,
                 tint = content,
                 modifier = Modifier.size(24.dp)

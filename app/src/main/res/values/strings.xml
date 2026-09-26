@@ -47,6 +47,7 @@
     <string name="alarm_list_delete_all">Delete all</string>
     <string name="alarm_list_delete_all_title">Delete all alarms?</string>
     <string name="alarm_list_material_you">Material You colors</string>
+    <string name="alarm_list_update_check">Check for updates</string>
     <string name="alarm_card_copy">Copy</string>
     <string name="alarm_card_delete">Delete</string>
     <!-- Date shown under the next-alarm countdown, e.g. "Mon, Aug 17, 06:30" -->
@@ -75,6 +76,9 @@
     <string name="banner_battery_title">Battery optimization active</string>
     <string name="banner_battery_body">Aggressive battery savers can swallow alarms. Whitelist Brutus so it rings for sure.</string>
     <string name="banner_battery_action">Whitelist</string>
+    <string name="banner_update_title">Brutus %1$s is available</string>
+    <string name="banner_update_body">A newer version is on brutus.celox.io. Install it over this one — your alarms stay.</string>
+    <string name="banner_update_action">Download</string>
     <string name="banner_fullscreen_title">Full-screen alarm blocked</string>
     <string name="banner_fullscreen_body">Without this permission the alarm only shows as a notification — the app will not come to the foreground.</string>
     <string name="banner_fullscreen_action">Allow</string>
@@ -234,6 +238,10 @@
     <string name="channel_service_description">Background alarm service</string>
     <string name="channel_ultra_hardcore_name">Ultra Hardcore reminder</string>
     <string name="channel_ultra_hardcore_description">Persistent reminder while two follow-up alarms are armed</string>
+    <string name="channel_updates_name">App updates</string>
+    <string name="channel_updates_description">A note when a new Brutus release is out (only if \"Check for updates\" is on)</string>
+    <string name="update_notification_title">Brutus %1$s is available</string>
+    <string name="update_notification_body">Tap to download the new version from brutus.celox.io.</string>
     <string name="notification_alarm_title">Brutus alarm</string>
     <string name="notification_realarm_title">Brutus re-alarm</string>
     <string name="notification_alarm_text">Alarm active! Get up!</string>

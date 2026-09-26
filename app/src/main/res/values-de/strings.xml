@@ -47,6 +47,7 @@
     <string name="alarm_list_delete_all">Alle löschen</string>
     <string name="alarm_list_delete_all_title">Alle Alarme löschen?</string>
     <string name="alarm_list_material_you">Material You Farben</string>
+    <string name="alarm_list_update_check">Nach Updates suchen</string>
     <string name="alarm_card_copy">Kopieren</string>
     <string name="alarm_card_delete">Löschen</string>
     <!-- Datum unter dem Countdown, z. B. „Mo, 17. Aug, 06:30“ -->
@@ -75,6 +76,9 @@
     <string name="banner_battery_title">Akku-Optimierung aktiv</string>
     <string name="banner_battery_body">Aggressive Akkusparmaßnahmen können Alarme verschlucken. Whiteliste Brutus, damit er garantiert klingelt.</string>
     <string name="banner_battery_action">Whitelisten</string>
+    <string name="banner_update_title">Brutus %1$s ist verfügbar</string>
+    <string name="banner_update_body">Auf brutus.celox.io gibt es eine neuere Version. Einfach drüberinstallieren — deine Wecker bleiben.</string>
+    <string name="banner_update_action">Herunterladen</string>
     <string name="banner_fullscreen_title">Vollbild-Alarm blockiert</string>
     <string name="banner_fullscreen_body">Ohne diese Berechtigung erscheint der Alarm nur als Benachrichtigung — die App poppt nicht in den Vordergrund.</string>
     <string name="banner_fullscreen_action">Erlauben</string>
@@ -234,6 +238,10 @@
     <string name="channel_service_description">Hintergrunddienst des Alarms</string>
     <string name="channel_ultra_hardcore_name">Ultra-Hardcore-Erinnerung</string>
     <string name="channel_ultra_hardcore_description">Dauerhafte Erinnerung, solange zwei Re-Alarme scharf sind</string>
+    <string name="channel_updates_name">App-Updates</string>
+    <string name="channel_updates_description">Hinweis, wenn eine neue Brutus-Version erscheint (nur mit „Nach Updates suchen“)</string>
+    <string name="update_notification_title">Brutus %1$s ist verfügbar</string>
+    <string name="update_notification_body">Tippen, um die neue Version von brutus.celox.io zu laden.</string>
     <string name="notification_alarm_title">Brutus Alarm</string>
     <string name="notification_realarm_title">Brutus Re-Alarm</string>
     <string name="notification_alarm_text">Alarm aktiv! Aufstehen!</string>

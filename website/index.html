@@ -8,7 +8,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Brutus — Android Alarm Clock You Can&#x27;t Ignore</title>
-  <meta name="description" content="Free, open-source Android alarm clock: stop it only by solving math, shaking the phone or scanning a QR code. Hardcore volume lock. No internet access.">
+  <meta name="description" content="Free, open-source Android alarm clock: stop it only by solving math, shaking the phone or scanning a QR code. Hardcore volume lock. Offline by default.">
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
   <meta name="author" content="Martin Pfeffer">
   <meta name="application-name" content="Brutus">
@@ -45,7 +45,7 @@
   <meta property="og:image:alt" content="Two phones with the Brutus alarm screen — a math challenge and a shake challenge — in front of red alarm rings.">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Brutus — You WILL wake up.">
-  <meta name="twitter:description" content="Free, open-source Android alarm clock: math, shake and QR challenges, a volume lock and follow-up alarms. No ads, no tracking, no internet access.">
+  <meta name="twitter:description" content="Free, open-source Android alarm clock: math, shake and QR challenges, a volume lock and follow-up alarms. No ads, no tracking, offline by default.">
   <meta name="twitter:image" content="https://brutus.celox.io/assets/og.jpg?v=1">
   <meta name="twitter:image:alt" content="Two phones with the Brutus alarm screen — a math challenge and a shake challenge — in front of red alarm rings.">
 
@@ -56,7 +56,7 @@
   "@type": "MobileApplication",
   "@id": "https://brutus.celox.io/#app",
   "name": "Brutus",
-  "description": "Brutus is a free, open-source (MIT) alarm clock for Android 8.0 and later. A ringing alarm only stops once you complete the challenges you chose for it: solve math problems, shake the phone, or scan a QR code you placed somewhere else in your home — in any combination, one after the other. Hardcore mode keeps the alarm at full volume while it rings; Ultra Hardcore mode re-rings 10 and 15 minutes later unless you walk 30 steps. It also has a world clock, stopwatch, timer and a home-screen widget, runs in English and German, requests no internet permission and has no ads or tracking. Distributed as a signed APK through GitHub Releases.",
+  "description": "Brutus is a free, open-source (MIT) alarm clock for Android 8.0 and later. A ringing alarm only stops once you complete the challenges you chose for it: solve math problems, shake the phone, or scan a QR code you placed somewhere else in your home — in any combination, one after the other. Hardcore mode keeps the alarm at full volume while it rings; Ultra Hardcore mode re-rings 10 and 15 minutes later unless you walk 30 steps. It also has a world clock, stopwatch, timer and a home-screen widget, runs in English and German, has no ads or tracking, and stays offline unless you switch on its update check, which then reads the newest version number once a day and notifies you. Distributed as a signed APK through GitHub Releases.",
   "url": "https://brutus.celox.io/",
   "image": "https://brutus.celox.io/assets/og.jpg?v=1",
   "operatingSystem": "Android 8.0 or later",
@@ -102,7 +102,8 @@
    "Home-screen widget with the next alarm and a countdown",
    "Alarms survive reboots and Doze; banners warn when the system would block them",
    "English and German, including per-app language on Android 13+",
-   "No internet permission, no ads, no tracking"
+   "Opt-in update check: a daily look at the newest version, a notification and a banner when one is out",
+   "No ads, no tracking; offline by default"
   ],
   "author": {
    "@type": "Person",
@@ -177,7 +178,7 @@
     "name": "How do I update?",
     "acceptedAnswer": {
      "@type": "Answer",
-     "text": "Download the newest APK from this page and install it over the existing app; your alarms and settings stay. Brutus has no internet access, so it does not check for updates itself."
+     "text": "Switch on Check for updates in the ⋮ menu of the alarm list: Brutus then looks once a day for a new release and notifies you. Download the APK from this page and install it over the existing app; your alarms and settings stay."
     }
    },
    {
@@ -253,7 +254,7 @@
       <div class="hero-content">
         <p class="kicker" data-i18n="hero.kicker">Android · Open source · Free</p>
         <h1 data-i18n="hero.title">The alarm clock <br>you can't ignore.</h1>
-        <p class="lead" data-i18n="hero.lead">Brutus only stops once you have solved math problems, shaken your phone or scanned a QR code on the other side of the flat — your choice, in any combination. No ads, no tracking, no internet access.</p>
+        <p class="lead" data-i18n="hero.lead">Brutus only stops once you have solved math problems, shaken your phone or scanned a QR code on the other side of the flat — your choice, in any combination. No ads, no tracking, offline by default.</p>
 
         <div class="cta">
           <a class="btn primary" id="dl" href="/download" aria-describedby="dl-meta">
@@ -291,8 +292,8 @@
           <p data-i18n="f5.p">An optional pre-alarm brightens the screen over the ten minutes before it rings. A home-screen widget shows the next alarm with a countdown.</p>
         </article>
         <article class="card">
-          <h3 data-i18n="f6.t">Reliable and offline</h3>
-          <p data-i18n="f6.p">Exact alarms that ring in Doze and come back after a reboot, with banners when the system would block them. Brutus requests no internet permission — plus world clock, stopwatch and timer.</p>
+          <h3 data-i18n="f6.t">Reliable, offline by default</h3>
+          <p data-i18n="f6.p">Exact alarms that ring in Doze and come back after a reboot, with banners when the system would block them. Online only if you switch on update notices — then it reads the newest version once a day.</p>
         </article>
       </div>
     </section>
@@ -356,7 +357,7 @@
         </details>
         <details class="faq-item">
           <summary data-i18n="faq.q4">How do I update?</summary>
-          <p data-i18n="faq.q4a">Download the newest APK from this page and install it over the existing app; your alarms and settings stay. Brutus has no internet access, so it does not check for updates itself.</p>
+          <p data-i18n="faq.q4a">Switch on <em>Check for updates</em> in the ⋮ menu of the alarm list: Brutus then looks once a day for a new release and notifies you. Download the APK from this page and install it over the existing app; your alarms and settings stay.</p>
         </details>
         <details class="faq-item">
           <summary data-i18n="faq.q5">What does it do besides alarms?</summary>

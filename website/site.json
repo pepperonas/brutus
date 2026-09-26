@@ -30,8 +30,15 @@
     "tertiary": "#ffb77c",
     "accent": "#e53935"
   },
-  "hero": { "bg": "#0c0908", "width": 2912, "height": 1440 },
-  "screens": { "width": 1600, "height": 894 },
+  "hero": {
+    "bg": "#0c0908",
+    "width": 2912,
+    "height": 1440
+  },
+  "screens": {
+    "width": 1600,
+    "height": 894
+  },
   "ld": {
     "type": "MobileApplication",
     "category": "LifestyleApplication",
@@ -64,13 +71,13 @@
   "content": {
     "meta": {
       "title": "Brutus — Android Alarm Clock You Can't Ignore",
-      "description": "Free, open-source Android alarm clock: stop it only by solving math, shaking the phone or scanning a QR code. Hardcore volume lock. No internet access.",
+      "description": "Free, open-source Android alarm clock: stop it only by solving math, shaking the phone or scanning a QR code. Hardcore volume lock. Offline by default.",
       "og_title": "Brutus — You WILL wake up.",
       "og_description": "Free, open-source Android alarm clock that only stops once you solve math problems, shake your phone or scan a QR code across the room.",
-      "twitter_description": "Free, open-source Android alarm clock: math, shake and QR challenges, a volume lock and follow-up alarms. No ads, no tracking, no internet access.",
+      "twitter_description": "Free, open-source Android alarm clock: math, shake and QR challenges, a volume lock and follow-up alarms. No ads, no tracking, offline by default.",
       "image_alt": "Two phones with the Brutus alarm screen — a math challenge and a shake challenge — in front of red alarm rings."
     },
-    "summary": "Brutus is a free, open-source (MIT) alarm clock for Android 8.0 and later. A ringing alarm only stops once you complete the challenges you chose for it: solve math problems, shake the phone, or scan a QR code you placed somewhere else in your home — in any combination, one after the other. Hardcore mode keeps the alarm at full volume while it rings; Ultra Hardcore mode re-rings 10 and 15 minutes later unless you walk 30 steps. It also has a world clock, stopwatch, timer and a home-screen widget, runs in English and German, requests no internet permission and has no ads or tracking. Distributed as a signed APK through GitHub Releases.",
+    "summary": "Brutus is a free, open-source (MIT) alarm clock for Android 8.0 and later. A ringing alarm only stops once you complete the challenges you chose for it: solve math problems, shake the phone, or scan a QR code you placed somewhere else in your home — in any combination, one after the other. Hardcore mode keeps the alarm at full volume while it rings; Ultra Hardcore mode re-rings 10 and 15 minutes later unless you walk 30 steps. It also has a world clock, stopwatch, timer and a home-screen widget, runs in English and German, has no ads or tracking, and stays offline unless you switch on its update check, which then reads the newest version number once a day and notifies you. Distributed as a signed APK through GitHub Releases.",
     "meta_fallback": "Newest release · Android 8.0+ · free, MIT licence",
     "feature_list": [
       "Wake-up challenges: math problems, shaking the phone and scanning a QR code, combinable and run in sequence",
@@ -85,13 +92,15 @@
       "Home-screen widget with the next alarm and a countdown",
       "Alarms survive reboots and Doze; banners warn when the system would block them",
       "English and German, including per-app language on Android 13+",
-      "No internet permission, no ads, no tracking"
+      "Opt-in update check: a daily look at the newest version, a notification and a banner when one is out",
+      "No ads, no tracking; offline by default"
     ],
     "limits": [
       "Android only; not on Google Play — distributed as an APK through GitHub Releases.",
       "The QR challenge needs Google Play Services, which delivers the barcode model; math and shake work without it.",
       "Available in English and German only.",
-      "Android offers no way to truly lock the volume: Hardcore mode snaps it back to maximum and swallows the volume keys while the alarm rings."
+      "Android offers no way to truly lock the volume: Hardcore mode snaps it back to maximum and swallows the volume keys while the alarm rings.",
+      "It does not download or install updates by itself — it only tells you, and you install the new APK over the old one."
     ],
     "hero.kicker": {
       "en": "Android · Open source · Free",
@@ -108,11 +117,11 @@
       "fr": "Le réveil <br>qu’on ne peut pas ignorer."
     },
     "hero.lead": {
-      "en": "Brutus only stops once you have solved math problems, shaken your phone or scanned a QR code on the other side of the flat — your choice, in any combination. No ads, no tracking, no internet access.",
-      "de": "Brutus verstummt erst, wenn du Rechenaufgaben gelöst, dein Handy geschüttelt oder einen QR-Code am anderen Ende der Wohnung gescannt hast — frei kombinierbar. Keine Werbung, kein Tracking, kein Internetzugriff.",
-      "es": "Brutus solo se calla cuando has resuelto operaciones, agitado el móvil o escaneado un código QR al otro lado de la casa, en la combinación que elijas. Sin anuncios, sin rastreo, sin acceso a internet.",
-      "it": "Brutus si ferma solo dopo che hai risolto dei calcoli, scosso il telefono o scansionato un codice QR dall’altra parte della casa, nella combinazione che preferisci. Nessuna pubblicità, nessun tracciamento, nessun accesso a internet.",
-      "fr": "Brutus ne s’arrête qu’une fois que vous avez résolu des calculs, secoué votre téléphone ou scanné un code QR à l’autre bout de l’appartement, dans la combinaison de votre choix. Sans pub, sans pistage, sans accès à internet."
+      "en": "Brutus only stops once you have solved math problems, shaken your phone or scanned a QR code on the other side of the flat — your choice, in any combination. No ads, no tracking, offline by default.",
+      "de": "Brutus verstummt erst, wenn du Rechenaufgaben gelöst, dein Handy geschüttelt oder einen QR-Code am anderen Ende der Wohnung gescannt hast — frei kombinierbar. Keine Werbung, kein Tracking, standardmäßig offline.",
+      "es": "Brutus solo se calla cuando has resuelto operaciones, agitado el móvil o escaneado un código QR al otro lado de la casa, en la combinación que elijas. Sin anuncios, sin rastreo, sin conexión por defecto.",
+      "it": "Brutus si ferma solo dopo che hai risolto dei calcoli, scosso il telefono o scansionato un codice QR dall’altra parte della casa, nella combinazione che preferisci. Nessuna pubblicità, nessun tracciamento, offline per impostazione predefinita.",
+      "fr": "Brutus ne s’arrête qu’une fois que vous avez résolu des calculs, secoué votre téléphone ou scanné un code QR à l’autre bout de l’appartement, dans la combinaison de votre choix. Sans pub, sans pistage, hors ligne par défaut."
     },
     "pl.h": {
       "en": "Supported platforms",
@@ -211,18 +220,18 @@
       },
       {
         "t": {
-          "en": "Reliable and offline",
-          "de": "Zuverlässig und offline",
-          "es": "Fiable y sin conexión",
-          "it": "Affidabile e offline",
-          "fr": "Fiable et hors ligne"
+          "en": "Reliable, offline by default",
+          "de": "Zuverlässig, standardmäßig offline",
+          "es": "Fiable y sin conexión por defecto",
+          "it": "Affidabile, offline di serie",
+          "fr": "Fiable, hors ligne par défaut"
         },
         "p": {
-          "en": "Exact alarms that ring in Doze and come back after a reboot, with banners when the system would block them. Brutus requests no internet permission — plus world clock, stopwatch and timer.",
-          "de": "Exakte Wecker, die auch im Doze klingeln und nach einem Neustart zurückkommen, mit Hinweisen, wenn das System sie blockieren würde. Brutus fordert keine Internetberechtigung an — dazu Weltuhr, Stoppuhr und Timer.",
-          "es": "Alarmas exactas que suenan en modo Doze y vuelven tras un reinicio, con avisos cuando el sistema las bloquearía. Brutus no pide permiso de internet; además, reloj mundial, cronómetro y temporizador.",
-          "it": "Sveglie esatte che suonano anche in Doze e tornano dopo un riavvio, con avvisi quando il sistema le bloccherebbe. Brutus non chiede il permesso di internet; in più orologio mondiale, cronometro e timer.",
-          "fr": "Des alarmes exactes qui sonnent en mode Doze et reviennent après un redémarrage, avec des bandeaux quand le système les bloquerait. Brutus ne demande pas l’accès à internet ; en plus, horloge mondiale, chronomètre et minuteur."
+          "en": "Exact alarms that ring in Doze and come back after a reboot, with banners when the system would block them. Online only if you switch on update notices — then it reads the newest version once a day.",
+          "de": "Exakte Wecker, die auch im Doze klingeln und nach einem Neustart zurückkommen, mit Hinweisen, wenn das System sie blockieren würde. Online nur, wenn du Update-Hinweise einschaltest — dann liest Brutus einmal täglich die neueste Version.",
+          "es": "Alarmas exactas que suenan en modo Doze y vuelven tras un reinicio, con avisos cuando el sistema las bloquearía. Solo se conecta si activas los avisos de actualización, y entonces consulta la versión más reciente una vez al día.",
+          "it": "Sveglie esatte che suonano anche in Doze e tornano dopo un riavvio, con avvisi quando il sistema le bloccherebbe. Va online solo se attivi gli avvisi di aggiornamento, e allora legge la versione più recente una volta al giorno.",
+          "fr": "Des alarmes exactes qui sonnent en mode Doze et reviennent après un redémarrage, avec des bandeaux quand le système les bloquerait. En ligne uniquement si vous activez les avis de mise à jour : il lit alors la dernière version une fois par jour."
         }
       }
     ],
@@ -362,11 +371,11 @@
           "fr": "Comment mettre à jour ?"
         },
         "a": {
-          "en": "Download the newest APK from this page and install it over the existing app; your alarms and settings stay. Brutus has no internet access, so it does not check for updates itself.",
-          "de": "Die neueste APK von dieser Seite laden und über die bestehende App installieren; Wecker und Einstellungen bleiben erhalten. Brutus hat keinen Internetzugriff und sucht deshalb nicht selbst nach Updates.",
-          "es": "Descarga la APK más reciente desde esta página e instálala sobre la app existente; tus alarmas y ajustes se conservan. Brutus no tiene acceso a internet, así que no busca actualizaciones por sí mismo.",
-          "it": "Scarica l’APK più recente da questa pagina e installalo sopra l’app esistente; sveglie e impostazioni restano. Brutus non ha accesso a internet, quindi non cerca aggiornamenti da solo.",
-          "fr": "Téléchargez l’APK le plus récent depuis cette page et installez-le par-dessus l’app existante ; vos alarmes et réglages sont conservés. Brutus n’a pas accès à internet, il ne cherche donc pas lui-même les mises à jour."
+          "en": "Switch on <em>Check for updates</em> in the ⋮ menu of the alarm list: Brutus then looks once a day for a new release and notifies you. Download the APK from this page and install it over the existing app; your alarms and settings stay.",
+          "de": "Schalte im ⋮-Menü der Weckerliste <em>Nach Updates suchen</em> ein: Brutus schaut dann einmal täglich nach einer neuen Version und benachrichtigt dich. Die APK von dieser Seite laden und über die bestehende App installieren; Wecker und Einstellungen bleiben erhalten.",
+          "es": "Activa <em>Check for updates</em> en el menú ⋮ de la lista de alarmas: Brutus comprobará una vez al día si hay una versión nueva y te avisará. Descarga la APK desde esta página e instálala sobre la app existente; tus alarmas y ajustes se conservan.",
+          "it": "Attiva <em>Check for updates</em> nel menu ⋮ dell’elenco delle sveglie: Brutus controllerà una volta al giorno se c’è una nuova versione e ti avviserà. Scarica l’APK da questa pagina e installalo sopra l’app esistente; sveglie e impostazioni restano.",
+          "fr": "Activez <em>Check for updates</em> dans le menu ⋮ de la liste des alarmes : Brutus vérifie alors une fois par jour s’il existe une nouvelle version et vous prévient. Téléchargez l’APK depuis cette page et installez-le par-dessus l’app existante ; vos alarmes et réglages sont conservés."
         }
       },
       {
@@ -408,7 +417,12 @@
       "How do I verify the Brutus APK signature?",
       "Android alarm clock that makes you solve math or scan a QR code to turn it off"
     ],
-    "tags": ["android", "alarm-clock", "open-source", "apk"],
+    "tags": [
+      "android",
+      "alarm-clock",
+      "open-source",
+      "apk"
+    ],
     "skill_description": "Download, verify and install the newest Brutus APK — the free, open-source Android alarm clock that only stops after math, shake or QR-code challenges. Use when someone asks for the app, its latest version, a download link, or how to check the APK is genuine."
   }
 }

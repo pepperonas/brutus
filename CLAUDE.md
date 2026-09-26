@@ -47,6 +47,14 @@ challenges in sequence → `ACTION_STOP` / `ACTION_SNOOZE` back to the service.
 - `SunriseActivity`, `TestAlarmActivity` and `widget/NextAlarmWidget` are side entry points;
   `util/NextAlarmCalculator` is the shared next-trigger arithmetic (DST-sensitive).
 
+**Update check** (`update/`, opt-in, off by default): the only code that touches the network.
+`UpdateScheduler` enqueues a unique 24 h `PeriodicWorkRequest` + one immediate check (both
+`NetworkType.CONNECTED`) when the ⋮-menu switch is on and cancels everything when it is off;
+`UpdateChecker` asks `ReleaseSource` (`brutus.celox.io/latest.json`, GitHub releases API as fallback),
+compares via `AppVersion`, posts once per version on `CHANNEL_UPDATES` and records the finding in
+`UpdateCheckStore`, which the alarm-list banner follows. Keep the privacy wording in README/website in
+sync with any change here.
+
 **Data**: Room `data/AlarmDatabase` (version 7, `exportSchema = true`, schemas committed under
 `app/schemas/`). Adding/changing an `AlarmEntity` field requires a bumped version, a `Migration`,
 and the new exported schema — `RoomSchemaExportTest` compares the runtime identity hash against the

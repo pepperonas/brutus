@@ -130,6 +130,9 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.9.3")
     implementation("androidx.navigation:navigation-compose:2.8.5")
     implementation("androidx.datastore:datastore-preferences:1.1.1")
+    // Opt-in daily update check (v2.3.0). 2.10.x is the newest line that still builds against
+    // compileSdk 35.
+    implementation("androidx.work:work-runtime-ktx:2.10.0")
 
     // Room
     val roomVersion = "2.6.1"
@@ -157,4 +160,5 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
     testImplementation("org.robolectric:robolectric:4.14.1")
     testImplementation("androidx.test:core:1.6.1")
+    testImplementation("androidx.work:work-testing:2.10.0")
 }
