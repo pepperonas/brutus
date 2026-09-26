@@ -3,10 +3,18 @@
 **English** · [Deutsch](README.de.md)
 
 <p align="center">
-  <img src="docs/hero.png" alt="Brutus — Killer Alarm Clock" width="100%" />
+  <a href="https://brutus.celox.io"><img src="docs/hero.png" alt="Brutus — Killer Alarm Clock · brutus.celox.io" width="100%" /></a>
 </p>
 
-<p align="center"><strong><a href="https://brutus.celox.io">brutus.celox.io</a></strong> · <a href="https://brutus.celox.io/download">Download the newest APK</a></p>
+<h2 align="center">🌐 <a href="https://brutus.celox.io">brutus.celox.io</a></h2>
+
+<p align="center"><strong>Features, screenshots, FAQ and the newest signed APK with its SHA-256 — all on the product page.</strong></p>
+
+<p align="center">
+  <a href="https://brutus.celox.io"><img alt="Product page" src="https://img.shields.io/badge/Product%20page-brutus.celox.io-E53935?style=for-the-badge&logo=googlechrome&logoColor=white" height="42" /></a>
+  &nbsp;
+  <a href="https://brutus.celox.io/download"><img alt="Download APK" src="https://img.shields.io/badge/Download%20APK-Android%208.0%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white" height="42" /></a>
+</p>
 
 <!-- Project status — these badges are live and update themselves. -->
 
