@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+
 package com.pepperonas.brutus.ui.alarm
 
 import android.Manifest
@@ -58,6 +60,9 @@ fun QrChallenge(expectedQrData: String, onComplete: () -> Unit) {
         )
     }
     var scannedWrong by remember { mutableStateOf(false) }
+    // Until the camera delivers frames the preview is black; the expressive loading indicator
+    // says "starting the camera" instead of looking broken.
+    var streaming by remember { mutableStateOf(false) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -122,6 +127,7 @@ fun QrChallenge(expectedQrData: String, onComplete: () -> Unit) {
             val borderColor by androidx.compose.animation.animateColorAsState(
                 targetValue = if (scannedWrong) MaterialTheme.colorScheme.error
                 else MaterialTheme.colorScheme.tertiary,
+                animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
                 label = "qrBorder"
             )
             Box(
@@ -141,6 +147,9 @@ fun QrChallenge(expectedQrData: String, onComplete: () -> Unit) {
 
                             val preview = Preview.Builder().build().also {
                                 it.surfaceProvider = previewView.surfaceProvider
+                            }
+                            previewView.previewStreamState.observe(lifecycleOwner) { state ->
+                                streaming = state == PreviewView.StreamState.STREAMING
                             }
 
                             val imageAnalysis = ImageAnalysis.Builder()
@@ -196,6 +205,12 @@ fun QrChallenge(expectedQrData: String, onComplete: () -> Unit) {
                     },
                     modifier = Modifier.fillMaxSize()
                 )
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = !streaming,
+                    exit = androidx.compose.animation.fadeOut(MaterialTheme.motionScheme.defaultEffectsSpec()),
+                ) {
+                    androidx.compose.material3.LoadingIndicator(color = MaterialTheme.colorScheme.tertiary)
+                }
             }
 
             if (scannedWrong) {

@@ -5,6 +5,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,6 +25,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,8 +57,21 @@ fun ShakeChallenge(
 
     val progress by animateFloatAsState(
         targetValue = shakeCount.toFloat() / requiredShakes,
+        animationSpec = WavyProgressIndicatorDefaults.ProgressAnimationSpec,
         label = "shakeProgress"
     )
+    // Each counted shake makes the number jump a little and spring back — feedback that the
+    // shake registered, without looking at the ring.
+    val pop = remember { Animatable(1f) }
+    val popSpec = MaterialTheme.motionScheme.fastSpatialSpec<Float>()
+    LaunchedEffect(shakeCount) {
+        if (shakeCount == 0 || reducedMotion) return@LaunchedEffect
+        pop.snapTo(1.18f)
+        pop.animateTo(1f, popSpec)
+    }
+    // The listener keeps delivering after the target: report completion exactly once, or a late
+    // shake during the hand-over animation would advance the chain a second time.
+    var completed by remember { mutableStateOf(false) }
 
     DisposableEffect(sensitivity) {
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -73,8 +90,10 @@ fun ShakeChallenge(
 
                 if (delta > threshold && System.currentTimeMillis() - lastShakeTime > 250) {
                     lastShakeTime = System.currentTimeMillis()
+                    if (completed) return
                     shakeCount++
                     if (shakeCount >= requiredShakes) {
+                        completed = true
                         onComplete()
                     }
                 }
@@ -131,7 +150,11 @@ fun ShakeChallenge(
                 Text(
                     text = "$shakeCount",
                     style = MaterialTheme.typography.displayMedium.copy(fontSize = 64.sp),
-                    color = Color.White
+                    color = Color.White,
+                    modifier = Modifier.graphicsLayer {
+                        scaleX = pop.value
+                        scaleY = pop.value
+                    }
                 )
                 Text(
                     text = "/ $requiredShakes",

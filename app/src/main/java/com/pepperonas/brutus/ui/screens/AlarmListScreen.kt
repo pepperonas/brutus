@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+
 package com.pepperonas.brutus.ui.screens
 
 import android.Manifest
@@ -8,6 +10,15 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -36,6 +47,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.AlarmAdd
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -70,6 +82,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
@@ -91,6 +105,7 @@ import android.provider.Settings
 import androidx.core.app.NotificationManagerCompat
 import com.pepperonas.brutus.update.UpdateCheckStore
 import com.pepperonas.brutus.util.UltraHardcoreNotifier
+import com.pepperonas.brutus.util.RingingStore
 import com.pepperonas.brutus.util.UltraHardcoreStore
 import com.pepperonas.brutus.update.UpdateChecker
 import com.pepperonas.brutus.update.UpdateScheduler
@@ -112,7 +127,7 @@ import androidx.compose.ui.res.pluralStringResource
 import com.pepperonas.brutus.R
 
 @Composable
-fun AlarmListScreen(viewModel: AlarmViewModel) {
+fun AlarmListScreen(viewModel: AlarmViewModel, onOpenSettings: () -> Unit = {}) {
     val alarms by viewModel.alarms.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
     var editingAlarm by remember { mutableStateOf<AlarmEntity?>(null) }
@@ -160,7 +175,10 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
             delay(30_000L)
         }
     }
-    val nextAlarm = remember(alarms, nowMillis) { NextAlarmCalculator.findNext(alarms, nowMillis) }
+    // A skipped occurrence ("Dismiss early") is not the next alarm.
+    val nextAlarm = remember(alarms, nowMillis) {
+        NextAlarmCalculator.findNext(alarms, nowMillis, RingingStore.skips(context))
+    }
 
     // Re-check exact-alarm + battery + full-screen-intent permissions on resume
     var exactGranted by remember { mutableStateOf(ExactAlarmPermission.isGranted(context)) }
@@ -176,12 +194,7 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
     // (the worker writes the finding in the background).
     val updateTick by UpdateCheckStore.changes(context).collectAsState(initial = -1)
     val installedVersion = remember { UpdateChecker.installedVersion(context) }
-    val updateCheckOn = remember(updateTick) { UpdateCheckStore.isEnabled(context) }
     val updateVersion = remember(updateTick) { UpdateChecker.bannerVersion(context, installedVersion) }
-    // Asked only when the user switches the check on — the banner works without it.
-    val notificationPermission = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { }
 
     DisposableEffect(lifecycle) {
         val observer = LifecycleEventObserver { _, event ->
@@ -229,74 +242,36 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
                                 confirmDeleteAll = true
                             }
                         )
-                        // Material You opt-in (API 31+): wallpaper-based dynamic color
-                        // instead of the red brand scheme.
-                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                            val dynamicOn by ThemeSettings.dynamicColorFlow(context)
-                                .collectAsState(initial = false)
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.alarm_list_material_you)) },
-                                trailingIcon = {
-                                    Switch(
-                                        checked = dynamicOn,
-                                        onCheckedChange = null,
-                                        modifier = Modifier.scale(0.8f)
-                                    )
-                                },
-                                onClick = {
-                                    haptics.tap()
-                                    scope.launch {
-                                        ThemeSettings.setDynamicColor(context, !dynamicOn)
-                                    }
-                                }
-                            )
-                        }
-                        // Off by default: with it off Brutus never touches the network.
                         DropdownMenuItem(
-                            text = { Text(stringResource(R.string.alarm_list_update_check)) },
-                            trailingIcon = {
-                                Switch(
-                                    checked = updateCheckOn,
-                                    onCheckedChange = null,
-                                    modifier = Modifier.scale(0.8f)
-                                )
-                            },
+                            text = { Text(stringResource(R.string.alarm_list_settings)) },
+                            leadingIcon = { Icon(Icons.Outlined.Settings, contentDescription = null) },
                             onClick = {
-                                haptics.tap()
-                                val enable = !updateCheckOn
-                                UpdateScheduler.setEnabled(context, enable)
-                                if (enable && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-                                    ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
-                                    != PackageManager.PERMISSION_GRANTED
-                                ) {
-                                    notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
-                                }
+                                menuOpen = false
+                                onOpenSettings()
                             }
                         )
                     }
                 }
             }
 
-            if (updateVersion != null) {
+            BannerSlot(updateVersion != null) {
                 PermissionBanner(
-                    title = stringResource(R.string.banner_update_title, updateVersion),
+                    title = stringResource(R.string.banner_update_title, updateVersion ?: ""),
                     body = stringResource(R.string.banner_update_body),
                     actionLabel = stringResource(R.string.banner_update_action),
                     info = true,
                     icon = Icons.Default.SystemUpdate,
                     onFix = { UpdateChecker.openDownload(context) },
                 )
-                Spacer(modifier = Modifier.height(12.dp))
             }
 
-            if (!exactGranted) {
+            BannerSlot(!exactGranted) {
                 ExactAlarmBanner(onFix = {
                     ExactAlarmPermission.settingsIntent(context)?.let { context.startActivity(it) }
                 })
-                Spacer(modifier = Modifier.height(12.dp))
             }
 
-            if (!batteryIgnoring) {
+            BannerSlot(!batteryIgnoring) {
                 BatteryOptimizationBanner(onFix = {
                     try {
                         context.startActivity(BatteryOptimizationPermission.settingsIntent(context))
@@ -304,17 +279,15 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
                         context.startActivity(BatteryOptimizationPermission.fallbackSettingsIntent())
                     }
                 })
-                Spacer(modifier = Modifier.height(12.dp))
             }
 
-            if (!fsiGranted) {
+            BannerSlot(!fsiGranted) {
                 FullScreenIntentBanner(onFix = {
                     FullScreenIntentPermission.settingsIntent(context)?.let { context.startActivity(it) }
                 })
-                Spacer(modifier = Modifier.height(12.dp))
             }
 
-            if (!notificationsOn) {
+            BannerSlot(!notificationsOn) {
                 PermissionBanner(
                     title = stringResource(R.string.banner_notifications_title),
                     body = stringResource(R.string.banner_notifications_body),
@@ -329,10 +302,10 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
                         }
                     },
                 )
-                Spacer(modifier = Modifier.height(12.dp))
             }
 
-            uhcPendingId?.let { pendingId ->
+            BannerSlot(uhcPendingId != null) {
+                val pendingId = uhcPendingId ?: -1L
                 PermissionBanner(
                     title = stringResource(R.string.notification_uhc_title),
                     body = stringResource(R.string.banner_uhc_body),
@@ -340,12 +313,23 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
                     warning = true,
                     onFix = { context.startActivity(UltraHardcoreNotifier.taskIntent(context, pendingId)) },
                 )
-                Spacer(modifier = Modifier.height(12.dp))
             }
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            if (alarms.isEmpty()) {
+            // Deleting the last alarm (or creating the first) crossfades instead of swapping hard.
+            val listEffects = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
+            val listFastEffects = MaterialTheme.motionScheme.fastEffectsSpec<Float>()
+            val listSpatial = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
+            AnimatedContent(
+                targetState = alarms.isEmpty(),
+                transitionSpec = {
+                    (fadeIn(listEffects) + scaleIn(listSpatial, initialScale = 0.96f)) togetherWith
+                        fadeOut(listFastEffects)
+                },
+                label = "listOrEmpty",
+            ) { empty ->
+            if (empty) {
                 EmptyState(onCreate = {
                     editingAlarm = null
                     showDialog = true
@@ -383,6 +367,7 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
                     // Keep the FAB from covering the last card's actions.
                     item { Spacer(modifier = Modifier.height(96.dp)) }
                 }
+            }
             }
         }
 
@@ -513,7 +498,10 @@ private fun AddAlarmFab(onClick: () -> Unit, modifier: Modifier = Modifier) {
 
 @Composable
 private fun NextAlarmHeader(next: AlarmEntity?, now: Long, modifier: Modifier = Modifier) {
-    val triggerMillis = remember(next, now) { next?.let { NextAlarmCalculator.nextTrigger(it, now) } }
+    val context = LocalContext.current
+    val triggerMillis = remember(next, now) {
+        next?.let { NextAlarmCalculator.nextTrigger(it, now, RingingStore.skips(context)[it.id]) }
+    }
 
     Column(
         modifier = modifier.padding(top = 28.dp, bottom = 20.dp),
@@ -570,6 +558,7 @@ private fun DismissableAlarmCard(
     onCopy: () -> Unit,
     onClick: () -> Unit,
 ) {
+    val haptics = rememberBrutusHaptics()
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { value ->
             if (value == SwipeToDismissBoxValue.EndToStart) {
@@ -580,30 +569,43 @@ private fun DismissableAlarmCard(
             }
         }
     )
+    // A tick when releasing would now delete — and again if the finger pulls back out of it.
+    LaunchedEffect(dismissState.targetValue) {
+        if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) haptics.tap()
+    }
     SwipeToDismissBox(
         state = dismissState,
         modifier = modifier,
         enableDismissFromStartToEnd = false,
         backgroundContent = {
-            val revealed = dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart
+            // Everything follows the finger: the red deepens and the bin grows with the drag, and
+            // jumps once more when letting go would delete. Read in draw/layer lambdas only.
+            val errorContainer = MaterialTheme.colorScheme.errorContainer
+            fun fraction(): Float =
+                if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart)
+                    dismissState.progress.coerceIn(0f, 1f) else 0f
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(MaterialTheme.shapes.large)
-                    .background(
-                        if (revealed) MaterialTheme.colorScheme.errorContainer
-                        else Color.Transparent
-                    ),
+                    .drawBehind { drawRect(errorContainer.copy(alpha = (fraction() * 2.5f).coerceIn(0f, 1f))) },
                 contentAlignment = Alignment.CenterEnd
             ) {
-                if (revealed) {
-                    Icon(
-                        Icons.Default.Delete,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onErrorContainer,
-                        modifier = Modifier.padding(end = 28.dp)
-                    )
-                }
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onErrorContainer,
+                    modifier = Modifier
+                        .padding(end = 28.dp)
+                        .graphicsLayer {
+                            val f = fraction()
+                            val armed = dismissState.targetValue == SwipeToDismissBoxValue.EndToStart
+                            val scale = if (armed) 1.25f else 0.6f + 0.4f * (f * 2f).coerceAtMost(1f)
+                            scaleX = scale
+                            scaleY = scale
+                            alpha = (f * 4f).coerceIn(0f, 1f)
+                        }
+                )
             }
         }
     ) {
@@ -643,6 +645,7 @@ private fun AlarmCard(
     val enabledContainer = lerp(cs.surfaceContainerHigh, cs.primaryContainer, 0.45f)
     val containerColor by animateColorAsState(
         targetValue = if (alarm.enabled) enabledContainer else cs.surfaceContainerLow,
+        animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
         label = "cardColor"
     )
     val timeColor = if (alarm.enabled) cs.onSurface else cs.onSurfaceVariant.copy(alpha = 0.6f)
@@ -879,6 +882,23 @@ private fun FullScreenIntentBanner(onFix: () -> Unit) {
         actionLabel = stringResource(R.string.banner_fullscreen_action),
         onFix = onFix,
     )
+}
+
+/** A banner that slides in and out on the theme's springs instead of making the list jump. */
+@Composable
+private fun ColumnScope.BannerSlot(visible: Boolean, content: @Composable () -> Unit) {
+    AnimatedVisibility(
+        visible = visible,
+        enter = expandVertically(MaterialTheme.motionScheme.defaultSpatialSpec()) +
+            fadeIn(MaterialTheme.motionScheme.defaultEffectsSpec()),
+        exit = shrinkVertically(MaterialTheme.motionScheme.fastSpatialSpec()) +
+            fadeOut(MaterialTheme.motionScheme.fastEffectsSpec()),
+    ) {
+        Column {
+            content()
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+    }
 }
 
 /**

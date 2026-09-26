@@ -19,7 +19,7 @@
 <!-- Projektstatus — diese Badges aktualisieren sich selbst. -->
 
 [![Tests](https://img.shields.io/github/actions/workflow/status/pepperonas/brutus/tests.yml?branch=main&label=tests&logo=githubactions&logoColor=white)](https://github.com/pepperonas/brutus/actions/workflows/tests.yml)
-[![Unit tests](https://img.shields.io/badge/unit%20tests-306-brightgreen)](#tests-und-ci)
+[![Unit tests](https://img.shields.io/badge/unit%20tests-339-brightgreen)](#tests-und-ci)
 [![Release](https://img.shields.io/github/v/release/pepperonas/brutus?color=FF5252&logo=github&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/pepperonas/brutus/total?label=APK%20downloads&color=success&logo=github&logoColor=white)](https://github.com/pepperonas/brutus/releases)
 [![Last commit](https://img.shields.io/github/last-commit/pepperonas/brutus?logo=git&logoColor=white)](https://github.com/pepperonas/brutus/commits/main)
@@ -116,6 +116,9 @@ Alles steckt in einer Bottom-Navigation mit vier Tabs, die den brutalen Wecker-K
   - [Weltuhr](#weltuhr)
   - [Stoppuhr](#stoppuhr)
   - [Timer](#timer)
+  - [Einstellungen & Info](#einstellungen--info)
+  - [Benachrichtigungen](#benachrichtigungen)
+  - [Motion und Physik](#motion-und-physik)
   - [Theming und Material You](#theming-und-material-you)
   - [Sprachen](#sprachen)
   - [Terminierung](#terminierung)
@@ -387,7 +390,7 @@ Alle drei Banner verschwinden automatisch, sobald der jeweilige Systemzustand be
 
 ### Update-Hinweis
 
-Seit v2.3.0 zum Einschalten: **⋮ → Nach Updates suchen** (standardmäßig aus, auch bei bestehenden Installationen).
+Seit v2.3.0 zum Einschalten: **⋮ → Einstellungen & Info → Nach Updates suchen** (standardmäßig aus, auch bei bestehenden Installationen; bis v2.4.0 saß der Schalter direkt im ⋮-Menü).
 
 - **Eingeschaltet** fragt Brutus einmal sofort und dann einmal täglich — per WorkManager, nur mit
   Netz — nach der neuesten Version: `GET https://brutus.celox.io/latest.json`, ersatzweise
@@ -439,7 +442,7 @@ Beim ersten Start vorbelegt: **Europe/Berlin**, **America/New_York**, **Asia/Tok
 
 ### Stoppuhr
 
-Hundertstelgenaue Stoppuhr auf `SystemClock.elapsedRealtime()` (unbeeindruckt von Sprüngen der Wanduhrzeit). Eine große Anzeige mit gleich breiten Ziffern, ein roter **Start / Stopp**-Kreisknopf und ein **Reset / Runde**-Kreisknopf in Surface-Variant. Runden liegen während der Sitzung im Speicher und erscheinen als Liste mit Einzel- und Gesamtspalte. Der Runden-Knopf wird automatisch verfügbar, sobald die Uhr läuft.
+Hundertstelgenaue Stoppuhr auf `SystemClock.elapsedRealtime()` (unbeeindruckt von Sprüngen der Wanduhrzeit). Eine große Anzeige mit gleich breiten Ziffern und eine Expressive-Knopfgruppe — **Reset / Runde** und **Start / Stopp**, deren Beschriftungen zum neuen Wort rollen. Runden liegen während der Sitzung im Speicher und erscheinen als Liste mit Einzel- und Gesamtspalte. Der Runden-Knopf wird automatisch verfügbar, sobald die Uhr läuft.
 
 Seit **v1.8.0** halten Stoppuhr und Timer ihren gesamten Zustand — laufende Messung, Runden und den Endton des Timers — in Activity-weiten ViewModels, sodass ein Tab-Wechsel nichts mehr zurücksetzt.
 
@@ -447,7 +450,60 @@ Seit **v1.8.0** halten Stoppuhr und Timer ihren gesamten Zustand — laufende Me
 
 HMS-Picker (Stunden 0–23, Minuten 0–59, Sekunden 0–59) mit Auf-/Ab-Steppern je Spalte. Schnellwahl-Reihe für gängige Dauern (1m, 3m, 5m, 10m, 15m, 30m). Ein **Wähler für sanfte Sounds** (seit v1.5.0) unter der Schnellwahl bestimmt den Endton — Standard **Glockenspiel**, die Wahl überlebt Neustarts über `TimerSoundStore`. Ein Tipp auf einen Chip spielt den Ton probeweise; **Stopp** beendet die Vorschau.
 
-Während des Countdowns wechselt der Bildschirm auf eine große 64-sp-Anzeige und zwei Kreisknöpfe (**Abbruch / Pause-Weiter**). Läuft der Timer ab, spielt der gewählte synthetisierte Sound (oder der System-Klingelton bei **System-Alarm**) in Schleife mit `USAGE_ALARM`-Attributen, bis **Stopp** gedrückt wird — Verhalten wie eine klassische Küchenuhr, nicht wie ein brutaler Weckmodus.
+Während des Countdowns wechselt der Bildschirm auf eine große 56-sp-Anzeige in einem fließend leerlaufenden, welligen Ring und eine Knopfgruppe (**Abbruch / Pause-Weiter**). Läuft der Timer ab, spielt der gewählte synthetisierte Sound (oder der System-Klingelton bei **System-Alarm**) in Schleife mit `USAGE_ALARM`-Attributen, bis **Stopp** gedrückt wird — Verhalten wie eine klassische Küchenuhr, nicht wie ein brutaler Weckmodus.
+
+Seit **v2.4.0 ist der Timer ein echter Wecker**: sein Zustand wird gespeichert (`timer/TimerController`), AlarmManager weckt das Handy am Ende, und ein Vordergrund-Service klingelt — auch wenn die App mit Zurück verlassen oder ihr Prozess beendet wurde (vorher endete er dann stillschweigend). Eine Benachrichtigung zeigt den Countdown mit Pause/Weiter/Abbruch; die klingelnde hat **Stopp**. Auf dem Emulator geprüft: Timer gestartet, App verlassen, Prozess beendet, er klingelte pünktlich.
+
+### Einstellungen & Info
+
+Seit **v2.4.0**: **⋮ → Einstellungen & Info**, aufgebaut wie die Einstellungen von Flipper the Ripper —
+Abschnittstitel in der Primärfarbe über einer abgerundeten Karte.
+
+- **Darstellung** — Design **System / Hell / Dunkel** (die Alarm-Bildschirme bleiben dunkel),
+  **Material-You-Farben** (ab Android 12).
+- **Benachrichtigungen** — wie lange vor einem Wecker der Hinweis erscheint (**Aus / 30 / 60 / 120 Min.**),
+  und die optionale **Update-Prüfung**.
+- **Über Brutus** — App-Zeichen, Version und Build, „Von Martin Pfeffer“, Chips für die
+  [Website](https://brutus.celox.io), celox.io, den Quellcode und die MIT-Lizenz, die **Lizenz der Schrift
+  Space Grotesk (OFL 1.1)** im Dialog und ein PayPal-Spendenknopf, der unter dem Finger federt.
+
+### Benachrichtigungen
+
+| Benachrichtigung | Wann | Was sie anbietet |
+|---|---|---|
+| **Hinweis** | der gewählte Vorlauf vor einem Wecker (Standard 60 Min.) | Countdown bis zum Wecker; **Vorzeitig beenden** überspringt diese eine Auslösung — bei **Hardcore-Weckern nur nach gelöster eigener Challenge** (lautlos, ohne Snooze) |
+| **Schlummert** | solange ein Wecker schlummert | Countdown bis zum erneuten Klingeln; **Snooze beenden** (nicht bei Hardcore) |
+| **Ultra Hardcore** | solange Re-Alarme scharf sind | Countdown bis zum nächsten Re-Alarm; öffnet die Schrittaufgabe |
+| **Verpasster Wecker** | nach einem Neustart oder Uhrzeitsprung, wenn ein Wecker fällig war, während das Handy aus war | die fällige Uhrzeit |
+| **Timer** | solange der Timer läuft | Countdown mit **Pause / Weiter / Abbruch**; am Ende eine klingelnde Benachrichtigung mit **Stopp** |
+
+Eine übersprungene Auslösung wird gemerkt, ein Neustart holt sie nicht zurück; Kopfzeile und Widget zeigen
+die nächste danach. Hinweis und Snooze-Countdown laufen über einen leisen Kanal (*Anstehende Wecker*,
+niedrige Wichtigkeit), verpasste Wecker über einen eigenen (*Verpasste Wecker*); keiner geht durch „Nicht stören“.
+
+### Motion und Physik
+
+Brutus läuft auf `MaterialExpressiveTheme` mit `MotionScheme.expressive()`, und seit v2.4.0 holt sich jede
+Animation ihre Spezifikation aus `MaterialTheme.motionScheme` statt aus handgewählten Tweens.
+
+- **Snooze-Daumen** — gezogen per `draggable`, beim Loslassen übernimmt eine Feder die **Wurfgeschwindigkeit**
+  des Fingers; ein Haptik-Tick an der 85-%-Schwelle. Es entscheidet nur die Position — ein schneller Wisch
+  schlummert nie versehentlich.
+- **Wischen zum Löschen** — das Rot wird mit dem Ziehen kräftiger, der Mülleimer wächst und springt noch
+  einmal (mit Tick), sobald Loslassen löschen würde.
+- **Knopfgruppen** (`ButtonGroup` + `animateWidth`) bei Timer und Stoppuhr: der gedrückte Knopf wird breiter,
+  der Nachbar weicht aus; Beschriftungen rollen zum neuen Wort (Start → Stopp, Pause → Weiter).
+- **Zahlen rollen** wie ein mechanisches Zählwerk in jedem Stepper; der Schüttel-Zähler hüpft bei jedem
+  Schütteln; eine falsche Rechnung lässt das Eingabefeld an einer weich gedämpften Feder wackeln, mit Warnvibration.
+- **Übergänge statt Sprünge** — Bottom-Sheets gleiten beim Speichern hinaus, Banner gleiten ein und aus,
+  Liste ↔ Leerzustand blenden über, der „Geschafft!“-Moment und der Stopp-Knopf federn ein, die
+  Challenge-Punkte schwellen an.
+- **Laden und Fortschritt** — `LoadingIndicator`, solange die Kamera startet, `LinearWavyProgressIndicator`
+  für den Sunrise-Vorlauf, ein fließend leerlaufender Timer-Ring.
+- **Günstig zu zeichnen** — der atmende Alarm-Hintergrund und das Pulsieren des Snooze-Hinweises werden in
+  Draw-/Layer-Lambdas gelesen, sie zeichnen neu, ohne den Bildschirm jedes Frame neu aufzubauen.
+- **Reduzierte Bewegung** wird bei jeder Rückkehr in die App neu gelesen; ohne Animationen stehen dekorative
+  Schleifen still, und Tab-Wechsel blenden über statt zu gleiten.
 
 ### Theming und Material You
 
@@ -572,7 +628,7 @@ Wer es lieber manuell macht:
 | `CAMERA` | QR-Scan-Aufgabe | Zur Laufzeit, wenn der Alarm mit aktiver QR-Aufgabe klingelt |
 | `ACTIVITY_RECOGNITION` (seit v1.4.0) | Schrittzähler für die Ultra-Hardcore-Anti-Schlummer-Aufgabe | Zur Laufzeit, beim Aktivieren von Ultra Hardcore oder Öffnen der Aufgabe |
 | `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` (seit v1.6.0) | Lässt das Akku-Banner auf den System-Whitelist-Dialog verlinken | Bei Installation (der Dialog selbst ist pro Gerät ein Opt-in) |
-| `INTERNET` (seit v2.3.0) | Nur für die optionale Update-Prüfung (⋮ → Nach Updates suchen, standardmäßig aus) | Bei Installation — ungenutzt, bis du die Prüfung einschaltest |
+| `INTERNET` (seit v2.3.0) | Nur für die optionale Update-Prüfung (Einstellungen & Info → Nach Updates suchen, standardmäßig aus) | Bei Installation — ungenutzt, bis du die Prüfung einschaltest |
 | `VIBRATE` | Vibrationsmuster während des Alarms | Bei Installation |
 | `USE_FULL_SCREEN_INTENT` | Alarm-Overlay auf dem Sperrbildschirm | Bei Installation |
 | `FOREGROUND_SERVICE` / `FOREGROUND_SERVICE_MEDIA_PLAYBACK` | Service für die Alarm-Wiedergabe | Bei Installation |
@@ -702,7 +758,7 @@ keytool -genkeypair -v \
 | Build | Gradle 8.11.1, AGP 8.7.3, KSP 2.1.0-1.0.29, R8 (`minify` + `shrinkResources`) |
 | SDK-Level | min 26 (Android 8.0) · target/compile 35 (Android 15) |
 
-**Warum `material3` an der BOM vorbei gepinnt ist:** Die BOM 2026.06.01 bildet `material3` 1.4.0 ab, dort sind die Expressive-APIs (`MaterialExpressiveTheme`, `MotionScheme`, `expressiveLightColorScheme`) noch `internal`. Sie werden im 1.5.0-alpha-Kanal öffentlich, und **1.5.0-alpha18 ist das neueste Alpha, das noch gegen Compose 1.11 baut** — ab alpha19 zieht es Compose 1.12 nach und würde compileSdk 37 + AGP 9.1 erzwingen. Komponenten, die in alpha18 noch nicht stabil waren (`ButtonGroup`, `FloatingToolbar`), werden hinter einem expliziten `@OptIn(ExperimentalMaterial3ExpressiveApi)` genutzt.
+**Warum `material3` an der BOM vorbei gepinnt ist:** Die BOM 2026.06.01 bildet `material3` 1.4.0 ab, dort sind die Expressive-APIs (`MaterialExpressiveTheme`, `MotionScheme`, `expressiveLightColorScheme`) noch `internal`. Sie werden im 1.5.0-alpha-Kanal öffentlich, und **1.5.0-alpha18 ist das neueste Alpha, das noch gegen Compose 1.11 baut** — ab alpha19 zieht es Compose 1.12 nach und würde compileSdk 37 + AGP 9.1 erzwingen. Komponenten, die in alpha18 noch nicht stabil waren (`ButtonGroup`, `LoadingIndicator`, `LinearWavyProgressIndicator`), werden hinter einem expliziten `@OptIn(ExperimentalMaterial3ExpressiveApi)` genutzt.
 
 Kein Hilt, kein Koin, kein Dagger — manuelle DI über die Application-Klasse. Kein Retrofit, keine Coroutines-Channels, keine Flow-Operatoren jenseits von `stateIn`. Die Codebasis ist mit Absicht klein: **80 Kotlin-Dateien, ~12.000 Zeilen** — davon 53 Produktivcode.
 
@@ -794,7 +850,7 @@ app/src/main/res/
 
 ## Tests und CI
 
-306 JVM-Unit-Tests sichern die Stellen, an denen ein Fehler bedeutet, dass jemand verschläft: was tatsächlich im `AlarmManager` landet, die Weckzeit-Arithmetik, die Persistenz, die Vollständigkeit beider Übersetzungen und jeden String, den der Nutzer auf einem Ziffernblatt liest. Es gibt keine Instrumentierungstests — die gesamte Suite läuft in Sekunden auf der JVM.
+339 JVM-Unit-Tests sichern die Stellen, an denen ein Fehler bedeutet, dass jemand verschläft: was tatsächlich im `AlarmManager` landet, die Weckzeit-Arithmetik, die Persistenz, die Vollständigkeit beider Übersetzungen und jeden String, den der Nutzer auf einem Ziffernblatt liest. Es gibt keine Instrumentierungstests — die gesamte Suite läuft in Sekunden auf der JVM.
 
 | Suite | Tests | Was sie festnagelt |
 |-------|-------|--------------------|
@@ -807,14 +863,20 @@ app/src/main/res/
 | `util/NextAlarmCalendarEdgeTest` | 11 | **Sommerzeit**: 23 echte Stunden zwischen zwei Auslösungen in der kurzen Nacht, 25 in der langen, Wanduhrzeit bleibt; übersprungene und doppelte Stunde; Monats-, Jahres- und Schaltjahreswechsel |
 | `ResourceParityTest` | 11 | die zwei Sprachen können nicht auseinanderlaufen: identische Schlüsselsätze, keine leeren Werte, **passende Format-Platzhalter**, vollständige Plurale, je sieben Wochentage, kein Deutsch im Standardsatz und `locales_config.xml` im Einklang mit den `values-*`-Ordnern |
 | `util/AlarmSoundTest` | 11 | die **persistierten** Sound-Ids als Goldene Map — ein Umnummerieren würde still ändern, was bestehende Wecker spielen — plus die Anzeigenamen in beiden Sprachen |
-| `BrutusApplicationTest` | 9 | Notification-Kanäle sind write-once: Wichtigkeit, DND-Bypass, Stummheit — und der Update-Kanal geht nie durch „Nicht stören“ (Robolectric) |
+| `BrutusApplicationTest` | 10 | Notification-Kanäle sind write-once: Wichtigkeit, DND-Bypass, Stummheit — und der Update-Kanal geht nie durch „Nicht stören“ (Robolectric) |
 | `update/UpdateCheckerTest` | 10 | die optionale Update-Prüfung komplett mit Fake-Quelle: aus heißt **gar keine Anfrage**, eine Benachrichtigung pro Version, nie für die installierte oder eine ältere, Tippen öffnet die Download-Seite, der Banner folgt dem Schalter (Robolectric) |
 | `update/ReleaseSourceTest` | 9 | Version aus `latest.json` der Produktseite und aus GitHubs Release lesen, Müll wirft nie, GitHub nur, wenn die Seite scheitert |
 | `update/AppVersionTest` | 8 | Release-Tags gegen die installierte Version: `2.10.0 > 2.9.1`, `v`-Präfix und `-beta`-Suffix, Müll ist nie „neuer“ |
 | `update/UpdateCheckStoreTest` | 2 | jede Änderung erreicht den Bildschirm (ein konstanter Wert wird von `collectAsState` verschluckt), Ausschalten vergisst den Fund |
+| `scheduler/AlarmNotificationsTest` | 12 | Snooze-Countdown (und „Snooze beenden“ nur bei normalen Weckern), Hinweis im eingestellten Vorlauf, „Vorzeitig beenden“ überspringt eine Auslösung und überlebt einen Neustart, nie bei Hardcore ohne Challenge, Hinweis auf verpassten Wecker genau einmal — nicht für einen, der gerade klingelt |
+| `timer/TimerControllerTest` | 6 | der Timer als echter Wecker: Wecken am Ende in Elapsed-Zeit, gespeicherter Zustand, Pause/Weiter plant neu, klingelt genau einmal, ein Timer von vor dem Neustart gilt als leer |
+| `ui/settings/AboutLinksTest` | 5 | die Links der Info-Karte, PayPal-Empfänger/Währung/Notiz, die genannte Lizenz ist die des Repos, die mitgelieferte Schriftlizenz gleicht `THIRD_PARTY_LICENSES` |
+| `ui/settings/ThemeModeTest` | 3 | System/Hell/Dunkel werden gespeichert; die Namen sind ein Vertrag |
+| `ui/alarm/SnoozeGestureTest` | 3 | die 85-%-Schwelle zählt nur die Position |
+| `ui/theme/RollingNumberTest` | 2 | Zahlen rollen in Richtung der Änderung |
 | `util/StorageTest` | 7 | der einmalige Umzug in den geräteverschlüsselten Speicher: der ausgedruckte QR-Code und ausstehende Re-Alarme überleben ihn, gesperrt zieht nichts um, er läuft nie zweimal, jeder Store ist erfasst |
 | `scheduler/ReschedulerTest` | 6 | ein Zeitzonenwechsel hält die Wanduhrzeit, Re-Alarme eines selbst deaktivierten Einmal-Weckers überleben samt Benachrichtigung, Snoozes kommen zurück, zweimal ausführen stapelt nie |
-| `service/AlarmServiceUltraHardcoreTest` | 4 | der echte Service: Snooze stellt keine Re-Alarme scharf, Beenden schon, die Lautstärke kommt auch nach einem Abbruch mitten im Klingeln zurück |
+| `service/AlarmServiceUltraHardcoreTest` | 5 | der echte Service: Snooze stellt keine Re-Alarme scharf, Beenden schon (auch bevor der Ton geladen ist), die Lautstärke kommt auch nach einem Abbruch mitten im Klingeln zurück |
 | `receiver/SystemChangeReceiverTest` | 3 | jede behandelte Aktion steht im Manifest-Filter, der ganze Klingel-Pfad ist `directBootAware` |
 | `widget/NextAlarmWidgetLockedTest` | 2 | das Widget wird vor dem ersten Entsperren nie angefasst |
 | `update/UpdateSchedulerTest` | 6 | Einschalten plant eine tägliche, netzgebundene Prüfung plus eine sofortige; Aus löscht alles; nach dem Update bleibt es aus (WorkManager-Testtreiber) |
@@ -836,7 +898,7 @@ app/src/main/res/
 | `scheduler/AlarmSchedulerConstantsTest` | 4 | Ultra-Hardcore-Offsets, Sunrise-Vorlauf, Eindeutigkeit der Intent-Extras |
 
 ```bash
-./gradlew :app:testDebugUnitTest          # alle 306
+./gradlew :app:testDebugUnitTest          # alle 339
 ./gradlew :app:testDebugUnitTest --tests '*NextAlarmCalculatorTest'
 # HTML-Report: app/build/reports/tests/testDebugUnitTest/index.html
 ```

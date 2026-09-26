@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.pepperonas.brutus.timer.TimerController
 import com.pepperonas.brutus.util.AlarmSound
 import com.pepperonas.brutus.util.SoundPreviewPlayer
 import com.pepperonas.brutus.util.TimerSoundStore
@@ -19,10 +20,10 @@ import kotlinx.coroutines.launch
 enum class TimerState { IDLE, RUNNING, PAUSED, FINISHED }
 
 /**
- * Holds the countdown state and the ticking loop OUTSIDE the composition, so a
- * running timer survives bottom-nav tab switches (the screen composable gets
- * disposed on every tab change) and still fires its finish sound while the user
- * is on another tab.
+ * The screen's view of the timer. The timer itself lives in [TimerController] (persisted, woken by
+ * AlarmManager, rung by a service), so it keeps running when the app is left or killed; this
+ * ViewModel mirrors it — including changes made from the notification — and runs the ticker that
+ * repaints the countdown.
  *
  * [now] is injectable for unit tests; @JvmOverloads keeps the (Application)
  * constructor the AndroidViewModelFactory instantiates via reflection.
@@ -51,6 +52,41 @@ class TimerViewModel @JvmOverloads constructor(
     val player = SoundPreviewPlayer(application)
     private var tickerJob: Job? = null
 
+    init {
+        mirror()
+        // Pause/resume/cancel from the notification (or the timer ringing) while the screen is open.
+        viewModelScope.launch { TimerController.changes(application).collect { mirror() } }
+    }
+
+    private fun mirror() {
+        val s = TimerController.snapshot(getApplication())
+        when (s.phase) {
+            TimerController.Phase.RUNNING -> {
+                endAt = s.endAt
+                tick = now()
+                if (state != TimerState.RUNNING) {
+                    state = TimerState.RUNNING
+                    startTicker()
+                }
+            }
+            TimerController.Phase.PAUSED -> {
+                remaining = s.remaining
+                state = TimerState.PAUSED
+                stopTicker()
+            }
+            TimerController.Phase.FINISHED -> {
+                remaining = 0L
+                state = TimerState.FINISHED
+                stopTicker()
+            }
+            TimerController.Phase.IDLE -> if (state != TimerState.IDLE) {
+                state = TimerState.IDLE
+                remaining = 0L
+                stopTicker()
+            }
+        }
+    }
+
     val liveRemaining: Long
         get() = when (state) {
             TimerState.RUNNING -> (endAt - tick).coerceAtLeast(0L)
@@ -72,6 +108,7 @@ class TimerViewModel @JvmOverloads constructor(
         endAt = tick + totalMs
         remaining = totalMs
         state = TimerState.RUNNING
+        TimerController.start(getApplication(), totalMs, tick)
         startTicker()
     }
 
@@ -79,12 +116,14 @@ class TimerViewModel @JvmOverloads constructor(
         remaining = (endAt - now()).coerceAtLeast(0L)
         state = TimerState.PAUSED
         stopTicker()
+        TimerController.paused(getApplication(), remaining, now())
     }
 
     fun resume() {
         tick = now()
         endAt = tick + remaining
         state = TimerState.RUNNING
+        TimerController.start(getApplication(), remaining, tick)
         startTicker()
     }
 
@@ -104,6 +143,7 @@ class TimerViewModel @JvmOverloads constructor(
         stopTicker()
         state = TimerState.IDLE
         remaining = 0L
+        TimerController.cancel(getApplication())
     }
 
     /** True right after cancel() aborted a running/paused countdown. */
@@ -119,6 +159,7 @@ class TimerViewModel @JvmOverloads constructor(
             resume()
         } else {
             state = TimerState.PAUSED
+            TimerController.paused(getApplication(), rem, now())
         }
     }
 
@@ -130,7 +171,9 @@ class TimerViewModel @JvmOverloads constructor(
                 if (tick >= endAt) {
                     state = TimerState.FINISHED
                     remaining = 0L
-                    player.play(selectedSound)
+                    // The ring service plays the tone (also when the app is closed); AlarmManager
+                    // fires at the same instant — fired() is idempotent, whoever comes first rings.
+                    TimerController.fired(getApplication())
                     break
                 }
                 delay(100L)

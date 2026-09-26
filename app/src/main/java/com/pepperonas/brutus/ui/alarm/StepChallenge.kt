@@ -115,6 +115,7 @@ fun StepChallenge(
 
     val progress by animateFloatAsState(
         targetValue = (steps.toFloat() / requiredSteps).coerceIn(0f, 1f),
+        animationSpec = WavyProgressIndicatorDefaults.ProgressAnimationSpec,
         label = "stepProgress"
     )
 

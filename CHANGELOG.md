@@ -4,6 +4,56 @@
 
 All notable changes to Brutus are documented here. Versions follow [SemVer](https://semver.org).
 
+## [2.4.0] — 2026-09-26 · Settings & info, notifications, a real timer, and motion with physics
+
+### Added — Settings & info
+- **⋮ → Settings & info**, built like Flipper the Ripper's settings: theme **System / Light / Dark**
+  (before, Brutus always followed the system), Material You colours, the heads-up lead time, the update
+  check (moved here from the ⋮ menu), and **About Brutus** — version and build, author, links to the
+  website, celox.io, the source and the MIT licence, the Space Grotesk font licence (OFL 1.1, previously
+  only in the repository) and a PayPal donate button.
+
+### Added — notifications
+- **Heads-up before an alarm** (Off / 30 / 60 / 120 min, default 60) with a countdown and **Dismiss early**,
+  which skips this one occurrence. A Hardcore alarm is only dismissed early by solving its own challenges —
+  never by a button. The skipped occurrence survives reboots; header and widget show the next one.
+- **Snooze countdown** — "Snoozed — rings again at 07:05", with Cancel snooze for normal alarms.
+- **Countdown in the Ultra Hardcore reminder** to the next re-alarm.
+- **Missed alarm** — after a reboot or a clock jump, a note for an alarm that was due while the phone was off.
+
+### Changed — the timer is a real alarm
+- The countdown used to live only in the screen: leaving the app with Back ended it silently, in the
+  background it rang late or never. Now its state is persisted, AlarmManager wakes the phone at the end,
+  a foreground service rings, and a notification shows the countdown with Pause / Resume / Abort (the
+  ringing one has Stop). Verified on an emulator: app left, process killed, rang on time.
+
+### Changed — Material 3 Expressive motion and physics
+- Every animation now takes its spec from the theme's `MotionScheme` instead of hand-picked tweens.
+- **Snooze thumb** with real fling physics: the release spring carries the finger's velocity, a haptic tick
+  at the 85 % point; still position-only, so a flick never snoozes by accident.
+- **Swipe to delete** follows the finger (colour, growing bin, tick when letting go would delete).
+- **Button groups** on Timer and Stopwatch (the pressed button widens, its neighbour yields), labels that
+  roll to their new word, numbers that roll like a counter, a pop per counted shake, and a springy
+  wobble with a buzz on a wrong math answer.
+- Bottom sheets now **slide out** on save instead of vanishing; banners, list ↔ empty state, the "Done!"
+  moment and the stop button animate instead of jumping; `LoadingIndicator` while the camera starts,
+  `LinearWavyProgressIndicator` for Sunrise, a continuously draining timer ring.
+- The ringing screen no longer **recomposes 60 times a second** for its breathing background, and the
+  snooze hint pulse only repaints.
+- "Remove animations" is re-read whenever the app comes back; with it on, tab changes fade instead of slide.
+- The README claimed `ButtonGroup` and `FloatingToolbar`; neither was used. `ButtonGroup` now is, the
+  claim about `FloatingToolbar` is gone.
+
+### Fixed
+- An Ultra Hardcore alarm dismissed in the split second before its sound had loaded — or taken over
+  by a second alarm in that moment — armed no follow-ups: the service only knew "Ultra Hardcore" from
+  a flag set after loading. It now asks the database. Found by a test that went red under load.
+
+### Tests
+- 33 new unit tests (306 → 339): notifications and early dismiss (incl. the Hardcore guard), missed
+  alarms, the timer controller, About links and the bundled licence, theme mode, snooze threshold.
+  Each new guard was re-introduced once to see its test fail.
+
 ## [2.3.1] — 2026-09-26 · Rings before the first unlock, and a dozen more fixes
 
 A review of the whole alarm path found bugs that each could make someone oversleep. All are fixed,

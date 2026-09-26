@@ -1,5 +1,12 @@
 package com.pepperonas.brutus.ui.alarm
 
+import com.pepperonas.brutus.util.rememberBrutusHaptics
+import com.pepperonas.brutus.ui.theme.rememberReducedMotion
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.Animatable
 import android.content.res.Configuration
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
@@ -108,6 +115,24 @@ fun MathChallenge(
     var problem by remember { mutableStateOf(generateProblem(difficulty)) }
     var userInput by remember { mutableStateOf("") }
     var showError by remember { mutableStateOf(false) }
+    val haptics = rememberBrutusHaptics()
+    val reducedMotion = rememberReducedMotion()
+
+    // A wrong answer shakes the readout like a head saying no: the field is kicked sideways and a
+    // lightly damped spring lets it wobble back. Deliberately bouncier than the theme's springs.
+    var wrongCount by remember { mutableIntStateOf(0) }
+    val wobble = remember { Animatable(0f) }
+    LaunchedEffect(wrongCount) {
+        if (wrongCount == 0) return@LaunchedEffect
+        haptics.warn()
+        if (reducedMotion) return@LaunchedEffect
+        wobble.snapTo(0f)
+        wobble.animateTo(
+            0f,
+            spring(dampingRatio = WRONG_ANSWER_DAMPING, stiffness = Spring.StiffnessMediumLow),
+            initialVelocity = WRONG_ANSWER_KICK,
+        )
+    }
 
     val submit: () -> Unit = {
         if (userInput.toIntOrNull() == problem.answer) {
@@ -119,6 +144,7 @@ fun MathChallenge(
         } else {
             showError = true
             userInput = ""
+            wrongCount++
         }
     }
 
@@ -162,6 +188,7 @@ fun MathChallenge(
         // Answer readout
         Box(
             modifier = Modifier
+                .graphicsLayer { translationX = wobble.value }
                 .fillMaxWidth(0.6f)
                 .background(
                     Color.White.copy(alpha = 0.08f),
@@ -299,3 +326,9 @@ private fun MathChallengePreview() {
         MathChallenge(totalRequired = 3, onComplete = {})
     }
 }
+
+/** Spring of the "wrong answer" wobble: low damping so it visibly swings a few times. */
+internal const val WRONG_ANSWER_DAMPING = 0.25f
+
+/** Initial sideways velocity (px/s) of the wobble. */
+internal const val WRONG_ANSWER_KICK = 2400f

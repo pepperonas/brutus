@@ -11,6 +11,9 @@ object RingingStore {
     private const val PREFS = "brutus_ringing"
     private const val KEY_SNOOZE = "snooze_"          // snooze_{alarmId} = "triggerAt;followup;seq"
     private const val KEY_PREVIOUS_VOLUME = "previous_alarm_volume"
+    private const val KEY_EXPECTED = "expected_"    // expected_{alarmId} = trigger AlarmManager was given
+    private const val KEY_SKIP = "skip_"            // skip_{alarmId} = occurrence the user dismissed early
+    private const val KEY_UPCOMING = "upcoming_"    // upcoming_{alarmId} = trigger its heads-up announces
 
     data class Snooze(val alarmId: Long, val triggerAt: Long, val isFollowup: Boolean, val followupSeq: Int)
 
@@ -48,4 +51,46 @@ object RingingStore {
     fun forgetVolume(context: Context) {
         prefs(context).edit().remove(KEY_PREVIOUS_VOLUME).commit()
     }
+
+    // ---- missed-alarm detection: what was due, and whether it rang ------------------------------
+
+    fun setExpected(context: Context, alarmId: Long, triggerAt: Long) {
+        prefs(context).edit().putLong("$KEY_EXPECTED$alarmId", triggerAt).commit()
+    }
+
+    fun clearExpected(context: Context, alarmId: Long) {
+        prefs(context).edit().remove("$KEY_EXPECTED$alarmId").commit()
+    }
+
+    fun expected(context: Context): Map<Long, Long> = longMap(context, KEY_EXPECTED)
+
+    // ---- "dismiss early": one skipped occurrence per alarm --------------------------------------
+
+    fun skip(context: Context, alarmId: Long, occurrence: Long) {
+        prefs(context).edit().putLong("$KEY_SKIP$alarmId", occurrence).commit()
+    }
+
+    fun clearSkip(context: Context, alarmId: Long) {
+        prefs(context).edit().remove("$KEY_SKIP$alarmId").commit()
+    }
+
+    fun skips(context: Context): Map<Long, Long> = longMap(context, KEY_SKIP)
+
+    fun setUpcomingShown(context: Context, alarmId: Long, triggerAt: Long) {
+        prefs(context).edit().putLong("$KEY_UPCOMING$alarmId", triggerAt).commit()
+    }
+
+    fun clearUpcomingShown(context: Context, alarmId: Long) {
+        prefs(context).edit().remove("$KEY_UPCOMING$alarmId").commit()
+    }
+
+    fun upcomingShown(context: Context, alarmId: Long): Long? =
+        prefs(context).getLong("$KEY_UPCOMING$alarmId", -1L).takeIf { it >= 0 }
+
+    private fun longMap(context: Context, prefix: String): Map<Long, Long> =
+        prefs(context).all.mapNotNull { (key, value) ->
+            if (!key.startsWith(prefix)) return@mapNotNull null
+            val id = key.removePrefix(prefix).toLongOrNull() ?: return@mapNotNull null
+            id to ((value as? Long) ?: return@mapNotNull null)
+        }.toMap()
 }

@@ -1,5 +1,11 @@
 package com.pepperonas.brutus.ui.alarm
 
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.runtime.State
+import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -62,6 +68,7 @@ import com.pepperonas.brutus.R
  * Slide-to-unlock style snooze button. User must drag the thumb from the left
  * to past ~85% of the track width to trigger [onSnooze]. Spring-back otherwise.
  */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SwipeToSnoozeButton(
     onSnooze: () -> Unit,
@@ -74,13 +81,24 @@ fun SwipeToSnoozeButton(
     val thumbSizePx = with(density) { thumbSize.toPx() }
 
     var trackWidthPx by remember { mutableFloatStateOf(0f) }
-    val offsetX = remember { Animatable(0f) }
+    // One source of truth for the thumb position: the drag writes it directly, the release
+    // animation writes it frame by frame — no coroutine per pointer event fighting the fling.
+    var offsetX by remember { mutableFloatStateOf(0f) }
     val scope = rememberCoroutineScope()
     var triggered by remember { mutableStateOf(false) }
     val haptics = rememberBrutusHaptics()
+    val releaseSpring = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
+    val snapSpring = MaterialTheme.motionScheme.fastSpatialSpec<Float>()
 
     val maxOffset = (trackWidthPx - thumbSizePx).coerceAtLeast(0f)
-    val progress = if (maxOffset > 0f) (offsetX.value / maxOffset).coerceIn(0f, 1f) else 0f
+    val progress = if (maxOffset > 0f) (offsetX / maxOffset).coerceIn(0f, 1f) else 0f
+    // A tick the moment the thumb crosses the point of no return, so the finger feels it.
+    var armed by remember { mutableStateOf(false) }
+    LaunchedEffect(snoozeArmed(offsetX, maxOffset)) {
+        val nowArmed = snoozeArmed(offsetX, maxOffset)
+        if (nowArmed && !armed && !triggered) haptics.tap()
+        armed = nowArmed
+    }
     val accent = MaterialTheme.colorScheme.tertiary
     val onAccent = MaterialTheme.colorScheme.onTertiary
 
@@ -90,15 +108,16 @@ fun SwipeToSnoozeButton(
     val snoozeAction = stringResource(R.string.snooze_action)
 
     // Pulsing hint when idle — static when system animations are disabled.
+    // Kept as State and read in layer/offset lambdas: the pulse repaints, it does not recompose.
     val reducedMotion = rememberReducedMotion()
-    val hintAlpha: Float
-    val hintShift: Float
+    val hintAlpha: State<Float>
+    val hintShift: State<Float>
     if (reducedMotion) {
-        hintAlpha = 1f
-        hintShift = 0f
+        hintAlpha = remember { mutableFloatStateOf(1f) }
+        hintShift = remember { mutableFloatStateOf(0f) }
     } else {
         val infinite = rememberInfiniteTransition(label = "snoozeHint")
-        val alphaAnim by infinite.animateFloat(
+        val alphaAnim = infinite.animateFloat(
             initialValue = 0.35f,
             targetValue = 1f,
             animationSpec = infiniteRepeatable(
@@ -107,7 +126,7 @@ fun SwipeToSnoozeButton(
             ),
             label = "hintAlpha"
         )
-        val shiftAnim by infinite.animateFloat(
+        val shiftAnim = infinite.animateFloat(
             initialValue = 0f,
             targetValue = 8f,
             animationSpec = infiniteRepeatable(
@@ -128,7 +147,7 @@ fun SwipeToSnoozeButton(
     LaunchedEffect(triggered) {
         if (triggered) {
             kotlinx.coroutines.delay(400)
-            offsetX.snapTo(0f)
+            offsetX = 0f
             triggered = false
         }
     }
@@ -187,18 +206,21 @@ fun SwipeToSnoozeButton(
         ) {
             Text(
                 text = swipeHint,
-                color = accent.copy(alpha = hintAlpha),
+                color = accent,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 15.sp,
-                modifier = Modifier.padding(end = 6.dp)
+                modifier = Modifier
+                    .padding(end = 6.dp)
+                    .graphicsLayer { alpha = hintAlpha.value }
             )
             Icon(
                 Icons.Default.KeyboardDoubleArrowRight,
                 contentDescription = null,
-                tint = accent.copy(alpha = hintAlpha),
+                tint = accent,
                 modifier = Modifier
                     .size(20.dp)
-                    .offset { IntOffset(hintShift.toInt(), 0) }
+                    .graphicsLayer { alpha = hintAlpha.value }
+                    .offset { IntOffset(hintShift.value.toInt(), 0) }
             )
         }
 
@@ -206,48 +228,34 @@ fun SwipeToSnoozeButton(
         Box(
             modifier = Modifier
                 .padding(thumbPadding)
-                .offset { IntOffset(offsetX.value.toInt(), 0) }
+                .offset { IntOffset(offsetX.toInt(), 0) }
                 .size(thumbSize)
                 .clip(RoundedCornerShape(percent = thumbCornerPercent))
                 .background(accent)
-                .pointerInput(maxOffset) {
-                    if (maxOffset <= 0f) return@pointerInput
-                    detectHorizontalDragGestures(
-                        onDragEnd = {
-                            scope.launch {
-                                if (offsetX.value >= maxOffset * 0.85f && !triggered) {
-                                    offsetX.animateTo(maxOffset, tween(150))
-                                    triggered = true
-                                    haptics.success()
-                                    onSnooze()
-                                } else {
-                                    offsetX.animateTo(
-                                        0f,
-                                        spring(
-                                            dampingRatio = 0.55f,
-                                            stiffness = Spring.StiffnessMedium
-                                        )
-                                    )
-                                }
+                .draggable(
+                    orientation = Orientation.Horizontal,
+                    enabled = maxOffset > 0f && !triggered,
+                    state = rememberDraggableState { delta ->
+                        offsetX = (offsetX + delta).coerceIn(0f, maxOffset)
+                    },
+                    onDragStopped = { velocity ->
+                        // Only the position decides (see snoozeArmed) — a quick flick must not
+                        // snooze by accident. The fling's velocity feeds the spring either way,
+                        // so the thumb carries the finger's momentum instead of stopping dead.
+                        if (snoozeArmed(offsetX, maxOffset) && !triggered) {
+                            triggered = true
+                            haptics.success()
+                            animate(offsetX, maxOffset, initialVelocity = velocity, animationSpec = snapSpring) { v, _ ->
+                                offsetX = v
                             }
-                        },
-                        onDragCancel = {
-                            scope.launch {
-                                offsetX.animateTo(
-                                    0f,
-                                    spring(dampingRatio = 0.6f, stiffness = Spring.StiffnessMedium)
-                                )
-                            }
-                        },
-                        onHorizontalDrag = { change, dragAmount ->
-                            change.consume()
-                            scope.launch {
-                                val next = (offsetX.value + dragAmount).coerceIn(0f, maxOffset)
-                                offsetX.snapTo(next)
+                            onSnooze()
+                        } else {
+                            animate(offsetX, 0f, initialVelocity = velocity, animationSpec = releaseSpring) { v, _ ->
+                                offsetX = v.coerceIn(-thumbSizePx / 4, maxOffset)
                             }
                         }
-                    )
-                },
+                    },
+                ),
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -273,3 +281,9 @@ private fun SwipeToSnoozePreview() {
     }
 }
 
+
+/** Past this share of the track, releasing the thumb snoozes. Position only, never velocity. */
+internal const val SNOOZE_THRESHOLD = 0.85f
+
+internal fun snoozeArmed(offset: Float, maxOffset: Float): Boolean =
+    maxOffset > 0f && offset >= maxOffset * SNOOZE_THRESHOLD

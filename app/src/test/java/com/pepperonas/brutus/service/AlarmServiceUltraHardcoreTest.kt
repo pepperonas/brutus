@@ -101,6 +101,26 @@ class AlarmServiceUltraHardcoreTest {
     }
 
     @Test
+    fun `a dismiss before the sound has loaded still arms the follow-ups`() {
+        val alarm = uhcAlarm()
+        val start = Intent(context, AlarmService::class.java)
+            .setAction(AlarmService.ACTION_START)
+            .putExtra("alarm_id", alarm.id)
+        val service = Robolectric.buildService(AlarmService::class.java, start).create().startCommand(0, 1).get()
+        started += service
+        // Wait for the DB side only — the main looper stays paused, so the in-memory
+        // "is Ultra Hardcore" flag has not been set yet.
+        val until = System.currentTimeMillis() + 5_000
+        while (runBlocking { db.alarmDao().getById(alarm.id)?.enabled } != false) {
+            if (System.currentTimeMillis() > until) fail("alarm not loaded")
+            Thread.sleep(20)
+        }
+
+        service.onStartCommand(Intent(context, AlarmService::class.java).setAction(AlarmService.ACTION_STOP), 0, 2)
+        waitFor("follow-ups armed") { UltraHardcoreStore.listPending(context).size == 2 }
+    }
+
+    @Test
     fun `dismissing an Ultra Hardcore alarm arms both follow-ups`() {
         val alarm = uhcAlarm()
         val service = ring(alarm).get()

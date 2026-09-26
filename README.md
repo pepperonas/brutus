@@ -19,7 +19,7 @@
 <!-- Project status — these badges are live and update themselves. -->
 
 [![Tests](https://img.shields.io/github/actions/workflow/status/pepperonas/brutus/tests.yml?branch=main&label=tests&logo=githubactions&logoColor=white)](https://github.com/pepperonas/brutus/actions/workflows/tests.yml)
-[![Unit tests](https://img.shields.io/badge/unit%20tests-306-brightgreen)](#tests-and-ci)
+[![Unit tests](https://img.shields.io/badge/unit%20tests-339-brightgreen)](#tests-and-ci)
 [![Release](https://img.shields.io/github/v/release/pepperonas/brutus?color=FF5252&logo=github&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/pepperonas/brutus/total?label=APK%20downloads&color=success&logo=github&logoColor=white)](https://github.com/pepperonas/brutus/releases)
 [![Last commit](https://img.shields.io/github/last-commit/pepperonas/brutus?logo=git&logoColor=white)](https://github.com/pepperonas/brutus/commits/main)
@@ -116,6 +116,9 @@ Everything is packed into a four-tab bottom navigation that keeps the brutal ala
   - [World Clock](#world-clock)
   - [Stopwatch](#stopwatch)
   - [Timer](#timer)
+  - [Settings & info](#settings--info)
+  - [Notifications](#notifications)
+  - [Motion and physics](#motion-and-physics)
   - [Theming and Material You](#theming-and-material-you)
   - [Languages](#languages)
   - [Scheduling](#scheduling)
@@ -387,7 +390,7 @@ All three banners disappear automatically as soon as the corresponding system st
 
 ### Update notice
 
-Opt-in since v2.3.0: **⋮ → Check for updates** (off by default, also for existing installs).
+Opt-in since v2.3.0: **⋮ → Settings & info → Check for updates** (off by default, also for existing installs; until v2.4.0 the switch sat directly in the ⋮ menu).
 
 - Switched **on**, Brutus asks once right away and then once a day — WorkManager, only with a
   network — for the newest version: `GET https://brutus.celox.io/latest.json`, falling back to
@@ -439,7 +442,7 @@ Default seeded set on first launch: **Europe/Berlin**, **America/New_York**, **A
 
 ### Stopwatch
 
-Centisecond-precision stopwatch built on `SystemClock.elapsedRealtime()` (unaffected by wall-clock jumps). A single large monospace-width readout (using the Material 3 Light weight for elegance), a red **Start / Stop** circle button, and a surface-variant **Reset / Lap** circle button. Laps are persisted in-memory during the session and shown as a list with per-lap and cumulative columns. Lap button becomes available automatically while the timer is running.
+Centisecond-precision stopwatch built on `SystemClock.elapsedRealtime()` (unaffected by wall-clock jumps). A single large monospace-width readout (using the Material 3 Light weight for elegance) and an expressive button group — **Reset / Lap** and **Start / Stop**, whose labels roll to their new word. Laps are persisted in-memory during the session and shown as a list with per-lap and cumulative columns. Lap button becomes available automatically while the timer is running.
 
 Since **v1.8.0** the stopwatch (and the timer) keep their entire state — including a running measurement, laps, and a timer's finish sound — in Activity-scoped ViewModels, so switching bottom-nav tabs no longer resets them.
 
@@ -447,7 +450,59 @@ Since **v1.8.0** the stopwatch (and the timer) keep their entire state — inclu
 
 HMS picker (hours 0–23, minutes 0–59, seconds 0–59) with up/down steppers on each column. Quick-preset row for common durations (1m, 3m, 5m, 10m, 15m, 30m). A **gentle-sound picker** (added in v1.5.0) below the presets lets you pick the finish tone — defaults to **Chime**, choice persists across launches via `TimerSoundStore`. Tapping a chip previews the sound; **Stop** halts the preview.
 
-During the countdown the screen switches to a large 64 sp time readout and two circle buttons (**Abort / Pause-Resume**). When the timer expires the chosen synthesized sound (or the system ringtone if **System alarm** is picked) plays in a loop with `USAGE_ALARM` audio attributes until **Stop** is pressed — behavior mirrors a classic kitchen timer rather than a brutal wake mode.
+During the countdown the screen switches to a large 56 sp readout in a continuously draining wavy ring and a button group (**Abort / Pause-Resume**). When the timer expires the chosen synthesized sound (or the system ringtone if **System alarm** is picked) plays in a loop with `USAGE_ALARM` audio attributes until **Stop** is pressed — behavior mirrors a classic kitchen timer rather than a brutal wake mode.
+
+Since **v2.4.0 the timer is a real alarm**: its state is persisted (`timer/TimerController`), AlarmManager wakes the phone at the end and a foreground service rings — also when the app was left with Back or its process was killed (before, it silently ended). A notification shows the countdown with Pause/Resume/Abort; the ringing one has **Stop**. Verified on an emulator: timer started, app left, process killed, it rang on time.
+
+### Settings & info
+
+Since **v2.4.0**: **⋮ → Settings & info**, built like Flipper the Ripper's settings — a section title
+in the primary colour over a rounded card.
+
+- **Appearance** — theme **System / Light / Dark** (the alarm screens stay dark), **Material You colors**
+  (Android 12+).
+- **Notifications** — how long before an alarm the heads-up appears (**Off / 30 / 60 / 120 min**), and the
+  opt-in **update check**.
+- **About Brutus** — the app mark, version and build, "Made by Martin Pfeffer", chips for the
+  [website](https://brutus.celox.io), celox.io, the source code and the MIT licence, the **Space Grotesk
+  font licence (OFL 1.1)** in a dialog, and a PayPal donate button that springs under the finger.
+
+### Notifications
+
+| Notification | When | What it offers |
+|---|---|---|
+| **Heads-up** | the chosen lead before an alarm (default 60 min) | countdown to the alarm; **Dismiss early** skips this one occurrence — for **Hardcore alarms only after solving the alarm's own challenges** (silent, no snooze) |
+| **Snoozed** | while an alarm is snoozed | countdown to when it rings again; **Cancel snooze** (not for Hardcore alarms) |
+| **Ultra Hardcore** | while follow-ups are armed | countdown to the next re-alarm; opens the step task |
+| **Missed alarm** | after a reboot or clock jump, if an alarm was due while the phone was off | the time it was due |
+| **Timer** | while the timer runs | countdown with **Pause / Resume / Abort**; when it ends, a ringing notification with **Stop** |
+
+A skipped occurrence is remembered, so a reboot cannot bring it back; the list header and the widget show
+the occurrence after it. The heads-up and the snooze countdown use a quiet channel (*Upcoming alarms*,
+low importance), missed alarms their own (*Missed alarms*); none of them breaks through Do Not Disturb.
+
+### Motion and physics
+
+Brutus runs on `MaterialExpressiveTheme` with `MotionScheme.expressive()`, and since v2.4.0 every
+animation takes its spec from `MaterialTheme.motionScheme` instead of hand-picked tweens.
+
+- **Snooze thumb** — dragged with `draggable`, released onto a spring that carries the finger's
+  **fling velocity**; a haptic tick at the 85 % point of no return. Only the position decides — a quick
+  flick never snoozes by accident.
+- **Swipe to delete** — the red deepens and the bin grows with the drag, jumps once more (and ticks) when
+  letting go would delete.
+- **Button groups** (`ButtonGroup` + `animateWidth`) on Timer and Stopwatch: the pressed button widens, its
+  neighbour yields; labels roll to their new word (Start → Stop, Pause → Resume).
+- **Numbers roll** like a mechanical counter in every stepper; the shake counter pops on each shake; a
+  wrong math answer shakes the readout on a lightly damped spring with a warning buzz.
+- **Transitions instead of jumps** — bottom sheets slide out on save, banners slide in and out, list ↔ empty
+  state crossfades, the "Done!" moment and the stop button spring in, the challenge dots swell.
+- **Loading and progress** — `LoadingIndicator` while the camera starts, `LinearWavyProgressIndicator` for
+  the Sunrise lead-in, a continuously draining timer ring.
+- **Cheap to draw** — the breathing alarm background and the snooze hint pulse are read in draw/layer
+  lambdas, so they repaint without recomposing the screen every frame.
+- **Reduced motion** is re-read every time the app comes back; with animations off, decorative loops stop
+  and tab changes fade instead of sliding.
 
 ### Theming and Material You
 
@@ -591,7 +646,7 @@ If you'd rather do it manually:
 | `CAMERA` | QR code scanning challenge | Runtime, when the alarm fires and QR challenge is active |
 | `ACTIVITY_RECOGNITION` (since v1.4.0) | Step counter for the Ultra Hardcore anti-snooze task | Runtime, when enabling Ultra Hardcore Mode or opening the task screen |
 | `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` (since v1.6.0) | Lets the battery-optimization banner deep-link the system whitelist dialog | Install time (the dialog itself is opt-in per device) |
-| `INTERNET` (since v2.3.0) | Only for the opt-in update check (⋮ → Check for updates, off by default) | Install time — unused until you switch the check on |
+| `INTERNET` (since v2.3.0) | Only for the opt-in update check (Settings & info → Check for updates, off by default) | Install time — unused until you switch the check on |
 | `VIBRATE` | Vibration pattern during alarm | Install time |
 | `USE_FULL_SCREEN_INTENT` | Lock-screen alarm overlay | Install time |
 | `FOREGROUND_SERVICE` / `FOREGROUND_SERVICE_MEDIA_PLAYBACK` | Alarm playback service | Install time |
@@ -729,7 +784,7 @@ Expressive APIs (`MaterialExpressiveTheme`, `MotionScheme`, `expressiveLightColo
 still `internal`. They graduate in the 1.5.0-alpha channel, and **1.5.0-alpha18 is the newest
 alpha still built against Compose 1.11** — alpha19+ pulls Compose 1.12 and would force
 compileSdk 37 + AGP 9.1. Components that had not graduated by alpha18 (`ButtonGroup`,
-`FloatingToolbar`) are used behind an explicit `@OptIn(ExperimentalMaterial3ExpressiveApi)`.
+`LoadingIndicator`, `LinearWavyProgressIndicator`) are used behind an explicit `@OptIn(ExperimentalMaterial3ExpressiveApi)`.
 
 No Hilt, no Koin, no Dagger — manual DI via the Application class. No Retrofit, no coroutines channels, no Flow operators beyond `stateIn`. The codebase is small on purpose: **80 Kotlin files, ~12,000 lines** — 53 of them production code.
 
@@ -821,7 +876,7 @@ app/src/main/res/
 
 ## Tests and CI
 
-306 JVM unit tests guard the parts where a bug means someone oversleeps: what actually lands in
+339 JVM unit tests guard the parts where a bug means someone oversleeps: what actually lands in
 `AlarmManager`, the alarm-time arithmetic, persistence, the completeness of both translations, and
 every string the user reads on a clock face. There are no instrumented tests — the whole suite runs
 on the JVM in seconds.
@@ -837,14 +892,20 @@ on the JVM in seconds.
 | `util/NextAlarmCalendarEdgeTest` | 11 | **daylight saving**: 23 real hours between triggers on the short night, 25 on the long one, wall-clock time preserved; the skipped and the duplicated hour; month, year and leap-day rollovers |
 | `util/AlarmSoundTest` | 11 | the **persisted** sound ids as a golden map — renumbering would silently change what existing alarms play — plus the display names in both languages |
 | `ResourceParityTest` | 11 | the two languages cannot drift: identical key sets, no blank values, **matching format specifiers**, complete plurals, seven weekdays each, no German left in the default file, and `locales_config.xml` in sync with the `values-*` folders |
-| `BrutusApplicationTest` | 9 | notification channels are write-once: importance, DND bypass, silence — and the update channel never breaks through DND (Robolectric) |
+| `BrutusApplicationTest` | 10 | notification channels are write-once: importance, DND bypass, silence — and the update channel never breaks through DND (Robolectric) |
 | `update/UpdateCheckerTest` | 10 | the opt-in update check end to end with a fake source: off means **no request at all**, one notification per version, never for the installed or an older one, the tap opens the download page, the banner follows the switch (Robolectric) |
 | `update/ReleaseSourceTest` | 9 | reading the version from the product page's `latest.json` and GitHub's release, garbage never throws, GitHub only asked when the page fails |
 | `update/AppVersionTest` | 8 | release tags vs. the installed version: `2.10.0 > 2.9.1`, `v`-prefix and `-beta` suffix, garbage is never "newer" |
 | `update/UpdateCheckStoreTest` | 2 | every change reaches the screen (a constant emission is swallowed by `collectAsState`), switching off forgets the finding |
+| `scheduler/AlarmNotificationsTest` | 12 | snooze countdown (and "Cancel snooze" only for normal alarms), heads-up armed the configured lead before the alarm, "Dismiss early" skips one occurrence and survives a reboot, never for a Hardcore alarm without its challenge, missed-alarm notice once — not for an alarm ringing right now |
+| `timer/TimerControllerTest` | 6 | the timer as a real alarm: elapsed-time wake-up at the end, persisted state, pause/resume re-arm, rings exactly once, a timer from before a reboot reads as idle |
+| `ui/settings/AboutLinksTest` | 5 | the About links, PayPal recipient/currency/note, the licence named in-app is the repo's, the bundled font licence equals `THIRD_PARTY_LICENSES` |
+| `ui/settings/ThemeModeTest` | 3 | System/Light/Dark round-trips; stored names are a persisted contract |
+| `ui/alarm/SnoozeGestureTest` | 3 | the 85 % point of no return is position-only |
+| `ui/theme/RollingNumberTest` | 2 | numbers roll in the direction of the change |
 | `util/StorageTest` | 7 | the one-time move to device-protected storage: the printed QR code and pending follow-ups survive it, nothing moves while locked, it never runs twice, every store is covered |
 | `scheduler/ReschedulerTest` | 6 | a time-zone change keeps the wall-clock time, follow-ups of a self-disabled one-shot alarm survive with their notification, snoozes restored, running twice never stacks |
-| `service/AlarmServiceUltraHardcoreTest` | 4 | the real service: snoozing does not arm the follow-ups, dismissing does, the volume comes back even after a mid-ring kill |
+| `service/AlarmServiceUltraHardcoreTest` | 5 | the real service: snoozing does not arm the follow-ups, dismissing does (even before the sound has loaded), the volume comes back even after a mid-ring kill |
 | `receiver/SystemChangeReceiverTest` | 3 | every handled action is in the manifest filter, the whole ringing path is `directBootAware` |
 | `widget/NextAlarmWidgetLockedTest` | 2 | the widget is never touched before the first unlock |
 | `update/UpdateSchedulerTest` | 6 | switching on schedules a daily, network-bound check plus one immediate check; off cancels everything; default stays off after updating (WorkManager test driver) |
@@ -866,7 +927,7 @@ on the JVM in seconds.
 | `scheduler/AlarmSchedulerConstantsTest` | 4 | Ultra Hardcore offsets, sunrise lead time, intent-extra uniqueness |
 
 ```bash
-./gradlew :app:testDebugUnitTest          # all 306
+./gradlew :app:testDebugUnitTest          # all 339
 ./gradlew :app:testDebugUnitTest --tests '*NextAlarmCalculatorTest'
 # HTML report: app/build/reports/tests/testDebugUnitTest/index.html
 ```
@@ -906,7 +967,7 @@ app/src/test/java/com/pepperonas/brutus/
 ├── receiver/
 │   └── SystemChangeReceiverTest.kt     3 — manifest filter covers every handled action, direct-boot awareness
 ├── service/
-│   └── AlarmServiceUltraHardcoreTest.kt 4 — snooze ≠ dismiss, volume restored after a mid-ring kill
+│   └── AlarmServiceUltraHardcoreTest.kt 5 — snooze ≠ dismiss, volume restored after a mid-ring kill
 ├── ui/
 │   ├── alarm/MathProblemTest.kt        8 — answer/display, per-difficulty range + sign invariants (500 samples)
 │   └── screens/ClockFormattingTest.kt 14 — stopwatch/timer readouts, hour column, constant string width

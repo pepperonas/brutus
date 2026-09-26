@@ -9,6 +9,11 @@ import android.content.Intent
 import com.pepperonas.brutus.BrutusApplication
 import com.pepperonas.brutus.R
 import com.pepperonas.brutus.SunriseActivity
+import com.pepperonas.brutus.data.AlarmDatabase
+import com.pepperonas.brutus.util.AlarmNotifier
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import com.pepperonas.brutus.scheduler.AlarmScheduler
 import com.pepperonas.brutus.service.AlarmService
 
@@ -25,6 +30,18 @@ class AlarmReceiver : BroadcastReceiver() {
 
         if (isSunrise) {
             showSunrise(context, alarmId, mainTriggerAt)
+            return
+        }
+        if (intent.getBooleanExtra(AlarmScheduler.EXTRA_IS_UPCOMING, false)) {
+            val pending = goAsync()
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val alarm = AlarmDatabase.getInstance(context).alarmDao().getById(alarmId)
+                    if (alarm != null && alarm.enabled) AlarmNotifier.postUpcoming(context, alarm, mainTriggerAt)
+                } finally {
+                    pending?.finish()
+                }
+            }
             return
         }
 

@@ -4,6 +4,60 @@
 
 Alle nennenswerten Änderungen an Brutus stehen hier. Versionen folgen [SemVer](https://semver.org).
 
+## [2.4.0] — 2026-09-26 · Einstellungen & Info, Benachrichtigungen, ein echter Timer und Motion mit Physik
+
+### Neu — Einstellungen & Info
+- **⋮ → Einstellungen & Info**, aufgebaut wie die Einstellungen von Flipper the Ripper: Design **System /
+  Hell / Dunkel** (vorher folgte Brutus immer dem System), Material-You-Farben, der Vorlauf des Hinweises,
+  die Update-Prüfung (aus dem ⋮-Menü hierher umgezogen) und **Über Brutus** — Version und Build, Autor,
+  Links zu Website, celox.io, Quellcode und MIT-Lizenz, die Lizenz der Schrift Space Grotesk (OFL 1.1,
+  bisher nur im Repository) und ein PayPal-Spendenknopf.
+
+### Neu — Benachrichtigungen
+- **Hinweis vor dem Wecker** (Aus / 30 / 60 / 120 Min., Standard 60) mit Countdown und **Vorzeitig
+  beenden**, das diese eine Auslösung überspringt. Ein Hardcore-Wecker lässt sich nur über seine eigenen
+  Challenges vorzeitig beenden — nie per Knopf. Die übersprungene Auslösung übersteht Neustarts; Kopfzeile
+  und Widget zeigen die nächste.
+- **Snooze-Countdown** — „Schlummert — klingelt wieder um 07:05“, mit „Snooze beenden“ bei normalen Weckern.
+- **Countdown in der Ultra-Hardcore-Erinnerung** bis zum nächsten Re-Alarm.
+- **Verpasster Wecker** — nach einem Neustart oder Uhrzeitsprung ein Hinweis auf einen Wecker, der fällig
+  war, während das Handy aus war.
+
+### Geändert — der Timer ist ein echter Wecker
+- Der Countdown lebte nur im Bildschirm: Mit Zurück verlassen endete er stillschweigend, im Hintergrund
+  klingelte er spät oder nie. Jetzt wird sein Zustand gespeichert, AlarmManager weckt das Handy am Ende,
+  ein Vordergrund-Service klingelt, und eine Benachrichtigung zeigt den Countdown mit Pause / Weiter /
+  Abbruch (die klingelnde hat Stopp). Auf dem Emulator geprüft: App verlassen, Prozess beendet, klingelte pünktlich.
+
+### Geändert — Motion und Physik nach Material 3 Expressive
+- Jede Animation holt ihre Spezifikation jetzt aus dem `MotionScheme` des Themes statt aus handgewählten Tweens.
+- **Snooze-Daumen** mit echter Wurfphysik: die Feder beim Loslassen übernimmt die Geschwindigkeit des
+  Fingers, Haptik-Tick an der 85-%-Schwelle; weiterhin nur positionsabhängig, ein Wisch schlummert nie versehentlich.
+- **Wischen zum Löschen** folgt dem Finger (Farbe, wachsender Mülleimer, Tick, sobald Loslassen löschen würde).
+- **Knopfgruppen** bei Timer und Stoppuhr (der gedrückte Knopf wird breiter, der Nachbar weicht aus),
+  Beschriftungen, die zum neuen Wort rollen, Zahlen, die wie ein Zählwerk rollen, ein Hüpfer pro gezähltem
+  Schütteln und ein federndes Wackeln mit Vibration bei einer falschen Rechnung.
+- Bottom-Sheets **gleiten** beim Speichern jetzt hinaus, statt zu verschwinden; Banner, Liste ↔
+  Leerzustand, der „Geschafft!“-Moment und der Stopp-Knopf animieren, statt zu springen;
+  `LoadingIndicator`, solange die Kamera startet, `LinearWavyProgressIndicator` für Sunrise, ein fließend
+  leerlaufender Timer-Ring.
+- Der Alarmbildschirm wird für seinen atmenden Hintergrund **nicht mehr 60-mal pro Sekunde neu aufgebaut**,
+  und das Pulsieren des Snooze-Hinweises zeichnet nur noch neu.
+- „Animationen entfernen“ wird bei jeder Rückkehr in die App neu gelesen; ist es an, blenden Tab-Wechsel über statt zu gleiten.
+- Das README behauptete `ButtonGroup` und `FloatingToolbar`; beides war nicht im Einsatz. `ButtonGroup` ist
+  es jetzt, die Behauptung zu `FloatingToolbar` ist raus.
+
+### Behoben
+- Ein Ultra-Hardcore-Wecker, der im Bruchteil einer Sekunde vor dem Laden seines Tons beendet — oder
+  in diesem Moment von einem zweiten Wecker übernommen — wurde, stellte keine Re-Alarme scharf: der
+  Service kannte „Ultra Hardcore“ nur aus einem Merker, der erst nach dem Laden gesetzt wird. Jetzt
+  fragt er die Datenbank. Gefunden durch einen Test, der unter Last rot wurde.
+
+### Tests
+- 33 neue Unit-Tests (306 → 339): Benachrichtigungen und vorzeitiges Beenden (inkl. Hardcore-Sperre),
+  verpasste Wecker, der Timer-Controller, Info-Links und die mitgelieferte Lizenz, Design-Modus,
+  Snooze-Schwelle. Jede neue Sperre wurde einmal wieder ausgebaut, um ihren Test scheitern zu sehen.
+
 ## [2.3.1] — 2026-09-26 · Klingelt vor dem ersten Entsperren, und ein Dutzend weitere Korrekturen
 
 Eine Durchsicht des gesamten Alarm-Pfads fand Fehler, von denen jeder einzelne jemanden verschlafen

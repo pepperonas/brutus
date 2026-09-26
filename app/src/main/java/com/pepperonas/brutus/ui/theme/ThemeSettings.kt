@@ -3,6 +3,7 @@ package com.pepperonas.brutus.ui.theme
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.datastore.preferences.core.emptyPreferences
 import kotlinx.coroutines.flow.Flow
@@ -17,6 +18,19 @@ private val Context.themeDataStore by preferencesDataStore(name = "theme_setting
  */
 object ThemeSettings {
     private val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
+    private val THEME_MODE = stringPreferencesKey("theme_mode")
+
+    /** Light/dark choice; [SYSTEM] follows the phone. Stored by name — renaming an entry resets it. */
+    enum class Mode { SYSTEM, LIGHT, DARK }
+
+    fun modeFlow(context: Context): Flow<Mode> =
+        context.themeDataStore.data
+            .catch { emit(emptyPreferences()) }
+            .map { prefs -> Mode.entries.firstOrNull { it.name == prefs[THEME_MODE] } ?: Mode.SYSTEM }
+
+    suspend fun setMode(context: Context, mode: Mode) {
+        context.themeDataStore.edit { it[THEME_MODE] = mode.name }
+    }
 
     // The ringing screen can open before the first unlock after a reboot, when this
     // (credential-encrypted) file cannot be read. Fall back to the brand scheme then.

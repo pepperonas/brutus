@@ -78,7 +78,7 @@ window.SITE_I18N = {
     "faq.q4": "Wie aktualisiere ich?",
     "faq.q4a": "Schalte im ⋮-Menü der Weckerliste <em>Nach Updates suchen</em> ein: Brutus schaut dann einmal täglich nach einer neuen Version und benachrichtigt dich. Die APK von dieser Seite laden und über die bestehende App installieren; Wecker und Einstellungen bleiben erhalten.",
     "faq.q5": "Was kann sie außer Wecken?",
-    "faq.q5a": "Eine Weltuhr, eine Stoppuhr mit Runden, einen Timer mit sanften Endtönen und ein Widget für den Startbildschirm. Die App gibt es auf Deutsch und Englisch, sie folgt der Systemsprache.",
+    "faq.q5a": "Eine Weltuhr, eine Stoppuhr mit Runden, einen Timer, der auch nach dem Verlassen der App klingelt, und ein Widget für den Startbildschirm. Vor einem Wecker zählt eine Benachrichtigung herunter und lässt ihn vorzeitig beenden. Das Design (hell, dunkel oder System) stellst du unter ⋮ → Einstellungen & Info ein. Die App gibt es auf Deutsch und Englisch, sie folgt der Systemsprache.",
     "faq.q6": "Woran erkenne ich, dass die APK echt ist?",
     "faq.q6a": "Vergleiche ihre SHA-256 mit dem Wert oben und prüfe das Signaturzertifikat mit apksigner verify --print-certs; das Zertifikat ist seit 1.0.0 bei jeder Version dasselbe.",
     "v.row0": "SHA-256 des Signaturzertifikats"
@@ -159,7 +159,7 @@ window.SITE_I18N = {
     "faq.q4": "¿Cómo actualizo?",
     "faq.q4a": "Activa <em>Check for updates</em> en el menú ⋮ de la lista de alarmas: Brutus comprobará una vez al día si hay una versión nueva y te avisará. Descarga la APK desde esta página e instálala sobre la app existente; tus alarmas y ajustes se conservan.",
     "faq.q5": "¿Qué hace además de despertar?",
-    "faq.q5a": "Un reloj mundial, un cronómetro con vueltas, un temporizador con sonidos suaves al terminar y un widget para la pantalla de inicio. La app está en inglés y alemán y sigue el idioma del sistema.",
+    "faq.q5a": "Un reloj mundial, un cronómetro con vueltas, un temporizador que suena aunque salgas de la app y un widget para la pantalla de inicio. Antes de una alarma, una notificación hace la cuenta atrás y permite descartarla antes de tiempo. El tema (claro, oscuro o del sistema) se elige en ⋮ → Settings & info. La app está en inglés y alemán y sigue el idioma del sistema.",
     "faq.q6": "¿Cómo sé que la APK es auténtica?",
     "faq.q6a": "Compara su SHA-256 con el valor de arriba y comprueba el certificado de firma con apksigner verify --print-certs; el certificado es el mismo en todas las versiones desde la 1.0.0.",
     "v.row0": "SHA-256 del certificado de firma"
@@ -240,7 +240,7 @@ window.SITE_I18N = {
     "faq.q4": "Come aggiorno?",
     "faq.q4a": "Attiva <em>Check for updates</em> nel menu ⋮ dell’elenco delle sveglie: Brutus controllerà una volta al giorno se c’è una nuova versione e ti avviserà. Scarica l’APK da questa pagina e installalo sopra l’app esistente; sveglie e impostazioni restano.",
     "faq.q5": "Cosa fa oltre alla sveglia?",
-    "faq.q5a": "Un orologio mondiale, un cronometro con giri, un timer con suoni delicati alla fine e un widget per la schermata Home. L’app è in inglese e tedesco e segue la lingua di sistema.",
+    "faq.q5a": "Un orologio mondiale, un cronometro con giri, un timer che suona anche dopo aver lasciato l’app e un widget per la schermata Home. Prima di una sveglia una notifica fa il conto alla rovescia e permette di annullarla in anticipo. Il tema (chiaro, scuro o di sistema) si imposta in ⋮ → Settings & info. L’app è in inglese e tedesco e segue la lingua di sistema.",
     "faq.q6": "Come faccio a sapere che l’APK è autentico?",
     "faq.q6a": "Confronta il suo SHA-256 con il valore qui sopra e verifica il certificato di firma con apksigner verify --print-certs; il certificato è lo stesso per ogni versione dalla 1.0.0.",
     "v.row0": "SHA-256 del certificato di firma"
@@ -321,7 +321,7 @@ window.SITE_I18N = {
     "faq.q4": "Comment mettre à jour ?",
     "faq.q4a": "Activez <em>Check for updates</em> dans le menu ⋮ de la liste des alarmes : Brutus vérifie alors une fois par jour s’il existe une nouvelle version et vous prévient. Téléchargez l’APK depuis cette page et installez-le par-dessus l’app existante ; vos alarmes et réglages sont conservés.",
     "faq.q5": "Que fait-il en plus des alarmes ?",
-    "faq.q5a": "Une horloge mondiale, un chronomètre avec tours, un minuteur aux sonneries douces et un widget pour l’écran d’accueil. L’app est en anglais et en allemand et suit la langue du système.",
+    "faq.q5a": "Une horloge mondiale, un chronomètre avec tours, un minuteur qui sonne même après avoir quitté l’app et un widget pour l’écran d’accueil. Avant une alarme, une notification affiche un compte à rebours et permet de l’annuler à l’avance. Le thème (clair, sombre ou système) se règle dans ⋮ → Settings & info. L’app est en anglais et en allemand et suit la langue du système.",
     "faq.q6": "Comment savoir si l’APK est authentique ?",
     "faq.q6a": "Comparez son SHA-256 avec la valeur ci-dessus et vérifiez le certificat de signature avec apksigner verify --print-certs ; le certificat est le même pour toutes les versions depuis la 1.0.0.",
     "v.row0": "SHA-256 du certificat de signature"

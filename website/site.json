@@ -77,7 +77,7 @@
       "twitter_description": "Free, open-source Android alarm clock: math, shake and QR challenges, a volume lock and follow-up alarms. No ads, no tracking, offline by default.",
       "image_alt": "Two phones with the Brutus alarm screen — a math challenge and a shake challenge — in front of red alarm rings."
     },
-    "summary": "Brutus is a free, open-source (MIT) alarm clock for Android 8.0 and later. A ringing alarm only stops once you complete the challenges you chose for it: solve math problems, shake the phone, or scan a QR code you placed somewhere else in your home — in any combination, one after the other. Hardcore mode keeps the alarm at full volume while it rings; Ultra Hardcore mode re-rings 10 and 15 minutes later unless you walk 30 steps. It also has a world clock, stopwatch, timer and a home-screen widget, runs in English and German, has no ads or tracking, and stays offline unless you switch on its update check, which then reads the newest version number once a day and notifies you. Distributed as a signed APK through GitHub Releases.",
+    "summary": "Brutus is a free, open-source (MIT) alarm clock for Android 8.0 and later. A ringing alarm only stops once you complete the challenges you chose for it: solve math problems, shake the phone, or scan a QR code you placed somewhere else in your home — in any combination, one after the other. Hardcore mode keeps the alarm at full volume while it rings; Ultra Hardcore mode re-rings 10 and 15 minutes later unless you walk 30 steps. It notifies you before an alarm and lets you dismiss it early, and it also has a world clock, stopwatch, a timer that rings even with the app closed and a home-screen widget, runs in English and German, has no ads or tracking, and stays offline unless you switch on its update check, which then reads the newest version number once a day and notifies you. Distributed as a signed APK through GitHub Releases.",
     "meta_fallback": "Newest release · Android 8.0+ · free, MIT licence",
     "feature_list": [
       "Wake-up challenges: math problems, shaking the phone and scanning a QR code, combinable and run in sequence",
@@ -88,7 +88,10 @@
       "Sunrise pre-alarm: screen brightens over the 10 minutes before the alarm",
       "Slide-to-snooze with configurable snooze length, or no snooze at all",
       "Test mode to try a wake-up chain without setting a real alarm",
-      "World clock, stopwatch and timer",
+      "World clock, stopwatch, and a timer that rings even after you leave the app",
+      "Heads-up notification before an alarm, with a countdown and Dismiss early (Hardcore alarms only via their challenges)",
+      "Snooze countdown and a notice when an alarm was missed because the phone was off",
+      "Settings & info: light, dark or system theme, Material You colours, version, links and licences",
       "Home-screen widget with the next alarm and a countdown",
       "Rings after a reboot even before the phone is unlocked",
       "Alarms survive reboots and Doze; banners warn when the system would block them",
@@ -388,11 +391,11 @@
           "fr": "Que fait-il en plus des alarmes ?"
         },
         "a": {
-          "en": "A world clock, a stopwatch with laps, a timer with gentle finish sounds and a home-screen widget. The app is in English and German and follows the system language.",
-          "de": "Eine Weltuhr, eine Stoppuhr mit Runden, einen Timer mit sanften Endtönen und ein Widget für den Startbildschirm. Die App gibt es auf Deutsch und Englisch, sie folgt der Systemsprache.",
-          "es": "Un reloj mundial, un cronómetro con vueltas, un temporizador con sonidos suaves al terminar y un widget para la pantalla de inicio. La app está en inglés y alemán y sigue el idioma del sistema.",
-          "it": "Un orologio mondiale, un cronometro con giri, un timer con suoni delicati alla fine e un widget per la schermata Home. L’app è in inglese e tedesco e segue la lingua di sistema.",
-          "fr": "Une horloge mondiale, un chronomètre avec tours, un minuteur aux sonneries douces et un widget pour l’écran d’accueil. L’app est en anglais et en allemand et suit la langue du système."
+          "en": "A world clock, a stopwatch with laps, a timer that rings even after you leave the app, and a home-screen widget. Before an alarm a notification counts down and lets you dismiss it early. Theme (light, dark or system) is set under ⋮ → Settings & info. The app is in English and German and follows the system language.",
+          "de": "Eine Weltuhr, eine Stoppuhr mit Runden, einen Timer, der auch nach dem Verlassen der App klingelt, und ein Widget für den Startbildschirm. Vor einem Wecker zählt eine Benachrichtigung herunter und lässt ihn vorzeitig beenden. Das Design (hell, dunkel oder System) stellst du unter ⋮ → Einstellungen & Info ein. Die App gibt es auf Deutsch und Englisch, sie folgt der Systemsprache.",
+          "es": "Un reloj mundial, un cronómetro con vueltas, un temporizador que suena aunque salgas de la app y un widget para la pantalla de inicio. Antes de una alarma, una notificación hace la cuenta atrás y permite descartarla antes de tiempo. El tema (claro, oscuro o del sistema) se elige en ⋮ → Settings & info. La app está en inglés y alemán y sigue el idioma del sistema.",
+          "it": "Un orologio mondiale, un cronometro con giri, un timer che suona anche dopo aver lasciato l’app e un widget per la schermata Home. Prima di una sveglia una notifica fa il conto alla rovescia e permette di annullarla in anticipo. Il tema (chiaro, scuro o di sistema) si imposta in ⋮ → Settings & info. L’app è in inglese e tedesco e segue la lingua di sistema.",
+          "fr": "Une horloge mondiale, un chronomètre avec tours, un minuteur qui sonne même après avoir quitté l’app et un widget pour l’écran d’accueil. Avant une alarme, une notification affiche un compte à rebours et permet de l’annuler à l’avance. Le thème (clair, sombre ou système) se règle dans ⋮ → Settings & info. L’app est en anglais et en allemand et suit la langue du système."
         }
       },
       {

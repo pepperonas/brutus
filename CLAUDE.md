@@ -59,6 +59,19 @@ challenges in sequence → `ACTION_STOP` / `ACTION_SNOOZE` back to the service.
   Nothing on the ringing path may touch credential storage or `AppWidgetManager` while locked
   (`NextAlarmWidget.refresh` checks `Storage.isUserUnlocked`); receiver, service and alarm
   activities are `directBootAware` (pinned by `SystemChangeReceiverTest`).
+- **Notifications around an alarm** (`util/AlarmNotifier`): heads-up before it rings (request code
+  `0x3A000000 | id`, lead in `util/AppSettings`), snooze countdown, missed-alarm notice (from
+  `RingingStore.expected` in `Rescheduler`). "Dismiss early" = `scheduler/AlarmActions.skipNext` — a
+  Hardcore alarm only with `solvedChallenge = true` (via `TestAlarmActivity` in early-dismiss mode);
+  the skipped occurrence lives in `RingingStore.skips` and `NextAlarmCalculator` honours it.
+- **Timer** (`timer/`): `TimerController` is the source of truth (persisted, elapsed-time AlarmManager
+  wake-up at code `0x71000000`, ongoing notification); `TimerReceiver` handles fire/pause/resume/cancel,
+  `TimerRingService` rings. `TimerViewModel` only mirrors it and runs the repaint ticker.
+- **Settings & info** (`ui/settings/`): route `settings` in `HomeScreen`'s NavHost, opened from the ⋮
+  menu; About facts in `AboutLinks` (pinned by `AboutLinksTest`).
+- **Motion**: specs come from `MaterialTheme.motionScheme` (files opt in with
+  `@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)`); decorative loops are read in draw/layer
+  lambdas, never in composition; `rememberReducedMotion()` gates them.
 - **Snooze vs. dismiss**: `AlarmService.stopAlarm(dismissed)` — only a completed challenge arms UHC
   follow-ups. Snoozes use their own request-code space `0x5A000000 | id`.
 - `SunriseActivity`, `TestAlarmActivity` and `widget/NextAlarmWidget` are side entry points;

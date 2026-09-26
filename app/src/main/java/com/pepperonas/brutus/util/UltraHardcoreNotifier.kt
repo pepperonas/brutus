@@ -31,11 +31,23 @@ object UltraHardcoreNotifier {
             taskIntent(context, alarmId),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
+        // Counts down to the next re-alarm, so "you have ten minutes" is visible, not just claimed.
+        val nextAt = UltraHardcoreStore.listPending(context)
+            .filter { it.alarmId == alarmId && it.triggerAt > System.currentTimeMillis() }
+            .minOfOrNull { it.triggerAt }
         val notification = Notification.Builder(context, BrutusApplication.CHANNEL_ULTRA_HARDCORE)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setContentTitle(context.getString(R.string.notification_uhc_title))
             .setContentText(context.getString(R.string.notification_uhc_text))
             .setStyle(Notification.BigTextStyle().bigText(context.getString(R.string.notification_uhc_big_text)))
+            .apply {
+                if (nextAt != null) {
+                    setWhen(nextAt)
+                    setShowWhen(true)
+                    setUsesChronometer(true)
+                    setChronometerCountDown(true)
+                }
+            }
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setCategory(Notification.CATEGORY_REMINDER)

@@ -93,16 +93,27 @@ private val BrutusLightScheme
  * App theme: Material 3 Expressive (spatial springs via [MotionScheme.expressive],
  * expressive shape scale, Space Grotesk display type).
  *
- * - Follows the system dark/light setting by default; alarm-facing activities
+ * - Follows the user's choice in Settings (System/Light/Dark, default System); alarm-facing activities
  *   (ring, sunrise, UHC task) pass darkTheme = true — their layered black/red
  *   gradients assume light-on-dark content.
  * - Material You dynamic color is a persisted opt-in ([ThemeSettings], API 31+);
  *   default stays the red Brutus brand scheme.
  */
+/** The user's light/dark choice from Settings, falling back to the system setting. */
+@Composable
+fun rememberUserDarkTheme(): Boolean {
+    val mode by ThemeSettings.modeFlow(LocalContext.current).collectAsState(initial = ThemeSettings.Mode.SYSTEM)
+    return when (mode) {
+        ThemeSettings.Mode.LIGHT -> false
+        ThemeSettings.Mode.DARK -> true
+        ThemeSettings.Mode.SYSTEM -> isSystemInDarkTheme()
+    }
+}
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun BrutusTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = rememberUserDarkTheme(),
     content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current

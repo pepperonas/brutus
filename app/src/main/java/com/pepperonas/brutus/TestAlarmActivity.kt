@@ -1,5 +1,7 @@
 package com.pepperonas.brutus
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.KeyEvent
 import androidx.activity.ComponentActivity
@@ -8,7 +10,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import com.pepperonas.brutus.data.AlarmEntity
+import com.pepperonas.brutus.scheduler.AlarmActions
 import com.pepperonas.brutus.ui.alarm.AlarmScreen
+import com.pepperonas.brutus.util.GlobalQrStore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import com.pepperonas.brutus.ui.theme.BrutusTheme
 import com.pepperonas.brutus.util.AlarmSound
 import com.pepperonas.brutus.util.ChallengeDifficulty
@@ -36,10 +44,16 @@ class TestAlarmActivity : ComponentActivity() {
         val ultraHardcoreMode = intent.getBooleanExtra(EXTRA_ULTRA_HARDCORE, false)
         val mathDifficulty = intent.getIntExtra(EXTRA_MATH_DIFFICULTY, ChallengeDifficulty.MATH_HARD)
         val shakeSensitivity = intent.getIntExtra(EXTRA_SHAKE_SENSITIVITY, ChallengeDifficulty.SHAKE_NORMAL)
-        hardcoreActive = hardcoreMode || ultraHardcoreMode
+        // "Dismiss early" from the heads-up of a Hardcore alarm: the same challenges, but silent and
+        // without snooze — solving them skips this one occurrence.
+        val earlyDismissId = intent.getLongExtra(EXTRA_EARLY_DISMISS_ALARM_ID, -1L)
+        val earlyDismiss = earlyDismissId != -1L
+        hardcoreActive = !earlyDismiss && (hardcoreMode || ultraHardcoreMode)
 
-        soundPlayer = SoundPreviewPlayer(this).also {
-            it.play(AlarmSound.fromId(soundId))
+        if (!earlyDismiss) {
+            soundPlayer = SoundPreviewPlayer(this).also {
+                it.play(AlarmSound.fromId(soundId))
+            }
         }
 
         if (hardcoreActive) {
@@ -54,12 +68,18 @@ class TestAlarmActivity : ComponentActivity() {
                         qrCodeData = qrData,
                         mathProblemCount = mathCount,
                         shakeCount = shakeCount,
-                        snoozeEnabled = snoozeEnabled,
+                        snoozeEnabled = snoozeEnabled && !earlyDismiss,
                         hardcoreMode = hardcoreMode,
                         ultraHardcoreMode = ultraHardcoreMode,
                         mathDifficulty = mathDifficulty,
                         shakeSensitivity = shakeSensitivity,
-                        onDismiss = { finish() },
+                        onDismiss = {
+                            if (earlyDismiss) {
+                                val app = applicationContext
+                                CoroutineScope(Dispatchers.IO).launch { AlarmActions.skipNext(app, earlyDismissId, solvedChallenge = true) }
+                            }
+                            finish()
+                        },
                         onSnooze = { finish() }
                     )
                 }
@@ -96,5 +116,20 @@ class TestAlarmActivity : ComponentActivity() {
         const val EXTRA_ULTRA_HARDCORE = "ultra_hardcore"
         const val EXTRA_MATH_DIFFICULTY = "math_difficulty"
         const val EXTRA_SHAKE_SENSITIVITY = "shake_sensitivity"
+        const val EXTRA_EARLY_DISMISS_ALARM_ID = "early_dismiss_alarm_id"
+
+        /** The challenges exactly as [alarm] would ring with them (QR code included). */
+        fun intentFor(context: Context, alarm: AlarmEntity): Intent =
+            Intent(context, TestAlarmActivity::class.java)
+                .putExtra(EXTRA_CHALLENGE_FLAGS, alarm.challengeFlags)
+                .putExtra(EXTRA_QR_DATA, GlobalQrStore.get(context))
+                .putExtra(EXTRA_SOUND_ID, alarm.soundId)
+                .putExtra(EXTRA_MATH_COUNT, alarm.mathProblemCount)
+                .putExtra(EXTRA_SHAKE_COUNT, alarm.shakeCount)
+                .putExtra(EXTRA_SNOOZE_ENABLED, alarm.snoozeDuration > 0)
+                .putExtra(EXTRA_HARDCORE, alarm.hardcoreMode)
+                .putExtra(EXTRA_ULTRA_HARDCORE, alarm.ultraHardcoreMode)
+                .putExtra(EXTRA_MATH_DIFFICULTY, alarm.mathDifficulty)
+                .putExtra(EXTRA_SHAKE_SENSITIVITY, alarm.shakeSensitivity)
     }
 }

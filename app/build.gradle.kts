@@ -23,8 +23,8 @@ android {
         applicationId = "com.pepperonas.brutus"
         minSdk = 26
         targetSdk = 35
-        versionCode = 18
-        versionName = "2.3.1"
+        versionCode = 19
+        versionName = "2.4.0"
     }
 
     signingConfigs {
@@ -113,7 +113,7 @@ dependencies {
     // `internal`. They graduated in the 1.5.0-alpha channel, so material3 is pinned
     // past the BOM. 1.5.0-alpha18 is the newest alpha still on Compose 1.11
     // (alpha19+ pulls Compose 1.12 → requires compileSdk 37 + AGP 9.1); components
-    // not yet graduated in alpha18 (ButtonGroup, FloatingToolbar) are used behind
+    // not yet graduated in alpha18 (ButtonGroup, LoadingIndicator, LinearWavyProgressIndicator) are used behind
     // an explicit @OptIn(ExperimentalMaterial3ExpressiveApi).
     val composeBom = platform("androidx.compose:compose-bom:2026.06.01")
     implementation(composeBom)

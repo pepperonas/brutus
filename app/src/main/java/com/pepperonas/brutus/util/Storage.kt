@@ -29,6 +29,8 @@ object Storage {
         "brutus_timer",
         "brutus_world_clock",
         "brutus_ringing",
+        "brutus_settings",
+        "brutus_timer_state",
     )
 
     private const val MARKER_FILE = "brutus_storage"

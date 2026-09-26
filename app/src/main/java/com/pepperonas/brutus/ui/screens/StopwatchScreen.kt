@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+
 package com.pepperonas.brutus.ui.screens
 
 import android.content.res.Configuration
@@ -22,6 +24,8 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.material3.ButtonGroup
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -96,7 +100,11 @@ fun StopwatchScreen(viewModel: StopwatchViewModel = viewModel()) {
 
         Spacer(modifier = Modifier.height(48.dp))
 
-        Row(
+        // Expressive button group: the pressed button widens, its neighbour yields on a spring;
+        // the labels roll to their new word instead of swapping.
+        val lapInteraction = remember { MutableInteractionSource() }
+        val startInteraction = remember { MutableInteractionSource() }
+        ButtonGroup(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -104,31 +112,25 @@ fun StopwatchScreen(viewModel: StopwatchViewModel = viewModel()) {
             FilledTonalButton(
                 onClick = lapOrResetWithUndo,
                 shape = MaterialTheme.shapes.large,
+                interactionSource = lapInteraction,
                 modifier = Modifier
                     .weight(1f)
+                    .animateWidth(lapInteraction)
                     .height(64.dp),
             ) {
-                Text(
-                    stringResource(
-                        if (running) R.string.stopwatch_lap else R.string.stopwatch_reset
-                    ),
-                    fontSize = 16.sp
-                )
+                RollingLabel(stringResource(if (running) R.string.stopwatch_lap else R.string.stopwatch_reset))
             }
             // Right: Start / Stop
             Button(
                 onClick = { viewModel.startStop() },
                 shape = MaterialTheme.shapes.large,
+                interactionSource = startInteraction,
                 modifier = Modifier
                     .weight(1f)
+                    .animateWidth(startInteraction)
                     .height(64.dp),
             ) {
-                Text(
-                    stringResource(
-                        if (running) R.string.stopwatch_stop else R.string.stopwatch_start
-                    ),
-                    fontSize = 16.sp
-                )
+                RollingLabel(stringResource(if (running) R.string.stopwatch_stop else R.string.stopwatch_start))
             }
         }
 

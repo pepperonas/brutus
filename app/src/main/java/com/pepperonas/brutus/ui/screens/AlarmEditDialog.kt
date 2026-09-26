@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+
 package com.pepperonas.brutus.ui.screens
 
 import android.Manifest
@@ -42,6 +44,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -57,6 +60,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -81,6 +85,7 @@ import androidx.annotation.StringRes
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.stringArrayResource
 import com.pepperonas.brutus.R
+import kotlinx.coroutines.launch
 
 data class AlarmEditResult(
     val hour: Int,
@@ -195,11 +200,17 @@ fun AlarmEditDialog(
         }
     }
 
+    // Own state: saving slides the sheet out on the theme's spring before it leaves composition
+    // (removing it directly made it vanish in one frame). Opens fully expanded — the sheet is a
+    // form, a half-open state only hid the save button.
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetScope = rememberCoroutineScope()
     ModalBottomSheet(
         onDismissRequest = {
             onStopPreview()
             onDismiss()
         },
+        sheetState = sheetState,
         containerColor = MaterialTheme.colorScheme.surfaceContainerLow
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -263,6 +274,7 @@ fun AlarmEditDialog(
                     val bg by animateColorAsState(
                         targetValue = if (selected) MaterialTheme.colorScheme.primary
                         else MaterialTheme.colorScheme.surfaceContainerHigh,
+                        animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
                         label = "dayPill"
                     )
                     Box(
@@ -543,7 +555,7 @@ fun AlarmEditDialog(
                 onClick = {
                     haptics.success()
                     onStopPreview()
-                    onSave(
+                    val result =
                         AlarmEditResult(
                             hour = timePickerState.hour,
                             minute = timePickerState.minute,
@@ -560,7 +572,7 @@ fun AlarmEditDialog(
                             shakeSensitivity = shakeSensitivity,
                             sunriseEnabled = sunriseEnabled,
                         )
-                    )
+                    sheetScope.launch { sheetState.hide() }.invokeOnCompletion { onSave(result) }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -602,6 +614,7 @@ private fun ModeToggleRow(
             danger -> cs.errorContainer
             else -> cs.tertiaryContainer
         },
+        animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
         label = "modeContainer"
     )
     val titleColor = when {
@@ -712,12 +725,14 @@ private fun CountStepper(
                 tint = MaterialTheme.colorScheme.primary
             )
         }
-        Text(
-            text = if (suffix.isBlank()) "$value" else "$value $suffix",
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.width(56.dp),
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-        )
+        com.pepperonas.brutus.ui.theme.RollingNumber(value, modifier = Modifier.width(56.dp)) { v ->
+            Text(
+                text = if (suffix.isBlank()) "$v" else "$v $suffix",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+        }
         IconButton(
             onClick = { if (value + step <= max) onChange(value + step) },
             enabled = value + step <= max

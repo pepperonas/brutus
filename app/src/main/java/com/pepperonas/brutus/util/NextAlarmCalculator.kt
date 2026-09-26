@@ -7,13 +7,26 @@ import java.util.Calendar
 
 object NextAlarmCalculator {
 
-    /** Returns the soonest trigger timestamp across all enabled alarms, or null if none. */
-    fun findNext(alarms: List<AlarmEntity>, now: Long = System.currentTimeMillis()): AlarmEntity? {
+    /**
+     * Returns the alarm that rings soonest, or null if none. [skips] maps alarm id → an occurrence
+     * the user dismissed early; that occurrence does not count as "next".
+     */
+    fun findNext(
+        alarms: List<AlarmEntity>,
+        now: Long = System.currentTimeMillis(),
+        skips: Map<Long, Long> = emptyMap(),
+    ): AlarmEntity? {
         return alarms
             .filter { it.enabled }
-            .mapNotNull { a -> nextTrigger(a, now)?.let { t -> a to t } }
+            .mapNotNull { a -> nextTrigger(a, now, skips[a.id])?.let { t -> a to t } }
             .minByOrNull { it.second }
             ?.first
+    }
+
+    /** Next occurrence after [now], stepping past [skipped] if it is exactly that occurrence. */
+    fun nextTrigger(alarm: AlarmEntity, now: Long = System.currentTimeMillis(), skipped: Long?): Long? {
+        val next = nextTrigger(alarm, now) ?: return null
+        return if (skipped != null && next == skipped) nextTrigger(alarm, skipped) else next
     }
 
     fun nextTrigger(alarm: AlarmEntity, now: Long = System.currentTimeMillis()): Long? {

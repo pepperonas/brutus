@@ -1,7 +1,7 @@
 <!--# block name="none" --><!--# endblock -->
 # Brutus — Android Alarm Clock You Can't Ignore
 
-> Brutus is a free, open-source (MIT) alarm clock for Android 8.0 and later. A ringing alarm only stops once you complete the challenges you chose for it: solve math problems, shake the phone, or scan a QR code you placed somewhere else in your home — in any combination, one after the other. Hardcore mode keeps the alarm at full volume while it rings; Ultra Hardcore mode re-rings 10 and 15 minutes later unless you walk 30 steps. It also has a world clock, stopwatch, timer and a home-screen widget, runs in English and German, has no ads or tracking, and stays offline unless you switch on its update check, which then reads the newest version number once a day and notifies you. Distributed as a signed APK through GitHub Releases.
+> Brutus is a free, open-source (MIT) alarm clock for Android 8.0 and later. A ringing alarm only stops once you complete the challenges you chose for it: solve math problems, shake the phone, or scan a QR code you placed somewhere else in your home — in any combination, one after the other. Hardcore mode keeps the alarm at full volume while it rings; Ultra Hardcore mode re-rings 10 and 15 minutes later unless you walk 30 steps. It notifies you before an alarm and lets you dismiss it early, and it also has a world clock, stopwatch, a timer that rings even with the app closed and a home-screen widget, runs in English and German, has no ads or tracking, and stays offline unless you switch on its update check, which then reads the newest version number once a day and notifies you. Distributed as a signed APK through GitHub Releases.
 
 This is the Markdown version of https://brutus.celox.io/ for agents and text tools. A short summary with every link lives at https://brutus.celox.io/llms.txt.
 
@@ -47,7 +47,7 @@ Files in the current release:
 
 **How do I update?** Switch on *Check for updates* in the ⋮ menu of the alarm list: Brutus then looks once a day for a new release and notifies you. Download the APK from this page and install it over the existing app; your alarms and settings stay.
 
-**What does it do besides alarms?** A world clock, a stopwatch with laps, a timer with gentle finish sounds and a home-screen widget. The app is in English and German and follows the system language.
+**What does it do besides alarms?** A world clock, a stopwatch with laps, a timer that rings even after you leave the app, and a home-screen widget. Before an alarm a notification counts down and lets you dismiss it early. Theme (light, dark or system) is set under ⋮ → Settings & info. The app is in English and German and follows the system language.
 
 **How do I know the APK is genuine?** Compare its SHA-256 with the value above and check the signing certificate with apksigner verify --print-certs; the certificate is the same for every release since 1.0.0.
 

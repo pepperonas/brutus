@@ -60,11 +60,25 @@ class BrutusApplication : Application() {
             description = getString(R.string.channel_updates_description)
         }
 
+        // Quiet: the heads-up before an alarm and the snooze countdown must not wake anyone.
+        val upcomingChannel = NotificationChannel(
+            CHANNEL_UPCOMING, getString(R.string.channel_upcoming_name), NotificationManager.IMPORTANCE_LOW
+        ).apply { description = getString(R.string.channel_upcoming_description) }
+        val missedChannel = NotificationChannel(
+            CHANNEL_MISSED, getString(R.string.channel_missed_name), NotificationManager.IMPORTANCE_DEFAULT
+        ).apply { description = getString(R.string.channel_missed_description) }
+        val timerChannel = NotificationChannel(
+            CHANNEL_TIMER, getString(R.string.channel_timer_name), NotificationManager.IMPORTANCE_LOW
+        ).apply { description = getString(R.string.channel_timer_description) }
+
         val nm = getSystemService(NotificationManager::class.java)
         nm.createNotificationChannel(alarmChannel)
         nm.createNotificationChannel(serviceChannel)
         nm.createNotificationChannel(ultraHardcoreChannel)
         nm.createNotificationChannel(updatesChannel)
+        nm.createNotificationChannel(upcomingChannel)
+        nm.createNotificationChannel(missedChannel)
+        nm.createNotificationChannel(timerChannel)
     }
 
     companion object {
@@ -72,5 +86,8 @@ class BrutusApplication : Application() {
         const val CHANNEL_SERVICE = "brutus_service"
         const val CHANNEL_ULTRA_HARDCORE = "brutus_ultra_hardcore"
         const val CHANNEL_UPDATES = "brutus_updates"
+        const val CHANNEL_UPCOMING = "brutus_upcoming"
+        const val CHANNEL_MISSED = "brutus_missed"
+        const val CHANNEL_TIMER = "brutus_timer"
     }
 }

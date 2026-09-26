@@ -3,6 +3,7 @@ package com.pepperonas.brutus.scheduler
 import android.content.Context
 import com.pepperonas.brutus.data.AlarmDatabase
 import com.pepperonas.brutus.data.AlarmRepository
+import com.pepperonas.brutus.util.AlarmNotifier
 import com.pepperonas.brutus.util.RingingStore
 import com.pepperonas.brutus.util.UltraHardcoreNotifier
 import com.pepperonas.brutus.util.UltraHardcoreStore
@@ -22,7 +23,17 @@ object Rescheduler {
     suspend fun rescheduleAll(context: Context, now: Long = System.currentTimeMillis()) {
         val repo = AlarmRepository(AlarmDatabase.getInstance(context).alarmDao())
 
-        repo.getEnabledAlarms().forEach { AlarmScheduler.schedule(context, it) }
+        // An occurrence that AlarmManager was given but that never rang (phone off, clock jumped
+        // forward) is reported before the alarm is re-armed for its next occurrence.
+        val expected = RingingStore.expected(context)
+        val enabled = repo.getEnabledAlarms()
+        enabled.forEach { alarm ->
+            val due = expected[alarm.id]
+            if (due != null && isMissed(due, now)) AlarmNotifier.postMissed(context, alarm, due)
+        }
+        enabled.forEach { AlarmScheduler.schedule(context, it) }
+        // Past skips are spent; drop them so the store does not grow.
+        RingingStore.skips(context).forEach { (id, at) -> if (at < now) RingingStore.clearSkip(context, id) }
 
         // Follow-ups belong to an alarm regardless of whether it is still enabled: a one-shot
         // Ultra Hardcore alarm disables itself the moment it fires, and its follow-ups are exactly
@@ -41,8 +52,9 @@ object Rescheduler {
         stillPending.forEach { UltraHardcoreNotifier.post(context, it) }
 
         RingingStore.snoozes(context).forEach { s ->
-            if (s.triggerAt > now && repo.getById(s.alarmId) != null) {
-                AlarmScheduler.restoreSnooze(context, s)
+            val alarm = if (s.triggerAt > now) repo.getById(s.alarmId) else null
+            if (alarm != null) {
+                AlarmScheduler.restoreSnooze(context, s, alarm)
             } else {
                 RingingStore.clearSnooze(context, s.alarmId)
             }
@@ -50,4 +62,12 @@ object Rescheduler {
 
         NextAlarmWidget.refresh(context)
     }
+
+    /**
+     * An expected occurrence counts as missed once it is more than [MISSED_GRACE_MS] past — the
+     * grace covers an alarm that is firing right now while this runs.
+     */
+    fun isMissed(dueAt: Long, now: Long): Boolean = dueAt < now - MISSED_GRACE_MS
+
+    const val MISSED_GRACE_MS = 2 * 60_000L
 }

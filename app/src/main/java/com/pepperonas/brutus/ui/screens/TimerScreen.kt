@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+
 package com.pepperonas.brutus.ui.screens
 
 import android.content.res.Configuration
@@ -34,6 +36,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.WavyProgressIndicatorDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.animation.togetherWith
+import androidx.compose.material3.ButtonGroup
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -144,15 +149,20 @@ fun TimerScreen(viewModel: TimerViewModel = viewModel()) {
 
             Spacer(modifier = Modifier.weight(1f))
 
-            Row(
+            // Expressive button group: the pressed button widens, its neighbour yields on a spring.
+            val abortInteraction = remember { MutableInteractionSource() }
+            val mainInteraction = remember { MutableInteractionSource() }
+            ButtonGroup(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 FilledTonalButton(
                     onClick = cancelWithUndo,
                     shape = MaterialTheme.shapes.large,
+                    interactionSource = abortInteraction,
                     modifier = Modifier
                         .weight(1f)
+                        .animateWidth(abortInteraction)
                         .height(64.dp),
                 ) {
                     Text(stringResource(R.string.timer_abort), fontSize = 16.sp)
@@ -168,11 +178,13 @@ fun TimerScreen(viewModel: TimerViewModel = viewModel()) {
                 Button(
                     onClick = mainAction,
                     shape = MaterialTheme.shapes.large,
+                    interactionSource = mainInteraction,
                     modifier = Modifier
                         .weight(1f)
+                        .animateWidth(mainInteraction)
                         .height(64.dp),
                 ) {
-                    Text(mainLabel, fontSize = 16.sp)
+                    RollingLabel(mainLabel)
                 }
             }
             Spacer(modifier = Modifier.height(24.dp))
@@ -196,10 +208,18 @@ fun TimerScreen(viewModel: TimerViewModel = viewModel()) {
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun TimerRing(remainingMs: Long, totalMs: Long, finished: Boolean) {
-    val fraction = if (totalMs > 0) (remainingMs.toFloat() / totalMs).coerceIn(0f, 1f) else 0f
+    val raw = if (totalMs > 0) (remainingMs.toFloat() / totalMs).coerceIn(0f, 1f) else 0f
+    // The view model updates every 100 ms; a short linear glide turns those steps into a
+    // continuously draining ring.
+    val fraction by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = raw,
+        animationSpec = androidx.compose.animation.core.tween(120, easing = androidx.compose.animation.core.LinearEasing),
+        label = "timerRing",
+    )
     val ringColor by animateColorAsState(
         targetValue = if (finished) MaterialTheme.colorScheme.error
         else MaterialTheme.colorScheme.primary,
+        animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
         label = "timerRingColor"
     )
     // The rolling wave is decoration — flatten it when animations are off.
@@ -306,11 +326,13 @@ private fun TimeUnitStepper(
             modifier = Modifier.size(width = 88.dp, height = 72.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "%02d".format(value),
-                style = MaterialTheme.typography.displayMedium.copy(fontSize = 52.sp),
-                color = MaterialTheme.colorScheme.onBackground
-            )
+            com.pepperonas.brutus.ui.theme.RollingNumber(value) { v ->
+                Text(
+                    text = "%02d".format(v),
+                    style = MaterialTheme.typography.displayMedium.copy(fontSize = 52.sp),
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
         }
         IconButton(onClick = { if (value - 1 >= min) onChange(value - 1) }) {
             Icon(
@@ -390,4 +412,22 @@ private fun TimerRingPreviewDynamic() {
     BrutusTheme(darkTheme = true) {
         TimerRing(remainingMs = 30_000L, totalMs = 300_000L, finished = false)
     }
+}
+
+/**
+ * A button label that rolls to its new text (Pause → Resume, Start → Stop) instead of swapping:
+ * the old word slides up and out, the new one springs in from below.
+ */
+@Composable
+internal fun RollingLabel(text: String) {
+    val spatial = MaterialTheme.motionScheme.fastSpatialSpec<androidx.compose.ui.unit.IntOffset>()
+    val effects = MaterialTheme.motionScheme.fastEffectsSpec<Float>()
+    androidx.compose.animation.AnimatedContent(
+        targetState = text,
+        transitionSpec = {
+            (androidx.compose.animation.slideInVertically(spatial) { it / 2 } + androidx.compose.animation.fadeIn(effects)) togetherWith
+                (androidx.compose.animation.slideOutVertically(spatial) { -it / 2 } + androidx.compose.animation.fadeOut(effects))
+        },
+        label = "rollingLabel",
+    ) { Text(it, fontSize = 16.sp) }
 }

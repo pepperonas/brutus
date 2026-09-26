@@ -1,6 +1,9 @@
 package com.pepperonas.brutus.ui.alarm
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.scaleIn
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloat
@@ -32,6 +35,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -40,6 +45,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -59,6 +65,7 @@ import java.util.Locale
 import androidx.compose.ui.res.stringResource
 import com.pepperonas.brutus.R
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AlarmScreen(
     challengeFlags: Int,
@@ -102,11 +109,12 @@ fun AlarmScreen(
     // cycle, small alpha delta — deliberately far from any flicker/strobe).
     // Static when system animations are disabled.
     val reducedMotion = rememberReducedMotion()
-    val breathe = if (reducedMotion) {
-        0.3f
+    // Kept as State and read only inside drawBehind: the breathing then repaints the background
+    // alone. Reading it in composition recomposed the whole alarm screen every frame while it rang.
+    val breathe: State<Float> = if (reducedMotion) {
+        remember { mutableFloatStateOf(0.3f) }
     } else {
-        val transition = rememberInfiniteTransition(label = "alarmBreathe")
-        val value by transition.animateFloat(
+        rememberInfiniteTransition(label = "alarmBreathe").animateFloat(
             initialValue = 0.22f,
             targetValue = 0.40f,
             animationSpec = infiniteRepeatable(
@@ -115,17 +123,18 @@ fun AlarmScreen(
             ),
             label = "breatheAlpha"
         )
-        value
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(Color.Black, BrutusDarkRed.copy(alpha = breathe), Color.Black)
+            .drawBehind {
+                drawRect(
+                    Brush.verticalGradient(
+                        colors = listOf(Color.Black, BrutusDarkRed.copy(alpha = breathe.value), Color.Black)
+                    )
                 )
-            )
+            }
     ) {
         Column(
             modifier = Modifier
@@ -209,15 +218,19 @@ fun AlarmScreen(
                 }
             }
 
-            // Challenge area (sequential)
-            if (!allDone) {
-                AnimatedContent(
-                    targetState = currentIndex,
-                    transitionSpec = {
-                        (fadeIn(tween(300)) togetherWith fadeOut(tween(150)))
-                    },
-                    label = "challengeTransition"
-                ) { idx ->
+            // Challenge area (sequential). The "done" moment is part of the same transition, so
+            // the last challenge hands over to it instead of being cut off.
+            val effects = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
+            val fastEffects = MaterialTheme.motionScheme.fastEffectsSpec<Float>()
+            val spatial = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
+            AnimatedContent(
+                targetState = currentIndex,
+                transitionSpec = {
+                    (fadeIn(effects) + scaleIn(spatial, initialScale = 0.92f)) togetherWith fadeOut(fastEffects)
+                },
+                label = "challengeTransition"
+            ) { idx ->
+                if (idx < active.size) {
                     when (active[idx]) {
                         ChallengeFlags.MATH -> MathChallenge(
                             totalRequired = mathProblemCount,
@@ -234,22 +247,22 @@ fun AlarmScreen(
                             onComplete = { currentIndex++ }
                         )
                     }
-                }
-            } else {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(32.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.alarm_done),
-                        style = MaterialTheme.typography.headlineLarge,
-                        color = Color.White
-                    )
-                    Text(
-                        text = stringResource(R.string.alarm_good_morning),
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.tertiary
-                    )
+                } else {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(32.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.alarm_done),
+                            style = MaterialTheme.typography.headlineLarge,
+                            color = Color.White
+                        )
+                        Text(
+                            text = stringResource(R.string.alarm_good_morning),
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.tertiary
+                        )
+                    }
                 }
             }
 
@@ -257,7 +270,12 @@ fun AlarmScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (allDone) {
+                // The payoff springs in instead of popping into the layout.
+                AnimatedVisibility(
+                    visible = allDone,
+                    enter = scaleIn(MaterialTheme.motionScheme.fastSpatialSpec(), initialScale = 0.6f) +
+                        fadeIn(MaterialTheme.motionScheme.defaultEffectsSpec()),
+                ) {
                     DismissButton(onDismiss = onDismiss)
                 }
 
@@ -302,18 +320,24 @@ private fun DismissButton(onDismiss: () -> Unit) {
     }
 }
 
+/** The current challenge's dot swells on a spring; colours change on the effects spec. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ChallengeProgressDots(total: Int, current: Int) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
         repeat(total) { i ->
-            val color = when {
+            val target = when {
                 i < current -> MaterialTheme.colorScheme.tertiary
                 i == current -> MaterialTheme.colorScheme.primary
                 else -> Color.White.copy(alpha = 0.2f)
             }
+            val color by animateColorAsState(target, MaterialTheme.motionScheme.defaultEffectsSpec(), label = "dot")
+            val size by animateDpAsState(
+                if (i == current) 16.dp else 12.dp, MaterialTheme.motionScheme.fastSpatialSpec(), label = "dotSize"
+            )
             Box(
                 modifier = Modifier
-                    .size(12.dp)
+                    .size(size)
                     .background(color, CircleShape)
             )
         }

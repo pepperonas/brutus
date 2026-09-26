@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import com.pepperonas.brutus.util.RingingStore
 import com.pepperonas.brutus.util.Storage
 import android.widget.RemoteViews
 import com.pepperonas.brutus.BrutusApplication
@@ -60,8 +61,9 @@ class NextAlarmWidget : AppWidgetProvider() {
         val app = context.applicationContext as BrutusApplication
         val alarms = app.database.alarmDao().getEnabledAlarms()
         val now = System.currentTimeMillis()
-        val next = NextAlarmCalculator.findNext(alarms, now)
-        val triggerAt = next?.let { NextAlarmCalculator.nextTrigger(it, now) }
+        val skips = RingingStore.skips(context)
+        val next = NextAlarmCalculator.findNext(alarms, now, skips)
+        val triggerAt = next?.let { NextAlarmCalculator.nextTrigger(it, now, skips[it.id]) }
 
         val views = RemoteViews(context.packageName, R.layout.widget_next_alarm)
         if (next == null || triggerAt == null) {

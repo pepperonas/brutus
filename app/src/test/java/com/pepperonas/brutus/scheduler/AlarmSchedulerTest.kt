@@ -42,6 +42,9 @@ class AlarmSchedulerTest {
         // Robolectric reports "not allowed" by default; a device with USE_EXACT_ALARM (13+) or the
         // default SCHEDULE_EXACT_ALARM grant (12) reports true. The revoked case has its own test.
         ShadowAlarmManager.setCanScheduleExactAlarms(true)
+        // The heads-up before an alarm is one more registration; it has its own tests
+        // (AlarmNotificationsTest). Off here, so the counts below stay about main/sunrise/snooze.
+        com.pepperonas.brutus.util.AppSettings.setUpcomingLeadMinutes(context, 0)
     }
 
     private fun scheduled(): List<ShadowAlarmManager.ScheduledAlarm> =

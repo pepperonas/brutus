@@ -7,6 +7,8 @@ import android.content.Intent
 import com.pepperonas.brutus.data.AlarmEntity
 import android.os.Build
 import com.pepperonas.brutus.receiver.AlarmReceiver
+import com.pepperonas.brutus.util.AlarmNotifier
+import com.pepperonas.brutus.util.AppSettings
 import com.pepperonas.brutus.util.NextAlarmCalculator
 import com.pepperonas.brutus.util.RingingStore
 
@@ -20,10 +22,15 @@ object AlarmScheduler {
 
     fun schedule(context: Context, alarm: AlarmEntity) {
         val alarmManager = context.getSystemService(AlarmManager::class.java)
-        val nextTrigger = calculateNextTrigger(alarm)
+        val now = System.currentTimeMillis()
+        val nextTrigger = NextAlarmCalculator.nextTrigger(alarm, now, RingingStore.skips(context)[alarm.id])
+            ?: calculateNextTrigger(alarm, now)
         val intent = createPendingIntent(context, alarm)
 
         setClock(alarmManager, nextTrigger, intent)
+        // Remembered so a reboot can tell that this occurrence never rang (missed-alarm notice).
+        RingingStore.setExpected(context, alarm.id, nextTrigger)
+        scheduleUpcoming(context, alarmManager, alarm, nextTrigger, now)
 
         // Always clear any previously armed sunrise first — if the new trigger is
         // less than SUNRISE_LEAD_MIN away we would otherwise leave a stale sunrise
@@ -48,7 +55,49 @@ object AlarmScheduler {
         val alarmManager = context.getSystemService(AlarmManager::class.java)
         alarmManager.cancel(createPendingIntent(context, alarm))
         cancelSunrise(context, alarm.id)
+        alarmManager.cancel(createUpcomingPendingIntent(context, alarm.id, 0L))
+        AlarmNotifier.cancelUpcoming(context, alarm.id)
+        RingingStore.clearExpected(context, alarm.id)
+        RingingStore.clearSkip(context, alarm.id)
     }
+
+    /**
+     * The quiet heads-up before the alarm ([AppSettings.upcomingLeadMinutes], 0 = off). A heads-up
+     * already on screen that announces a different time (the alarm moved) is withdrawn.
+     */
+    private fun scheduleUpcoming(
+        context: Context, alarmManager: AlarmManager, alarm: AlarmEntity, nextTrigger: Long, now: Long,
+    ) {
+        val pi = createUpcomingPendingIntent(context, alarm.id, nextTrigger)
+        alarmManager.cancel(pi)
+        RingingStore.upcomingShown(context, alarm.id)?.let { shown ->
+            if (shown != nextTrigger) AlarmNotifier.cancelUpcoming(context, alarm.id)
+        }
+        val lead = AppSettings.upcomingLeadMinutes(context)
+        if (lead <= 0) return
+        val at = nextTrigger - lead * 60_000L
+        if (at <= now) return
+        if (canScheduleExact(alarmManager)) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pi)
+        } else {
+            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pi)
+        }
+    }
+
+    private fun createUpcomingPendingIntent(context: Context, alarmId: Long, mainTriggerAt: Long): PendingIntent {
+        val intent = Intent(context, AlarmReceiver::class.java).apply {
+            putExtra("alarm_id", alarmId)
+            putExtra(EXTRA_IS_UPCOMING, true)
+            putExtra(EXTRA_MAIN_TRIGGER_AT, mainTriggerAt)
+            action = ACTION_ALARM_TRIGGER
+        }
+        return PendingIntent.getBroadcast(
+            context, upcomingRequestCode(alarmId), intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+    }
+
+    fun upcomingRequestCode(alarmId: Long): Int = 0x3A000000 or (alarmId.toInt() and 0x00FFFFFF)
 
     fun cancelSunrise(context: Context, alarmId: Long) {
         val alarmManager = context.getSystemService(AlarmManager::class.java)
@@ -71,17 +120,21 @@ object AlarmScheduler {
         val triggerAt = now + alarm.snoozeDuration * 60_000L
         registerSnooze(context, alarm.id, triggerAt, isFollowup, followupSeq)
         RingingStore.recordSnooze(context, RingingStore.Snooze(alarm.id, triggerAt, isFollowup, followupSeq))
+        AlarmNotifier.postSnooze(context, alarm, triggerAt)
         return triggerAt
     }
 
-    /** Re-registers a remembered snooze (after a reboot or clock change). */
-    fun restoreSnooze(context: Context, snooze: RingingStore.Snooze) =
+    /** Re-registers a remembered snooze (after a reboot or clock change) and its countdown. */
+    fun restoreSnooze(context: Context, snooze: RingingStore.Snooze, alarm: AlarmEntity) {
         registerSnooze(context, snooze.alarmId, snooze.triggerAt, snooze.isFollowup, snooze.followupSeq)
+        AlarmNotifier.postSnooze(context, alarm, snooze.triggerAt)
+    }
 
     fun cancelSnooze(context: Context, alarmId: Long) {
         val alarmManager = context.getSystemService(AlarmManager::class.java)
         alarmManager.cancel(createSnoozePendingIntent(context, alarmId, false, 0))
         RingingStore.clearSnooze(context, alarmId)
+        AlarmNotifier.cancelSnooze(context, alarmId)
     }
 
     private fun registerSnooze(
@@ -228,4 +281,5 @@ object AlarmScheduler {
     const val EXTRA_IS_SUNRISE = "is_sunrise"
     const val EXTRA_MAIN_TRIGGER_AT = "main_trigger_at"
     const val EXTRA_IS_SNOOZE = "is_snooze"
+    const val EXTRA_IS_UPCOMING = "is_upcoming"
 }

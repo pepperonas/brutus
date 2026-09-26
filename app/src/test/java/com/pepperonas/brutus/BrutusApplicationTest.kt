@@ -41,15 +41,30 @@ class BrutusApplicationTest {
         assertEquals("brutus_service", BrutusApplication.CHANNEL_SERVICE)
         assertEquals("brutus_ultra_hardcore", BrutusApplication.CHANNEL_ULTRA_HARDCORE)
         assertEquals("brutus_updates", BrutusApplication.CHANNEL_UPDATES)
+        assertEquals("brutus_upcoming", BrutusApplication.CHANNEL_UPCOMING)
+        assertEquals("brutus_missed", BrutusApplication.CHANNEL_MISSED)
+        assertEquals("brutus_timer", BrutusApplication.CHANNEL_TIMER)
     }
 
     @Test
-    fun `all four channels exist after application start`() {
+    fun `the quiet channels never break through Do Not Disturb, the heads-up and timer make no sound`() {
+        listOf(BrutusApplication.CHANNEL_UPCOMING, BrutusApplication.CHANNEL_TIMER).forEach {
+            assertEquals(NotificationManager.IMPORTANCE_LOW, channel(it).importance, it)
+            assertFalse(channel(it).canBypassDnd(), it)
+        }
+        assertFalse(channel(BrutusApplication.CHANNEL_MISSED).canBypassDnd())
+    }
+
+    @Test
+    fun `every channel exists after application start`() {
         listOf(
             BrutusApplication.CHANNEL_ALARM,
             BrutusApplication.CHANNEL_SERVICE,
             BrutusApplication.CHANNEL_ULTRA_HARDCORE,
             BrutusApplication.CHANNEL_UPDATES,
+            BrutusApplication.CHANNEL_UPCOMING,
+            BrutusApplication.CHANNEL_MISSED,
+            BrutusApplication.CHANNEL_TIMER,
         ).forEach { channel(it) }
     }
 

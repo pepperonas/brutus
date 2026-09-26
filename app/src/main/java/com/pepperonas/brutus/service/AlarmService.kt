@@ -21,6 +21,7 @@ import com.pepperonas.brutus.BrutusApplication
 import com.pepperonas.brutus.R
 import com.pepperonas.brutus.data.AlarmRepository
 import com.pepperonas.brutus.scheduler.AlarmScheduler
+import com.pepperonas.brutus.util.AlarmNotifier
 import com.pepperonas.brutus.util.AlarmSound
 import com.pepperonas.brutus.util.AlarmSoundGenerator
 import com.pepperonas.brutus.util.HardcoreAudioGuard
@@ -94,6 +95,10 @@ class AlarmService : Service() {
         currentIsFollowup = isFollowup
         currentFollowupSeq = followupSeq
         currentUltraHardcore = false
+
+        // It rings now: the heads-up and a snooze countdown have done their job.
+        AlarmNotifier.cancelUpcoming(applicationContext, alarmId)
+        AlarmNotifier.cancelSnooze(applicationContext, alarmId)
 
         acquireWakeLock()
 
@@ -177,6 +182,7 @@ class AlarmService : Service() {
                     AlarmScheduler.schedule(this@AlarmService, alarm)
                 } else {
                     repo.setEnabled(alarm.id, false)
+                    RingingStore.clearExpected(applicationContext, alarm.id) // it rang — not missed
                 }
                 NextAlarmWidget.refresh(applicationContext)
             }
@@ -347,8 +353,10 @@ class AlarmService : Service() {
 
         cleanupPlayback()
 
-        if (ultraSnap && alarmIdSnap != -1L && !isFollowupSnap) {
-            CoroutineScope(Dispatchers.IO).launch { armUltraHardcoreFollowups(alarmIdSnap) }
+        if (alarmIdSnap != -1L && !isFollowupSnap) {
+            CoroutineScope(Dispatchers.IO).launch {
+                if (ultraSnap || isUltraHardcore(alarmIdSnap)) armUltraHardcoreFollowups(alarmIdSnap)
+            }
         }
     }
 
@@ -374,7 +382,9 @@ class AlarmService : Service() {
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                if (dismissed && ultraSnap && alarmIdSnap != -1L) {
+                // A dismiss before the sound has loaded must still arm the follow-ups.
+                val ultra = ultraSnap || (alarmIdSnap != -1L && isUltraHardcore(alarmIdSnap))
+                if (dismissed && ultra && alarmIdSnap != -1L) {
                     if (!isFollowupSnap) {
                         armUltraHardcoreFollowups(alarmIdSnap)
                     } else {
@@ -383,6 +393,8 @@ class AlarmService : Service() {
                         if (UltraHardcoreStore.listPending(applicationContext).none { it.alarmId == alarmIdSnap }) {
                             UltraHardcoreNotifier.cancel(applicationContext, alarmIdSnap)
                             UltraHardcoreStore.clearAllFor(applicationContext, alarmIdSnap)
+                        } else {
+                            UltraHardcoreNotifier.post(applicationContext, alarmIdSnap) // countdown → next one
                         }
                     }
                 }
@@ -392,6 +404,11 @@ class AlarmService : Service() {
             }
         }
     }
+
+    /** The in-memory flag is only set once the sound has loaded; this is the answer before that. */
+    private suspend fun isUltraHardcore(alarmId: Long): Boolean =
+        AlarmRepository((applicationContext as BrutusApplication).database.alarmDao())
+            .getById(alarmId)?.ultraHardcoreMode == true
 
     private suspend fun armUltraHardcoreFollowups(alarmId: Long) {
         val app = applicationContext as BrutusApplication

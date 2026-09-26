@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+
 package com.pepperonas.brutus.ui.screens
 
 import android.content.res.Configuration
@@ -40,6 +42,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.pepperonas.brutus.ui.theme.BrutusTheme
+import com.pepperonas.brutus.ui.settings.SettingsScreen
 import com.pepperonas.brutus.viewmodel.AlarmViewModel
 import com.pepperonas.brutus.viewmodel.StopwatchViewModel
 import com.pepperonas.brutus.viewmodel.TimerViewModel
@@ -58,6 +61,8 @@ private enum class HomeTab(
     STOPWATCH("stopwatch", R.string.nav_stopwatch, Icons.Filled.Timer, Icons.Outlined.Timer),
     TIMER("timer", R.string.nav_timer, Icons.Filled.HourglassBottom, Icons.Outlined.HourglassBottom),
 }
+
+private const val SETTINGS_ROUTE = "settings"
 
 @Composable
 fun HomeScreen(viewModel: AlarmViewModel) {
@@ -95,8 +100,15 @@ fun HomeScreen(viewModel: AlarmViewModel) {
         // via the expressive spatial spec, while fades do the hand-over.
         @OptIn(ExperimentalMaterial3ExpressiveApi::class)
         val spatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<IntOffset>()
+        // Fades from the theme's effects specs instead of hand-picked tweens (220/110 ms).
+        val effectsSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
+        val fastEffectsSpec = MaterialTheme.motionScheme.fastEffectsSpec<Float>()
+        // "Remove animations": the tab change keeps its hand-over fade but no longer moves.
+        val reducedMotion = com.pepperonas.brutus.ui.theme.rememberReducedMotion()
+        // Settings sits "after" every tab, so it slides in from the end and back out again.
         fun tabIndex(entry: NavBackStackEntry): Int =
-            HomeTab.entries.indexOfFirst { it.route == entry.destination.route }
+            if (entry.destination.route == SETTINGS_ROUTE) HomeTab.entries.size
+            else HomeTab.entries.indexOfFirst { it.route == entry.destination.route }
 
         NavHost(
             navController = navController,
@@ -106,26 +118,25 @@ fun HomeScreen(viewModel: AlarmViewModel) {
                 .padding(padding),
             enterTransition = {
                 val dir = if (tabIndex(targetState) >= tabIndex(initialState)) 1 else -1
-                slideInHorizontally(spatialSpec) { full -> dir * full / 8 } +
-                    fadeIn(tween(220, delayMillis = 40))
+                if (reducedMotion) fadeIn(effectsSpec) else slideInHorizontally(spatialSpec) { full -> dir * full / 8 } + fadeIn(effectsSpec)
             },
             exitTransition = {
                 val dir = if (tabIndex(targetState) >= tabIndex(initialState)) 1 else -1
-                slideOutHorizontally(spatialSpec) { full -> -dir * full / 8 } +
-                    fadeOut(tween(110))
+                if (reducedMotion) fadeOut(fastEffectsSpec) else slideOutHorizontally(spatialSpec) { full -> -dir * full / 8 } + fadeOut(fastEffectsSpec)
             },
             popEnterTransition = {
                 val dir = if (tabIndex(targetState) >= tabIndex(initialState)) 1 else -1
-                slideInHorizontally(spatialSpec) { full -> dir * full / 8 } +
-                    fadeIn(tween(220, delayMillis = 40))
+                if (reducedMotion) fadeIn(effectsSpec) else slideInHorizontally(spatialSpec) { full -> dir * full / 8 } + fadeIn(effectsSpec)
             },
             popExitTransition = {
                 val dir = if (tabIndex(targetState) >= tabIndex(initialState)) 1 else -1
-                slideOutHorizontally(spatialSpec) { full -> -dir * full / 8 } +
-                    fadeOut(tween(110))
+                if (reducedMotion) fadeOut(fastEffectsSpec) else slideOutHorizontally(spatialSpec) { full -> -dir * full / 8 } + fadeOut(fastEffectsSpec)
             },
         ) {
-            composable(HomeTab.ALARM.route) { AlarmListScreen(viewModel = viewModel) }
+            composable(HomeTab.ALARM.route) {
+                AlarmListScreen(viewModel = viewModel, onOpenSettings = { navController.navigate(SETTINGS_ROUTE) })
+            }
+            composable(SETTINGS_ROUTE) { SettingsScreen(onBack = { navController.popBackStack() }) }
             composable(HomeTab.WORLD.route) { WorldClockScreen() }
             composable(HomeTab.STOPWATCH.route) { StopwatchScreen(viewModel = stopwatchViewModel) }
             composable(HomeTab.TIMER.route) { TimerScreen(viewModel = timerViewModel) }

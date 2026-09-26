@@ -104,6 +104,24 @@
             android:exported="false"
             android:directBootAware="true" />
 
+        <!-- The timer: AlarmManager's "time is up" + notification buttons, and the ring service. -->
+        <receiver
+            android:name=".timer.TimerReceiver"
+            android:exported="false"
+            android:directBootAware="true" />
+
+        <service
+            android:name=".timer.TimerRingService"
+            android:exported="false"
+            android:directBootAware="true"
+            android:foregroundServiceType="mediaPlayback" />
+
+        <!-- Buttons on the snooze / heads-up notifications ("Cancel snooze", "Dismiss early"). -->
+        <receiver
+            android:name=".receiver.NotificationActionReceiver"
+            android:exported="false"
+            android:directBootAware="true" />
+
         <!-- Every event after which the AlarmManager registrations no longer match the
              alarms in the database: clock/zone change, exact-alarm permission re-granted
              (a revoke cancels all alarms), app update. -->

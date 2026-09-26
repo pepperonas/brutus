@@ -30,6 +30,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -292,8 +293,12 @@ private fun AddZoneSheet(
         zones.filter { q.isBlank() || it.lowercase().contains(q) }.take(60)
     }
 
+    // Picking a zone slides the sheet out first (see AlarmEditDialog for why).
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetScope = rememberCoroutineScope()
     ModalBottomSheet(
         onDismissRequest = onDismiss,
+        sheetState = sheetState,
         containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
     ) {
         Column(
@@ -360,7 +365,9 @@ private fun AddZoneSheet(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable(enabled = !disabled) { onAdd(zone) }
+                            .clickable(enabled = !disabled) {
+                                sheetScope.launch { sheetState.hide() }.invokeOnCompletion { onAdd(zone) }
+                            }
                             .padding(vertical = 12.dp),
                     ) {
                         Column {

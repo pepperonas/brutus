@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+
 package com.pepperonas.brutus
 
 import android.app.KeyguardManager
@@ -246,6 +248,17 @@ private fun SunriseScreen(
                     else stringResource(R.string.sunrise_running),
                     style = MaterialTheme.typography.titleMedium,
                     color = Color.White.copy(alpha = 0.55f),
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                // The lead-in made visible: a gently rolling wave fills up to the real alarm.
+                val reduced = com.pepperonas.brutus.ui.theme.rememberReducedMotion()
+                androidx.compose.material3.LinearWavyProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier.fillMaxWidth(0.7f),
+                    color = MaterialTheme.colorScheme.tertiary,
+                    trackColor = Color.White.copy(alpha = 0.12f),
+                    amplitude = if (reduced) { _ -> 0f }
+                    else androidx.compose.material3.WavyProgressIndicatorDefaults.indicatorAmplitude,
                 )
             }
 
