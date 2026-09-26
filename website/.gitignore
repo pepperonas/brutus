@@ -1,0 +1,6 @@
+# Written by the release timer (server) or by a local preview run — never committed.
+latest.json
+changelog.md
+ssi/
+download.conf
+__pycache__/

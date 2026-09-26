@@ -1,0 +1,414 @@
+{
+  "$comment": "Brutus product page — built with the product-page kit (~/claude/_templates/apps/product-page). Change texts here, then run build.py --force.",
+  "name": "Brutus",
+  "slug": "brutus",
+  "aliases": [],
+  "repo": "pepperonas/brutus",
+  "branch": "main",
+  "tagline": "You WILL wake up.",
+  "license": "MIT",
+  "year": 2026,
+  "asset_version": 1,
+  "theme_source": "app/src/main/java/com/pepperonas/brutus/ui/theme/Color.kt — dark red-seed roles (primary lifted to red tone 80 for text contrast on the web)",
+  "theme": {
+    "bg": "#141110",
+    "bg-lowest": "#0c0908",
+    "surface-low": "#1d1a19",
+    "surface": "#211e1d",
+    "surface-high": "#2b2827",
+    "surface-highest": "#363231",
+    "on-bg": "#ede0dd",
+    "on-variant": "#d8c2bf",
+    "outline": "#a08c8a",
+    "outline-variant": "#534341",
+    "primary": "#ffb4ab",
+    "on-primary": "#690005",
+    "primary-container": "#93000a",
+    "on-primary-container": "#ffdad6",
+    "secondary-container": "#5d3f3c",
+    "on-secondary-container": "#ffdad6",
+    "tertiary": "#ffb77c",
+    "accent": "#e53935"
+  },
+  "hero": { "bg": "#0c0908", "width": 2912, "height": 1440 },
+  "screens": { "width": 1600, "height": 894 },
+  "ld": {
+    "type": "MobileApplication",
+    "category": "LifestyleApplication",
+    "subcategory": "Alarm clock",
+    "os": "Android 8.0 or later"
+  },
+  "targets": [
+    {
+      "id": "android",
+      "label": "Download APK",
+      "short": "APK",
+      "asset": "^brutus-v[0-9][0-9A-Za-z.\\-]*\\.apk$",
+      "requirement": "Android 8.0+",
+      "ua": "android"
+    }
+  ],
+  "chips": [],
+  "verify_rows": [
+    {
+      "label": {
+        "en": "Signing certificate SHA-256",
+        "de": "SHA-256 des Signaturzertifikats",
+        "es": "SHA-256 del certificado de firma",
+        "it": "SHA-256 del certificato di firma",
+        "fr": "SHA-256 du certificat de signature"
+      },
+      "value": "69d67a10a826cf4050da4b271af9b5ed500c962bfab07a8f8fe863e3d7600382"
+    }
+  ],
+  "content": {
+    "meta": {
+      "title": "Brutus — Android Alarm Clock You Can't Ignore",
+      "description": "Free, open-source Android alarm clock: stop it only by solving math, shaking the phone or scanning a QR code. Hardcore volume lock. No internet access.",
+      "og_title": "Brutus — You WILL wake up.",
+      "og_description": "Free, open-source Android alarm clock that only stops once you solve math problems, shake your phone or scan a QR code across the room.",
+      "twitter_description": "Free, open-source Android alarm clock: math, shake and QR challenges, a volume lock and follow-up alarms. No ads, no tracking, no internet access.",
+      "image_alt": "Two phones with the Brutus alarm screen — a math challenge and a shake challenge — in front of red alarm rings."
+    },
+    "summary": "Brutus is a free, open-source (MIT) alarm clock for Android 8.0 and later. A ringing alarm only stops once you complete the challenges you chose for it: solve math problems, shake the phone, or scan a QR code you placed somewhere else in your home — in any combination, one after the other. Hardcore mode keeps the alarm at full volume while it rings; Ultra Hardcore mode re-rings 10 and 15 minutes later unless you walk 30 steps. It also has a world clock, stopwatch, timer and a home-screen widget, runs in English and German, requests no internet permission and has no ads or tracking. Distributed as a signed APK through GitHub Releases.",
+    "meta_fallback": "Newest release · Android 8.0+ · free, MIT licence",
+    "feature_list": [
+      "Wake-up challenges: math problems, shaking the phone and scanning a QR code, combinable and run in sequence",
+      "Three math difficulties and three shake sensitivities per alarm",
+      "Hardcore mode: alarm volume stays at maximum and the volume keys do nothing while it rings",
+      "Ultra Hardcore mode: two follow-up alarms after dismissal, cancelled only by walking 30 steps",
+      "Eleven alarm sounds synthesized on the device, plus the system alarm tone and a silent option",
+      "Sunrise pre-alarm: screen brightens over the 10 minutes before the alarm",
+      "Slide-to-snooze with configurable snooze length, or no snooze at all",
+      "Test mode to try a wake-up chain without setting a real alarm",
+      "World clock, stopwatch and timer",
+      "Home-screen widget with the next alarm and a countdown",
+      "Alarms survive reboots and Doze; banners warn when the system would block them",
+      "English and German, including per-app language on Android 13+",
+      "No internet permission, no ads, no tracking"
+    ],
+    "limits": [
+      "Android only; not on Google Play — distributed as an APK through GitHub Releases.",
+      "The QR challenge needs Google Play Services, which delivers the barcode model; math and shake work without it.",
+      "Available in English and German only.",
+      "Android offers no way to truly lock the volume: Hardcore mode snaps it back to maximum and swallows the volume keys while the alarm rings."
+    ],
+    "hero.kicker": {
+      "en": "Android · Open source · Free",
+      "de": "Android · Open Source · Kostenlos",
+      "es": "Android · Código abierto · Gratis",
+      "it": "Android · Open source · Gratis",
+      "fr": "Android · Open source · Gratuit"
+    },
+    "hero.title": {
+      "en": "The alarm clock <br>you can't ignore.",
+      "de": "Der Wecker, <br>den du nicht ignorieren kannst.",
+      "es": "El despertador <br>que no puedes ignorar.",
+      "it": "La sveglia <br>che non puoi ignorare.",
+      "fr": "Le réveil <br>qu’on ne peut pas ignorer."
+    },
+    "hero.lead": {
+      "en": "Brutus only stops once you have solved math problems, shaken your phone or scanned a QR code on the other side of the flat — your choice, in any combination. No ads, no tracking, no internet access.",
+      "de": "Brutus verstummt erst, wenn du Rechenaufgaben gelöst, dein Handy geschüttelt oder einen QR-Code am anderen Ende der Wohnung gescannt hast — frei kombinierbar. Keine Werbung, kein Tracking, kein Internetzugriff.",
+      "es": "Brutus solo se calla cuando has resuelto operaciones, agitado el móvil o escaneado un código QR al otro lado de la casa, en la combinación que elijas. Sin anuncios, sin rastreo, sin acceso a internet.",
+      "it": "Brutus si ferma solo dopo che hai risolto dei calcoli, scosso il telefono o scansionato un codice QR dall’altra parte della casa, nella combinazione che preferisci. Nessuna pubblicità, nessun tracciamento, nessun accesso a internet.",
+      "fr": "Brutus ne s’arrête qu’une fois que vous avez résolu des calculs, secoué votre téléphone ou scanné un code QR à l’autre bout de l’appartement, dans la combinaison de votre choix. Sans pub, sans pistage, sans accès à internet."
+    },
+    "pl.h": {
+      "en": "Supported platforms",
+      "de": "Unterstützte Plattformen",
+      "es": "Plataformas compatibles",
+      "it": "Piattaforme supportate",
+      "fr": "Plateformes prises en charge"
+    },
+    "f.h": {
+      "en": "Built so that snoozing takes more effort than getting up",
+      "de": "Gebaut, damit Weiterschlafen mehr Mühe macht als Aufstehen",
+      "es": "Pensado para que seguir durmiendo cueste más que levantarse",
+      "it": "Pensata perché riaddormentarsi costi più fatica che alzarsi",
+      "fr": "Pensé pour que se rendormir coûte plus d’efforts que se lever"
+    },
+    "features": [
+      {
+        "t": {
+          "en": "Challenges, not a button",
+          "de": "Aufgaben statt Knopf",
+          "es": "Retos, no un botón",
+          "it": "Sfide, non un pulsante",
+          "fr": "Des défis, pas un bouton"
+        },
+        "p": {
+          "en": "Math (1–10 problems), shaking (10–100 shakes) and a QR scan. Enable one, two or all three per alarm — they run one after the other, and only then does <em>Stop alarm</em> appear.",
+          "de": "Rechnen (1–10 Aufgaben), Schütteln (10–100-mal) und ein QR-Scan. Pro Wecker eine, zwei oder alle drei aktivieren — sie laufen nacheinander, erst danach erscheint <em>Alarm stoppen</em>.",
+          "es": "Cálculo (1–10 operaciones), agitar (10–100 veces) y escanear un QR. Activa uno, dos o los tres en cada alarma: se ejecutan uno tras otro y solo entonces aparece <em>Detener alarma</em>.",
+          "it": "Calcoli (1–10), scuotimenti (10–100) e una scansione QR. Attivane uno, due o tutti e tre per sveglia: si svolgono uno dopo l’altro e solo alla fine compare <em>Ferma sveglia</em>.",
+          "fr": "Calculs (1 à 10), secousses (10 à 100) et un scan de code QR. Activez-en un, deux ou les trois par alarme : ils s’enchaînent, et c’est seulement après qu’apparaît <em>Arrêter l’alarme</em>."
+        }
+      },
+      {
+        "t": {
+          "en": "Hardcore mode",
+          "de": "Hardcore-Modus",
+          "es": "Modo Hardcore",
+          "it": "Modalità Hardcore",
+          "fr": "Mode Hardcore"
+        },
+        "p": {
+          "en": "While the alarm rings, its volume stays at maximum and the volume keys do nothing. The moment it is dismissed, your phone behaves normally again.",
+          "de": "Solange der Alarm klingelt, bleibt die Lautstärke auf Maximum und die Lautstärketasten tun nichts. Sobald er beendet ist, verhält sich dein Handy wieder ganz normal.",
+          "es": "Mientras suena la alarma, el volumen se queda al máximo y los botones de volumen no hacen nada. En cuanto la apagas, el móvil vuelve a funcionar con normalidad.",
+          "it": "Finché la sveglia suona, il volume resta al massimo e i tasti del volume non fanno nulla. Appena la spegni, il telefono torna a comportarsi normalmente.",
+          "fr": "Tant que l’alarme sonne, le volume reste au maximum et les touches de volume ne font rien. Dès qu’elle est arrêtée, le téléphone se comporte à nouveau normalement."
+        }
+      },
+      {
+        "t": {
+          "en": "No going back to bed",
+          "de": "Kein Zurück ins Bett",
+          "es": "Nada de volver a la cama",
+          "it": "Niente ritorno a letto",
+          "fr": "Pas de retour au lit"
+        },
+        "p": {
+          "en": "Ultra Hardcore rings again 10 and 15 minutes after you dismiss it — unless you walk 30 steps with the phone. The follow-ups survive a reboot.",
+          "de": "Ultra Hardcore klingelt 10 und 15 Minuten nach dem Beenden erneut — außer du gehst 30 Schritte mit dem Handy. Die Nachwecker überstehen auch einen Neustart.",
+          "es": "Ultra Hardcore vuelve a sonar 10 y 15 minutos después de apagarla, salvo que camines 30 pasos con el móvil. Las repeticiones sobreviven a un reinicio.",
+          "it": "Ultra Hardcore suona di nuovo 10 e 15 minuti dopo che l’hai spenta, a meno che tu non faccia 30 passi con il telefono. Le ripetizioni sopravvivono a un riavvio.",
+          "fr": "Ultra Hardcore sonne à nouveau 10 et 15 minutes après l’arrêt, sauf si vous faites 30 pas avec le téléphone. Les rappels survivent à un redémarrage."
+        }
+      },
+      {
+        "t": {
+          "en": "Sounds made on the phone",
+          "de": "Klänge, direkt auf dem Handy erzeugt",
+          "es": "Sonidos creados en el móvil",
+          "it": "Suoni generati sul telefono",
+          "fr": "Des sons créés sur le téléphone"
+        },
+        "p": {
+          "en": "Eleven alarm sounds are synthesized in real time — from klaxon, siren and fire alarm to a gentle chime — plus the system tone. Preview each one while you set the alarm.",
+          "de": "Elf Wecktöne werden in Echtzeit synthetisiert — von Hupe, Sirene und Feuermelder bis zum sanften Glockenspiel — dazu der Systemton. Jeder lässt sich beim Einstellen probehören.",
+          "es": "Once sonidos de alarma se sintetizan en tiempo real, desde bocina, sirena y alarma de incendios hasta un suave carillón, además del tono del sistema. Puedes escucharlos al configurar la alarma.",
+          "it": "Undici suonerie sono sintetizzate in tempo reale, da clacson, sirena e allarme antincendio a un dolce carillon, più il tono di sistema. Puoi ascoltarle mentre imposti la sveglia.",
+          "fr": "Onze sonneries sont synthétisées en temps réel, du klaxon à la sirène et à l’alarme incendie jusqu’à un carillon doux, plus la tonalité système. Chacune s’écoute pendant le réglage."
+        }
+      },
+      {
+        "t": {
+          "en": "Sunrise and widget",
+          "de": "Sonnenaufgang und Widget",
+          "es": "Amanecer y widget",
+          "it": "Alba e widget",
+          "fr": "Lever du soleil et widget"
+        },
+        "p": {
+          "en": "An optional pre-alarm brightens the screen over the ten minutes before it rings. A home-screen widget shows the next alarm with a countdown.",
+          "de": "Ein optionaler Vorwecker hellt den Bildschirm in den zehn Minuten vor dem Klingeln langsam auf. Ein Widget zeigt den nächsten Wecker samt Countdown.",
+          "es": "Una prealarma opcional aclara la pantalla durante los diez minutos anteriores. Un widget muestra la próxima alarma con una cuenta atrás.",
+          "it": "Una pre-sveglia opzionale schiarisce lo schermo nei dieci minuti prima che suoni. Un widget mostra la prossima sveglia con il conto alla rovescia.",
+          "fr": "Une pré-alarme facultative éclaircit l’écran pendant les dix minutes qui précèdent. Un widget affiche la prochaine alarme avec un compte à rebours."
+        }
+      },
+      {
+        "t": {
+          "en": "Reliable and offline",
+          "de": "Zuverlässig und offline",
+          "es": "Fiable y sin conexión",
+          "it": "Affidabile e offline",
+          "fr": "Fiable et hors ligne"
+        },
+        "p": {
+          "en": "Exact alarms that ring in Doze and come back after a reboot, with banners when the system would block them. Brutus requests no internet permission — plus world clock, stopwatch and timer.",
+          "de": "Exakte Wecker, die auch im Doze klingeln und nach einem Neustart zurückkommen, mit Hinweisen, wenn das System sie blockieren würde. Brutus fordert keine Internetberechtigung an — dazu Weltuhr, Stoppuhr und Timer.",
+          "es": "Alarmas exactas que suenan en modo Doze y vuelven tras un reinicio, con avisos cuando el sistema las bloquearía. Brutus no pide permiso de internet; además, reloj mundial, cronómetro y temporizador.",
+          "it": "Sveglie esatte che suonano anche in Doze e tornano dopo un riavvio, con avvisi quando il sistema le bloccherebbe. Brutus non chiede il permesso di internet; in più orologio mondiale, cronometro e timer.",
+          "fr": "Des alarmes exactes qui sonnent en mode Doze et reviennent après un redémarrage, avec des bandeaux quand le système les bloquerait. Brutus ne demande pas l’accès à internet ; en plus, horloge mondiale, chronomètre et minuteur."
+        }
+      }
+    ],
+    "s.h": {
+      "en": "Material 3 Expressive, built for 6 a.m.",
+      "de": "Material 3 Expressive, gebaut für 6 Uhr morgens",
+      "es": "Material 3 Expressive, pensado para las 6 de la mañana",
+      "it": "Material 3 Expressive, pensata per le 6 del mattino",
+      "fr": "Material 3 Expressive, pensé pour 6 heures du matin"
+    },
+    "s.alt": {
+      "en": "Four screens in the German UI: the alarm list, a math challenge, a shake challenge and the finished alarm",
+      "de": "Vier Bildschirme: die Weckerliste, eine Mathe-Challenge, eine Schüttel-Challenge und der geschaffte Alarm",
+      "es": "Cuatro pantallas de la interfaz en alemán: la lista de alarmas, un reto de cálculo, un reto de agitar y la alarma superada",
+      "it": "Quattro schermate dell’interfaccia in tedesco: l’elenco delle sveglie, una sfida di calcolo, una sfida di scuotimento e la sveglia superata",
+      "fr": "Quatre écrans de l’interface en allemand : la liste des alarmes, un défi de calcul, un défi de secousse et l’alarme terminée"
+    },
+    "install": [
+      {
+        "t": {
+          "en": "Download the APK",
+          "de": "APK herunterladen",
+          "es": "Descarga la APK",
+          "it": "Scarica l’APK",
+          "fr": "Téléchargez l’APK"
+        },
+        "p": {
+          "en": "One file for every phone with Android 8.0 or later — there is nothing to pick.",
+          "de": "Eine Datei für jedes Handy mit Android 8.0 oder neuer — es gibt nichts auszuwählen.",
+          "es": "Un solo archivo para cualquier móvil con Android 8.0 o posterior: no hay nada que elegir.",
+          "it": "Un solo file per ogni telefono con Android 8.0 o successivo: non c’è niente da scegliere.",
+          "fr": "Un seul fichier pour tous les téléphones sous Android 8.0 ou plus récent : rien à choisir."
+        }
+      },
+      {
+        "t": {
+          "en": "Allow the install",
+          "de": "Installation erlauben",
+          "es": "Permite la instalación",
+          "it": "Consenti l’installazione",
+          "fr": "Autorisez l’installation"
+        },
+        "p": {
+          "en": "Open the file. Android asks once whether your browser may install apps — allow it.",
+          "de": "Datei öffnen. Android fragt einmal, ob dein Browser Apps installieren darf — erlauben.",
+          "es": "Abre el archivo. Android pregunta una vez si tu navegador puede instalar apps: permítelo.",
+          "it": "Apri il file. Android chiede una volta se il browser può installare app: consentilo.",
+          "fr": "Ouvrez le fichier. Android demande une fois si votre navigateur peut installer des apps : autorisez-le."
+        }
+      },
+      {
+        "t": {
+          "en": "Clear the banners",
+          "de": "Hinweise abarbeiten",
+          "es": "Resuelve los avisos",
+          "it": "Risolvi gli avvisi",
+          "fr": "Réglez les bandeaux"
+        },
+        "p": {
+          "en": "If the alarm list shows a banner — exact alarms, battery optimization, full-screen alarm — tap it and flip the switch. Then test your wake-up chain with <em>Test wake modes now</em>.",
+          "de": "Zeigt die Weckerliste einen Hinweis — exakte Wecker, Akku-Optimierung, Vollbild-Alarm —, antippen und den Schalter umlegen. Danach die Weckkette mit dem Testmodus ausprobieren.",
+          "es": "Si la lista de alarmas muestra un aviso (alarmas exactas, optimización de batería, alarma a pantalla completa), tócalo y activa el interruptor. Después prueba tu secuencia con el modo de prueba.",
+          "it": "Se l’elenco delle sveglie mostra un avviso (sveglie esatte, ottimizzazione batteria, sveglia a schermo intero), toccalo e attiva l’interruttore. Poi prova la tua sequenza con la modalità di test.",
+          "fr": "Si la liste des alarmes affiche un bandeau (alarmes exactes, optimisation de la batterie, alarme plein écran), touchez-le et activez l’interrupteur. Testez ensuite votre enchaînement avec le mode test."
+        }
+      }
+    ],
+    "v.p": {
+      "en": "Every release since 1.0.0 is signed with the same key. Compare with <code>apksigner verify --print-certs</code>.",
+      "de": "Jede Version seit 1.0.0 ist mit demselben Schlüssel signiert. Vergleiche mit <code>apksigner verify --print-certs</code>.",
+      "es": "Todas las versiones desde la 1.0.0 están firmadas con la misma clave. Compáralo con <code>apksigner verify --print-certs</code>.",
+      "it": "Ogni versione dalla 1.0.0 è firmata con la stessa chiave. Confronta con <code>apksigner verify --print-certs</code>.",
+      "fr": "Toutes les versions depuis la 1.0.0 sont signées avec la même clé. Comparez avec <code>apksigner verify --print-certs</code>."
+    },
+    "i.note": {
+      "en": "Brutus is not on Google Play. Every release is built and signed by GitHub Actions from the public source code and published on GitHub Releases.",
+      "de": "Brutus ist nicht bei Google Play. Jede Version wird von GitHub Actions aus dem öffentlichen Quellcode gebaut, signiert und auf GitHub Releases veröffentlicht.",
+      "es": "Brutus no está en Google Play. Cada versión la compila y firma GitHub Actions a partir del código fuente público y se publica en GitHub Releases.",
+      "it": "Brutus non è su Google Play. Ogni versione viene compilata e firmata da GitHub Actions a partire dal codice sorgente pubblico e pubblicata su GitHub Releases.",
+      "fr": "Brutus n’est pas sur Google Play. Chaque version est compilée et signée par GitHub Actions à partir du code source public, puis publiée sur GitHub Releases."
+    },
+    "faq": [
+      {
+        "q": {
+          "en": "Is Brutus free?",
+          "de": "Ist Brutus kostenlos?",
+          "es": "¿Brutus es gratis?",
+          "it": "Brutus è gratuita?",
+          "fr": "Brutus est-il gratuit ?"
+        },
+        "a": {
+          "en": "Yes. It is free and open source under the MIT licence, with no ads, no account and no tracking.",
+          "de": "Ja. Die App ist kostenlos und quelloffen unter der MIT-Lizenz, ohne Werbung, ohne Konto und ohne Tracking.",
+          "es": "Sí. Es gratuita y de código abierto con licencia MIT, sin anuncios, sin cuenta y sin rastreo.",
+          "it": "Sì. È gratuita e open source con licenza MIT, senza pubblicità, senza account e senza tracciamento.",
+          "fr": "Oui. Il est gratuit et open source sous licence MIT, sans pub, sans compte et sans pistage."
+        }
+      },
+      {
+        "q": {
+          "en": "Why is it not on Google Play?",
+          "de": "Warum ist sie nicht bei Google Play?",
+          "es": "¿Por qué no está en Google Play?",
+          "it": "Perché non è su Google Play?",
+          "fr": "Pourquoi n’est-il pas sur Google Play ?"
+        },
+        "a": {
+          "en": "It is distributed directly as a signed APK on GitHub Releases. Each release is built from the public source by GitHub Actions, and the workflow refuses to publish an APK that is not signed with the Brutus certificate.",
+          "de": "Sie wird direkt als signierte APK über GitHub Releases verteilt. Jede Version baut GitHub Actions aus dem öffentlichen Quellcode, und der Workflow veröffentlicht keine APK, die nicht mit dem Brutus-Zertifikat signiert ist.",
+          "es": "Se distribuye directamente como APK firmada en GitHub Releases. Cada versión la compila GitHub Actions a partir del código público, y el flujo se niega a publicar una APK que no esté firmada con el certificado de Brutus.",
+          "it": "Viene distribuita direttamente come APK firmato su GitHub Releases. Ogni versione è compilata da GitHub Actions dal codice pubblico, e il workflow si rifiuta di pubblicare un APK non firmato con il certificato di Brutus.",
+          "fr": "Il est distribué directement sous forme d’APK signé sur GitHub Releases. Chaque version est compilée par GitHub Actions à partir du code public, et le workflow refuse de publier un APK qui ne porte pas le certificat de Brutus."
+        }
+      },
+      {
+        "q": {
+          "en": "Which phones does it run on?",
+          "de": "Auf welchen Handys läuft sie?",
+          "es": "¿En qué móviles funciona?",
+          "it": "Su quali telefoni funziona?",
+          "fr": "Sur quels téléphones fonctionne-t-il ?"
+        },
+        "a": {
+          "en": "Android 8.0 or later. The QR challenge also needs Google Play Services, which supplies the barcode model; math and shake work on every device.",
+          "de": "Android 8.0 oder neuer. Die QR-Challenge braucht zusätzlich Google Play Services, die das Barcode-Modell liefern; Rechnen und Schütteln funktionieren auf jedem Gerät.",
+          "es": "Android 8.0 o posterior. El reto QR necesita además Google Play Services, que aporta el modelo de códigos; el cálculo y agitar funcionan en cualquier dispositivo.",
+          "it": "Android 8.0 o successivo. La sfida QR richiede anche Google Play Services, che fornisce il modello per i codici; calcoli e scuotimento funzionano su ogni dispositivo.",
+          "fr": "Android 8.0 ou plus récent. Le défi QR nécessite en plus les services Google Play, qui fournissent le modèle de lecture ; calcul et secousse fonctionnent sur tous les appareils."
+        }
+      },
+      {
+        "q": {
+          "en": "How do I update?",
+          "de": "Wie aktualisiere ich?",
+          "es": "¿Cómo actualizo?",
+          "it": "Come aggiorno?",
+          "fr": "Comment mettre à jour ?"
+        },
+        "a": {
+          "en": "Download the newest APK from this page and install it over the existing app; your alarms and settings stay. Brutus has no internet access, so it does not check for updates itself.",
+          "de": "Die neueste APK von dieser Seite laden und über die bestehende App installieren; Wecker und Einstellungen bleiben erhalten. Brutus hat keinen Internetzugriff und sucht deshalb nicht selbst nach Updates.",
+          "es": "Descarga la APK más reciente desde esta página e instálala sobre la app existente; tus alarmas y ajustes se conservan. Brutus no tiene acceso a internet, así que no busca actualizaciones por sí mismo.",
+          "it": "Scarica l’APK più recente da questa pagina e installalo sopra l’app esistente; sveglie e impostazioni restano. Brutus non ha accesso a internet, quindi non cerca aggiornamenti da solo.",
+          "fr": "Téléchargez l’APK le plus récent depuis cette page et installez-le par-dessus l’app existante ; vos alarmes et réglages sont conservés. Brutus n’a pas accès à internet, il ne cherche donc pas lui-même les mises à jour."
+        }
+      },
+      {
+        "q": {
+          "en": "What does it do besides alarms?",
+          "de": "Was kann sie außer Wecken?",
+          "es": "¿Qué hace además de despertar?",
+          "it": "Cosa fa oltre alla sveglia?",
+          "fr": "Que fait-il en plus des alarmes ?"
+        },
+        "a": {
+          "en": "A world clock, a stopwatch with laps, a timer with gentle finish sounds and a home-screen widget. The app is in English and German and follows the system language.",
+          "de": "Eine Weltuhr, eine Stoppuhr mit Runden, einen Timer mit sanften Endtönen und ein Widget für den Startbildschirm. Die App gibt es auf Deutsch und Englisch, sie folgt der Systemsprache.",
+          "es": "Un reloj mundial, un cronómetro con vueltas, un temporizador con sonidos suaves al terminar y un widget para la pantalla de inicio. La app está en inglés y alemán y sigue el idioma del sistema.",
+          "it": "Un orologio mondiale, un cronometro con giri, un timer con suoni delicati alla fine e un widget per la schermata Home. L’app è in inglese e tedesco e segue la lingua di sistema.",
+          "fr": "Une horloge mondiale, un chronomètre avec tours, un minuteur aux sonneries douces et un widget pour l’écran d’accueil. L’app est en anglais et en allemand et suit la langue du système."
+        }
+      },
+      {
+        "q": {
+          "en": "How do I know the APK is genuine?",
+          "de": "Woran erkenne ich, dass die APK echt ist?",
+          "es": "¿Cómo sé que la APK es auténtica?",
+          "it": "Come faccio a sapere che l’APK è autentico?",
+          "fr": "Comment savoir si l’APK est authentique ?"
+        },
+        "a": {
+          "en": "Compare its SHA-256 with the value above and check the signing certificate with apksigner verify --print-certs; the certificate is the same for every release since 1.0.0.",
+          "de": "Vergleiche ihre SHA-256 mit dem Wert oben und prüfe das Signaturzertifikat mit apksigner verify --print-certs; das Zertifikat ist seit 1.0.0 bei jeder Version dasselbe.",
+          "es": "Compara su SHA-256 con el valor de arriba y comprueba el certificado de firma con apksigner verify --print-certs; el certificado es el mismo en todas las versiones desde la 1.0.0.",
+          "it": "Confronta il suo SHA-256 con il valore qui sopra e verifica il certificato di firma con apksigner verify --print-certs; il certificato è lo stesso per ogni versione dalla 1.0.0.",
+          "fr": "Comparez son SHA-256 avec la valeur ci-dessus et vérifiez le certificat de signature avec apksigner verify --print-certs ; le certificat est le même pour toutes les versions depuis la 1.0.0."
+        }
+      }
+    ],
+    "agent_queries": [
+      "Download the latest Brutus alarm clock APK",
+      "Which version of Brutus is current?",
+      "How do I verify the Brutus APK signature?",
+      "Android alarm clock that makes you solve math or scan a QR code to turn it off"
+    ],
+    "tags": ["android", "alarm-clock", "open-source", "apk"],
+    "skill_description": "Download, verify and install the newest Brutus APK — the free, open-source Android alarm clock that only stops after math, shake or QR-code challenges. Use when someone asks for the app, its latest version, a download link, or how to check the APK is genuine."
+  }
+}

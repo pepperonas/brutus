@@ -6,6 +6,8 @@
   <img src="docs/hero.png" alt="Brutus — Killer Alarm Clock" width="100%" />
 </p>
 
+<p align="center"><strong><a href="https://brutus.celox.io">brutus.celox.io</a></strong> · <a href="https://brutus.celox.io/download">Neueste APK herunterladen</a></p>
+
 <!-- Projektstatus — diese Badges aktualisieren sich selbst. -->
 
 [![Tests](https://img.shields.io/github/actions/workflow/status/pepperonas/brutus/tests.yml?branch=main&label=tests&logo=githubactions&logoColor=white)](https://github.com/pepperonas/brutus/actions/workflows/tests.yml)
@@ -490,7 +492,7 @@ Der auslösende Alarm zeigt eine Vollbild-Activity **über** dem Sperrbildschirm
 
 ### Fertiges APK (empfohlen)
 
-Das neueste signierte APK gibt es auf der [Releases](https://github.com/pepperonas/brutus/releases/latest)-Seite:
+Das neueste signierte APK gibt es auf der Produktseite **[brutus.celox.io](https://brutus.celox.io)** — [`/download`](https://brutus.celox.io/download) zeigt immer auf die neueste Version, ihre SHA-256 steht auf der Seite — oder auf der [Releases](https://github.com/pepperonas/brutus/releases/latest)-Seite:
 
 ```
 https://github.com/pepperonas/brutus/releases/latest

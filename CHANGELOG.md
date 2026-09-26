@@ -4,6 +4,11 @@
 
 All notable changes to Brutus are documented here. Versions follow [SemVer](https://semver.org).
 
+## [Unreleased]
+
+### Added
+- **Product page at [brutus.celox.io](https://brutus.celox.io)** in English, German, Spanish, Italian and French, built with the celox product-page kit. It always offers the newest release — a server timer mirrors GitHub Releases every 15 minutes — with its SHA-256, the signing certificate, the changelog and `/download` as a stable link. Its source lives in `website/`.
+
 ## [2.2.0] — 2026-08-15 · English + German, and 168 more tests
 
 ### Added — English and German localization

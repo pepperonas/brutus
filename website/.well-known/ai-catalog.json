@@ -1,0 +1,29 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "Brutus",
+    "identifier": "did:web:brutus.celox.io",
+    "documentationUrl": "https://brutus.celox.io/llms.txt"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:brutus.celox.io:skills:get-brutus",
+      "displayName": "Get Brutus",
+      "type": "text/markdown; profile=\"urn:air:agent-skills\"",
+      "url": "https://brutus.celox.io/skills/get-brutus/SKILL.md",
+      "description": "Brutus is a free, open-source (MIT) alarm clock for Android 8.0 and later. A ringing alarm only stops once you complete the challenges you chose for it: solve math problems, shake the phone, or scan a QR code you placed somewhere else in your home — in any combination, one after the other. Hardcore mode keeps the alarm at full volume while it rings; Ultra Hardcore mode re-rings 10 and 15 minutes later unless you walk 30 steps. It also has a world clock, stopwatch, timer and a home-screen widget, runs in English and German, requests no internet permission and has no ads or tracking. Distributed as a signed APK through GitHub Releases.",
+      "tags": [
+        "android",
+        "alarm-clock",
+        "open-source",
+        "apk"
+      ],
+      "representativeQueries": [
+        "Download the latest Brutus alarm clock APK",
+        "Which version of Brutus is current?",
+        "How do I verify the Brutus APK signature?",
+        "Android alarm clock that makes you solve math or scan a QR code to turn it off"
+      ]
+    }
+  ]
+}

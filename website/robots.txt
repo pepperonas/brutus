@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+
+# For LLMs and agents: summary /llms.txt · this page as Markdown /index.md · newest release /latest.json
+# Agent resource catalog: /.well-known/ai-catalog.json (no "Agentmap:" line — SEO validators reject it)
+Sitemap: https://brutus.celox.io/sitemap.xml
