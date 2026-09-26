@@ -598,13 +598,13 @@ Sideloading heißt, einer Datei aus dem Internet zu vertrauen — hier ist alles
 | Schlüssel | RSA 4096, gültig 2026-04-12 → 2053-08-28 (10.000 Tage) |
 | Signaturschema | APK Signature Scheme v2 |
 | **Zertifikat-SHA-256** | `69d67a10a826cf4050da4b271af9b5ed500c962bfab07a8f8fe863e3d7600382` |
-| APK v2.3.1 | 4.504.122 Bytes · SHA-256 `99f5052082c86beabe563515df00bb4f9af68368adc4ad3874e8bc739ed535f8` |
+| APK v2.4.0 | 4.592.890 Bytes · SHA-256 `b4c267d00836611053527089f7a0505f171127ac0ed377978fada47fae098d0b` |
 
 Der **Zertifikats**-Fingerabdruck ist der dauerhafte — er bleibt über alle Releases identisch, eine Abweichung bedeutet also, dass das APK nicht von hier stammt. Der APK-Hash ändert sich mit jeder Version.
 
 ```bash
-shasum -a 256 brutus-v2.3.1.apk
-$ANDROID_HOME/build-tools/35.0.0/apksigner verify --print-certs -v brutus-v2.3.1.apk
+shasum -a 256 brutus-v2.4.0.apk
+$ANDROID_HOME/build-tools/35.0.0/apksigner verify --print-certs -v brutus-v2.4.0.apk
 ```
 
 ### Hinweis für Samsung
