@@ -5,6 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
+import com.pepperonas.brutus.util.Storage
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(entities = [AlarmEntity::class], version = 7, exportSchema = true)
@@ -55,12 +56,23 @@ abstract class AlarmDatabase : RoomDatabase() {
             }
         }
 
+        /** Tests only: Robolectric resets the files per test while this static would survive. */
+        @androidx.annotation.VisibleForTesting
+        fun resetInstanceForTests() {
+            synchronized(this) {
+                INSTANCE?.close()
+                INSTANCE = null
+            }
+        }
+
         fun getInstance(context: Context): AlarmDatabase {
             return INSTANCE ?: synchronized(this) {
+                // Device-protected storage: the alarm must be readable before the first
+                // unlock after a reboot (see Storage).
                 INSTANCE ?: Room.databaseBuilder(
-                    context.applicationContext,
+                    Storage.device(context),
                     AlarmDatabase::class.java,
-                    "brutus_alarms.db"
+                    Storage.DATABASE
                 )
                     .addMigrations(MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
                     // Pre-v1.0.0 dev versions never reached external users; if

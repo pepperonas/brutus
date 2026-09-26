@@ -2,6 +2,7 @@ package com.pepperonas.brutus.update
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.pepperonas.brutus.util.Storage
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -16,7 +17,7 @@ object UpdateCheckStore {
     private const val KEY_LATEST = "latest_seen"
     private const val KEY_NOTIFIED = "notified_version"
 
-    private fun prefs(c: Context) = c.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+    private fun prefs(c: Context) = Storage.prefs(c, PREFS)
 
     /** Off by default — also for installs that update from a version without the switch. */
     fun isEnabled(c: Context): Boolean = prefs(c).getBoolean(KEY_ENABLED, false)

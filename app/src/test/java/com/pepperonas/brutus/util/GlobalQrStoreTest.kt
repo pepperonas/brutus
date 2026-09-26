@@ -27,8 +27,7 @@ class GlobalQrStoreTest {
         context = ApplicationProvider.getApplicationContext()
     }
 
-    private fun storedValue(): String? = context
-        .getSharedPreferences("brutus_global", Context.MODE_PRIVATE)
+    private fun storedValue(): String? = Storage.prefs(context, "brutus_global")
         .getString("qr_data", null)
 
     @Test
@@ -68,7 +67,7 @@ class GlobalQrStoreTest {
     @Test
     fun `an existing code is honored instead of being regenerated`() {
         val seeded = "brutus:${UUID.randomUUID()}"
-        context.getSharedPreferences("brutus_global", Context.MODE_PRIVATE)
+        Storage.prefs(context, "brutus_global")
             .edit().putString("qr_data", seeded).commit()
 
         assertEquals(seeded, GlobalQrStore.get(context))

@@ -47,7 +47,12 @@ object UpdateScheduler {
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             PERIODIC_WORK,
             ExistingPeriodicWorkPolicy.KEEP,
-            PeriodicWorkRequestBuilder<UpdateCheckWorker>(24, TimeUnit.HOURS).setConstraints(network).build(),
+            // First periodic run a day out: turning the switch on already enqueues an immediate
+            // check, and two checks racing each other could both announce the same version.
+            PeriodicWorkRequestBuilder<UpdateCheckWorker>(24, TimeUnit.HOURS)
+                .setConstraints(network)
+                .setInitialDelay(24, TimeUnit.HOURS)
+                .build(),
         )
     }
 }

@@ -16,7 +16,7 @@ import com.pepperonas.brutus.R
 /** One check: ask the source, remember the finding, notify once per new version. */
 object UpdateChecker {
 
-    enum class Outcome { DISABLED, FAILED, UP_TO_DATE, ALREADY_NOTIFIED, NOTIFIED }
+    enum class Outcome { DISABLED, FAILED, UP_TO_DATE, ALREADY_NOTIFIED, NOT_SHOWN, NOTIFIED }
 
     private const val NOTIFICATION_ID = 0x5550D47E
 
@@ -29,7 +29,9 @@ object UpdateChecker {
         if (!AppVersion.isNewer(latest, installed)) return Outcome.UP_TO_DATE
         if (UpdateCheckStore.notifiedVersion(context) == latest) return Outcome.ALREADY_NOTIFIED
 
-        notify(context, latest)
+        // Only a notification that was actually shown counts as "told" — otherwise a user who
+        // grants the permission later would never hear about this version.
+        if (!notify(context, latest)) return Outcome.NOT_SHOWN
         UpdateCheckStore.markNotified(context, latest)
         return Outcome.NOTIFIED
     }
@@ -52,11 +54,12 @@ object UpdateChecker {
             ""
         }
 
-    private fun notify(context: Context, latest: String) {
+    private fun notify(context: Context, latest: String): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
             != PackageManager.PERMISSION_GRANTED
-        ) return // the banner still shows it
+        ) return false // the banner still shows it
+        if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return false
 
         val tap = PendingIntent.getActivity(
             context, 0, downloadIntent(),
@@ -73,5 +76,14 @@ object UpdateChecker {
             .setCategory(NotificationCompat.CATEGORY_RECOMMENDATION)
             .build()
         NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, n)
+        return true
+    }
+
+    /** Opens the download page; false when the phone has no app for it (no browser). */
+    fun openDownload(context: Context): Boolean = try {
+        context.startActivity(downloadIntent())
+        true
+    } catch (_: android.content.ActivityNotFoundException) {
+        false
     }
 }

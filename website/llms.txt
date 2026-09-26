@@ -36,7 +36,7 @@ Everything below is also available without JavaScript: the page's HTML carries t
 - No going back to bed: Ultra Hardcore rings again 10 and 15 minutes after you dismiss it — unless you walk 30 steps with the phone. The follow-ups survive a reboot.
 - Sounds made on the phone: Eleven alarm sounds are synthesized in real time — from klaxon, siren and fire alarm to a gentle chime — plus the system tone. Preview each one while you set the alarm.
 - Sunrise and widget: An optional pre-alarm brightens the screen over the ten minutes before it rings. A home-screen widget shows the next alarm with a countdown.
-- Reliable, offline by default: Exact alarms that ring in Doze and come back after a reboot, with banners when the system would block them. Online only if you switch on update notices — then it reads the newest version once a day.
+- Reliable, offline by default: Exact alarms that ring in Doze and come back after a reboot — even before you unlock the phone, with banners when the system would block them. Online only if you switch on update notices — then it reads the newest version once a day.
 
 ## Scope and limits
 

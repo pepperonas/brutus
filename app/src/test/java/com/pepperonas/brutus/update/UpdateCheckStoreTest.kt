@@ -1,6 +1,7 @@
 package com.pepperonas.brutus.update
 
 import android.content.Context
+import com.pepperonas.brutus.util.Storage
 import androidx.test.core.app.ApplicationProvider
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
@@ -21,7 +22,7 @@ class UpdateCheckStoreTest {
     @Before
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
-        context.getSharedPreferences(UpdateCheckStore.PREFS, Context.MODE_PRIVATE).edit().clear().commit()
+        Storage.prefs(context, UpdateCheckStore.PREFS).edit().clear().commit()
     }
 
     /**

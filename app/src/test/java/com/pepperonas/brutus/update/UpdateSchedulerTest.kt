@@ -1,6 +1,7 @@
 package com.pepperonas.brutus.update
 
 import android.content.Context
+import com.pepperonas.brutus.util.Storage
 import android.util.Log
 import androidx.test.core.app.ApplicationProvider
 import androidx.work.Configuration
@@ -28,7 +29,7 @@ class UpdateSchedulerTest {
     @Before
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
-        context.getSharedPreferences(UpdateCheckStore.PREFS, Context.MODE_PRIVATE).edit().clear().commit()
+        Storage.prefs(context, UpdateCheckStore.PREFS).edit().clear().commit()
         WorkManagerTestInitHelper.initializeTestWorkManager(
             context,
             Configuration.Builder().setMinimumLoggingLevel(Log.DEBUG).setExecutor(SynchronousExecutor()).build(),
@@ -47,6 +48,8 @@ class UpdateSchedulerTest {
         val daily = active(UpdateScheduler.PERIODIC_WORK).single()
         assertEquals(NetworkType.CONNECTED, daily.constraints.requiredNetworkType)
         assertEquals(TimeUnit.HOURS.toMillis(24), daily.periodicityInfo!!.repeatIntervalMillis)
+        // The immediate check covers "now"; a periodic run right away too would race it.
+        assertTrue(daily.initialDelayMillis >= TimeUnit.HOURS.toMillis(24) - 1000)
     }
 
     @Test

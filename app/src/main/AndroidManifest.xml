@@ -58,6 +58,7 @@
         <activity
             android:name=".UltraHardcoreTaskActivity"
             android:exported="false"
+            android:directBootAware="true"
             android:launchMode="singleTask"
             android:taskAffinity=""
             android:excludeFromRecents="true"
@@ -66,6 +67,7 @@
         <activity
             android:name=".SunriseActivity"
             android:exported="false"
+            android:directBootAware="true"
             android:launchMode="singleTask"
             android:taskAffinity=""
             android:excludeFromRecents="true"
@@ -87,6 +89,7 @@
         <activity
             android:name=".AlarmActivity"
             android:exported="false"
+            android:directBootAware="true"
             android:excludeFromRecents="true"
             android:launchMode="singleInstance"
             android:showOnLockScreen="true"
@@ -94,9 +97,27 @@
             android:turnScreenOn="true"
             android:theme="@android:style/Theme.Material.NoActionBar" />
 
+        <!-- directBootAware: an alarm must ring before the first unlock after a reboot.
+             Everything it reads lives in device-protected storage (util/Storage). -->
         <receiver
             android:name=".receiver.AlarmReceiver"
-            android:exported="false" />
+            android:exported="false"
+            android:directBootAware="true" />
+
+        <!-- Every event after which the AlarmManager registrations no longer match the
+             alarms in the database: clock/zone change, exact-alarm permission re-granted
+             (a revoke cancels all alarms), app update. -->
+        <receiver
+            android:name=".receiver.SystemChangeReceiver"
+            android:exported="true"
+            android:directBootAware="true">
+            <intent-filter>
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
 
         <receiver
             android:name=".widget.NextAlarmWidget"
@@ -122,6 +143,7 @@
         <service
             android:name=".service.AlarmService"
             android:exported="false"
+            android:directBootAware="true"
             android:foregroundServiceType="mediaPlayback" />
 
     </application>

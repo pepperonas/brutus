@@ -20,8 +20,7 @@ class TimerSoundStoreTest {
         context = ApplicationProvider.getApplicationContext()
     }
 
-    private fun writeRawId(id: Int) = context
-        .getSharedPreferences("brutus_timer", Context.MODE_PRIVATE)
+    private fun writeRawId(id: Int) = Storage.prefs(context, "brutus_timer")
         .edit().putInt("timer_sound_id", id).commit()
 
     @Test

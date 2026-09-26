@@ -28,6 +28,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -76,9 +77,19 @@ class SunriseActivity : ComponentActivity() {
 
         val alarmId = intent.getLongExtra(EXTRA_ALARM_ID, -1)
         val mainTriggerAt = intent.getLongExtra(EXTRA_MAIN_TRIGGER_AT, 0L)
+        getSystemService(android.app.NotificationManager::class.java)
+            .cancel(notificationIdForSunrise(alarmId))
 
         soundPlayer = SoundPreviewPlayer(this).also {
             it.play(AlarmSound.CHIME)
+        }
+
+        // Hidden until the alarm is known: a Hardcore alarm must not be switched off with one tap
+        // ten minutes early — that would defeat the point of the challenge.
+        val canStopMain = mutableStateOf(false)
+        CoroutineScope(Dispatchers.IO).launch {
+            val alarm = AlarmDatabase.getInstance(applicationContext).alarmDao().getById(alarmId)
+            canStopMain.value = alarm != null && !alarm.hardcoreEffective
         }
 
         setContent {
@@ -86,7 +97,10 @@ class SunriseActivity : ComponentActivity() {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     SunriseScreen(
                         mainTriggerAt = mainTriggerAt,
+                        canStopMain = canStopMain.value,
                         onSkip = { finish() },
+                        // The real alarm takes over now — the chime must not keep playing under it.
+                        onMainTime = { finish() },
                         onCancelMain = {
                             if (alarmId != -1L) {
                                 // Disable the alarm entirely — same effect as toggling it off
@@ -94,9 +108,10 @@ class SunriseActivity : ComponentActivity() {
                                 CoroutineScope(Dispatchers.IO).launch {
                                     val dao = AlarmDatabase.getInstance(applicationContext).alarmDao()
                                     val alarm = dao.getById(alarmId)
-                                    if (alarm != null) {
+                                    if (alarm != null && !alarm.hardcoreEffective) {
                                         AlarmScheduler.cancel(applicationContext, alarm)
                                         dao.setEnabled(alarmId, false)
+                                        com.pepperonas.brutus.widget.NextAlarmWidget.refresh(applicationContext)
                                     }
                                 }
                             }
@@ -140,13 +155,17 @@ class SunriseActivity : ComponentActivity() {
     companion object {
         const val EXTRA_ALARM_ID = "alarm_id"
         const val EXTRA_MAIN_TRIGGER_AT = "main_trigger_at"
+
+        fun notificationIdForSunrise(alarmId: Long): Int = 3000 + (alarmId.toInt() and 0xFFFF)
     }
 }
 
 @Composable
 private fun SunriseScreen(
     mainTriggerAt: Long,
+    canStopMain: Boolean,
     onSkip: () -> Unit,
+    onMainTime: () -> Unit,
     onCancelMain: () -> Unit,
     onBrightnessChange: (Float) -> Unit,
 ) {
@@ -162,7 +181,10 @@ private fun SunriseScreen(
             val elapsed = (nowMillis - startedAt).coerceAtLeast(0L)
             progress = (elapsed.toFloat() / totalMs).coerceIn(0f, 1f)
             onBrightnessChange(progress)
-            if (mainTriggerAt > 0L && nowMillis >= mainTriggerAt) break
+            if (mainTriggerAt > 0L && nowMillis >= mainTriggerAt) {
+                onMainTime()
+                break
+            }
             delay(500L)
         }
     }
@@ -231,18 +253,20 @@ private fun SunriseScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Button(
-                    onClick = onCancelMain,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    shape = MaterialTheme.shapes.large,
-                ) {
-                    Text(
-                        stringResource(R.string.sunrise_stop_alarm),
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                if (canStopMain) {
+                    Button(
+                        onClick = onCancelMain,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        shape = MaterialTheme.shapes.large,
+                    ) {
+                        Text(
+                            stringResource(R.string.sunrise_stop_alarm),
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 }
                 Button(
                     onClick = onSkip,

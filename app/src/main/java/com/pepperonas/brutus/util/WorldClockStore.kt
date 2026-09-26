@@ -13,7 +13,7 @@ object WorldClockStore {
     private val DEFAULTS = listOf("Europe/Berlin", "America/New_York", "Asia/Tokyo")
 
     fun load(context: Context): List<String> {
-        val prefs = context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val prefs = Storage.prefs(context, PREFS)
         val raw = prefs.getString(KEY_ZONES, null)
         if (raw == null) {
             save(context, DEFAULTS)
@@ -23,7 +23,7 @@ object WorldClockStore {
     }
 
     fun save(context: Context, zones: List<String>) {
-        val prefs = context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val prefs = Storage.prefs(context, PREFS)
         prefs.edit().putString(KEY_ZONES, zones.joinToString("\n")).apply()
     }
 }

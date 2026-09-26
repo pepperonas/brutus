@@ -36,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -79,7 +80,8 @@ fun AlarmScreen(
         val list = ChallengeFlags.activeList(challengeFlags)
         list.ifEmpty { listOf(ChallengeFlags.MATH) }
     }
-    var currentIndex by remember { mutableIntStateOf(0) }
+    // Saveable: rotating or folding the phone must not restart the math problems.
+    var currentIndex by rememberSaveable { mutableIntStateOf(0) }
     val allDone = currentIndex >= active.size
     val haptics = rememberBrutusHaptics()
 

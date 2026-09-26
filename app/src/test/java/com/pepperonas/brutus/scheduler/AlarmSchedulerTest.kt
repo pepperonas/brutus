@@ -39,6 +39,9 @@ class AlarmSchedulerTest {
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
         alarmManager = context.getSystemService(AlarmManager::class.java)
+        // Robolectric reports "not allowed" by default; a device with USE_EXACT_ALARM (13+) or the
+        // default SCHEDULE_EXACT_ALARM grant (12) reports true. The revoked case has its own test.
+        ShadowAlarmManager.setCanScheduleExactAlarms(true)
     }
 
     private fun scheduled(): List<ShadowAlarmManager.ScheduledAlarm> =
@@ -218,44 +221,105 @@ class AlarmSchedulerTest {
 
     // ---- snooze ----------------------------------------------------------
 
+    private fun snoozeCode(id: Long) = AlarmScheduler.snoozeRequestCode(id)
+
+    private fun snoozeAlarm(id: Long = 1L) =
+        scheduled().singleOrNull { shadowOf(it.operation).requestCode == snoozeCode(id) }
+
     @Test
-    fun `snooze re-arms the same alarm the configured number of minutes out`() {
+    fun `snooze arms its own registration the configured number of minutes out`() {
         val alarm = alarmAt(7, 0).copy(snoozeDuration = 5)
         val before = System.currentTimeMillis()
 
         AlarmScheduler.scheduleSnooze(context, alarm)
 
-        val trigger = assertNotNull(mainAlarm()).triggerAtMs
+        val trigger = assertNotNull(snoozeAlarm()).triggerAtMs
+        assertNotNull(snoozeAlarm()!!.alarmClockInfo, "a snooze is an alarm clock like any other")
         assertTrue(trigger >= before + 5 * minute, "snooze fired too early")
         assertTrue(trigger <= System.currentTimeMillis() + 5 * minute, "snooze fired too late")
     }
 
     @Test
-    fun `snoozing replaces the pending registration of that alarm`() {
-        val alarm = alarmAt(7, 0).copy(snoozeDuration = 2)
+    fun `snoozing leaves the alarm's next regular occurrence armed`() {
+        // Before v2.3.1 the snooze reused the main request code and silently replaced tomorrow's
+        // registration of a repeating alarm — a reboot during the snooze then lost both.
+        val alarm = alarmAt(7, 0).copy(snoozeDuration = 2, repeatDays = 0b1111111)
         AlarmScheduler.schedule(context, alarm)
+        val regular = mainAlarm()!!.triggerAtMs
+
         AlarmScheduler.scheduleSnooze(context, alarm)
 
-        assertEquals(1, scheduled().size, "the snooze must not stack onto the original")
-        assertTrue(
-            mainAlarm()!!.triggerAtMs <= System.currentTimeMillis() + 2 * minute
-        )
+        val clocks = scheduled().filter { it.alarmClockInfo != null }
+        assertEquals(2, clocks.size, "regular occurrence and snooze coexist")
+        assertTrue(clocks.any { it.triggerAtMs == regular })
+    }
+
+    @Test
+    fun `snoozing twice replaces the previous snooze instead of stacking`() {
+        val alarm = alarmAt(7, 0).copy(snoozeDuration = 5)
+        AlarmScheduler.scheduleSnooze(context, alarm, now = 1_000L)
+        AlarmScheduler.scheduleSnooze(context, alarm, now = 2_000L)
+
+        assertEquals(1, scheduled().count { shadowOf(it.operation).requestCode == snoozeCode(1L) })
+        assertEquals(2_000L + 5 * minute, snoozeAlarm()!!.triggerAtMs)
     }
 
     @Test
     fun `every offered snooze interval schedules that far out`() {
         listOf(2, 5, 10, 15).forEach { minutes ->
-            // Same alarm id ⇒ same PendingIntent ⇒ each round replaces the last.
             val before = System.currentTimeMillis()
-
             AlarmScheduler.scheduleSnooze(context, alarmAt(7, 0).copy(snoozeDuration = minutes))
-
-            val trigger = assertNotNull(mainAlarm()).triggerAtMs
-            assertTrue(
-                trigger >= before + minutes * minute,
-                "snooze of $minutes min was scheduled too early"
-            )
+            val trigger = assertNotNull(snoozeAlarm()).triggerAtMs
+            assertTrue(trigger >= before + minutes * minute, "snooze of $minutes min was scheduled too early")
         }
+    }
+
+    @Test
+    fun `a snoozed follow-up stays a follow-up — it must not re-arm the whole Ultra Hardcore chain`() {
+        AlarmScheduler.scheduleSnooze(context, alarmAt(7, 0), isFollowup = true, followupSeq = 2)
+
+        val intent = shadowOf(snoozeAlarm()!!.operation).savedIntent
+        assertTrue(intent.getBooleanExtra(AlarmScheduler.EXTRA_IS_SNOOZE, false))
+        assertTrue(intent.getBooleanExtra(AlarmScheduler.EXTRA_IS_FOLLOWUP, false))
+        assertEquals(2, intent.getIntExtra(AlarmScheduler.EXTRA_FOLLOWUP_SEQ, 0))
+    }
+
+    @Test
+    fun `a snooze is remembered so it can survive a reboot, and cancelling forgets it`() {
+        val at = AlarmScheduler.scheduleSnooze(context, alarmAt(7, 0, id = 4L), now = 10_000L)
+        assertEquals(listOf(com.pepperonas.brutus.util.RingingStore.Snooze(4L, at, false, 0)),
+            com.pepperonas.brutus.util.RingingStore.snoozes(context))
+
+        AlarmScheduler.cancelSnooze(context, 4L)
+        assertNull(snoozeAlarm(4L))
+        assertTrue(com.pepperonas.brutus.util.RingingStore.snoozes(context).isEmpty())
+    }
+
+    @Test
+    fun `the snooze code space collides with no other registration of the same alarm`() {
+        val id = 3L
+        val codes = listOf(
+            id.toInt(),
+            AlarmScheduler.snoozeRequestCode(id),
+        )
+        assertEquals(codes.size, codes.toSet().size)
+        assertEquals(0x5A000003, AlarmScheduler.snoozeRequestCode(id))
+    }
+
+    // ---- exact-alarm permission revoked (Android 12/12L) -------------------
+
+    @Test
+    fun `without the exact-alarm permission the alarm is still registered — inexact, never a crash`() {
+        // setAlarmClock throws SecurityException then; uncaught, it killed the ringing service
+        // while it rescheduled a repeating alarm.
+        ShadowAlarmManager.setCanScheduleExactAlarms(false)
+
+        AlarmScheduler.schedule(context, alarmAt(7, 30))
+
+        val only = scheduled().single()
+        assertNull(only.alarmClockInfo, "inexact fallback")
+        val (h, m) = hourMinuteOf(only.triggerAtMs)
+        assertEquals(7 to 30, h to m)
     }
 
     // ---- Ultra Hardcore follow-ups --------------------------------------

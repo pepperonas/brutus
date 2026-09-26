@@ -20,7 +20,15 @@ import androidx.core.content.ContextCompat
  * Call [attach] in the hosting Activity's onStart/onCreate and [detach]
  * in onStop/onDestroy. Safe to attach/detach multiple times.
  */
-class HardcoreAudioGuard(private val context: Context) {
+class HardcoreAudioGuard(
+    private val context: Context,
+    /**
+     * Test mode has no AlarmService, so nothing else would put the volume back — without this a
+     * single test of a Hardcore alarm left the phone's alarm volume at maximum for good.
+     */
+    private val restoreOnDetach: Boolean = false,
+) {
+    private var volumeBefore: Int = -1
 
     private val audioManager: AudioManager =
         context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -30,6 +38,7 @@ class HardcoreAudioGuard(private val context: Context) {
 
     fun attach() {
         if (attached) return
+        if (restoreOnDetach) volumeBefore = audioManager.getStreamVolume(AudioManager.STREAM_ALARM)
         clampToMax()
 
         val r = object : BroadcastReceiver() {
@@ -60,6 +69,10 @@ class HardcoreAudioGuard(private val context: Context) {
         }
         receiver = null
         attached = false
+        if (restoreOnDetach && volumeBefore >= 0) {
+            audioManager.setStreamVolume(AudioManager.STREAM_ALARM, volumeBefore, 0)
+            volumeBefore = -1
+        }
     }
 
     fun clampToMax() {

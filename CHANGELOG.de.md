@@ -4,6 +4,62 @@
 
 Alle nennenswerten Änderungen an Brutus stehen hier. Versionen folgen [SemVer](https://semver.org).
 
+## [2.3.1] — 2026-09-26 · Klingelt vor dem ersten Entsperren, und ein Dutzend weitere Korrekturen
+
+Eine Durchsicht des gesamten Alarm-Pfads fand Fehler, von denen jeder einzelne jemanden verschlafen
+lassen konnte. Alle sind behoben und mit Tests abgedeckt; die zwei, die Unit-Tests nicht sehen, wurden
+auf einem Emulator nachgestellt und abgenommen.
+
+### Behoben
+- **Wecker klingeln nach einem Neustart jetzt auch, bevor das Handy entsperrt ist.** Alles, was der
+  Klingel-Pfad liest — Wecker, Ultra-Hardcore-Re-Alarme, Snoozes, der QR-Code — liegt jetzt im
+  geräteverschlüsselten Speicher, und Receiver, Service und Alarmbildschirm sind direct-boot-fähig.
+  Vorher konnte der gesperrte Boot-Durchlauf die Datenbank nicht lesen, und seit v2.3.0 stürzte der
+  Prozess beim Start ab; bis zum ersten Entsperren war kein Wecker registriert. Vorhandene Daten
+  ziehen einmalig um, sobald die App zum ersten Mal entsperrt läuft. Auf dem Emulator geprüft: Neustart
+  mit PIN, nicht entsperrt, Alarm klingelte pünktlich, Challenge gelöst, Lautstärke zurückgestellt.
+- **Der klingelnde Service stirbt auf einem gesperrten Handy nicht mehr eine Sekunde nach Alarmbeginn.**
+  Er aktualisierte das Widget, und jeder Widget-Aufruf wirft vor dem ersten Entsperren. Auf dem Emulator
+  gefunden; im gesperrten Zustand bleibt das Widget jetzt unangetastet.
+- **Snooze eines Ultra-Hardcore-Weckers stellt die zwei Re-Alarme nicht mehr scharf.** Snooze lief
+  über den Beenden-Pfad; ein geschlummerter Wecker klingelte dreimal und verlangte die Schrittaufgabe.
+- **Ein Neustart löscht die Re-Alarme eines Ultra-Hardcore-Einmal-Weckers nicht mehr** (der Wecker
+  schaltet sich beim Auslösen selbst aus; gesucht wurde nur unter aktiven). Auch die
+  Erinnerungs-Benachrichtigung — der Weg zur Schrittaufgabe — kommt nach einem Neustart zurück.
+- **Ein Zeitzonenwechsel hält den Wecker auf seiner Wanduhrzeit.** Registrierungen sind absolute
+  Zeitpunkte; ein in Berlin gestellter 07:00-Wecker klingelte in London um 06:00. Ein neuer Receiver
+  registriert bei Zeitzonen- und Uhrzeitwechseln, wieder erteilter Exakt-Alarm-Berechtigung (ein
+  Entzug löscht alle Wecker) und App-Updates alles neu; die App tut es zusätzlich bei jedem Öffnen,
+  was Force-Stop und Backup-Wiederherstellung abdeckt.
+- **Ein zweiter Wecker, der während eines klingelnden auslöst, übernimmt jetzt den Bildschirm.** Der
+  Alarmbildschirm zeigte weiter die Challenges des ersten; Snooze schlummerte den falschen Wecker, und
+  die Challenge des neuen wurde übersprungen.
+- **Snooze hat eine eigene Registrierung.** Er ersetzt nicht mehr die nächste reguläre Auslösung, wird
+  über Neustarts gemerkt, und ein geschlummerter Re-Alarm bleibt ein Re-Alarm.
+- **Die Alarm-Lautstärke wird auch zurückgestellt, wenn der Service mitten im Klingeln beendet wird**
+  (sie lag nur im Speicher), und ein scheiternder Systemton oder Audio-Track fällt auf einen anderen
+  Ton zurück, statt die Sitzung zu beenden.
+- **Android 12/12L mit entzogenen exakten Alarmen:** Das Registrieren wirft im klingelnden Service
+  keine Ausnahme mehr, sondern weicht auf ein ungenaues Wecken aus, bis die Berechtigung zurück ist.
+- **Sunrise** startet jetzt über eine Vollbild-Benachrichtigung (ein Hintergrundstart aus dem Receiver
+  ist ab Android 10 blockiert), das Glockenspiel verstummt, wenn der echte Alarm beginnt, und „Alarm
+  stoppen“ ist bei Hardcore-Weckern ausgeblendet — ein Tipp zehn Minuten vorher entschärft sie nicht mehr.
+- **Der Testmodus stellt die Alarm-Lautstärke** nach dem Test eines Hardcore-Weckers wieder zurück.
+- Ausschalten oder Löschen eines Weckers entfernt auch seine Ultra-Hardcore-Erinnerung und einen
+  laufenden Snooze.
+- Der Update-Check zählt eine Version erst als gemeldet, wenn die Benachrichtigung wirklich gezeigt
+  wurde, und startet beim Einschalten nicht mehr zwei Prüfungen gleichzeitig.
+
+### Neu
+- Banner über der Weckerliste, wenn Benachrichtigungen blockiert sind und solange
+  Ultra-Hardcore-Re-Alarme ausstehen (die Erinnerungs-Benachrichtigung ist ab Android 14 wegwischbar).
+
+### Tests
+- 28 neue Unit-Tests (278 → 306): Speicher-Umzug (der ausgedruckte QR-Code überlebt ihn), Neuplanung
+  nach Zeitzonenwechsel, Wiederherstellung von Re-Alarmen und Snoozes, Snooze vs. Beenden im echten
+  Service, Manifest-Filter und Direct-Boot-Fähigkeit, die Widget-Sperre. Jeder Fix wurde einmal wieder
+  eingebaut, um seinen Test scheitern zu sehen.
+
 ## [2.3.0] — 2026-09-26 · Update-Hinweis (opt-in) + Produktseite
 
 ### Neu — Update-Hinweis (opt-in)

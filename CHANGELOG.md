@@ -4,6 +4,60 @@
 
 All notable changes to Brutus are documented here. Versions follow [SemVer](https://semver.org).
 
+## [2.3.1] — 2026-09-26 · Rings before the first unlock, and a dozen more fixes
+
+A review of the whole alarm path found bugs that each could make someone oversleep. All are fixed,
+covered by tests, and the two that unit tests cannot see were reproduced and verified on an emulator.
+
+### Fixed
+- **Alarms now ring after a reboot even before the phone is unlocked.** Everything the ringing path
+  reads — alarms, Ultra Hardcore follow-ups, snoozes, the QR code — moved to device-protected
+  storage, and receiver, service and alarm screen are direct-boot aware. Before, the locked boot
+  pass could not read the database and, since v2.3.0, the process crashed at start-up; no alarm was
+  registered until the first unlock. Existing data is moved once, the first time the app runs
+  unlocked. Verified on an emulator: reboot with a PIN, not unlocked, alarm rang on time, challenge
+  solved, volume restored.
+- **The ringing service no longer dies a second after an alarm starts on a locked phone.** It
+  refreshed the home-screen widget, and every widget call throws before the first unlock. Found on
+  the emulator; the widget is now left alone while locked.
+- **Snoozing an Ultra Hardcore alarm no longer arms the two follow-up alarms.** Snooze went through
+  the dismiss path, so a snoozed alarm rang three times and asked for the step task.
+- **A reboot no longer deletes the follow-ups of a one-shot Ultra Hardcore alarm** (the alarm
+  switches itself off when it fires; the lookup only considered enabled alarms). The reminder
+  notification — the way into the step task — comes back after a reboot too.
+- **Changing the time zone keeps the alarm at its wall-clock time.** Registrations are absolute
+  timestamps; a 07:00 alarm set in Berlin rang at 06:00 in London. A new receiver re-registers
+  everything on time-zone and clock changes, on the exact-alarm permission being granted again (a
+  revoke cancels all alarms) and on app updates; the app also does it every time it is opened, which
+  covers force stops and backup restores.
+- **A second alarm that fires while one is ringing now takes over the screen.** The alarm screen kept
+  showing the first alarm's challenges, so Snooze snoozed the wrong alarm and the new alarm's
+  challenge was skipped.
+- **Snooze has its own registration.** It no longer replaces the alarm's next regular occurrence, is
+  remembered across reboots, and snoozing a follow-up keeps it a follow-up.
+- **The alarm volume is put back even if the service is killed while ringing** (it was only kept in
+  memory), and a failing system tone or audio track falls back to another sound instead of ending
+  the session.
+- **Android 12/12L with exact alarms revoked:** registering no longer throws inside the ringing
+  service; it degrades to an inexact wake-up until the permission is back.
+- **Sunrise** now starts through a full-screen notification (a background start from the receiver is
+  blocked on Android 10+), its chime stops when the real alarm starts, and its "Stop alarm" button
+  is hidden for Hardcore alarms — one tap ten minutes early no longer disarms them.
+- **Test mode restores the alarm volume** after testing a Hardcore alarm.
+- Switching an alarm off or deleting it also clears its Ultra Hardcore reminder and a pending snooze.
+- The update check only counts a version as announced once the notification was actually shown, and
+  switching it on no longer starts two checks at once.
+
+### Added
+- Banners above the alarm list when notifications are blocked and while Ultra Hardcore follow-ups
+  are pending (the reminder notification can be swiped away on Android 14+).
+
+### Tests
+- 28 new unit tests (278 → 306): storage move (the printed QR code survives it), rescheduling after a
+  time-zone change, follow-up and snooze recovery, the real service's snooze vs. dismiss, manifest
+  filter and direct-boot awareness, the locked widget guard. Each fix was re-introduced once to see
+  its test fail.
+
 ## [2.3.0] — 2026-09-26 · Update notice (opt-in) + product page
 
 ### Added — update notice (opt-in)

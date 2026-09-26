@@ -13,6 +13,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import com.pepperonas.brutus.scheduler.Rescheduler
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import com.pepperonas.brutus.ui.screens.HomeScreen
 import com.pepperonas.brutus.ui.theme.BrutusTheme
 import com.pepperonas.brutus.viewmodel.AlarmViewModel
@@ -40,6 +44,16 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    /**
+     * Force stop, a revoked-and-restored exact-alarm permission or a backup restore leave alarms
+     * "on" in the list that AlarmManager no longer knows. Re-registering on every return to the
+     * app is cheap and idempotent (fixed request codes, FLAG_UPDATE_CURRENT).
+     */
+    override fun onResume() {
+        super.onResume()
+        lifecycleScope.launch(Dispatchers.IO) { Rescheduler.rescheduleAll(applicationContext) }
     }
 
     private fun requestPermissions() {

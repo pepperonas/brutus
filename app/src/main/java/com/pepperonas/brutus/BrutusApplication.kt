@@ -5,6 +5,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import com.pepperonas.brutus.data.AlarmDatabase
 import com.pepperonas.brutus.update.UpdateScheduler
+import com.pepperonas.brutus.util.Storage
 
 class BrutusApplication : Application() {
 
@@ -12,8 +13,12 @@ class BrutusApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // Before anything touches the database or a preference file.
+        Storage.migrateIfNeeded(this)
         createNotificationChannels()
-        UpdateScheduler.ensureScheduled(this)
+        // WorkManager lives in credential storage and is unavailable before the first unlock;
+        // BOOT_COMPLETED restarts the process once the user has unlocked.
+        if (Storage.isUserUnlocked(this)) UpdateScheduler.ensureScheduled(this)
     }
 
     private fun createNotificationChannels() {

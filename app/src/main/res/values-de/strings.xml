@@ -82,6 +82,10 @@
     <string name="banner_fullscreen_title">Vollbild-Alarm blockiert</string>
     <string name="banner_fullscreen_body">Ohne diese Berechtigung erscheint der Alarm nur als Benachrichtigung — die App poppt nicht in den Vordergrund.</string>
     <string name="banner_fullscreen_action">Erlauben</string>
+    <string name="banner_notifications_title">Benachrichtigungen blockiert</string>
+    <string name="banner_notifications_body">Ohne Benachrichtigungen zeigt Android den klingelnden Alarm womöglich nicht an, und die Ultra-Hardcore-Erinnerung erscheint nie.</string>
+    <string name="banner_notifications_action">Erlauben</string>
+    <string name="banner_uhc_body">Brutus klingelt gleich erneut. Schliesse die Schritt-Challenge ab, um die Re-Alarme abzubrechen.</string>
 
     <!-- ===================== Bearbeiten-Sheet ===================== -->
     <string name="edit_title_new">Neuer Alarm</string>

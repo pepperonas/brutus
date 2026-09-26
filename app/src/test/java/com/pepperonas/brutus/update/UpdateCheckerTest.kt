@@ -1,6 +1,7 @@
 package com.pepperonas.brutus.update
 
 import android.Manifest
+import com.pepperonas.brutus.util.Storage
 import android.app.Application
 import android.app.NotificationManager
 import android.content.Context
@@ -35,7 +36,7 @@ class UpdateCheckerTest {
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
         nm = context.getSystemService(NotificationManager::class.java)
-        context.getSharedPreferences(UpdateCheckStore.PREFS, Context.MODE_PRIVATE).edit().clear().commit()
+        Storage.prefs(context, UpdateCheckStore.PREFS).edit().clear().commit()
         fetches = 0
         shadowOf(context as Application).grantPermissions(Manifest.permission.POST_NOTIFICATIONS)
     }
@@ -116,10 +117,22 @@ class UpdateCheckerTest {
     fun `without the notification permission the finding still reaches the banner`() {
         shadowOf(context as Application).denyPermissions(Manifest.permission.POST_NOTIFICATIONS)
         UpdateCheckStore.setEnabled(context, true)
-        UpdateChecker.check(context, source("v2.3.0"), installed = "2.2.0")
+        val outcome = UpdateChecker.check(context, source("v2.3.0"), installed = "2.2.0")
 
+        assertEquals(UpdateChecker.Outcome.NOT_SHOWN, outcome)
         assertTrue(posted().isEmpty())
         assertEquals("2.3.0", UpdateChecker.bannerVersion(context, installed = "2.2.0"))
+    }
+
+    @Test
+    fun `granting the permission later still announces the version that was found while denied`() {
+        shadowOf(context as Application).denyPermissions(Manifest.permission.POST_NOTIFICATIONS)
+        UpdateCheckStore.setEnabled(context, true)
+        UpdateChecker.check(context, source("v2.3.0"), installed = "2.2.0")
+
+        shadowOf(context as Application).grantPermissions(Manifest.permission.POST_NOTIFICATIONS)
+        assertEquals(UpdateChecker.Outcome.NOTIFIED, UpdateChecker.check(context, source("v2.3.0"), installed = "2.2.0"))
+        assertEquals(1, posted().size)
     }
 
     @Test

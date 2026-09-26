@@ -184,6 +184,8 @@ are included inside `http {}`) and needs nginx ≥ 1.24 syntax `listen 443 ssl h
 B=https://brutus.celox.io
 curl -s  -o /dev/null -w '%{http_code}\n' $B/                          # 200
 curl -sI $B/download | grep -i ^location                                # current file for this platform
+curl -sI $B/download/<target> | grep -i ^location                       # …/files/<asset> — served here, not GitHub
+curl -sI -H 'Range: bytes=0-99' "$(curl -sI $B/download/<target> | awk 'tolower($1)=="location:"{print $2}' | tr -d '\r')" | head -1   # HTTP/2 206 — resumable
 curl -s  $B/ | grep -c '<!--#'                                          # 0 — no unprocessed SSI
 curl -s  $B/ | python3 -c "import sys,re,json;json.loads(re.search(r'ld\+json\">(.*?)</script>',sys.stdin.read(),re.S).group(1));print('JSON-LD ok')"
 curl -s  -H 'Accept: text/markdown' $B/ | grep 'Current version'       # real version, not a directive
@@ -217,5 +219,11 @@ keyboard, both dialogs, zero console messages, zero horizontal overflow.
   the em dash had 494 of its releases shown as sub-headings. Pinned in `tests/changelog.test.cjs`.
 - **No `backdrop-filter` on the fixed top bar.** It re-blurs everything under it on every scroll
   frame; on a 2015 Intel Mac scrolling dropped to ~24 fps.
+- **Downloads that hang at 100 % on Android.** GitHub release asset links are signed and expire after
+  about an hour; Chrome — above all a Custom Tab opened from another app — could not finish or resume
+  them and sat at *24,52 MB von 24,52 MB* forever (XCam on a Galaxy S24, Flipper the Ripper). Invisible
+  to `curl`, desktop browsers and the nginx log, because the button went straight to `github.com`. The
+  timer now keeps a verified copy under `/files/` and `/download` points there (`mirror`, default on);
+  pages built before 2026-09-26 need `build.py --force` **and** `deploy.sh server`.
 - **Hero images:** a 1024 px banner stretched over a 1440 px screen looks soft. Deliver at least the
   display width, in two sizes.

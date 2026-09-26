@@ -23,7 +23,11 @@ instrumented tests** — everything runs on the JVM; Android-dependent suites us
 (`isIncludeAndroidResources = true`). No mocking framework is used anywhere — keep it that way
 (ViewModels take an injectable clock `now: () -> Long`; calendar tests pin
 `TimeZone.setDefault(Europe/Berlin)`; `ShadowAlarmManager` records real registrations; Room runs
-in-memory).
+in-memory; tests that use the singleton call `AlarmDatabase.resetInstanceForTests()`). Robolectric
+reports `canScheduleExactAlarms() == false` by default — scheduler tests set
+`ShadowAlarmManager.setCanScheduleExactAlarms(true)`. Behaviour Robolectric cannot show (locked boot,
+widget calls throwing while locked, a second alarm taking over the screen) is checked on an emulator:
+use a dedicated AVD (`brutus-test`, port 5580), never an emulator another session is driving.
 
 ## Architecture
 
@@ -36,14 +40,27 @@ tone via `MediaPlayer`, re-schedules repeating alarms / disables one-shots) → 
 challenges in sequence → `ACTION_STOP` / `ACTION_SNOOZE` back to the service.
 
 - **PendingIntent request codes are partitioned** in `AlarmScheduler`: main alarm = alarm id,
-  sunrise pre-alarm = `0x2D000000 | id`, Ultra-Hardcore follow-ups = `0x4F000000 | id<<4 | seq`.
+  sunrise pre-alarm = `0x2D000000 | id`, snooze = `0x5A000000 | id`, Ultra-Hardcore follow-ups =
+  `0x4F000000 | id<<4 | seq`.
   Any new alarm kind needs its own carve-out, or it silently overwrites another registration.
   `schedule()` always cancels a stale sunrise before re-arming.
 - **Ultra Hardcore**: after dismissal the service arms two follow-ups (+10/+15 min) tracked in
   `util/UltraHardcoreStore` (must survive reboot); `UltraHardcoreTaskActivity` (step counter)
   cancels them. `util/HardcoreAudioGuard` snaps alarm volume back to max on every volume change.
-- **Boot recovery**: `receiver/BootReceiver` (`BOOT_COMPLETED` + `LOCKED_BOOT_COMPLETED`,
-  direct-boot aware, `goAsync()`) re-schedules enabled alarms and still-future pending follow-ups.
+- **Re-registration**: `scheduler/Rescheduler.rescheduleAll` is the one function for "AlarmManager may
+  be wrong now" — called by `BootReceiver`, `receiver/SystemChangeReceiver` (time zone, clock,
+  exact-alarm permission re-granted, app update) and `MainActivity.onResume`. It restores enabled
+  alarms, UHC follow-ups (looked up regardless of `enabled` — one-shots disable themselves on fire)
+  with their reminder (`util/UltraHardcoreNotifier`), and snoozes (`util/RingingStore`). Idempotent.
+- **Direct boot**: alarms must ring before the first unlock after a reboot. The DB and every
+  SharedPreferences file live in device-protected storage via `util/Storage` (`Storage.prefs`,
+  `Storage.device`); a new store must use `Storage.prefs` and be listed in
+  `Storage.PREFERENCE_FILES`, or it is unreadable while locked and skipped by the one-time migration.
+  Nothing on the ringing path may touch credential storage or `AppWidgetManager` while locked
+  (`NextAlarmWidget.refresh` checks `Storage.isUserUnlocked`); receiver, service and alarm
+  activities are `directBootAware` (pinned by `SystemChangeReceiverTest`).
+- **Snooze vs. dismiss**: `AlarmService.stopAlarm(dismissed)` — only a completed challenge arms UHC
+  follow-ups. Snoozes use their own request-code space `0x5A000000 | id`.
 - `SunriseActivity`, `TestAlarmActivity` and `widget/NextAlarmWidget` are side entry points;
   `util/NextAlarmCalculator` is the shared next-trigger arithmetic (DST-sensitive).
 

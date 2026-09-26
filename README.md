@@ -19,7 +19,7 @@
 <!-- Project status — these badges are live and update themselves. -->
 
 [![Tests](https://img.shields.io/github/actions/workflow/status/pepperonas/brutus/tests.yml?branch=main&label=tests&logo=githubactions&logoColor=white)](https://github.com/pepperonas/brutus/actions/workflows/tests.yml)
-[![Unit tests](https://img.shields.io/badge/unit%20tests-278-brightgreen)](#tests-and-ci)
+[![Unit tests](https://img.shields.io/badge/unit%20tests-306-brightgreen)](#tests-and-ci)
 [![Release](https://img.shields.io/github/v/release/pepperonas/brutus?color=FF5252&logo=github&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/pepperonas/brutus/total?label=APK%20downloads&color=success&logo=github&logoColor=white)](https://github.com/pepperonas/brutus/releases)
 [![Last commit](https://img.shields.io/github/last-commit/pepperonas/brutus?logo=git&logoColor=white)](https://github.com/pepperonas/brutus/commits/main)
@@ -522,9 +522,13 @@ The firing alarm presents a full-screen activity **over** the lock screen:
 | Keeping audio playing with screen off | Foreground service with `mediaPlayback` type + `PARTIAL_WAKE_LOCK` (10 min timeout) |
 | Surviving silent / DND | `STREAM_ALARM` with maximum volume set at start, restored when dismissed |
 | Surviving reboot | Room persistence + `BOOT_COMPLETED` / `LOCKED_BOOT_COMPLETED` receiver, held open via `goAsync()` so the reschedule can't be killed mid-flight (v1.8.0) |
-| Surviving app kill | `START_STICKY` service, alarm is re-scheduled before firing |
+| Ringing before the first unlock | Since v2.3.1 everything the ringing path reads (alarms, follow-ups, snoozes, the QR code) lives in **device-protected storage**, and receiver, service and alarm screen are `directBootAware` — an alarm rings after an overnight OS-update reboot even while the phone still waits for its PIN. Verified on an emulator: locked reboot, alarm rang, challenge solved, volume restored |
+| Clock / zone / permission changes | `SystemChangeReceiver` re-registers everything on `TIMEZONE_CHANGED`, `TIME_SET`, exact-alarm permission re-granted and app update; the app does the same on every resume (force stop, backup restore). A 07:00 alarm stays 07:00 after flying to London (v2.3.1) |
+| Exact alarms revoked (Android 12/12L) | Registrations degrade to inexact instead of throwing `SecurityException` inside the ringing service (v2.3.1) |
+| Surviving app kill | `START_STICKY` service, alarm is re-scheduled before firing; the volume from before the alarm is persisted, so a service killed mid-ring still puts it back (v2.3.1) |
 | Preventing accidental snooze | Slide-to-snooze gesture with 85% drag threshold |
-| Overlapping alarms | If a second alarm fires while one is still ringing, the old session is cleanly finished first — audio released, and a UHC main alarm's follow-ups get armed instead of silently dropped (v1.8.0) |
+| Overlapping alarms | If a second alarm fires while one is still ringing, the old session is cleanly finished first — audio released, and a UHC main alarm's follow-ups get armed instead of silently dropped (v1.8.0). Since v2.3.1 the screen switches to the new alarm's challenges too (before, it kept showing the first alarm, and Snooze snoozed the wrong one) |
+| Snooze | Own request-code space, so it neither replaces the next regular occurrence nor gets lost on reboot; snoozing an Ultra Hardcore alarm no longer arms the follow-ups (v2.3.1) |
 | Rescheduling with Sunrise | `schedule()` always cancels a previously armed sunrise pre-alarm before re-arming, so no stale sunrise can fire at the old time (v1.8.0) |
 
 ---
@@ -817,14 +821,14 @@ app/src/main/res/
 
 ## Tests and CI
 
-278 JVM unit tests guard the parts where a bug means someone oversleeps: what actually lands in
+306 JVM unit tests guard the parts where a bug means someone oversleeps: what actually lands in
 `AlarmManager`, the alarm-time arithmetic, persistence, the completeness of both translations, and
 every string the user reads on a clock face. There are no instrumented tests — the whole suite runs
 on the JVM in seconds.
 
 | Suite | Tests | What it pins down |
 |-------|-------|-------------------|
-| `scheduler/AlarmSchedulerTest` | 23 | the registrations that actually reach `AlarmManager`: trigger on the configured wall-clock time, passed times roll to tomorrow, weekday matching, sunrise exactly 10 min ahead (and skipped when it would be in the past), `setExactAndAllowWhileIdle` against Doze, the v1.8.0 stale-sunrise fix, snooze intervals, and the request-code carve-out that keeps main / sunrise / two follow-ups from overwriting each other (Robolectric) |
+| `scheduler/AlarmSchedulerTest` | 28 | the registrations that actually reach `AlarmManager`: trigger on the configured wall-clock time, passed times roll to tomorrow, weekday matching, sunrise exactly 10 min ahead (and skipped when it would be in the past), `setExactAndAllowWhileIdle` against Doze, the v1.8.0 stale-sunrise fix, snooze intervals, and the request-code carve-out that keeps main / sunrise / two follow-ups from overwriting each other (Robolectric) |
 | `util/NextAlarmCalculatorTest` | 17 | one-shot today vs. tomorrow, repeating wrap-around, weekend selection, `formatCountdown` |
 | `data/AlarmDaoTest` | 15 | real SQL on an in-memory Room database: ordering, `getEnabledAlarms` for boot recovery, full-field round-trip, REPLACE on conflict, undo-restore via `id = 0`, repository pass-through (Robolectric) |
 | `ui/screens/ClockFormattingTest` | 14 | stopwatch and timer readouts: truncation instead of rounding up, the hour column appearing exactly at the hour, and a **constant string width** — the premise of the tabular numerals |
@@ -834,10 +838,15 @@ on the JVM in seconds.
 | `util/AlarmSoundTest` | 11 | the **persisted** sound ids as a golden map — renumbering would silently change what existing alarms play — plus the display names in both languages |
 | `ResourceParityTest` | 11 | the two languages cannot drift: identical key sets, no blank values, **matching format specifiers**, complete plurals, seven weekdays each, no German left in the default file, and `locales_config.xml` in sync with the `values-*` folders |
 | `BrutusApplicationTest` | 9 | notification channels are write-once: importance, DND bypass, silence — and the update channel never breaks through DND (Robolectric) |
-| `update/UpdateCheckerTest` | 9 | the opt-in update check end to end with a fake source: off means **no request at all**, one notification per version, never for the installed or an older one, the tap opens the download page, the banner follows the switch (Robolectric) |
+| `update/UpdateCheckerTest` | 10 | the opt-in update check end to end with a fake source: off means **no request at all**, one notification per version, never for the installed or an older one, the tap opens the download page, the banner follows the switch (Robolectric) |
 | `update/ReleaseSourceTest` | 9 | reading the version from the product page's `latest.json` and GitHub's release, garbage never throws, GitHub only asked when the page fails |
 | `update/AppVersionTest` | 8 | release tags vs. the installed version: `2.10.0 > 2.9.1`, `v`-prefix and `-beta` suffix, garbage is never "newer" |
 | `update/UpdateCheckStoreTest` | 2 | every change reaches the screen (a constant emission is swallowed by `collectAsState`), switching off forgets the finding |
+| `util/StorageTest` | 7 | the one-time move to device-protected storage: the printed QR code and pending follow-ups survive it, nothing moves while locked, it never runs twice, every store is covered |
+| `scheduler/ReschedulerTest` | 6 | a time-zone change keeps the wall-clock time, follow-ups of a self-disabled one-shot alarm survive with their notification, snoozes restored, running twice never stacks |
+| `service/AlarmServiceUltraHardcoreTest` | 4 | the real service: snoozing does not arm the follow-ups, dismissing does, the volume comes back even after a mid-ring kill |
+| `receiver/SystemChangeReceiverTest` | 3 | every handled action is in the manifest filter, the whole ringing path is `directBootAware` |
+| `widget/NextAlarmWidgetLockedTest` | 2 | the widget is never touched before the first unlock |
 | `update/UpdateSchedulerTest` | 6 | switching on schedules a daily, network-bound check plus one immediate check; off cancels everything; default stays off after updating (WorkManager test driver) |
 | `ui/alarm/MathProblemTest` | 8 | answer/display correctness, per-difficulty operand range and sign invariants across 500 samples, operator fallback |
 | `viewmodel/TimerViewModelTest` | 8 | countdown/pause math, cancel-undo state machine, an expired timer is deliberately *not* undoable (Robolectric) |
@@ -857,7 +866,7 @@ on the JVM in seconds.
 | `scheduler/AlarmSchedulerConstantsTest` | 4 | Ultra Hardcore offsets, sunrise lead time, intent-extra uniqueness |
 
 ```bash
-./gradlew :app:testDebugUnitTest          # all 278
+./gradlew :app:testDebugUnitTest          # all 306
 ./gradlew :app:testDebugUnitTest --tests '*NextAlarmCalculatorTest'
 # HTML report: app/build/reports/tests/testDebugUnitTest/index.html
 ```
@@ -891,8 +900,13 @@ app/src/test/java/com/pepperonas/brutus/
 │   ├── AlarmEntityDefaultsTest.kt      7 — the persisted constructor defaults
 │   └── RoomSchemaExportTest.kt         7 — runtime identity hash vs. committed schema, per-version columns
 ├── scheduler/
-│   ├── AlarmSchedulerTest.kt          23 — what reaches AlarmManager: triggers, sunrise, snooze, follow-up request codes
-│   └── AlarmSchedulerConstantsTest.kt  4 — UHC offsets, sunrise lead, intent extra uniqueness
+│   ├── AlarmSchedulerTest.kt          28 — what reaches AlarmManager: triggers, sunrise, snooze, follow-up request codes
+│   ├── AlarmSchedulerConstantsTest.kt  4 — UHC offsets, sunrise lead, intent extra uniqueness
+│   └── ReschedulerTest.kt              6 — zone change keeps wall-clock time, follow-ups + snoozes restored
+├── receiver/
+│   └── SystemChangeReceiverTest.kt     3 — manifest filter covers every handled action, direct-boot awareness
+├── service/
+│   └── AlarmServiceUltraHardcoreTest.kt 4 — snooze ≠ dismiss, volume restored after a mid-ring kill
 ├── ui/
 │   ├── alarm/MathProblemTest.kt        8 — answer/display, per-difficulty range + sign invariants (500 samples)
 │   └── screens/ClockFormattingTest.kt 14 — stopwatch/timer readouts, hour column, constant string width
@@ -900,7 +914,7 @@ app/src/test/java/com/pepperonas/brutus/
 │   ├── AppVersionTest.kt               8 — tag vs. installed version, v-prefix, suffixes, garbage
 │   ├── ReleaseSourceTest.kt            9 — latest.json + GitHub release parsing, fallback order
 │   ├── UpdateCheckStoreTest.kt         2 — every change reaches the screen, off forgets the finding
-│   ├── UpdateCheckerTest.kt            9 — off = no request, notify once per version, banner, tap target
+│   ├── UpdateCheckerTest.kt           10 — off = no request, notify once per shown version, banner, tap target
 │   └── UpdateSchedulerTest.kt          6 — daily network-bound work, immediate check, cancel on off
 ├── util/
 │   ├── AlarmSoundTest.kt              11 — golden map of the persisted sound ids, names per language
@@ -911,6 +925,7 @@ app/src/test/java/com/pepperonas/brutus/
 │   ├── GlobalQrStoreTest.kt            6 — the installation QR code is generated once and never changes
 │   ├── NextAlarmCalculatorTest.kt     17 — one-shot today/tomorrow, repeating wrap, weekend selection
 │   ├── NextAlarmCalendarEdgeTest.kt   11 — DST nights (23 h / 25 h), skipped + duplicated hour, rollovers
+│   ├── StorageTest.kt                  7 — move to device-protected storage keeps the QR code
 │   ├── PermissionDeepLinkTest.kt       7 — the three reliability banners land on the right settings page
 │   ├── TimerSoundStoreTest.kt          6 — timer tone persistence and corrupt-id fallback
 │   ├── UltraHardcoreStoreTest.kt      12 — reboot-surviving follow-up bookkeeping
@@ -919,7 +934,8 @@ app/src/test/java/com/pepperonas/brutus/
 │   ├── StopwatchViewModelTest.kt       6 — segment accumulation, laps, reset-undo snapshot semantics
 │   └── TimerViewModelTest.kt           8 — countdown/pause math, cancel-undo, finished-not-undoable
 └── widget/
-    └── NextAlarmWidgetFormatTest.kt   12 — the home-screen countdown and repeat-day strip
+    ├── NextAlarmWidgetFormatTest.kt   12 — the home-screen countdown and repeat-day strip
+    └── NextAlarmWidgetLockedTest.kt    2 — never touched before the first unlock
 ```
 
 ---
@@ -1000,7 +1016,9 @@ T + 15m AlarmReceiver fires with EXTRA_IS_FOLLOWUP=true, seq=2
 
 ### Boot recovery
 
-`BootReceiver` listens for both `ACTION_BOOT_COMPLETED` and `ACTION_LOCKED_BOOT_COMPLETED` (`directBootAware = true`). It queries all enabled alarms from Room and calls `AlarmScheduler.schedule()` on each. Additionally, since v1.4.0, it walks `UltraHardcoreStore.listPending()` and re-registers any pending follow-up whose `triggerAt` is still in the future — expired entries get cleaned out.
+`BootReceiver` listens for both `ACTION_BOOT_COMPLETED` and `ACTION_LOCKED_BOOT_COMPLETED` (`directBootAware = true`) and calls `Rescheduler.rescheduleAll()` — the same function `SystemChangeReceiver` and `MainActivity.onResume` use. It registers every enabled alarm, every pending Ultra Hardcore follow-up whose `triggerAt` is still in the future (looked up regardless of the alarm's enabled flag — a one-shot alarm disables itself when it fires, its follow-ups must survive anyway) together with the reminder notification, and every remembered snooze. Expired entries get cleaned out.
+
+Since v2.3.1 this works **before the first unlock**: the data lives in device-protected storage (`util/Storage.kt`); installs from earlier versions move it there once, the first time the app runs unlocked. Until that move has happened, the locked pass does nothing and `BOOT_COMPLETED` does the work. The home-screen widget is not touched while locked — every `AppWidgetManager` call throws then, which on the emulator killed the ringing service a second into the alarm.
 
 ---
 

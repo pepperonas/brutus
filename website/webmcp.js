@@ -28,6 +28,7 @@
       "Test mode to try a wake-up chain without setting a real alarm",
       "World clock, stopwatch and timer",
       "Home-screen widget with the next alarm and a countdown",
+      "Rings after a reboot even before the phone is unlocked",
       "Alarms survive reboots and Doze; banners warn when the system would block them",
       "English and German, including per-app language on Android 13+",
       "Opt-in update check: a daily look at the newest version, a notification and a banner when one is out",

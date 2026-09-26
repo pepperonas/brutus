@@ -1,7 +1,6 @@
 package com.pepperonas.brutus.service
 
 import android.app.Notification
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
@@ -20,18 +19,19 @@ import android.os.VibratorManager
 import com.pepperonas.brutus.AlarmActivity
 import com.pepperonas.brutus.BrutusApplication
 import com.pepperonas.brutus.R
-import com.pepperonas.brutus.UltraHardcoreTaskActivity
-import com.pepperonas.brutus.data.AlarmEntity
 import com.pepperonas.brutus.data.AlarmRepository
 import com.pepperonas.brutus.scheduler.AlarmScheduler
 import com.pepperonas.brutus.util.AlarmSound
 import com.pepperonas.brutus.util.AlarmSoundGenerator
 import com.pepperonas.brutus.util.HardcoreAudioGuard
+import com.pepperonas.brutus.util.RingingStore
+import com.pepperonas.brutus.util.UltraHardcoreNotifier
 import com.pepperonas.brutus.util.UltraHardcoreStore
 import com.pepperonas.brutus.widget.NextAlarmWidget
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class AlarmService : Service() {
 
@@ -39,7 +39,6 @@ class AlarmService : Service() {
     private var audioTrack: AudioTrack? = null
     private var wakeLock: PowerManager.WakeLock? = null
     private var vibrator: Vibrator? = null
-    private var previousVolume: Int = -1
     private var hardcoreGuard: HardcoreAudioGuard? = null
 
     // Current firing context — used to decide what to do on dismiss.
@@ -48,17 +47,31 @@ class AlarmService : Service() {
     private var currentFollowupSeq: Int = 0
     private var currentUltraHardcore: Boolean = false
 
+    /** Newest start id — stopSelf(id) then cannot end a session that started in the meantime. */
+    private var lastStartId: Int = 0
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        when (intent?.action) {
+        lastStartId = startId
+        if (intent == null) {
+            // Sticky restart after the process was killed while ringing: the session is gone,
+            // but the alarm volume may still be forced to maximum. Put it back and go.
+            restoreVolume()
+            stopSelf(startId)
+            return START_NOT_STICKY
+        }
+        when (intent.action) {
             ACTION_START -> {
                 val alarmId = intent.getLongExtra("alarm_id", -1)
                 val isFollowup = intent.getBooleanExtra(AlarmScheduler.EXTRA_IS_FOLLOWUP, false)
                 val followupSeq = intent.getIntExtra(AlarmScheduler.EXTRA_FOLLOWUP_SEQ, 0)
+                if (intent.getBooleanExtra(AlarmScheduler.EXTRA_IS_SNOOZE, false) && alarmId != -1L) {
+                    RingingStore.clearSnooze(applicationContext, alarmId)
+                }
                 if (alarmId != -1L) startAlarm(alarmId, isFollowup, followupSeq)
             }
-            ACTION_STOP -> stopAlarm()
+            ACTION_STOP -> stopAlarm(dismissed = true)
             ACTION_SNOOZE -> {
                 val alarmId = intent.getLongExtra("alarm_id", -1)
                 if (alarmId != -1L) snoozeAlarm(alarmId)
@@ -172,47 +185,75 @@ class AlarmService : Service() {
 
     private fun setMaxVolume() {
         val audioManager = getSystemService(AudioManager::class.java)
-        previousVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM)
+        // Persisted: if the process dies while ringing, the next start restores it.
+        RingingStore.rememberVolume(applicationContext, audioManager.getStreamVolume(AudioManager.STREAM_ALARM))
         val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)
         audioManager.setStreamVolume(AudioManager.STREAM_ALARM, maxVolume, 0)
     }
 
     private fun restoreVolume() {
-        if (previousVolume >= 0) {
-            val audioManager = getSystemService(AudioManager::class.java)
-            audioManager.setStreamVolume(AudioManager.STREAM_ALARM, previousVolume, 0)
-        }
+        val previous = RingingStore.previousVolume(applicationContext) ?: return
+        getSystemService(AudioManager::class.java).setStreamVolume(AudioManager.STREAM_ALARM, previous, 0)
+        RingingStore.forgetVolume(applicationContext)
     }
 
+    /**
+     * Never lets a playback failure escape: an exception here would end the ringing session.
+     * Synthesized sound → system tone → (vibration, which is already running).
+     */
     private fun playAlarmSound(sound: AlarmSound) {
         when (sound) {
             AlarmSound.SILENT -> { /* intentionally nothing */ }
             AlarmSound.SYSTEM -> playSystemAlarm()
-            else -> playSynthesized(sound)
+            else -> try {
+                playSynthesized(sound)
+            } catch (e: Exception) {
+                audioTrack?.release()
+                audioTrack = null
+                playSystemAlarm(fallbackToSynth = false)
+            }
         }
     }
 
-    private fun playSystemAlarm() {
+    /**
+     * The system tone can be missing (no default set, file on removed storage, no permission) and
+     * MediaPlayer throws then — an alarm that throws instead of ringing is the worst outcome, so it
+     * falls back to a synthesized sound, which needs nothing from the device.
+     */
+    private fun playSystemAlarm(fallbackToSynth: Boolean = true) {
         val alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
             ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-        mediaPlayer = MediaPlayer().apply {
-            setAudioAttributes(
+        val player = MediaPlayer()
+        try {
+            checkNotNull(alarmUri) { "no system tone" }
+            player.setAudioAttributes(
                 AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_ALARM)
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                     .build()
             )
-            setDataSource(this@AlarmService, alarmUri)
-            isLooping = true
-            prepare()
-            start()
+            player.setDataSource(this, alarmUri)
+            player.isLooping = true
+            player.prepare()
+            player.start()
+            mediaPlayer = player
+        } catch (e: Exception) {
+            player.release()
+            if (fallbackToSynth) {
+                try {
+                    playSynthesized(AlarmSound.KLAXON)
+                } catch (_: Exception) {
+                    audioTrack?.release()
+                    audioTrack = null // vibration still runs
+                }
+            }
         }
     }
 
     private fun playSynthesized(sound: AlarmSound) {
         val pcm = AlarmSoundGenerator.generatePcm(sound)
         if (pcm.isEmpty()) {
-            playSystemAlarm()
+            if (sound != AlarmSound.KLAXON) playSynthesized(AlarmSound.KLAXON)
             return
         }
         val bufferBytes = pcm.size * 2
@@ -253,16 +294,19 @@ class AlarmService : Service() {
         vibrator?.vibrate(VibrationEffect.createWaveform(pattern, 0))
     }
 
+    /**
+     * Snoozing is not dismissing: it must not arm the Ultra Hardcore follow-ups, and snoozing a
+     * follow-up keeps it a follow-up.
+     */
     private fun snoozeAlarm(alarmId: Long) {
-        CoroutineScope(Dispatchers.IO).launch {
+        val isFollowup = currentAlarmId == alarmId && currentIsFollowup
+        val seq = if (isFollowup) currentFollowupSeq else 0
+        stopAlarm(dismissed = false) {
             val app = applicationContext as BrutusApplication
-            val repo = AlarmRepository(app.database.alarmDao())
-            val alarm = repo.getById(alarmId)
-            if (alarm != null) {
-                AlarmScheduler.scheduleSnooze(this@AlarmService, alarm)
-            }
+            val alarm = AlarmRepository(app.database.alarmDao()).getById(alarmId)
+            if (alarm != null) AlarmScheduler.scheduleSnooze(this@AlarmService, alarm, isFollowup, seq)
+            NextAlarmWidget.refresh(applicationContext)
         }
-        stopAlarm()
     }
 
     /** Stops audio/vibration and releases guard, volume override and wake lock. */
@@ -304,101 +348,64 @@ class AlarmService : Service() {
         cleanupPlayback()
 
         if (ultraSnap && alarmIdSnap != -1L && !isFollowupSnap) {
-            armUltraHardcoreFollowups(alarmIdSnap)
+            CoroutineScope(Dispatchers.IO).launch { armUltraHardcoreFollowups(alarmIdSnap) }
         }
     }
 
-    private fun stopAlarm() {
+    /**
+     * Ends the ringing session. [dismissed] is true only when the user completed the challenges —
+     * that alone arms the Ultra Hardcore follow-ups of a main alarm. [then] runs (on IO) before
+     * the service stops, so the process cannot be reaped with a snooze or a follow-up half-written.
+     */
+    private fun stopAlarm(dismissed: Boolean, then: suspend () -> Unit = {}) {
         val alarmIdSnap = currentAlarmId
         val ultraSnap = currentUltraHardcore
         val isFollowupSnap = currentIsFollowup
         val followupSeqSnap = currentFollowupSeq
+        val startIdSnap = lastStartId
 
         cleanupPlayback()
         stopForeground(STOP_FOREGROUND_REMOVE)
-
-        // Ultra Hardcore: when the main alarm is dismissed, arm the two follow-ups.
-        // When a follow-up is dismissed, just record it; if the last follow-up
-        // completed, clear the persistent reminder notification.
-        if (ultraSnap && alarmIdSnap != -1L) {
-            if (!isFollowupSnap) {
-                armUltraHardcoreFollowups(alarmIdSnap)
-            } else {
-                UltraHardcoreStore.clearFollowup(applicationContext, alarmIdSnap, followupSeqSnap)
-                if (UltraHardcoreStore.listPending(applicationContext)
-                        .none { it.alarmId == alarmIdSnap }
-                ) {
-                    cancelUltraHardcoreNotification(alarmIdSnap)
-                    UltraHardcoreStore.clearAllFor(applicationContext, alarmIdSnap)
-                }
-            }
-        }
 
         currentAlarmId = -1
         currentIsFollowup = false
         currentFollowupSeq = 0
         currentUltraHardcore = false
 
-        stopSelf()
-    }
-
-    private fun armUltraHardcoreFollowups(alarmId: Long) {
         CoroutineScope(Dispatchers.IO).launch {
-            val app = applicationContext as BrutusApplication
-            val repo = AlarmRepository(app.database.alarmDao())
-            val alarm = repo.getById(alarmId) ?: return@launch
-            val now = System.currentTimeMillis()
-
-            AlarmScheduler.ULTRA_HARDCORE_FOLLOWUP_OFFSETS_MIN.forEachIndexed { idx, offsetMin ->
-                val seq = idx + 1
-                val triggerAt = now + offsetMin * 60_000L
-                AlarmScheduler.scheduleFollowup(this@AlarmService, alarm, seq, triggerAt)
-                UltraHardcoreStore.recordFollowup(applicationContext, alarmId, seq, triggerAt)
+            try {
+                if (dismissed && ultraSnap && alarmIdSnap != -1L) {
+                    if (!isFollowupSnap) {
+                        armUltraHardcoreFollowups(alarmIdSnap)
+                    } else {
+                        // A dismissed follow-up is done; the last one clears the reminder.
+                        UltraHardcoreStore.clearFollowup(applicationContext, alarmIdSnap, followupSeqSnap)
+                        if (UltraHardcoreStore.listPending(applicationContext).none { it.alarmId == alarmIdSnap }) {
+                            UltraHardcoreNotifier.cancel(applicationContext, alarmIdSnap)
+                            UltraHardcoreStore.clearAllFor(applicationContext, alarmIdSnap)
+                        }
+                    }
+                }
+                then()
+            } finally {
+                withContext(Dispatchers.Main) { stopSelf(startIdSnap) }
             }
-            UltraHardcoreStore.setStepTarget(
-                applicationContext, alarmId, UltraHardcoreStore.DEFAULT_STEP_TARGET
-            )
-            postUltraHardcoreNotification(alarm)
         }
     }
 
-    private fun postUltraHardcoreNotification(alarm: AlarmEntity) {
-        val taskIntent = Intent(this, UltraHardcoreTaskActivity::class.java).apply {
-            putExtra(UltraHardcoreTaskActivity.EXTRA_ALARM_ID, alarm.id)
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    private suspend fun armUltraHardcoreFollowups(alarmId: Long) {
+        val app = applicationContext as BrutusApplication
+        val alarm = AlarmRepository(app.database.alarmDao()).getById(alarmId) ?: return
+        val now = System.currentTimeMillis()
+
+        AlarmScheduler.ULTRA_HARDCORE_FOLLOWUP_OFFSETS_MIN.forEachIndexed { idx, offsetMin ->
+            val seq = idx + 1
+            val triggerAt = now + offsetMin * 60_000L
+            AlarmScheduler.scheduleFollowup(this, alarm, seq, triggerAt)
+            UltraHardcoreStore.recordFollowup(applicationContext, alarmId, seq, triggerAt)
         }
-        val taskPi = PendingIntent.getActivity(
-            this,
-            (0x55_00_00_00 or (alarm.id.toInt() and 0xFFFFFF)),
-            taskIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val nm = getSystemService(NotificationManager::class.java)
-        val notification = Notification.Builder(this, BrutusApplication.CHANNEL_ULTRA_HARDCORE)
-            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setContentTitle(getString(R.string.notification_uhc_title))
-            .setContentText(getString(R.string.notification_uhc_text))
-            .setStyle(
-                Notification.BigTextStyle()
-                    .bigText(getString(R.string.notification_uhc_big_text))
-            )
-            .setOngoing(true)
-            .setOnlyAlertOnce(true)
-            .setCategory(Notification.CATEGORY_REMINDER)
-            .setContentIntent(taskPi)
-            .addAction(
-                Notification.Action.Builder(
-                    null, getString(R.string.notification_uhc_action), taskPi
-                ).build()
-            )
-            .build()
-        nm.notify(notificationIdForUltraHardcore(alarm.id), notification)
-    }
-
-    private fun cancelUltraHardcoreNotification(alarmId: Long) {
-        val nm = getSystemService(NotificationManager::class.java)
-        nm.cancel(notificationIdForUltraHardcore(alarmId))
+        UltraHardcoreStore.setStepTarget(applicationContext, alarmId, UltraHardcoreStore.DEFAULT_STEP_TARGET)
+        UltraHardcoreNotifier.post(applicationContext, alarmId)
     }
 
     private fun acquireWakeLock() {
@@ -417,7 +424,16 @@ class AlarmService : Service() {
     }
 
     override fun onDestroy() {
-        stopAlarm()
+        // Normally the session already ended (currentAlarmId == -1) and this is a no-op. If the
+        // system tears the service down while an Ultra Hardcore main alarm rings, arm its
+        // follow-ups — being killed must not be a way out.
+        if (currentAlarmId != -1L) {
+            val id = currentAlarmId
+            val arm = currentUltraHardcore && !currentIsFollowup
+            cleanupPlayback()
+            currentAlarmId = -1
+            if (arm) CoroutineScope(Dispatchers.IO).launch { armUltraHardcoreFollowups(id) }
+        }
         super.onDestroy()
     }
 
@@ -428,6 +444,6 @@ class AlarmService : Service() {
         const val NOTIFICATION_ID = 1001
 
         fun notificationIdForUltraHardcore(alarmId: Long): Int =
-            2000 + (alarmId.toInt() and 0xFFFF)
+            UltraHardcoreNotifier.notificationId(alarmId)
     }
 }

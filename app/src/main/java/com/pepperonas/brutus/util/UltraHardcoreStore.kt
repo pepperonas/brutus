@@ -29,17 +29,17 @@ object UltraHardcoreStore {
     data class Pending(val alarmId: Long, val seq: Int, val triggerAt: Long)
 
     fun recordFollowup(context: Context, alarmId: Long, seq: Int, triggerAt: Long) {
-        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val prefs = Storage.prefs(context, PREFS)
         prefs.edit().putLong("$KEY_FOLLOWUP_PREFIX${alarmId}_$seq", triggerAt).apply()
     }
 
     fun clearFollowup(context: Context, alarmId: Long, seq: Int) {
-        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val prefs = Storage.prefs(context, PREFS)
         prefs.edit().remove("$KEY_FOLLOWUP_PREFIX${alarmId}_$seq").apply()
     }
 
     fun clearAllFor(context: Context, alarmId: Long) {
-        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val prefs = Storage.prefs(context, PREFS)
         val editor = prefs.edit()
         prefs.all.keys.toList()
             .filter { it.startsWith("$KEY_FOLLOWUP_PREFIX${alarmId}_") }
@@ -50,7 +50,7 @@ object UltraHardcoreStore {
     }
 
     fun listPending(context: Context): List<Pending> {
-        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val prefs = Storage.prefs(context, PREFS)
         return prefs.all.entries
             .mapNotNull { (key, value) ->
                 if (!key.startsWith(KEY_FOLLOWUP_PREFIX)) return@mapNotNull null
@@ -69,12 +69,12 @@ object UltraHardcoreStore {
         listPending(context).map { it.alarmId }.toSet()
 
     fun setStepTarget(context: Context, alarmId: Long, target: Int) {
-        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val prefs = Storage.prefs(context, PREFS)
         prefs.edit().putInt("$KEY_STEP_TARGET_PREFIX$alarmId", target).apply()
     }
 
     fun stepTarget(context: Context, alarmId: Long): Int {
-        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val prefs = Storage.prefs(context, PREFS)
         return prefs.getInt("$KEY_STEP_TARGET_PREFIX$alarmId", DEFAULT_STEP_TARGET)
     }
 
@@ -83,12 +83,12 @@ object UltraHardcoreStore {
      * so the task screen can show progress as a delta even if reopened later.
      */
     fun setBaselineSteps(context: Context, alarmId: Long, baseline: Float) {
-        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val prefs = Storage.prefs(context, PREFS)
         prefs.edit().putFloat("$KEY_BASE_STEPS_PREFIX$alarmId", baseline).apply()
     }
 
     fun baselineSteps(context: Context, alarmId: Long): Float {
-        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val prefs = Storage.prefs(context, PREFS)
         return prefs.getFloat("$KEY_BASE_STEPS_PREFIX$alarmId", -1f)
     }
 }

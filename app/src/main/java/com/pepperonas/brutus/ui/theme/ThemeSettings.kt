@@ -4,7 +4,9 @@ import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
+import androidx.datastore.preferences.core.emptyPreferences
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 
 private val Context.themeDataStore by preferencesDataStore(name = "theme_settings")
@@ -16,8 +18,12 @@ private val Context.themeDataStore by preferencesDataStore(name = "theme_setting
 object ThemeSettings {
     private val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
 
+    // The ringing screen can open before the first unlock after a reboot, when this
+    // (credential-encrypted) file cannot be read. Fall back to the brand scheme then.
     fun dynamicColorFlow(context: Context): Flow<Boolean> =
-        context.themeDataStore.data.map { it[DYNAMIC_COLOR] ?: false }
+        context.themeDataStore.data
+            .catch { emit(emptyPreferences()) }
+            .map { it[DYNAMIC_COLOR] ?: false }
 
     suspend fun setDynamicColor(context: Context, enabled: Boolean) {
         context.themeDataStore.edit { it[DYNAMIC_COLOR] = enabled }

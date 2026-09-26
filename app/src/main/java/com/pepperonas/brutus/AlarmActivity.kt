@@ -11,6 +11,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import com.pepperonas.brutus.data.AlarmDatabase
 import com.pepperonas.brutus.scheduler.AlarmScheduler
@@ -31,12 +32,33 @@ class AlarmActivity : ComponentActivity() {
     private var hardcoreActive: Boolean = false
     private var audioGuard: HardcoreAudioGuard? = null
 
+    /** Bumped per alarm shown, so a takeover starts its challenge chain from scratch. */
+    private var session = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         setupLockScreen()
+        showAlarm(intent)
+    }
 
+    /**
+     * A second alarm that fires while this one is on screen arrives here (the activity is
+     * singleInstance). Without this the screen kept showing the first alarm's challenges, and
+     * Snooze snoozed the wrong alarm while the new one's challenge was skipped entirely.
+     */
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        audioGuard?.detach()
+        audioGuard = null
+        hardcoreActive = false
+        showAlarm(intent)
+    }
+
+    private fun showAlarm(intent: Intent) {
+        val sessionKey = ++session
         alarmId = intent.getLongExtra("alarm_id", -1)
         val isFollowup = intent.getBooleanExtra(AlarmScheduler.EXTRA_IS_FOLLOWUP, false)
         val followupSeq = intent.getIntExtra(AlarmScheduler.EXTRA_FOLLOWUP_SEQ, 0)
@@ -58,12 +80,14 @@ class AlarmActivity : ComponentActivity() {
             hardcoreActive = alarm?.hardcoreEffective == true
 
             runOnUiThread {
+                if (sessionKey != session) return@runOnUiThread // superseded by a newer alarm
                 if (hardcoreActive) {
                     audioGuard = HardcoreAudioGuard(applicationContext).also { it.attach() }
                 }
                 setContent {
                     BrutusTheme(darkTheme = true) {
                         Surface(modifier = Modifier.fillMaxSize()) {
+                          key(sessionKey) {
                             AlarmScreen(
                                 challengeFlags = flags,
                                 qrCodeData = qrData,
@@ -79,6 +103,7 @@ class AlarmActivity : ComponentActivity() {
                                 onDismiss = { stopAlarm() },
                                 onSnooze = { snoozeAlarm() }
                             )
+                          }
                         }
                     }
                 }

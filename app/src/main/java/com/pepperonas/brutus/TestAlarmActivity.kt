@@ -43,7 +43,7 @@ class TestAlarmActivity : ComponentActivity() {
         }
 
         if (hardcoreActive) {
-            audioGuard = HardcoreAudioGuard(applicationContext).also { it.attach() }
+            audioGuard = HardcoreAudioGuard(applicationContext, restoreOnDetach = true).also { it.attach() }
         }
 
         setContent {

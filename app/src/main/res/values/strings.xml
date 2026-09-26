@@ -82,6 +82,10 @@
     <string name="banner_fullscreen_title">Full-screen alarm blocked</string>
     <string name="banner_fullscreen_body">Without this permission the alarm only shows as a notification — the app will not come to the foreground.</string>
     <string name="banner_fullscreen_action">Allow</string>
+    <string name="banner_notifications_title">Notifications blocked</string>
+    <string name="banner_notifications_body">Without notifications Android may not show the ringing alarm on screen, and the Ultra Hardcore reminder never appears.</string>
+    <string name="banner_notifications_action">Allow</string>
+    <string name="banner_uhc_body">Brutus rings again soon. Finish the step challenge to cancel the re-alarms.</string>
 
     <!-- ===================== Edit sheet ===================== -->
     <string name="edit_title_new">New alarm</string>

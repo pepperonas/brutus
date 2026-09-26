@@ -13,13 +13,13 @@ object TimerSoundStore {
     val DEFAULT_SOUND: AlarmSound = AlarmSound.CHIME
 
     fun get(context: Context): AlarmSound {
-        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val prefs = Storage.prefs(context, PREFS)
         val id = prefs.getInt(KEY_SOUND_ID, DEFAULT_SOUND.id)
         return AlarmSound.fromId(id)
     }
 
     fun set(context: Context, sound: AlarmSound) {
-        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val prefs = Storage.prefs(context, PREFS)
         prefs.edit().putInt(KEY_SOUND_ID, sound.id).apply()
     }
 }

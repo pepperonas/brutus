@@ -12,8 +12,7 @@ object GlobalQrStore {
     private const val KEY_QR = "qr_data"
 
     fun get(context: Context): String {
-        val prefs = context.applicationContext
-            .getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val prefs = Storage.prefs(context, PREFS)
         prefs.getString(KEY_QR, null)?.let { return it }
         val fresh = QrGenerator.generateData()
         prefs.edit().putString(KEY_QR, fresh).apply()

@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import com.pepperonas.brutus.util.Storage
 import android.widget.RemoteViews
 import com.pepperonas.brutus.BrutusApplication
 import com.pepperonas.brutus.MainActivity
@@ -40,7 +41,7 @@ class NextAlarmWidget : AppWidgetProvider() {
             try {
                 appWidgetIds.forEach { id -> updateWidget(context, appWidgetManager, id) }
             } finally {
-                pendingResult.finish()
+                pendingResult?.finish()
             }
         }
     }
@@ -95,10 +96,18 @@ class NextAlarmWidget : AppWidgetProvider() {
          * behind by 30 minutes.
          */
         fun refresh(context: Context) {
-            val manager = AppWidgetManager.getInstance(context)
-            val ids = manager.getAppWidgetIds(
-                ComponentName(context, NextAlarmWidget::class.java)
-            )
+            // Before the first unlock after a reboot every AppWidgetManager call throws — and the
+            // ringing service calls this right after an alarm fires. Found on the emulator: the
+            // exception killed the service a second into the alarm. The widget updates itself on
+            // its next tick once the user has unlocked.
+            if (!Storage.isUserUnlocked(context)) return
+            val ids = try {
+                AppWidgetManager.getInstance(context).getAppWidgetIds(
+                    ComponentName(context, NextAlarmWidget::class.java)
+                )
+            } catch (_: IllegalStateException) {
+                return
+            }
             if (ids.isEmpty()) return
             val intent = Intent(context, NextAlarmWidget::class.java).apply {
                 action = AppWidgetManager.ACTION_APPWIDGET_UPDATE

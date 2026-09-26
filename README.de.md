@@ -19,7 +19,7 @@
 <!-- Projektstatus — diese Badges aktualisieren sich selbst. -->
 
 [![Tests](https://img.shields.io/github/actions/workflow/status/pepperonas/brutus/tests.yml?branch=main&label=tests&logo=githubactions&logoColor=white)](https://github.com/pepperonas/brutus/actions/workflows/tests.yml)
-[![Unit tests](https://img.shields.io/badge/unit%20tests-278-brightgreen)](#tests-und-ci)
+[![Unit tests](https://img.shields.io/badge/unit%20tests-306-brightgreen)](#tests-und-ci)
 [![Release](https://img.shields.io/github/v/release/pepperonas/brutus?color=FF5252&logo=github&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/pepperonas/brutus/total?label=APK%20downloads&color=success&logo=github&logoColor=white)](https://github.com/pepperonas/brutus/releases)
 [![Last commit](https://img.shields.io/github/last-commit/pepperonas/brutus?logo=git&logoColor=white)](https://github.com/pepperonas/brutus/commits/main)
@@ -505,9 +505,13 @@ Der auslösende Alarm zeigt eine Vollbild-Activity **über** dem Sperrbildschirm
 | Audio läuft bei ausgeschaltetem Bildschirm weiter | Foreground-Service mit Typ `mediaPlayback` + `PARTIAL_WAKE_LOCK` (10 min Timeout) |
 | Überlebt Lautlos / „Nicht stören" | `STREAM_ALARM` wird beim Start auf Maximum gesetzt und beim Verwerfen zurückgestellt |
 | Überlebt Neustart | Room-Persistenz + `BOOT_COMPLETED` / `LOCKED_BOOT_COMPLETED`-Receiver, über `goAsync()` offen gehalten, damit die Neuplanung nicht mittendrin abgeschossen wird (v1.8.0) |
-| Überlebt App-Kill | `START_STICKY`-Service, der Wecker wird vor dem Auslösen neu geplant |
+| Klingeln vor dem ersten Entsperren | Seit v2.3.1 liegt alles, was der Klingel-Pfad liest (Wecker, Re-Alarme, Snoozes, der QR-Code), im **geräteverschlüsselten Speicher**, und Receiver, Service und Alarmbildschirm sind `directBootAware` — ein Wecker klingelt nach einem nächtlichen Update-Neustart, auch wenn das Handy noch auf die PIN wartet. Auf dem Emulator geprüft: gesperrter Neustart, Alarm klingelte, Challenge gelöst, Lautstärke zurückgestellt |
+| Uhrzeit-/Zonen-/Rechte-Wechsel | `SystemChangeReceiver` registriert bei `TIMEZONE_CHANGED`, `TIME_SET`, wieder erteilter Exakt-Alarm-Berechtigung und App-Update alles neu; die App tut dasselbe bei jedem Öffnen (Force-Stop, Backup-Wiederherstellung). Ein 07:00-Wecker bleibt nach dem Flug nach London 07:00 (v2.3.1) |
+| Exakte Alarme entzogen (Android 12/12L) | Registrierungen weichen auf ungenau aus, statt im klingelnden Service eine `SecurityException` zu werfen (v2.3.1) |
+| Überlebt App-Kill | `START_STICKY`-Service, der Wecker wird vor dem Auslösen neu geplant; die Lautstärke von vor dem Alarm wird gespeichert, sodass auch ein mitten im Klingeln beendeter Service sie zurückstellt (v2.3.1) |
 | Verhindert versehentliches Snoozen | Wisch-Geste mit 85-%-Schwelle |
-| Überlappende Alarme | Feuert ein zweiter Wecker, während einer klingelt, wird die alte Sitzung sauber beendet — Audio freigegeben, und die Re-Alarme eines UHC-Hauptalarms werden scharfgestellt statt still verworfen (v1.8.0) |
+| Überlappende Alarme | Feuert ein zweiter Wecker, während einer klingelt, wird die alte Sitzung sauber beendet — Audio freigegeben, und die Re-Alarme eines UHC-Hauptalarms werden scharfgestellt statt still verworfen (v1.8.0). Seit v2.3.1 wechselt auch der Bildschirm zu den Challenges des neuen Weckers (vorher blieb der erste stehen, und Snooze schlummerte den falschen) |
+| Snooze | Eigener Request-Code-Raum: ersetzt weder die nächste reguläre Auslösung noch geht er beim Neustart verloren; Snooze eines Ultra-Hardcore-Weckers stellt keine Re-Alarme mehr scharf (v2.3.1) |
 | Neuplanung mit Sunrise | `schedule()` bricht einen zuvor scharfgestellten Sunrise-Vorlauf immer ab, bevor neu geplant wird — kein veralteter Sunrise kann zur alten Zeit feuern (v1.8.0) |
 
 ---
@@ -790,11 +794,11 @@ app/src/main/res/
 
 ## Tests und CI
 
-278 JVM-Unit-Tests sichern die Stellen, an denen ein Fehler bedeutet, dass jemand verschläft: was tatsächlich im `AlarmManager` landet, die Weckzeit-Arithmetik, die Persistenz, die Vollständigkeit beider Übersetzungen und jeden String, den der Nutzer auf einem Ziffernblatt liest. Es gibt keine Instrumentierungstests — die gesamte Suite läuft in Sekunden auf der JVM.
+306 JVM-Unit-Tests sichern die Stellen, an denen ein Fehler bedeutet, dass jemand verschläft: was tatsächlich im `AlarmManager` landet, die Weckzeit-Arithmetik, die Persistenz, die Vollständigkeit beider Übersetzungen und jeden String, den der Nutzer auf einem Ziffernblatt liest. Es gibt keine Instrumentierungstests — die gesamte Suite läuft in Sekunden auf der JVM.
 
 | Suite | Tests | Was sie festnagelt |
 |-------|-------|--------------------|
-| `scheduler/AlarmSchedulerTest` | 23 | die Registrierungen, die wirklich beim `AlarmManager` ankommen: Auslösung auf der eingestellten Wanduhrzeit, verstrichene Zeiten rutschen auf morgen, Wochentags-Treffer, Sunrise exakt 10 min davor (und übersprungen, wenn er in der Vergangenheit läge), `setExactAndAllowWhileIdle` gegen Doze, der Stale-Sunrise-Fix aus v1.8.0, Snooze-Intervalle und die Request-Code-Trennung, die Haupt-/Sunrise-/zwei Re-Alarm-Registrierungen davor bewahrt, sich gegenseitig zu überschreiben (Robolectric) |
+| `scheduler/AlarmSchedulerTest` | 28 | die Registrierungen, die wirklich beim `AlarmManager` ankommen: Auslösung auf der eingestellten Wanduhrzeit, verstrichene Zeiten rutschen auf morgen, Wochentags-Treffer, Sunrise exakt 10 min davor (und übersprungen, wenn er in der Vergangenheit läge), `setExactAndAllowWhileIdle` gegen Doze, der Stale-Sunrise-Fix aus v1.8.0, Snooze-Intervalle und die Request-Code-Trennung, die Haupt-/Sunrise-/zwei Re-Alarm-Registrierungen davor bewahrt, sich gegenseitig zu überschreiben (Robolectric) |
 | `util/NextAlarmCalculatorTest` | 17 | einmalig heute vs. morgen, Wochenumbruch bei Wiederholung, Wochenendauswahl, `formatCountdown` in beiden Sprachen |
 | `data/AlarmDaoTest` | 15 | echtes SQL auf einer In-Memory-Room-Datenbank: Sortierung, `getEnabledAlarms` fürs Boot-Rescheduling, Vollfeld-Roundtrip, REPLACE-Konflikt, Undo-Restore mit `id = 0`, Repository-Durchreiche (Robolectric) |
 | `ui/screens/ClockFormattingTest` | 14 | Stoppuhr- und Timer-Anzeigen: Abschneiden statt Aufrunden, Stundenspalte exakt an der Stundengrenze und eine **konstante Stringbreite** — die Prämisse der Tabellenziffern |
@@ -804,10 +808,15 @@ app/src/main/res/
 | `ResourceParityTest` | 11 | die zwei Sprachen können nicht auseinanderlaufen: identische Schlüsselsätze, keine leeren Werte, **passende Format-Platzhalter**, vollständige Plurale, je sieben Wochentage, kein Deutsch im Standardsatz und `locales_config.xml` im Einklang mit den `values-*`-Ordnern |
 | `util/AlarmSoundTest` | 11 | die **persistierten** Sound-Ids als Goldene Map — ein Umnummerieren würde still ändern, was bestehende Wecker spielen — plus die Anzeigenamen in beiden Sprachen |
 | `BrutusApplicationTest` | 9 | Notification-Kanäle sind write-once: Wichtigkeit, DND-Bypass, Stummheit — und der Update-Kanal geht nie durch „Nicht stören“ (Robolectric) |
-| `update/UpdateCheckerTest` | 9 | die optionale Update-Prüfung komplett mit Fake-Quelle: aus heißt **gar keine Anfrage**, eine Benachrichtigung pro Version, nie für die installierte oder eine ältere, Tippen öffnet die Download-Seite, der Banner folgt dem Schalter (Robolectric) |
+| `update/UpdateCheckerTest` | 10 | die optionale Update-Prüfung komplett mit Fake-Quelle: aus heißt **gar keine Anfrage**, eine Benachrichtigung pro Version, nie für die installierte oder eine ältere, Tippen öffnet die Download-Seite, der Banner folgt dem Schalter (Robolectric) |
 | `update/ReleaseSourceTest` | 9 | Version aus `latest.json` der Produktseite und aus GitHubs Release lesen, Müll wirft nie, GitHub nur, wenn die Seite scheitert |
 | `update/AppVersionTest` | 8 | Release-Tags gegen die installierte Version: `2.10.0 > 2.9.1`, `v`-Präfix und `-beta`-Suffix, Müll ist nie „neuer“ |
 | `update/UpdateCheckStoreTest` | 2 | jede Änderung erreicht den Bildschirm (ein konstanter Wert wird von `collectAsState` verschluckt), Ausschalten vergisst den Fund |
+| `util/StorageTest` | 7 | der einmalige Umzug in den geräteverschlüsselten Speicher: der ausgedruckte QR-Code und ausstehende Re-Alarme überleben ihn, gesperrt zieht nichts um, er läuft nie zweimal, jeder Store ist erfasst |
+| `scheduler/ReschedulerTest` | 6 | ein Zeitzonenwechsel hält die Wanduhrzeit, Re-Alarme eines selbst deaktivierten Einmal-Weckers überleben samt Benachrichtigung, Snoozes kommen zurück, zweimal ausführen stapelt nie |
+| `service/AlarmServiceUltraHardcoreTest` | 4 | der echte Service: Snooze stellt keine Re-Alarme scharf, Beenden schon, die Lautstärke kommt auch nach einem Abbruch mitten im Klingeln zurück |
+| `receiver/SystemChangeReceiverTest` | 3 | jede behandelte Aktion steht im Manifest-Filter, der ganze Klingel-Pfad ist `directBootAware` |
+| `widget/NextAlarmWidgetLockedTest` | 2 | das Widget wird vor dem ersten Entsperren nie angefasst |
 | `update/UpdateSchedulerTest` | 6 | Einschalten plant eine tägliche, netzgebundene Prüfung plus eine sofortige; Aus löscht alles; nach dem Update bleibt es aus (WorkManager-Testtreiber) |
 | `ui/alarm/MathProblemTest` | 8 | Antwort-/Anzeigelogik, Range- und Vorzeichen-Invarianten je Schwierigkeitsgrad über 500 Samples, Operator-Fallback |
 | `viewmodel/TimerViewModelTest` | 8 | Countdown-/Pause-Mathematik, Cancel-Undo-Automat, ein abgelaufener Timer ist bewusst *nicht* undoable (Robolectric) |
@@ -827,7 +836,7 @@ app/src/main/res/
 | `scheduler/AlarmSchedulerConstantsTest` | 4 | Ultra-Hardcore-Offsets, Sunrise-Vorlauf, Eindeutigkeit der Intent-Extras |
 
 ```bash
-./gradlew :app:testDebugUnitTest          # alle 278
+./gradlew :app:testDebugUnitTest          # alle 306
 ./gradlew :app:testDebugUnitTest --tests '*NextAlarmCalculatorTest'
 # HTML-Report: app/build/reports/tests/testDebugUnitTest/index.html
 ```
@@ -919,7 +928,9 @@ T + 15m AlarmReceiver feuert mit EXTRA_IS_FOLLOWUP=true, seq=2
 
 ### Boot-Wiederherstellung
 
-`BootReceiver` lauscht auf `ACTION_BOOT_COMPLETED` und `ACTION_LOCKED_BOOT_COMPLETED` (`directBootAware = true`). Er holt alle aktiven Wecker aus Room und ruft für jeden `AlarmScheduler.schedule()` auf. Zusätzlich läuft er seit v1.4.0 durch `UltraHardcoreStore.listPending()` und registriert jeden ausstehenden Re-Alarm neu, dessen `triggerAt` noch in der Zukunft liegt — abgelaufene Einträge werden aufgeräumt.
+`BootReceiver` lauscht auf `ACTION_BOOT_COMPLETED` und `ACTION_LOCKED_BOOT_COMPLETED` (`directBootAware = true`) und ruft `Rescheduler.rescheduleAll()` auf — dieselbe Funktion wie `SystemChangeReceiver` und `MainActivity.onResume`. Sie registriert jeden aktiven Wecker, jeden ausstehenden Ultra-Hardcore-Re-Alarm mit `triggerAt` in der Zukunft (unabhängig davon, ob der Wecker noch aktiv ist — ein Einmal-Wecker schaltet sich beim Auslösen selbst aus, seine Re-Alarme müssen trotzdem überleben) samt Erinnerungs-Benachrichtigung, und jeden gemerkten Snooze. Abgelaufene Einträge werden aufgeräumt.
+
+Seit v2.3.1 klappt das **vor dem ersten Entsperren**: die Daten liegen im geräteverschlüsselten Speicher (`util/Storage.kt`); Installationen älterer Versionen ziehen sie einmalig dorthin um, sobald die App zum ersten Mal entsperrt läuft. Bis dahin tut der gesperrte Durchlauf nichts, und `BOOT_COMPLETED` erledigt die Arbeit. Das Widget wird im gesperrten Zustand nicht angefasst — dann wirft jeder `AppWidgetManager`-Aufruf, was auf dem Emulator den klingelnden Service eine Sekunde nach Alarmbeginn beendete.
 
 ---
 

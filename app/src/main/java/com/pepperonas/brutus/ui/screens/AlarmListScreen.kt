@@ -86,7 +86,12 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.pepperonas.brutus.data.AlarmEntity
 import com.pepperonas.brutus.ui.theme.BrutusTheme
 import com.pepperonas.brutus.ui.theme.ThemeSettings
+import android.content.Intent
+import android.provider.Settings
+import androidx.core.app.NotificationManagerCompat
 import com.pepperonas.brutus.update.UpdateCheckStore
+import com.pepperonas.brutus.util.UltraHardcoreNotifier
+import com.pepperonas.brutus.util.UltraHardcoreStore
 import com.pepperonas.brutus.update.UpdateChecker
 import com.pepperonas.brutus.update.UpdateScheduler
 import com.pepperonas.brutus.util.BatteryOptimizationPermission
@@ -161,6 +166,11 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
     var exactGranted by remember { mutableStateOf(ExactAlarmPermission.isGranted(context)) }
     var batteryIgnoring by remember { mutableStateOf(BatteryOptimizationPermission.isIgnoring(context)) }
     var fsiGranted by remember { mutableStateOf(FullScreenIntentPermission.isGranted(context)) }
+    var notificationsOn by remember {
+        mutableStateOf(NotificationManagerCompat.from(context).areNotificationsEnabled())
+    }
+    // The UHC reminder notification can be swiped away on Android 14+; the task must stay reachable.
+    var uhcPendingId by remember { mutableStateOf(UltraHardcoreStore.pendingAlarmIds(context).firstOrNull()) }
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     // Opt-in update check: the switch and the banner both follow the store live
     // (the worker writes the finding in the background).
@@ -179,6 +189,8 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
                 exactGranted = ExactAlarmPermission.isGranted(context)
                 batteryIgnoring = BatteryOptimizationPermission.isIgnoring(context)
                 fsiGranted = FullScreenIntentPermission.isGranted(context)
+                notificationsOn = NotificationManagerCompat.from(context).areNotificationsEnabled()
+                uhcPendingId = UltraHardcoreStore.pendingAlarmIds(context).firstOrNull()
             }
         }
         lifecycle.addObserver(observer)
@@ -272,7 +284,7 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
                     actionLabel = stringResource(R.string.banner_update_action),
                     info = true,
                     icon = Icons.Default.SystemUpdate,
-                    onFix = { context.startActivity(UpdateChecker.downloadIntent()) },
+                    onFix = { UpdateChecker.openDownload(context) },
                 )
                 Spacer(modifier = Modifier.height(12.dp))
             }
@@ -299,6 +311,35 @@ fun AlarmListScreen(viewModel: AlarmViewModel) {
                 FullScreenIntentBanner(onFix = {
                     FullScreenIntentPermission.settingsIntent(context)?.let { context.startActivity(it) }
                 })
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+
+            if (!notificationsOn) {
+                PermissionBanner(
+                    title = stringResource(R.string.banner_notifications_title),
+                    body = stringResource(R.string.banner_notifications_body),
+                    actionLabel = stringResource(R.string.banner_notifications_action),
+                    onFix = {
+                        runCatching {
+                            context.startActivity(
+                                Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                                    .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            )
+                        }
+                    },
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+
+            uhcPendingId?.let { pendingId ->
+                PermissionBanner(
+                    title = stringResource(R.string.notification_uhc_title),
+                    body = stringResource(R.string.banner_uhc_body),
+                    actionLabel = stringResource(R.string.notification_uhc_action),
+                    warning = true,
+                    onFix = { context.startActivity(UltraHardcoreNotifier.taskIntent(context, pendingId)) },
+                )
                 Spacer(modifier = Modifier.height(12.dp))
             }
 

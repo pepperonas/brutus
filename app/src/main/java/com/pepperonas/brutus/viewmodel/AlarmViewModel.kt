@@ -8,6 +8,7 @@ import com.pepperonas.brutus.data.AlarmEntity
 import com.pepperonas.brutus.data.AlarmRepository
 import com.pepperonas.brutus.scheduler.AlarmScheduler
 import com.pepperonas.brutus.util.ChallengeFlags
+import com.pepperonas.brutus.util.UltraHardcoreNotifier
 import com.pepperonas.brutus.util.UltraHardcoreStore
 import com.pepperonas.brutus.widget.NextAlarmWidget
 import kotlinx.coroutines.flow.SharingStarted
@@ -78,11 +79,10 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
             repository.update(alarm)
             if (alarm.enabled) {
                 AlarmScheduler.schedule(getApplication(), alarm)
+                // Ultra Hardcore switched off on an enabled alarm: its in-flight follow-ups go too.
+                if (!alarm.ultraHardcoreMode) disarmUltraHardcore(alarm.id)
             } else {
-                AlarmScheduler.cancel(getApplication(), alarm)
-                // If Ultra Hardcore got turned off, also clear any in-flight follow-ups.
-                AlarmScheduler.cancelAllFollowups(getApplication(), alarm.id)
-                UltraHardcoreStore.clearAllFor(getApplication(), alarm.id)
+                disarm(alarm)
             }
             NextAlarmWidget.refresh(getApplication())
         }
@@ -95,9 +95,7 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
             if (updated.enabled) {
                 AlarmScheduler.schedule(getApplication(), updated)
             } else {
-                AlarmScheduler.cancel(getApplication(), updated)
-                AlarmScheduler.cancelAllFollowups(getApplication(), updated.id)
-                UltraHardcoreStore.clearAllFor(getApplication(), updated.id)
+                disarm(updated)
             }
             NextAlarmWidget.refresh(getApplication())
         }
@@ -105,12 +103,27 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
 
     fun deleteAlarm(alarm: AlarmEntity) {
         viewModelScope.launch {
-            AlarmScheduler.cancel(getApplication(), alarm)
-            AlarmScheduler.cancelAllFollowups(getApplication(), alarm.id)
-            UltraHardcoreStore.clearAllFor(getApplication(), alarm.id)
+            disarm(alarm)
             repository.delete(alarm)
             NextAlarmWidget.refresh(getApplication())
         }
+    }
+
+    /**
+     * Everything that can still ring or remind for [alarm]: the regular registration and its
+     * sunrise, a pending snooze, the Ultra Hardcore follow-ups and their reminder notification
+     * (which otherwise stayed on screen until the next reboot).
+     */
+    private fun disarm(alarm: AlarmEntity) {
+        AlarmScheduler.cancel(getApplication(), alarm)
+        AlarmScheduler.cancelSnooze(getApplication(), alarm.id)
+        disarmUltraHardcore(alarm.id)
+    }
+
+    private fun disarmUltraHardcore(alarmId: Long) {
+        AlarmScheduler.cancelAllFollowups(getApplication(), alarmId)
+        UltraHardcoreStore.clearAllFor(getApplication(), alarmId)
+        UltraHardcoreNotifier.cancel(getApplication(), alarmId)
     }
 
     /**
