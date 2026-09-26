@@ -4,7 +4,7 @@
 
 All notable changes to Brutus are documented here. Versions follow [SemVer](https://semver.org).
 
-## [Unreleased]
+## [2.3.0] — 2026-09-26 · Update notice (opt-in) + product page
 
 ### Added — update notice (opt-in)
 - **⋮ → Check for updates** (off by default, also after updating). Switched on, Brutus asks

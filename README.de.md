@@ -36,7 +36,7 @@
 [![targetSdk](https://img.shields.io/badge/targetSdk-35%20%C2%B7%20Android%2015-3DDC84?logo=android&logoColor=white)](https://apilevels.com)
 [![compileSdk](https://img.shields.io/badge/compileSdk-35-3DDC84?logo=android&logoColor=white)](https://developer.android.com/tools/releases/platforms)
 [![JDK](https://img.shields.io/badge/JDK-17-437291?logo=openjdk&logoColor=white)](https://adoptium.net)
-[![APK size](https://img.shields.io/badge/APK-4.2%20MB-blueviolet?logo=android&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
+[![APK size](https://img.shields.io/badge/APK-4.3%20MB-blueviolet?logo=android&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
 
 <!-- Sprache, Build & Toolchain -->
 
