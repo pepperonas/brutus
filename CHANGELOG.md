@@ -4,6 +4,22 @@
 
 All notable changes to Brutus are documented here. Versions follow [SemVer](https://semver.org).
 
+## [2.5.2] — 2026-09-27 · The alarm screen's clock is no longer covered
+
+### Fixed
+- **A ringing alarm on an unlocked phone:** Android shows the alarm notification — it carries a full-screen
+  intent — as a *pinned* heads-up, and it sat right over the alarm screen's clock and challenge counter
+  for as long as the alarm rang. While the alarm screen is in front, Brutus now runs on a quiet
+  notification without a heads-up; as soon as the screen leaves (Home, another app), the loud one with
+  the full-screen intent comes back, so the alarm is never out of sight. A locked phone behaves as before.
+  If the phone is in use in another app when the alarm fires, Android itself shows the heads-up instead of
+  the full screen — it rings as always, and a tap opens the alarm screen (checked on Android 15).
+
+### Tests
+- 371 → 376: the real service swaps the two notifications with the alarm screen, removes both on dismiss
+  and does not linger as a started service when there is no alarm. Both guards were re-introduced once
+  to see their test fail.
+
 ## [2.5.1] — 2026-09-27 · The timer's Start button is back in reach
 
 ### Fixed

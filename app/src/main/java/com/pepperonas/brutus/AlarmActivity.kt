@@ -35,6 +35,9 @@ class AlarmActivity : ComponentActivity() {
     /** Bumped per alarm shown, so a takeover starts its challenge chain from scratch. */
     private var session = 0
 
+    /** Set once the user dismissed or snoozed — then leaving is not "the alarm lost the screen". */
+    private var leaving = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -139,7 +142,30 @@ class AlarmActivity : ComponentActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 
+    /**
+     * On an unlocked phone the alarm notification is a pinned heads-up that covers the clock. While
+     * this screen is in front the service swaps it for a quiet one, and back when the screen leaves.
+     */
+    override fun onResume() {
+        super.onResume()
+        tellService(AlarmService.ACTION_SCREEN_SHOWN)
+    }
+
+    override fun onPause() {
+        if (!leaving && !isFinishing) tellService(AlarmService.ACTION_SCREEN_HIDDEN)
+        super.onPause()
+    }
+
+    private fun tellService(action: String) {
+        try {
+            startService(Intent(this, AlarmService::class.java).setAction(action))
+        } catch (e: IllegalStateException) {
+            // The service is not running (the alarm already ended) — nothing to swap.
+        }
+    }
+
     private fun stopAlarm() {
+        leaving = true
         val intent = Intent(this, AlarmService::class.java).apply {
             action = AlarmService.ACTION_STOP
         }
@@ -148,6 +174,7 @@ class AlarmActivity : ComponentActivity() {
     }
 
     private fun snoozeAlarm() {
+        leaving = true
         val intent = Intent(this, AlarmService::class.java).apply {
             action = AlarmService.ACTION_SNOOZE
             putExtra("alarm_id", alarmId)

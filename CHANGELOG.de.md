@@ -4,6 +4,22 @@
 
 Alle nennenswerten Änderungen an Brutus stehen hier. Versionen folgen [SemVer](https://semver.org).
 
+## [2.5.2] — 2026-09-27 · Die Uhr auf dem Alarmbildschirm ist nicht mehr verdeckt
+
+### Behoben
+- **Ein klingelnder Wecker bei entsperrtem Handy:** Android zeigt die Wecker-Benachrichtigung — sie trägt einen
+  Vollbild-Intent — als *angeheftetes* Heads-up, und das lag die ganze Klingelzeit über der Uhr und dem
+  Aufgabenzähler des Alarmbildschirms. Solange der Alarmbildschirm vorne ist, läuft Brutus jetzt auf einer
+  leisen Benachrichtigung ohne Heads-up; sobald der Bildschirm verschwindet (Home, andere App), kommt die
+  laute mit Vollbild-Intent zurück — der Alarm ist nie aus dem Blick. Bei gesperrtem Handy bleibt alles wie
+  bisher. Wird das Handy beim Klingeln gerade in einer anderen App benutzt, zeigt Android selbst das Heads-up
+  statt des Vollbilds — es klingelt wie immer, ein Tipp öffnet den Alarmbildschirm (geprüft auf Android 15).
+
+### Tests
+- 371 → 376: Der echte Service tauscht die beiden Benachrichtigungen mit dem Alarmbildschirm, entfernt beim
+  Beenden beide und bleibt ohne Alarm nicht als gestarteter Service hängen. Beide Sperren wurden einmal
+  wieder ausgebaut, um ihren Test scheitern zu sehen.
+
 ## [2.5.1] — 2026-09-27 · Der Start-Knopf des Timers ist wieder erreichbar
 
 ### Behoben

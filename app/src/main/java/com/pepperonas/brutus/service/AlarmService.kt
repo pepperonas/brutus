@@ -1,6 +1,7 @@
 package com.pepperonas.brutus.service
 
 import android.app.Notification
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
@@ -51,6 +52,9 @@ class AlarmService : Service() {
     /** Newest start id — stopSelf(id) then cannot end a session that started in the meantime. */
     private var lastStartId: Int = 0
 
+    /** Whether the alarm screen is in front — then the quiet notification carries the service. */
+    private var screenShown = false
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -73,6 +77,14 @@ class AlarmService : Service() {
                 if (alarmId != -1L) startAlarm(alarmId, isFollowup, followupSeq)
             }
             ACTION_STOP -> stopAlarm(dismissed = true)
+            ACTION_SCREEN_SHOWN, ACTION_SCREEN_HIDDEN -> {
+                if (currentAlarmId == -1L) {
+                    // Only the screen reporting in, no session: don't linger as a started service.
+                    stopSelf(startId)
+                    return START_NOT_STICKY
+                }
+                onAlarmScreenShown(intent.action == ACTION_SCREEN_SHOWN)
+            }
             ACTION_SNOOZE -> {
                 val alarmId = intent.getLongExtra("alarm_id", -1)
                 if (alarmId != -1L) snoozeAlarm(alarmId)
@@ -102,54 +114,19 @@ class AlarmService : Service() {
 
         acquireWakeLock()
 
-        val activityIntent = Intent(this, AlarmActivity::class.java).apply {
-            putExtra("alarm_id", alarmId)
-            putExtra(AlarmScheduler.EXTRA_IS_FOLLOWUP, isFollowup)
-            putExtra(AlarmScheduler.EXTRA_FOLLOWUP_SEQ, followupSeq)
-            addFlags(
-                Intent.FLAG_ACTIVITY_NEW_TASK
-                    or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                    or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-                    or Intent.FLAG_ACTIVITY_NO_USER_ACTION
-            )
-        }
-        val pendingIntent = PendingIntent.getActivity(
-            this, 0, activityIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val contentText = if (isFollowup)
-            getString(R.string.notification_realarm_text, followupSeq)
-        else getString(R.string.notification_alarm_text)
-
-        val notification = Notification.Builder(this, BrutusApplication.CHANNEL_ALARM)
-            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setContentTitle(
-                getString(
-                    if (isFollowup) R.string.notification_realarm_title
-                    else R.string.notification_alarm_title
-                )
-            )
-            .setContentText(contentText)
-            .setContentIntent(pendingIntent)
-            .setOngoing(true)
-            .setCategory(Notification.CATEGORY_ALARM)
-            .setVisibility(Notification.VISIBILITY_PUBLIC)
-            .setFullScreenIntent(pendingIntent, true)
-            .build()
-
-        startForeground(NOTIFICATION_ID, notification)
+        val activityIntent = alarmActivityIntent(alarmId, isFollowup, followupSeq)
+        startForeground(NOTIFICATION_ID, ringingNotification(fullScreen = true))
+        screenShown = false
 
         setMaxVolume()
         startVibration()
 
-        // Belt and suspenders: the full-screen intent on the notification is the
-        // canonical route for foregrounding on Android 10+, but we also call
-        // startActivity directly because the foreground service grants us the
-        // background-activity-start privilege. If the full-screen intent
-        // permission is revoked, this is the only path that still works
-        // reliably; if it's granted, the second call is a no-op because the
-        // activity is singleInstance.
+        // Belt and suspenders: the full-screen intent is the canonical route to the alarm
+        // screen. This direct start helps where it is still allowed — while Brutus itself is
+        // in front, and on older Android versions. Since Android 14 a foreground service does
+        // NOT grant background activity starts (logcat: "Background activity launch blocked",
+        // BAL_BLOCK): with the phone unlocked and another app in use, Android shows the
+        // full-screen notification as a pinned heads-up instead, and a tap opens the screen.
         try {
             startActivity(activityIntent)
         } catch (e: Exception) {
@@ -186,6 +163,67 @@ class AlarmService : Service() {
                 }
                 NextAlarmWidget.refresh(applicationContext)
             }
+        }
+    }
+
+    private fun alarmActivityIntent(alarmId: Long, isFollowup: Boolean, followupSeq: Int) =
+        Intent(this, AlarmActivity::class.java).apply {
+            putExtra("alarm_id", alarmId)
+            putExtra(AlarmScheduler.EXTRA_IS_FOLLOWUP, isFollowup)
+            putExtra(AlarmScheduler.EXTRA_FOLLOWUP_SEQ, followupSeq)
+            addFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK
+                    or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                    or Intent.FLAG_ACTIVITY_NO_USER_ACTION
+            )
+        }
+
+    /**
+     * The ringing session's notification. [fullScreen] = the loud one on the alarm channel with a
+     * full-screen intent: it wakes a locked phone into the alarm screen. On an unlocked phone Android
+     * shows it as a *pinned* heads-up instead — right over the alarm screen's clock. So while that
+     * screen is in front, the service switches to a quiet one on the low service channel (no heads-up),
+     * and back as soon as the screen leaves, so the alarm is never out of sight.
+     */
+    private fun ringingNotification(fullScreen: Boolean): Notification {
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, alarmActivityIntent(currentAlarmId, currentIsFollowup, currentFollowupSeq),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val builder = Notification.Builder(
+            this, if (fullScreen) BrutusApplication.CHANNEL_ALARM else BrutusApplication.CHANNEL_SERVICE
+        )
+            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
+            .setContentTitle(
+                getString(
+                    if (currentIsFollowup) R.string.notification_realarm_title
+                    else R.string.notification_alarm_title
+                )
+            )
+            .setContentText(
+                if (currentIsFollowup) getString(R.string.notification_realarm_text, currentFollowupSeq)
+                else getString(R.string.notification_alarm_text)
+            )
+            .setContentIntent(pendingIntent)
+            .setOngoing(true)
+            .setCategory(Notification.CATEGORY_ALARM)
+            .setVisibility(Notification.VISIBILITY_PUBLIC)
+        if (fullScreen) builder.setFullScreenIntent(pendingIntent, true)
+        return builder.build()
+    }
+
+    /** The alarm screen came to the front ([shown]) or left it; swap the notifications accordingly. */
+    private fun onAlarmScreenShown(shown: Boolean) {
+        if (currentAlarmId == -1L || shown == screenShown) return
+        screenShown = shown
+        val nm = getSystemService(NotificationManager::class.java)
+        if (shown) {
+            startForeground(NOTIFICATION_ID_QUIET, ringingNotification(fullScreen = false))
+            nm.cancel(NOTIFICATION_ID)
+        } else {
+            startForeground(NOTIFICATION_ID, ringingNotification(fullScreen = true))
+            nm.cancel(NOTIFICATION_ID_QUIET)
         }
     }
 
@@ -374,6 +412,10 @@ class AlarmService : Service() {
 
         cleanupPlayback()
         stopForeground(STOP_FOREGROUND_REMOVE)
+        // Whichever of the two notifications was not attached to the service must go too.
+        getSystemService(NotificationManager::class.java).cancel(NOTIFICATION_ID)
+        getSystemService(NotificationManager::class.java).cancel(NOTIFICATION_ID_QUIET)
+        screenShown = false
 
         currentAlarmId = -1
         currentIsFollowup = false
@@ -459,6 +501,10 @@ class AlarmService : Service() {
         const val ACTION_STOP = "com.pepperonas.brutus.STOP_ALARM"
         const val ACTION_SNOOZE = "com.pepperonas.brutus.SNOOZE_ALARM"
         const val NOTIFICATION_ID = 1001
+        /** The quiet variant while the alarm screen is in front (see [ringingNotification]). */
+        const val NOTIFICATION_ID_QUIET = 1002
+        const val ACTION_SCREEN_SHOWN = "com.pepperonas.brutus.ALARM_SCREEN_SHOWN"
+        const val ACTION_SCREEN_HIDDEN = "com.pepperonas.brutus.ALARM_SCREEN_HIDDEN"
 
         fun notificationIdForUltraHardcore(alarmId: Long): Int =
             UltraHardcoreNotifier.notificationId(alarmId)

@@ -72,6 +72,10 @@ challenges in sequence → `ACTION_STOP` / `ACTION_SNOOZE` back to the service.
 - **Motion**: specs come from `MaterialTheme.motionScheme` (files opt in with
   `@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)`); decorative loops are read in draw/layer
   lambdas, never in composition; `rememberReducedMotion()` gates them.
+- **Ringing notification**: the loud one (`NOTIFICATION_ID`, alarm channel, full-screen intent) wakes a locked
+  phone; on an unlocked one Android pins it as a heads-up over the alarm screen. `AlarmActivity` reports
+  `ACTION_SCREEN_SHOWN`/`HIDDEN` and the service swaps to a quiet one (`NOTIFICATION_ID_QUIET`, service
+  channel) while the screen is in front — `AlarmServiceScreenNotificationTest`.
 - **Snooze vs. dismiss**: `AlarmService.stopAlarm(dismissed)` — only a completed challenge arms UHC
   follow-ups. Snoozes use their own request-code space `0x5A000000 | id`.
 - **Sounds**: `util/AlarmSoundGenerator` synthesizes every sound (the v2.5.0 set lives in

@@ -17,8 +17,8 @@
 <h3>👉 <a href="https://brutus.celox.io">brutus.celox.io</a> — features, <a href="https://brutus.celox.io/#sounds">all 25 sounds to listen to</a>, FAQ and always the newest APK</h3>
 
 <!-- BADGES:BIG — version, unit tests and lines of code; ReadmeSyncTest keeps them true. -->
-[![version](https://img.shields.io/badge/version-2.5.1-E53935?style=for-the-badge&logo=android&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
-[![unit tests](https://img.shields.io/badge/unit%20tests-371-2E9E5B?style=for-the-badge&logo=junit5&logoColor=white)](#tests-and-ci)
+[![version](https://img.shields.io/badge/version-2.5.2-E53935?style=for-the-badge&logo=android&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
+[![unit tests](https://img.shields.io/badge/unit%20tests-376-2E9E5B?style=for-the-badge&logo=junit5&logoColor=white)](#tests-and-ci)
 [![lines of code](https://img.shields.io/badge/lines%20of%20code-11.3k-4B6BDF?style=for-the-badge&logo=kotlin&logoColor=white)](app/src/main/java/com/pepperonas/brutus)
 [![test code](https://img.shields.io/badge/test%20code-5.6k-2E9E5B?style=for-the-badge&logo=kotlin&logoColor=white)](app/src/test/java/com/pepperonas/brutus)
 [![sounds](https://img.shields.io/badge/sounds-25-FF5252?style=for-the-badge&logo=audiomack&logoColor=white)](https://brutus.celox.io/#sounds)
@@ -235,6 +235,8 @@ Everything is packed into a four-tab bottom navigation that keeps the brutal ala
   the same character instead of the system tone.
 - **2.5.1:** the Timer's Start button stays visible (the longer tone list had squeezed it), and a cold start no
   longer flashes “No alarms yet” before the list has loaded.
+- **2.5.2:** on an unlocked phone the pinned alarm notification no longer covers the alarm screen's clock —
+  it gives way while the screen is in front and comes back when you leave it.
 - Everything in detail: [CHANGELOG](CHANGELOG.md).
 
 ## Why Brutus?
@@ -909,7 +911,7 @@ app/src/main/res/
 
 ## Tests and CI
 
-371 JVM unit tests guard the parts where a bug means someone oversleeps: what actually lands in
+376 JVM unit tests guard the parts where a bug means someone oversleeps: what actually lands in
 `AlarmManager`, the alarm-time arithmetic, persistence, the completeness of both translations, and
 every string the user reads on a clock face. There are no instrumented tests — the whole suite runs
 on the JVM in seconds.
@@ -938,6 +940,7 @@ on the JVM in seconds.
 | `ui/theme/RollingNumberTest` | 2 | numbers roll in the direction of the change |
 | `util/StorageTest` | 7 | the one-time move to device-protected storage: the printed QR code and pending follow-ups survive it, nothing moves while locked, it never runs twice, every store is covered |
 | `scheduler/ReschedulerTest` | 6 | a time-zone change keeps the wall-clock time, follow-ups of a self-disabled one-shot alarm survive with their notification, snoozes restored, running twice never stacks |
+| `service/AlarmServiceScreenNotificationTest` | 5 | the pinned alarm heads-up gives way to a quiet notification while the alarm screen is in front and comes back when it leaves; dismiss removes both; no lingering service without an alarm (Robolectric) |
 | `service/AlarmServiceUltraHardcoreTest` | 5 | the real service: snoozing does not arm the follow-ups, dismissing does (even before the sound has loaded), the volume comes back even after a mid-ring kill |
 | `receiver/SystemChangeReceiverTest` | 3 | every handled action is in the manifest filter, the whole ringing path is `directBootAware` |
 | `widget/NextAlarmWidgetLockedTest` | 2 | the widget is never touched before the first unlock |
@@ -965,7 +968,7 @@ on the JVM in seconds.
 | `scheduler/AlarmSchedulerConstantsTest` | 4 | Ultra Hardcore offsets, sunrise lead time, intent-extra uniqueness |
 
 ```bash
-./gradlew :app:testDebugUnitTest          # all 371
+./gradlew :app:testDebugUnitTest          # all 376
 ./gradlew :app:testDebugUnitTest --tests '*NextAlarmCalculatorTest'
 # HTML report: app/build/reports/tests/testDebugUnitTest/index.html
 ```
@@ -1006,6 +1009,7 @@ app/src/test/java/com/pepperonas/brutus/
 ├── receiver/
 │   └── SystemChangeReceiverTest.kt     3 — manifest filter covers every handled action, direct-boot awareness
 ├── service/
+│   ├── AlarmServiceScreenNotificationTest.kt 5 — heads-up gives way while the alarm screen is in front
 │   └── AlarmServiceUltraHardcoreTest.kt 5 — snooze ≠ dismiss, volume restored after a mid-ring kill
 ├── ui/
 │   ├── alarm/MathProblemTest.kt        8 — answer/display, per-difficulty range + sign invariants (500 samples)
