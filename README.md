@@ -1,33 +1,50 @@
-# Brutus
+<div align="center">
+
+<a href="https://brutus.celox.io"><img src="docs/banner.jpg" alt="Brutus — Weckt jeden. Schläft nie. · brutus.celox.io" width="100%"></a>
+
+# ⏰ Brutus
 
 **English** · [Deutsch](README.de.md)
 
-<p align="center">
-  <a href="https://brutus.celox.io"><img src="docs/hero.png" alt="Brutus — Killer Alarm Clock · brutus.celox.io" width="100%" /></a>
-</p>
+**The alarm clock you can’t ignore: it only stops once you solve math, shake the phone or scan a QR code — plus world clock, stopwatch, timer and 25 alarm sounds made on the phone.**
 
-<h2 align="center">🌐 <a href="https://brutus.celox.io">brutus.celox.io</a></h2>
-
-<p align="center"><strong>Features, screenshots, FAQ and the newest signed APK with its SHA-256 — all on the product page.</strong></p>
-
-<p align="center">
-  <a href="https://brutus.celox.io"><img alt="Product page" src="https://img.shields.io/badge/Product%20page-brutus.celox.io-E53935?style=for-the-badge&logo=googlechrome&logoColor=white" height="42" /></a>
+<p>
+  <a href="https://brutus.celox.io"><img alt="Website: brutus.celox.io" height="56" src="https://img.shields.io/badge/%F0%9F%8C%90_Website-brutus.celox.io-E53935?style=for-the-badge"></a>
   &nbsp;
-  <a href="https://brutus.celox.io/download"><img alt="Download APK" src="https://img.shields.io/badge/Download%20APK-Android%208.0%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white" height="42" /></a>
+  <a href="https://brutus.celox.io/download"><img alt="APK" height="56" src="https://img.shields.io/badge/%E2%AC%87%EF%B8%8F_Download-newest_APK-3DDC84?style=for-the-badge&logo=android&logoColor=white"></a>
 </p>
 
-<!-- Project status — these badges are live and update themselves. -->
+<h3>👉 <a href="https://brutus.celox.io">brutus.celox.io</a> — features, <a href="https://brutus.celox.io/#sounds">all 25 sounds to listen to</a>, FAQ and always the newest APK</h3>
+
+<!-- BADGES:BIG — version, unit tests and lines of code; ReadmeSyncTest keeps them true. -->
+[![version](https://img.shields.io/badge/version-2.5.1-E53935?style=for-the-badge&logo=android&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
+[![unit tests](https://img.shields.io/badge/unit%20tests-371-2E9E5B?style=for-the-badge&logo=junit5&logoColor=white)](#tests-and-ci)
+[![lines of code](https://img.shields.io/badge/lines%20of%20code-11.3k-4B6BDF?style=for-the-badge&logo=kotlin&logoColor=white)](app/src/main/java/com/pepperonas/brutus)
+[![test code](https://img.shields.io/badge/test%20code-5.6k-2E9E5B?style=for-the-badge&logo=kotlin&logoColor=white)](app/src/test/java/com/pepperonas/brutus)
+[![sounds](https://img.shields.io/badge/sounds-25-FF5252?style=for-the-badge&logo=audiomack&logoColor=white)](https://brutus.celox.io/#sounds)
+
+[![Donate with PayPal](https://img.shields.io/badge/PayPal-support%20this%20project-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://www.paypal.com/donate/?business=martin.pfeffer@celox.io&currency_code=EUR&item_name=Brutus)
+
+</div>
+
+<!-- Project status — the GitHub badges are live and update themselves. -->
 
 [![Tests](https://img.shields.io/github/actions/workflow/status/pepperonas/brutus/tests.yml?branch=main&label=tests&logo=githubactions&logoColor=white)](https://github.com/pepperonas/brutus/actions/workflows/tests.yml)
-[![Unit tests](https://img.shields.io/badge/unit%20tests-350-brightgreen)](#tests-and-ci)
+[![Release build](https://img.shields.io/github/actions/workflow/status/pepperonas/brutus/release.yml?label=release%20build&logo=githubactions&logoColor=white)](https://github.com/pepperonas/brutus/actions/workflows/release.yml)
 [![Release](https://img.shields.io/github/v/release/pepperonas/brutus?color=FF5252&logo=github&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
+[![Release date](https://img.shields.io/github/release-date/pepperonas/brutus?color=FF5252&logo=github&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/pepperonas/brutus/total?label=APK%20downloads&color=success&logo=github&logoColor=white)](https://github.com/pepperonas/brutus/releases)
+[![Latest downloads](https://img.shields.io/github/downloads/pepperonas/brutus/latest/total?label=latest%20release&color=success&logo=github&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
 [![Last commit](https://img.shields.io/github/last-commit/pepperonas/brutus?logo=git&logoColor=white)](https://github.com/pepperonas/brutus/commits/main)
+[![Commit activity](https://img.shields.io/github/commit-activity/m/pepperonas/brutus?logo=git&logoColor=white)](https://github.com/pepperonas/brutus/commits/main)
 [![Code size](https://img.shields.io/github/languages/code-size/pepperonas/brutus?logo=files&logoColor=white)](#project-structure)
+[![Repo size](https://img.shields.io/github/repo-size/pepperonas/brutus?logo=github&logoColor=white)](https://github.com/pepperonas/brutus)
 [![Top language](https://img.shields.io/github/languages/top/pepperonas/brutus?logo=kotlin&logoColor=white)](https://kotlinlang.org)
 [![Open issues](https://img.shields.io/github/issues/pepperonas/brutus?logo=github&logoColor=white)](https://github.com/pepperonas/brutus/issues)
 [![Stars](https://img.shields.io/github/stars/pepperonas/brutus?logo=github&logoColor=white)](https://github.com/pepperonas/brutus/stargazers)
+[![Forks](https://img.shields.io/github/forks/pepperonas/brutus?logo=github&logoColor=white)](https://github.com/pepperonas/brutus/forks)
 [![License](https://img.shields.io/github/license/pepperonas/brutus?color=blue)](LICENSE)
+[![Made by celox.io](https://img.shields.io/badge/made%20by-celox.io-E53935)](https://celox.io)
 
 <!-- Platform & runtime -->
 
@@ -36,7 +53,7 @@
 [![targetSdk](https://img.shields.io/badge/targetSdk-35%20%C2%B7%20Android%2015-3DDC84?logo=android&logoColor=white)](https://apilevels.com)
 [![compileSdk](https://img.shields.io/badge/compileSdk-35-3DDC84?logo=android&logoColor=white)](https://developer.android.com/tools/releases/platforms)
 [![JDK](https://img.shields.io/badge/JDK-17-437291?logo=openjdk&logoColor=white)](https://adoptium.net)
-[![APK size](https://img.shields.io/badge/APK-4.3%20MB-blueviolet?logo=android&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
+[![APK size](https://img.shields.io/badge/APK-4.4%20MB-blueviolet?logo=android&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
 
 <!-- Language, build & toolchain -->
 
@@ -79,6 +96,17 @@
 [![Changelog](https://img.shields.io/badge/Changelog-Keep%20a%20Changelog-E05735?logo=keepachangelog&logoColor=white)](CHANGELOG.md)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](http://makeapullrequest.com)
 
+<!-- What makes it hard to sleep through -->
+
+[![Challenges](https://img.shields.io/badge/challenges-Math%20%C2%B7%20Shake%20%C2%B7%20QR-E53935)](#combinable-wake-up-challenges)
+[![Sounds](https://img.shields.io/badge/sounds-25%20synthesized%20on%20device-FF5252?logo=audiomack&logoColor=white)](#alarm-sounds)
+[![Hardcore](https://img.shields.io/badge/Hardcore-volume%20locked-B71C1C)](#hardcore-mode)
+[![Ultra Hardcore](https://img.shields.io/badge/Ultra%20Hardcore-re--alarms%20%2B%2030%20steps-B71C1C)](#ultra-hardcore-mode)
+[![Sunrise](https://img.shields.io/badge/Sunrise-10%20min%20light%20%2B%20sound-FFB74D)](#sunrise-pre-alarm)
+[![Direct boot](https://img.shields.io/badge/direct%20boot-rings%20before%20unlock-3DDC84?logo=android&logoColor=white)](#reliability)
+[![Signed](https://img.shields.io/badge/APK-certificate%20pinned%20in%20CI-2E7D32?logo=githubactions&logoColor=white)](#release-signing)
+[![Product page](https://img.shields.io/badge/product%20page-5%20languages-E53935?logo=googlechrome&logoColor=white)](https://brutus.celox.io)
+
 <!-- What Brutus deliberately does not do -->
 
 [![Offline](https://img.shields.io/badge/Offline-first-2E7D32)](#permissions)
@@ -98,6 +126,7 @@ Everything is packed into a four-tab bottom navigation that keeps the brutal ala
 ## Table of Contents
 
 - [Screenshots](#screenshots)
+- [New in 2.5](#new-in-25)
 - [Why Brutus?](#why-brutus)
 - [App structure](#app-structure)
 - [Features](#features)
@@ -143,78 +172,70 @@ Everything is packed into a four-tab bottom navigation that keeps the brutal ala
 
 ## Screenshots
 
-> **Coming with the next update.** The gallery below is wired up and waiting for
-> its twelve captures — the shot list (which screen, in which state, with which
-> `adb` command) lives in
-> [`docs/screenshots/SHOTLIST.md`](docs/screenshots/SHOTLIST.md). It is kept as a
-> comment here rather than as twelve broken image links.
+<img src="docs/screenshots/mockups.jpg" alt="The alarm list, the sound picker, a ringing math challenge, the Sunrise pre-alarm and Settings & info" width="100%">
 
-<!-- GALLERY: uncomment once docs/screenshots/*.png exist
-
-Captured on **v2.2.0**, dark theme, brand color scheme (Material You off). The app ships in English and German — see [Languages](#languages).
+<sub>Captured on **v2.5.x**, dark theme, brand colours (Material You off), English UI. Regenerate the strip from the raw captures with
+`python3 tools/mockups.py docs/screenshots/mockups.jpg docs/screenshots/01-alarm-list.png:"Alarms" …` — the shot list is in
+[`docs/screenshots/SHOTLIST.md`](docs/screenshots/SHOTLIST.md). **Hear the sounds on the [product page](https://brutus.celox.io/#sounds).**</sub>
 
 <table>
   <tr>
     <td width="33%" valign="top">
-      <img src="docs/screenshots/01-alarm-list.png" alt="Alarm list with countdown header and state-coded cards" width="100%" />
-      <br /><sub><b>Alarm list</b> — countdown header, one muted red for every active alarm, weekday strip, mode/challenge/snooze chips.</sub>
+      <img src="docs/screenshots/01-alarm-list.png" alt="Alarm list" width="100%" />
+      <br /><sub><b>Alarms</b> — countdown header, the next alarm outlined, weekday strip, mode · challenge · snooze · sound chips.</sub>
     </td>
     <td width="33%" valign="top">
-      <img src="docs/screenshots/02-alarm-edit.png" alt="Alarm edit bottom sheet" width="100%" />
-      <br /><sub><b>Edit sheet</b> — time, repeat days, sound picker with preview, challenge chain, snooze interval, Hardcore toggles.</sub>
+      <img src="docs/screenshots/02-sound-picker.png" alt="Sound picker in the edit sheet" width="100%" />
+      <br /><sub><b>Sound picker</b> — all 25 synthesized sounds as chips; tapping one previews it.</sub>
     </td>
     <td width="33%" valign="top">
-      <img src="docs/screenshots/03-alarm-ring.png" alt="Full-screen alarm over the lock screen" width="100%" />
-      <br /><sub><b>Alarm ringing</b> — full-screen lock-screen overlay, HARDCORE badge, no dismiss button until the chain is done.</sub>
-    </td>
-  </tr>
-  <tr>
-    <td width="33%" valign="top">
-      <img src="docs/screenshots/04-math-challenge.png" alt="Math challenge with on-screen keypad" width="100%" />
-      <br /><sub><b>Math challenge</b> — 1–10 generated problems, three difficulty presets, dedicated on-screen keypad.</sub>
-    </td>
-    <td width="33%" valign="top">
-      <img src="docs/screenshots/05-shake-challenge.png" alt="Shake challenge with progress ring" width="100%" />
-      <br /><sub><b>Shake challenge</b> — 10–100 shakes against a wavy progress ring, three sensitivity presets.</sub>
-    </td>
-    <td width="33%" valign="top">
-      <img src="docs/screenshots/06-qr-challenge.png" alt="QR scan challenge with camera preview" width="100%" />
-      <br /><sub><b>QR challenge</b> — CameraX preview + ML Kit scanner; only the installation's own global code unlocks it.</sub>
+      <img src="docs/screenshots/03-math-challenge.png" alt="Ringing alarm with a math challenge" width="100%" />
+      <br /><sub><b>Ringing</b> — Ultra Hardcore alarm, challenge 1 of 2, keypad and slide-to-snooze.</sub>
     </td>
   </tr>
   <tr>
     <td width="33%" valign="top">
-      <img src="docs/screenshots/07-world-clock.png" alt="World clock with multiple time zones" width="100%" />
-      <br /><sub><b>World Clock</b> — live board over <code>java.time.ZoneId</code>, day/night color roles, ticks every second.</sub>
+      <img src="docs/screenshots/04-shake-challenge.png" alt="Shake challenge" width="100%" />
+      <br /><sub><b>Shake</b> — wavy progress ring, 17 of 40 shakes.</sub>
     </td>
     <td width="33%" valign="top">
-      <img src="docs/screenshots/08-stopwatch.png" alt="Stopwatch with lap list" width="100%" />
-      <br /><sub><b>Stopwatch</b> — centisecond precision on <code>elapsedRealtime()</code>, laps with per-lap and cumulative columns.</sub>
+      <img src="docs/screenshots/05-sunrise.png" alt="Sunrise pre-alarm" width="100%" />
+      <br /><sub><b>Sunrise</b> — the screen warms up over the ten minutes before the alarm, a gentle sound swells.</sub>
     </td>
     <td width="33%" valign="top">
-      <img src="docs/screenshots/09-timer.png" alt="Timer countdown" width="100%" />
-      <br /><sub><b>Timer</b> — HMS picker, quick presets, gentle finish sound, survives tab switches.</sub>
+      <img src="docs/screenshots/06-settings.png" alt="Settings & info" width="100%" />
+      <br /><sub><b>Settings & info</b> — theme, Material You, the Sunrise sound, notifications and About.</sub>
     </td>
   </tr>
   <tr>
     <td width="33%" valign="top">
-      <img src="docs/screenshots/10-sunrise.png" alt="Sunrise pre-alarm screen" width="100%" />
-      <br /><sub><b>Sunrise pre-alarm</b> — 10 minutes of brightness ramp and dawn gradient before the brutal part starts.</sub>
+      <img src="docs/screenshots/07-timer-setup.png" alt="Timer setup" width="100%" />
+      <br /><sub><b>Timer</b> — presets and the gentle end tone; Start stays in reach.</sub>
     </td>
     <td width="33%" valign="top">
-      <img src="docs/screenshots/11-widget.png" alt="Home-screen widget showing the next alarm" width="100%" />
-      <br /><sub><b>Home-screen widget</b> — next alarm time, countdown and repeat days, straight from the same Room database.</sub>
+      <img src="docs/screenshots/08-timer.png" alt="Running timer" width="100%" />
+      <br /><sub><b>Running timer</b> — a wavy ring that drains continuously; it rings even with the app closed.</sub>
     </td>
     <td width="33%" valign="top">
-      <img src="docs/screenshots/12-ultra-hardcore-task.png" alt="Ultra Hardcore step counter task" width="100%" />
-      <br /><sub><b>Ultra Hardcore task</b> — walk 30 steps to cancel the two follow-up alarms armed after you dismissed.</sub>
+      <img src="docs/screenshots/09-world-clock.png" alt="World clock" width="100%" />
+      <br /><sub><b>World clock</b> — day and night per zone, UTC offset, date.</sub>
     </td>
   </tr>
 </table>
--->
 
+<p align="center"><img src="docs/screenshots/10-stopwatch.png" alt="Stopwatch with laps" width="32%" /><br /><sub><b>Stopwatch</b> — running readout and a lap list with lap and total times.</sub></p>
 
----
+## New in 2.5
+
+- **25 alarm sounds, chosen by ear** — nine new harsh ones (air-raid siren, dive alarm, car alarm, school bell,
+  reverse beeper, Shepard siren, steel hammer, strobe, evacuation whoop) and eight gentle ones built to loop
+  seamlessly for Sunrise and the timer. [Listen to all of them](https://brutus.celox.io/#sounds).
+- **Pick the Sunrise sound** under ⋮ → Settings & info — any gentle sound, or silence for light only.
+- **Removed sounds keep ringing:** alarms saved with Siren, Chime, Marimba or Morning sun play a successor of
+  the same character instead of the system tone.
+- **2.5.1:** the Timer's Start button stays visible (the longer tone list had squeezed it), and a cold start no
+  longer flashes “No alarms yet” before the list has loaded.
+- Everything in detail: [CHANGELOG](CHANGELOG.md).
 
 ## Why Brutus?
 
@@ -525,7 +546,7 @@ per-screen styling.
 - **Dark / light follows the system setting.** The three alarm-facing activities (ring, Sunrise,
   Ultra Hardcore task) deliberately pass `darkTheme = true` regardless — their layered black/red
   gradients assume light-on-dark content, and a white flash at 6 a.m. is its own kind of cruelty.
-- **Material You is an opt-in, not the default.** Alarm tab → **⋮** → *Material You colors*
+- **Material You is an opt-in, not the default.** **⋮ → Settings & info** → *Material You colors*
   swaps the red brand scheme for the wallpaper-derived one. Shown only on API 31+, persisted in
   DataStore, applied instantly across every screen.
 - **Space Grotesk** carries the display scale, with **tabular numerals on the entire type scale**
@@ -888,7 +909,7 @@ app/src/main/res/
 
 ## Tests and CI
 
-350 JVM unit tests guard the parts where a bug means someone oversleeps: what actually lands in
+371 JVM unit tests guard the parts where a bug means someone oversleeps: what actually lands in
 `AlarmManager`, the alarm-time arithmetic, persistence, the completeness of both translations, and
 every string the user reads on a clock face. There are no instrumented tests — the whole suite runs
 on the JVM in seconds.
@@ -926,6 +947,9 @@ on the JVM in seconds.
 | `util/ChallengeFlagsTest` | 8 | `describe` / `activeList` / `has` / `sanitize` bitmask edge cases, incl. the unknown-bit fallback |
 | `util/ChallengeDifficultyTest` | 8 | math operand ranges, shake threshold ordering (9 / 12 / 16 m/s²), distinct labels per preset in both languages |
 | `util/AlarmSoundGeneratorTest` | 7 | PCM buffer length, peak amplitudes, gentle loops without a click at the seam, gentle vs. harsh vs. extreme classification |
+| `util/SynthSoundsTest` | 11 | what makes each v2.5.0 sound itself, measured on the buffer — the air-raid siren winds up and down, the reverse beeper and the strobe speed up, the ocean swells, Daybreak brightens; harsh at full scale, gentle at 60 %, six-second gentle loops |
+| `viewmodel/AlarmViewModelTest` | 3 | the alarm list tells "not loaded yet" (`null`) from "no alarms" — a cold start no longer flashes the empty state (Robolectric + Room) |
+| `ReadmeSyncTest` | 7 | the README's version, unit-test and lines-of-code badges against `build.gradle.kts` and the source, both changelogs start with the current version, the PayPal button matches the app's, every shown image exists in both languages |
 | `util/AlarmSoundGeneratorPropertiesTest` | 7 | invariants every synthesized sound must hold — loop length budget, determinism, DC offset, gentle headroom; a new enum entry is covered automatically |
 | `util/PermissionDeepLinkTest` | 7 | the three reliability banners land on the right settings page (action + `package:` URI + `NEW_TASK`) (Robolectric) |
 | `data/RoomSchemaExportTest` | 7 | the running database's **identity hash against the committed `7.json`** — a field added without a migration fails here instead of on a user's device |
@@ -941,7 +965,7 @@ on the JVM in seconds.
 | `scheduler/AlarmSchedulerConstantsTest` | 4 | Ultra Hardcore offsets, sunrise lead time, intent-extra uniqueness |
 
 ```bash
-./gradlew :app:testDebugUnitTest          # all 350
+./gradlew :app:testDebugUnitTest          # all 371
 ./gradlew :app:testDebugUnitTest --tests '*NextAlarmCalculatorTest'
 # HTML report: app/build/reports/tests/testDebugUnitTest/index.html
 ```
@@ -968,6 +992,7 @@ app/src/test/java/com/pepperonas/brutus/
 ├── BrutusApplicationTest.kt            9 — notification channels: importance, DND bypass, silence
 ├── LocaleContexts.kt                       test helper: a Context pinned to en / de
 ├── LocalizedRuntimeTest.kt             7 — every string resolves in both languages, full card render
+├── ReadmeSyncTest.kt                   7 — README badges, changelog heads and images against the source
 ├── ResourceParityTest.kt              11 — values/ vs. values-de/: keys, plurals, format specifiers
 ├── data/
 │   ├── AlarmDaoTest.kt                15 — in-memory Room: ordering, enabled filter, round-trip, REPLACE, undo-restore
@@ -1005,9 +1030,11 @@ app/src/test/java/com/pepperonas/brutus/
 │   ├── TimerSoundStoreTest.kt          7 — timer tone persistence, corrupt-id fallback, retired ids
 │   ├── SunriseSoundSettingTest.kt      5 — Sunrise sound: gentle only, fallbacks, retired ids
 │   ├── SoundExportTest.kt              2 — WAV export + product page previews (opt-in)
+│   ├── SynthSoundsTest.kt             11 — what makes each v2.5.0 sound itself
 │   ├── UltraHardcoreStoreTest.kt      12 — reboot-surviving follow-up bookkeeping
 │   └── WorldClockStoreTest.kt          6 — default seeding, round-trips, empty list sticks
 ├── viewmodel/
+│   ├── AlarmViewModelTest.kt           3 — "not loaded yet" is not "no alarms"
 │   ├── StopwatchViewModelTest.kt       6 — segment accumulation, laps, reset-undo snapshot semantics
 │   └── TimerViewModelTest.kt           8 — countdown/pause math, cancel-undo, finished-not-undoable
 └── widget/

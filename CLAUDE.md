@@ -119,7 +119,13 @@ must list every `values-*` locale.
 
 Docs are bilingual too: `README.md`/`README.de.md`, `CHANGELOG.md`/`CHANGELOG.de.md`,
 `docs/screenshots/SHOTLIST{,.de}.md` — update both languages together. The README carries test
-counts per suite; keep them in sync when adding tests.
+counts per suite; keep them in sync when adding tests. `ReadmeSyncTest` fails when the big badges drift:
+version vs. `versionName`, unit tests vs. the counted `@Test`s, lines of code ±5 %, the PayPal link vs.
+`AboutLinks.donateUrl`, both changelogs' top entry, and every image the READMEs show. Screenshots:
+`docs/screenshots/SHOTLIST.md` (emulator helpers incl. firing an alarm by broadcast), strip via
+`python3 tools/mockups.py docs/screenshots/mockups.jpg <shot>:"Caption" …`. The banner `docs/banner.jpg`
+is also the product page hero (`build.py … --hero docs/banner.jpg`; `site.json` theme `bg` = hero `bg` =
+the art's edge colour, or the art shows as a box).
 
 ## Releasing
 

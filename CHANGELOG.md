@@ -4,6 +4,25 @@
 
 All notable changes to Brutus are documented here. Versions follow [SemVer](https://semver.org).
 
+## [2.5.1] — 2026-09-27 · The timer's Start button is back in reach
+
+### Fixed
+- **Timer:** with eight gentle end tones the picker grew by two rows and squeezed the **Start** button to a
+  sliver at the bottom of the screen on a 1080×2400 phone — the idle timer screen did not scroll. Presets
+  and tones now scroll, and Start stays pinned and fully visible.
+- **Alarm list:** a cold start showed *No alarms yet — Create alarm* and *No alarm set* for a moment although
+  alarms existed — the list started as "empty" before the database had answered. It now stays quiet until
+  the first answer.
+
+### Changed
+- README with the new banner, a screenshot strip and gallery captured on v2.5, and badges for version,
+  unit tests and lines of code that a test keeps true; the product page shows the banner in its hero.
+
+### Tests
+- 350 → 371: the alarm list tells "not loaded" from "empty", what makes each new sound itself (the
+  air-raid siren winds up, the reverse beeper speeds up, the ocean swells …), and the README's numbers
+  and images against the source. Each new guard was re-introduced once to see its test fail.
+
 ## [2.5.0] — 2026-09-27 · 25 sounds, chosen by ear, and a Sunrise you pick
 
 ### Added — sounds

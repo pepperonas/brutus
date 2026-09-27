@@ -4,6 +4,26 @@
 
 Alle nennenswerten Änderungen an Brutus stehen hier. Versionen folgen [SemVer](https://semver.org).
 
+## [2.5.1] — 2026-09-27 · Der Start-Knopf des Timers ist wieder erreichbar
+
+### Behoben
+- **Timer:** Mit acht sanften Endtönen wurde die Auswahl zwei Reihen höher und drückte den **Start**-Knopf auf
+  einem 1080×2400-Handy zu einem Streifen am unteren Rand zusammen — der Timer-Bildschirm scrollte nicht.
+  Schnellwahl und Töne scrollen jetzt, Start bleibt angeheftet und vollständig sichtbar.
+- **Weckerliste:** Ein Kaltstart zeigte kurz *Noch kein Alarm — Alarm erstellen* und *Kein Alarm aktiv*,
+  obwohl Wecker existierten — die Liste begann als „leer“, bevor die Datenbank geantwortet hatte. Jetzt bleibt
+  sie bis zur ersten Antwort still.
+
+### Geändert
+- README mit dem neuen Banner, einem Screenshot-Streifen und einer Galerie von v2.5 sowie Badges für Version,
+  Unit-Tests und Codezeilen, die ein Test ehrlich hält; die Produktseite zeigt das Banner im Hero.
+
+### Tests
+- 350 → 371: die Weckerliste unterscheidet „nicht geladen“ von „leer“, was jeden neuen Ton ausmacht (die
+  Luftschutzsirene steigt, der Rückfahrwarner wird schneller, das Meer schwillt an …), und die Zahlen und
+  Bilder im README gegen den Quellcode. Jede neue Sperre wurde einmal wieder ausgebaut, um ihren Test
+  scheitern zu sehen.
+
 ## [2.5.0] — 2026-09-27 · 25 Töne, nach Gehör ausgewählt, und ein Sunrise nach Wahl
 
 ### Neu — Töne

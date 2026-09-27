@@ -128,7 +128,9 @@ import com.pepperonas.brutus.R
 
 @Composable
 fun AlarmListScreen(viewModel: AlarmViewModel, onOpenSettings: () -> Unit = {}) {
-    val alarms by viewModel.alarms.collectAsState()
+    val loadedAlarms by viewModel.alarms.collectAsState()
+    val loaded = loadedAlarms != null
+    val alarms = loadedAlarms.orEmpty()
     var showDialog by remember { mutableStateOf(false) }
     var editingAlarm by remember { mutableStateOf<AlarmEntity?>(null) }
     var menuOpen by remember { mutableStateOf(false) }
@@ -223,6 +225,7 @@ fun AlarmListScreen(viewModel: AlarmViewModel, onOpenSettings: () -> Unit = {}) 
                 NextAlarmHeader(
                     next = nextAlarm,
                     now = nowMillis,
+                    loaded = loaded,
                     modifier = Modifier.weight(1f),
                 )
                 Box {
@@ -322,14 +325,21 @@ fun AlarmListScreen(viewModel: AlarmViewModel, onOpenSettings: () -> Unit = {}) 
             val listFastEffects = MaterialTheme.motionScheme.fastEffectsSpec<Float>()
             val listSpatial = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
             AnimatedContent(
-                targetState = alarms.isEmpty(),
+                // Before the first database answer: nothing, rather than an empty state that isn't true.
+                targetState = when {
+                    !loaded -> ListState.LOADING
+                    alarms.isEmpty() -> ListState.EMPTY
+                    else -> ListState.LIST
+                },
                 transitionSpec = {
                     (fadeIn(listEffects) + scaleIn(listSpatial, initialScale = 0.96f)) togetherWith
                         fadeOut(listFastEffects)
                 },
                 label = "listOrEmpty",
-            ) { empty ->
-            if (empty) {
+            ) { state ->
+            if (state == ListState.LOADING) {
+                Box(Modifier.fillMaxSize())
+            } else if (state == ListState.EMPTY) {
                 EmptyState(onCreate = {
                     editingAlarm = null
                     showDialog = true
@@ -496,8 +506,10 @@ private fun AddAlarmFab(onClick: () -> Unit, modifier: Modifier = Modifier) {
     }
 }
 
+private enum class ListState { LOADING, EMPTY, LIST }
+
 @Composable
-private fun NextAlarmHeader(next: AlarmEntity?, now: Long, modifier: Modifier = Modifier) {
+private fun NextAlarmHeader(next: AlarmEntity?, now: Long, loaded: Boolean, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val triggerMillis = remember(next, now) {
         next?.let { NextAlarmCalculator.nextTrigger(it, now, RingingStore.skips(context)[it.id]) }
@@ -530,7 +542,7 @@ private fun NextAlarmHeader(next: AlarmEntity?, now: Long, modifier: Modifier = 
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-        } else {
+        } else if (loaded) {
             Text(
                 text = stringResource(R.string.alarm_list_no_alarm),
                 style = MaterialTheme.typography.headlineMedium,

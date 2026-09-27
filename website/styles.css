@@ -1,16 +1,16 @@
 /* Brutus — product page (generated from templates/apps/product-page, then edited freely).
-   Colours: the app's own dark scheme (app/src/main/java/com/pepperonas/brutus/ui/theme/Color.kt — dark red-seed roles (primary lifted to red tone 80 for text contrast on the web)). */
+   Colours: the app's own dark scheme (app/src/main/java/com/pepperonas/brutus/ui/theme/Color.kt — dark red-seed roles (primary lifted to red tone 80 for text contrast on the web; background and surfaces tinted to the banner’s dark red #230303 so the hero art blends in)). */
 :root {
-  --bg: #141110;
-  --bg-lowest: #0c0908;
-  --surface-low: #1d1a19;
-  --surface: #211e1d;
-  --surface-high: #2b2827;
-  --surface-highest: #363231;
+  --bg: #230303;
+  --bg-lowest: #180202;
+  --surface-low: #2c0908;
+  --surface: #330e0d;
+  --surface-high: #3d1514;
+  --surface-highest: #481c1b;
   --on-bg: #ede0dd;
   --on-variant: #d8c2bf;
   --outline: #a08c8a;
-  --outline-variant: #534341;
+  --outline-variant: #5e3a38;
   --primary: #ffb4ab;
   --on-primary: #690005;
   --primary-container: #93000a;
@@ -196,11 +196,11 @@ h1 {
   /* Narrow screens show the whole banner — cropping it cut its wordmark mid-word. */
   .hero {
     display: block; min-height: 0;
-    padding-top: calc(env(safe-area-inset-top) + 60px + 49.45vw + 8px);
+    padding-top: calc(env(safe-area-inset-top) + 60px + 49.42vw + 8px);
     padding-bottom: 56px;
   }
   .hero-bg, .hero-scrim {
-    top: calc(env(safe-area-inset-top) + 60px); height: 49.45vw; bottom: auto;
+    top: calc(env(safe-area-inset-top) + 60px); height: 49.42vw; bottom: auto;
   }
   .hero-bg img { object-fit: cover; object-position: 50% 50%; }
   .hero-scrim {

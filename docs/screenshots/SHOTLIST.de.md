@@ -2,7 +2,7 @@
 
 [English](SHOTLIST.md) · **Deutsch**
 
-Die Galerie in der README erwartet genau diese zwölf Dateien in diesem Ordner. Gleiches
+Die Galerie in der README erwartet genau diese zehn Dateien in diesem Ordner. Gleiches
 Gerät, gleiches Theme, gleiche Statusleiste für alle — eine Galerie aus drei verschiedenen
 Telefonen sieht aus wie drei verschiedene Apps.
 
@@ -18,7 +18,7 @@ pflegen. Die App-Sprache lässt sich ab Android 13 unter
 
 | Regel | Warum |
 |-------|-------|
-| **Dunkles Theme**, Material You **aus** (⋮-Menü → *Material You Farben* = aus) | Das Markenrot ist die Signatur der App; hintergrundgetönte Aufnahmen sehen auf jedem Gerät anders aus |
+| **Dunkles Theme**, Material You **aus** (⋮ → *Einstellungen & Info* → *Material-You-Farben* = aus) | Das Markenrot ist die Signatur der App; hintergrundgetönte Aufnahmen sehen auf jedem Gerät anders aus |
 | Ein Gerät für alle Aufnahmen, Hochformat | Einheitliches Seitenverhältnis, einheitliche Dichte |
 | Keine echten persönlichen Daten — plausible Labels nehmen (`Arbeit`, `Sport`, `Zug 06:12`) | Screenshots landen in einem öffentlichen Repository |
 | Alle drei Zuverlässigkeits-Banner vorher beheben | Sonst dominieren rote Berechtigungswarnungen jedes Bild |
@@ -46,22 +46,39 @@ adb shell am broadcast -a com.android.systemui.demo -e command exit
 adb exec-out screencap -p > docs/screenshots/01-alarm-list.png
 ```
 
-## Die zwölf Aufnahmen
+## Die zehn Aufnahmen (v2.5.x)
 
-| # | Datei | Bildschirm | Wie man hinkommt | Was sichtbar sein muss |
-|---|-------|------------|------------------|------------------------|
-| 1 | `01-alarm-list.png` | Alarm-Tab | App mit **3–4 Weckern** starten, mindestens einer inaktiv | Countdown-Kopfzeile, aktive Karten im gedämpften Rot, eine graue inaktive Karte, dünne Kontur am nächsten Wecker, Wochentagsleiste, Info-Chips |
-| 2 | `02-alarm-edit.png` | Bearbeiten-Sheet | Auf eine Weckerkarte tippen | Zeit-Picker, Wochentagsreihe, Sound-Auswahl, Aufgaben-Schalter, Snooze-Wahl, Hardcore-Schalter |
-| 3 | `03-alarm-ring.png` | Klingelnder Wecker | Bearbeiten-Sheet → **Weckmodi jetzt testen** bei einem Hardcore-Wecker | Große Uhr, `HARDCORE MODE`-Badge, Fortschrittspunkte der Aufgaben, Snooze-Bahn, **kein** Stopp-Knopf |
-| 4 | `04-math-challenge.png` | Mathe-Aufgabe | Wecker mit aktivierter Mathe-Aufgabe testen | Eine Aufgabe, der Ziffernblock, der Fortschritt `n / N` |
-| 5 | `05-shake-challenge.png` | Schüttel-Aufgabe | Wecker mit Schüttel-Aufgabe testen, etwa ein Drittel schütteln | Fortschrittsring **teilweise** gefüllt — ein leerer oder voller Ring sagt nichts über die Mechanik |
-| 6 | `06-qr-challenge.png` | QR-Aufgabe | Wecker mit QR-Aufgabe testen | Kamera-Vorschau mit Scan-Rahmen; auf den Ausdruck halten, aber **vor** dem Treffer auslösen |
-| 7 | `07-world-clock.png` | Weltuhr-Tab | 2–3 Zonen hinzufügen, sodass eine Tag- und eine Nacht-Zone sichtbar sind | Mindestens vier Zeilen, sichtbar unterschiedliche Tag-/Nacht-Darstellung |
-| 8 | `08-stopwatch.png` | Stoppuhr-Tab | Starten, 3–4 Runden nehmen, **laufen lassen** | Große Anzeige mitten im Lauf, Rundenliste mit beiden Spalten |
-| 9 | `09-timer.png` | Timer-Tab | 5-Minuten-Timer starten, bei etwa 03:xx auslösen | Countdown-Anzeige plus die beiden Kreisknöpfe |
-| 10 | `10-sunrise.png` | Sunrise-Vorlauf | Wecker ~10 min in die Zukunft mit Sunrise setzen und abwarten | Morgenverlauf mitten in der Rampe (weder ganz schwarz noch ganz hell), Countdown zum Hauptalarm |
-| 11 | `11-widget.png` | Homescreen | Brutus-Widget platzieren, dann den **Homescreen** aufnehmen | Widget mit Uhrzeit, Countdown und Tagesleiste — nichts zuschneiden, der Homescreen-Kontext ist der Punkt |
-| 12 | `12-ultra-hardcore-task.png` | Anti-Schlummer-Aufgabe | Ultra-Hardcore-Wecker verwerfen → Notification → *Aufgabe lösen* | Schrittzähler mitten in den 30 Schritten |
+| # | Datei | Ansicht | So kommst du hin | Muss sichtbar sein |
+|---|-------|---------|------------------|--------------------|
+| 1 | `01-alarm-list.png` | Wecker-Tab | 3–4 plausible Wecker (`Work`, `Gym`, `Weekend`) — warten, bis die Liste geladen ist | Countdown im Kopf, der nächste Wecker umrandet, Wochentagsleiste, Chips inkl. `♪`-Ton |
+| 2 | `02-sound-picker.png` | Bearbeiten-Sheet | Weckerkarte antippen, bis *Weckton* scrollen | Die Ton-Chips mit dem gewählten |
+| 3 | `03-math-challenge.png` | Klingelnder Wecker | Ultra-Hardcore-Wecker mit Rechnen auslösen (unten), eine Ziffer tippen | `ULTRA HARDCORE MODE`, Aufgaben-Punkte, Tastenfeld, Wischen zum Schlummern |
+| 4 | `04-shake-challenge.png` | Schüttel-Aufgabe | Wecker mit Schütteln auslösen, über die Emulator-Konsole schütteln (unten) | Ring **teilweise** gefüllt |
+| 5 | `05-sunrise.png` | Sunrise-Vorlauf | `SunriseActivity` starten (unten) und ~2 Min. warten | Morgenrot mitten im Übergang, Countdown zum Hauptwecker |
+| 6 | `06-settings.png` | Einstellungen & Info | ⋮ → *Einstellungen & Info* | Darstellung und der Sunrise-Klang |
+| 7 | `07-timer-setup.png` | Timer-Tab, bereit | Timer-Tab | Schnellwahl, Endton und der **vollständig sichtbare** Start-Knopf |
+| 8 | `08-timer.png` | Laufender Timer | 5 Min. starten, bei etwa 04:xx aufnehmen | Welliger Ring, Abbrechen / Pause |
+| 9 | `09-world-clock.png` | Weltuhr | 3 Zonen, eine davon nachts | Tag- und Nacht-Symbole, Versatz |
+| 10 | `10-stopwatch.png` | Stoppuhr | Starten, drei Runden, weiterlaufen lassen | Anzeige und Rundenliste |
 
-Wenn eine Aufnahme entfällt, sag Bescheid — dann fliegt die Zelle aus der Galerie, statt
-auf eine fehlende Datei zu zeigen.
+Danach den README-Streifen bauen: `python3 tools/mockups.py docs/screenshots/mockups.jpg <aufnahme>:"Beschriftung" …`.
+
+### Emulator-Handgriffe (Root-Emulator-Image)
+
+```bash
+adb root
+# Plausible Uhrzeit: Statusleiste und Gerätezeit passen zu den Weckern
+adb shell settings put global auto_time 0 && adb shell "date 092806302026.00"
+adb shell am broadcast -a com.android.systemui.demo -e command clock -e hhmm 0630
+# Wecker <id> jetzt auslösen (die App muss seit einem Force-Stop einmal gestartet worden sein)
+adb shell am broadcast -n com.pepperonas.brutus/.receiver.AlarmReceiver --el alarm_id <id>
+# Die angepinnte Wecker-Benachrichtigung verdeckt bei entsperrtem Bildschirm die Uhr — nach oben wischen
+adb shell input swipe 540 270 540 20 250
+# Schütteln: ein Stoß alle ~0,6 s zählt als Schütteln
+adb emu sensor set acceleration 30:9.8:0; adb emu sensor set acceleration 0:9.8:0
+# Sunrise, Hauptwecker in 4 Minuten
+adb shell am start -n com.pepperonas.brutus/.SunriseActivity --el alarm_id <id> --el main_trigger_at <epoch-ms>
+```
+
+`uiautomator dump` schlägt fehl, solange eine Animation läuft, und lässt den **vorherigen** Dump liegen —
+vor dem Übernehmen von Koordinaten einen Screenshot prüfen.

@@ -37,7 +37,7 @@ written for three readers — people, search engines, and **AI agents** — and 
 | File | Purpose |
 |------|---------|
 | `index.html` | The page. English in the markup (what crawlers and agents read without JavaScript). Contains the SSI includes for the release facts and the JSON-LD. |
-| `styles.css` | All styling. Colours are the app's own dark scheme (app/src/main/java/com/pepperonas/brutus/ui/theme/Color.kt — dark red-seed roles (primary lifted to red tone 80 for text contrast on the web)) as tokens on `:root`, from `site.json` → `theme`. |
+| `styles.css` | All styling. Colours are the app's own dark scheme (app/src/main/java/com/pepperonas/brutus/ui/theme/Color.kt — dark red-seed roles (primary lifted to red tone 80 for text contrast on the web; background and surfaces tinted to the banner’s dark red #230303 so the hero art blends in)) as tokens on `:root`, from `site.json` → `theme`. |
 | `app.js` | Language switching and menu, the download button and meta line from `latest.json`, licence dialog, sticky bar, reveal animation. |
 | `i18n.js` | German, Spanish, Italian and French strings, keyed like the `data-i18n` attributes. A missing key falls back to the English in the markup. |
 | `changelog.js` | Changelog dialog: loads `changelog.md` (same origin) and renders it with a small escaping Markdown renderer. |

@@ -1,33 +1,50 @@
-# Brutus
+<div align="center">
+
+<a href="https://brutus.celox.io"><img src="docs/banner.jpg" alt="Brutus — Weckt jeden. Schläft nie. · brutus.celox.io" width="100%"></a>
+
+# ⏰ Brutus
 
 [English](README.md) · **Deutsch**
 
-<p align="center">
-  <a href="https://brutus.celox.io"><img src="docs/hero.png" alt="Brutus — Killer Alarm Clock · brutus.celox.io" width="100%" /></a>
-</p>
+**Der Wecker, den du nicht ignorieren kannst: Er verstummt erst, wenn du rechnest, das Handy schüttelst oder einen QR-Code scannst — dazu Weltuhr, Stoppuhr, Timer und 25 Wecktöne, direkt auf dem Handy erzeugt.**
 
-<h2 align="center">🌐 <a href="https://brutus.celox.io">brutus.celox.io</a></h2>
-
-<p align="center"><strong>Features, Screenshots, FAQ und die neueste signierte APK samt SHA-256 — alles auf der Produktseite.</strong></p>
-
-<p align="center">
-  <a href="https://brutus.celox.io"><img alt="Produktseite" src="https://img.shields.io/badge/Produktseite-brutus.celox.io-E53935?style=for-the-badge&logo=googlechrome&logoColor=white" height="42" /></a>
+<p>
+  <a href="https://brutus.celox.io"><img alt="Website: brutus.celox.io" height="56" src="https://img.shields.io/badge/%F0%9F%8C%90_Website-brutus.celox.io-E53935?style=for-the-badge"></a>
   &nbsp;
-  <a href="https://brutus.celox.io/download"><img alt="APK herunterladen" src="https://img.shields.io/badge/APK%20herunterladen-Android%208.0%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white" height="42" /></a>
+  <a href="https://brutus.celox.io/download"><img alt="APK" height="56" src="https://img.shields.io/badge/%E2%AC%87%EF%B8%8F_Download-neueste_APK-3DDC84?style=for-the-badge&logo=android&logoColor=white"></a>
 </p>
 
-<!-- Projektstatus — diese Badges aktualisieren sich selbst. -->
+<h3>👉 <a href="https://brutus.celox.io">brutus.celox.io</a> — Funktionen, <a href="https://brutus.celox.io/#sounds">alle 25 Töne zum Anhören</a>, FAQ und immer die neueste APK</h3>
+
+<!-- BADGES:BIG — version, unit tests and lines of code; ReadmeSyncTest keeps them true. -->
+[![version](https://img.shields.io/badge/version-2.5.1-E53935?style=for-the-badge&logo=android&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
+[![unit tests](https://img.shields.io/badge/unit%20tests-371-2E9E5B?style=for-the-badge&logo=junit5&logoColor=white)](#tests-und-ci)
+[![lines of code](https://img.shields.io/badge/lines%20of%20code-11.3k-4B6BDF?style=for-the-badge&logo=kotlin&logoColor=white)](app/src/main/java/com/pepperonas/brutus)
+[![test code](https://img.shields.io/badge/test%20code-5.6k-2E9E5B?style=for-the-badge&logo=kotlin&logoColor=white)](app/src/test/java/com/pepperonas/brutus)
+[![sounds](https://img.shields.io/badge/sounds-25-FF5252?style=for-the-badge&logo=audiomack&logoColor=white)](https://brutus.celox.io/#sounds)
+
+[![Donate with PayPal](https://img.shields.io/badge/PayPal-dieses%20Projekt%20unterst%C3%BCtzen-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://www.paypal.com/donate/?business=martin.pfeffer@celox.io&currency_code=EUR&item_name=Brutus)
+
+</div>
+
+<!-- Projektstatus — die GitHub-Badges sind live und aktualisieren sich selbst. -->
 
 [![Tests](https://img.shields.io/github/actions/workflow/status/pepperonas/brutus/tests.yml?branch=main&label=tests&logo=githubactions&logoColor=white)](https://github.com/pepperonas/brutus/actions/workflows/tests.yml)
-[![Unit tests](https://img.shields.io/badge/unit%20tests-350-brightgreen)](#tests-und-ci)
+[![Release build](https://img.shields.io/github/actions/workflow/status/pepperonas/brutus/release.yml?label=release%20build&logo=githubactions&logoColor=white)](https://github.com/pepperonas/brutus/actions/workflows/release.yml)
 [![Release](https://img.shields.io/github/v/release/pepperonas/brutus?color=FF5252&logo=github&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
+[![Release date](https://img.shields.io/github/release-date/pepperonas/brutus?color=FF5252&logo=github&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/pepperonas/brutus/total?label=APK%20downloads&color=success&logo=github&logoColor=white)](https://github.com/pepperonas/brutus/releases)
+[![Latest downloads](https://img.shields.io/github/downloads/pepperonas/brutus/latest/total?label=latest%20release&color=success&logo=github&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
 [![Last commit](https://img.shields.io/github/last-commit/pepperonas/brutus?logo=git&logoColor=white)](https://github.com/pepperonas/brutus/commits/main)
+[![Commit activity](https://img.shields.io/github/commit-activity/m/pepperonas/brutus?logo=git&logoColor=white)](https://github.com/pepperonas/brutus/commits/main)
 [![Code size](https://img.shields.io/github/languages/code-size/pepperonas/brutus?logo=files&logoColor=white)](#projektstruktur)
+[![Repo size](https://img.shields.io/github/repo-size/pepperonas/brutus?logo=github&logoColor=white)](https://github.com/pepperonas/brutus)
 [![Top language](https://img.shields.io/github/languages/top/pepperonas/brutus?logo=kotlin&logoColor=white)](https://kotlinlang.org)
 [![Open issues](https://img.shields.io/github/issues/pepperonas/brutus?logo=github&logoColor=white)](https://github.com/pepperonas/brutus/issues)
 [![Stars](https://img.shields.io/github/stars/pepperonas/brutus?logo=github&logoColor=white)](https://github.com/pepperonas/brutus/stargazers)
+[![Forks](https://img.shields.io/github/forks/pepperonas/brutus?logo=github&logoColor=white)](https://github.com/pepperonas/brutus/forks)
 [![License](https://img.shields.io/github/license/pepperonas/brutus?color=blue)](LICENSE)
+[![Made by celox.io](https://img.shields.io/badge/made%20by-celox.io-E53935)](https://celox.io)
 
 <!-- Plattform & Laufzeit -->
 
@@ -36,7 +53,7 @@
 [![targetSdk](https://img.shields.io/badge/targetSdk-35%20%C2%B7%20Android%2015-3DDC84?logo=android&logoColor=white)](https://apilevels.com)
 [![compileSdk](https://img.shields.io/badge/compileSdk-35-3DDC84?logo=android&logoColor=white)](https://developer.android.com/tools/releases/platforms)
 [![JDK](https://img.shields.io/badge/JDK-17-437291?logo=openjdk&logoColor=white)](https://adoptium.net)
-[![APK size](https://img.shields.io/badge/APK-4.3%20MB-blueviolet?logo=android&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
+[![APK size](https://img.shields.io/badge/APK-4.4%20MB-blueviolet?logo=android&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
 
 <!-- Sprache, Build & Toolchain -->
 
@@ -79,6 +96,17 @@
 [![Changelog](https://img.shields.io/badge/Changelog-Keep%20a%20Changelog-E05735?logo=keepachangelog&logoColor=white)](CHANGELOG.de.md)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](http://makeapullrequest.com)
 
+<!-- Was das Weiterschlafen schwer macht -->
+
+[![Challenges](https://img.shields.io/badge/Aufgaben-Mathe%20%C2%B7%20Sch%C3%BCtteln%20%C2%B7%20QR-E53935)](#kombinierbare-weck-aufgaben)
+[![Sounds](https://img.shields.io/badge/T%C3%B6ne-25%20auf%20dem%20Ger%C3%A4t%20erzeugt-FF5252?logo=audiomack&logoColor=white)](#wecker-sounds)
+[![Hardcore](https://img.shields.io/badge/Hardcore-Lautst%C3%A4rke%20gesperrt-B71C1C)](#hardcore-mode)
+[![Ultra Hardcore](https://img.shields.io/badge/Ultra%20Hardcore-Re--Alarme%20%2B%2030%20Schritte-B71C1C)](#ultra-hardcore-mode)
+[![Sunrise](https://img.shields.io/badge/Sunrise-10%20Min.%20Licht%20%2B%20Klang-FFB74D)](#sunrise-vorlauf)
+[![Direct boot](https://img.shields.io/badge/Direct%20Boot-klingelt%20vor%20dem%20Entsperren-3DDC84?logo=android&logoColor=white)](#zuverlässigkeit)
+[![Signed](https://img.shields.io/badge/APK-Zertifikat%20in%20CI%20gepr%C3%BCft-2E7D32?logo=githubactions&logoColor=white)](#release-signatur)
+[![Product page](https://img.shields.io/badge/Produktseite-5%20Sprachen-E53935?logo=googlechrome&logoColor=white)](https://brutus.celox.io)
+
 <!-- Was Brutus bewusst nicht tut -->
 
 [![Offline](https://img.shields.io/badge/Offline-first-2E7D32)](#berechtigungen)
@@ -98,6 +126,7 @@ Alles steckt in einer Bottom-Navigation mit vier Tabs, die den brutalen Wecker-K
 ## Inhaltsverzeichnis
 
 - [Screenshots](#screenshots)
+- [Neu in 2.5](#neu-in-25)
 - [Warum Brutus?](#warum-brutus)
 - [Aufbau der App](#aufbau-der-app)
 - [Funktionen](#funktionen)
@@ -143,78 +172,70 @@ Alles steckt in einer Bottom-Navigation mit vier Tabs, die den brutalen Wecker-K
 
 ## Screenshots
 
-> **Kommt mit dem nächsten Update.** Die Galerie unten ist fertig verdrahtet und
-> wartet auf ihre zwölf Aufnahmen — welche Ansicht in welchem Zustand und mit
-> welchem `adb`-Befehl, steht in
-> [`docs/screenshots/SHOTLIST.de.md`](docs/screenshots/SHOTLIST.de.md). Sie liegt
-> hier als Kommentar, statt zwölf kaputte Bildlinks zu zeigen.
+<img src="docs/screenshots/mockups.jpg" alt="Die Weckerliste, die Ton-Auswahl, eine klingelnde Rechenaufgabe, der Sunrise-Vorlauf und Einstellungen & Info" width="100%">
 
-<!-- GALLERY: uncomment once docs/screenshots/*.png exist
-
-Aufgenommen mit **v2.2.0**, dunkles Theme, Marken-Farbschema (Material You aus). Die App gibt es auf Englisch und Deutsch — siehe [Sprachen](#sprachen).
+<sub>Aufgenommen mit **v2.5.x**, dunkles Design, Markenfarben (Material You aus), englische Oberfläche. Den Streifen erzeugt
+`python3 tools/mockups.py docs/screenshots/mockups.jpg docs/screenshots/01-alarm-list.png:"Alarms" …` aus den Rohaufnahmen neu — die
+Aufnahmeliste steht in [`docs/screenshots/SHOTLIST.de.md`](docs/screenshots/SHOTLIST.de.md). **Die Töne anhören: [Produktseite](https://brutus.celox.io/#sounds).**</sub>
 
 <table>
   <tr>
     <td width="33%" valign="top">
-      <img src="docs/screenshots/01-alarm-list.png" alt="Weckerliste mit Countdown-Kopfzeile und zustandskodierten Karten" width="100%" />
-      <br /><sub><b>Weckerliste</b> — Countdown-Kopfzeile, ein gedämpftes Rot für jeden aktiven Wecker, Wochentagsleiste, Chips für Modus/Aufgabe/Snooze.</sub>
+      <img src="docs/screenshots/01-alarm-list.png" alt="Weckerliste" width="100%" />
+      <br /><sub><b>Wecker</b> — Countdown im Kopf, der nächste Wecker umrandet, Wochentagsleiste, Chips für Modus · Aufgabe · Snooze · Ton.</sub>
     </td>
     <td width="33%" valign="top">
-      <img src="docs/screenshots/02-alarm-edit.png" alt="Bearbeiten-Sheet eines Weckers" width="100%" />
-      <br /><sub><b>Bearbeiten-Sheet</b> — Zeit, Wochentage, Sound-Auswahl mit Vorhören, Aufgabenkette, Snooze-Dauer, Hardcore-Schalter.</sub>
+      <img src="docs/screenshots/02-sound-picker.png" alt="Ton-Auswahl im Bearbeiten-Sheet" width="100%" />
+      <br /><sub><b>Ton-Auswahl</b> — alle 25 synthetisierten Töne als Chips; antippen spielt ihn an.</sub>
     </td>
     <td width="33%" valign="top">
-      <img src="docs/screenshots/03-alarm-ring.png" alt="Vollbild-Alarm über dem Sperrbildschirm" width="100%" />
-      <br /><sub><b>Klingelnder Wecker</b> — Vollbild über dem Sperrbildschirm, HARDCORE-Badge, kein Stopp-Knopf, bevor die Kette gelöst ist.</sub>
-    </td>
-  </tr>
-  <tr>
-    <td width="33%" valign="top">
-      <img src="docs/screenshots/04-math-challenge.png" alt="Mathe-Aufgabe mit eigenem Ziffernblock" width="100%" />
-      <br /><sub><b>Mathe-Challenge</b> — 1–10 generierte Aufgaben, drei Schwierigkeitsstufen, eigener Ziffernblock.</sub>
-    </td>
-    <td width="33%" valign="top">
-      <img src="docs/screenshots/05-shake-challenge.png" alt="Schüttel-Aufgabe mit Fortschrittsring" width="100%" />
-      <br /><sub><b>Schüttel-Challenge</b> — 10–100 Schüttler gegen einen welligen Fortschrittsring, drei Empfindlichkeitsstufen.</sub>
-    </td>
-    <td width="33%" valign="top">
-      <img src="docs/screenshots/06-qr-challenge.png" alt="QR-Aufgabe mit Kamera-Vorschau" width="100%" />
-      <br /><sub><b>QR-Challenge</b> — CameraX-Vorschau + ML-Kit-Scanner; nur der eigene globale Code der Installation entsperrt.</sub>
+      <img src="docs/screenshots/03-math-challenge.png" alt="Klingelnder Wecker mit Rechenaufgabe" width="100%" />
+      <br /><sub><b>Klingeln</b> — Ultra-Hardcore-Wecker, Aufgabe 1 von 2, Tastenfeld und Wischen zum Schlummern.</sub>
     </td>
   </tr>
   <tr>
     <td width="33%" valign="top">
-      <img src="docs/screenshots/07-world-clock.png" alt="Weltuhr mit mehreren Zeitzonen" width="100%" />
-      <br /><sub><b>Weltuhr</b> — Live-Tafel über <code>java.time.ZoneId</code>, Tag-/Nacht-Farbrollen, tickt sekündlich.</sub>
+      <img src="docs/screenshots/04-shake-challenge.png" alt="Schüttel-Aufgabe" width="100%" />
+      <br /><sub><b>Schütteln</b> — welliger Fortschrittsring, 17 von 40 Schüttlern.</sub>
     </td>
     <td width="33%" valign="top">
-      <img src="docs/screenshots/08-stopwatch.png" alt="Stoppuhr mit Rundenliste" width="100%" />
-      <br /><sub><b>Stoppuhr</b> — Hundertstel-genau über <code>elapsedRealtime()</code>, Runden mit Einzel- und Gesamtspalte.</sub>
+      <img src="docs/screenshots/05-sunrise.png" alt="Sunrise-Vorlauf" width="100%" />
+      <br /><sub><b>Sunrise</b> — der Bildschirm wird in den zehn Minuten vor dem Wecker wärmer, ein sanfter Klang schwillt an.</sub>
     </td>
     <td width="33%" valign="top">
-      <img src="docs/screenshots/09-timer.png" alt="Laufender Timer" width="100%" />
-      <br /><sub><b>Timer</b> — HMS-Picker, Schnellwahl, sanfter Endton, überlebt Tab-Wechsel.</sub>
+      <img src="docs/screenshots/06-settings.png" alt="Einstellungen & Info" width="100%" />
+      <br /><sub><b>Einstellungen & Info</b> — Design, Material You, der Sunrise-Klang, Benachrichtigungen und Über Brutus.</sub>
     </td>
   </tr>
   <tr>
     <td width="33%" valign="top">
-      <img src="docs/screenshots/10-sunrise.png" alt="Sunrise-Vorlauf" width="100%" />
-      <br /><sub><b>Sunrise-Vorlauf</b> — 10 Minuten Helligkeitsrampe und Morgenrot, bevor der brutale Teil beginnt.</sub>
+      <img src="docs/screenshots/07-timer-setup.png" alt="Timer einstellen" width="100%" />
+      <br /><sub><b>Timer</b> — Schnellwahl und sanfter Endton; Start bleibt in Reichweite.</sub>
     </td>
     <td width="33%" valign="top">
-      <img src="docs/screenshots/11-widget.png" alt="Homescreen-Widget mit nächstem Wecker" width="100%" />
-      <br /><sub><b>Homescreen-Widget</b> — nächste Weckzeit, Countdown und Wochentage, direkt aus derselben Room-Datenbank.</sub>
+      <img src="docs/screenshots/08-timer.png" alt="Laufender Timer" width="100%" />
+      <br /><sub><b>Laufender Timer</b> — ein welliger Ring, der fließend leerläuft; klingelt auch bei geschlossener App.</sub>
     </td>
     <td width="33%" valign="top">
-      <img src="docs/screenshots/12-ultra-hardcore-task.png" alt="Ultra-Hardcore-Schrittaufgabe" width="100%" />
-      <br /><sub><b>Ultra-Hardcore-Aufgabe</b> — 30 Schritte laufen, um die beiden nach dem Dismiss scharfgestellten Re-Alarme zu stoppen.</sub>
+      <img src="docs/screenshots/09-world-clock.png" alt="Weltuhr" width="100%" />
+      <br /><sub><b>Weltuhr</b> — Tag und Nacht je Zone, UTC-Versatz, Datum.</sub>
     </td>
   </tr>
 </table>
--->
 
+<p align="center"><img src="docs/screenshots/10-stopwatch.png" alt="Stoppuhr mit Runden" width="32%" /><br /><sub><b>Stoppuhr</b> — laufende Anzeige und eine Rundenliste mit Runden- und Gesamtzeit.</sub></p>
 
----
+## Neu in 2.5
+
+- **25 Wecktöne, nach Gehör ausgewählt** — neun neue harte (Luftschutzsirene, U-Boot-Tauchalarm, Autoalarm,
+  Schulglocke, Rückfahrwarner, Shepard-Sirene, Stahlhammer, Stroboskop, Evakuierungs-Whoop) und acht sanfte, die
+  für Sunrise und den Timer nahtlos loopen. [Alle anhören](https://brutus.celox.io/#sounds).
+- **Sunrise-Klang wählen** unter ⋮ → Einstellungen & Info — jeder sanfte Ton oder Stille für reines Licht.
+- **Entfernte Töne klingeln weiter:** Wecker mit Sirene, Glockenspiel, Marimba oder Morgensonne spielen einen
+  Nachfolger gleichen Charakters statt des System-Tons.
+- **2.5.1:** Der Start-Knopf des Timers bleibt sichtbar (die längere Tonliste hatte ihn zusammengedrückt), und ein
+  Kaltstart zeigt nicht mehr kurz „Noch kein Alarm“, bevor die Liste geladen ist.
+- Alles im Detail: [CHANGELOG](CHANGELOG.de.md).
 
 ## Warum Brutus?
 
@@ -522,7 +543,7 @@ Animation ihre Spezifikation aus `MaterialTheme.motionScheme` statt aus handgew�
 Die gesamte App läuft auf `MaterialExpressiveTheme` mit `MotionScheme.expressive()` — tonale Flächen, räumliche Federn und die Form-Skala kommen aus einer Quelle (`ui/theme/`), nicht aus Styling pro Bildschirm.
 
 - **Dark / Light folgt der Systemeinstellung.** Die drei alarmnahen Activities (Klingeln, Sunrise, Ultra-Hardcore-Aufgabe) übergeben bewusst immer `darkTheme = true` — ihre geschichteten Schwarz-Rot-Verläufe setzen helle Inhalte auf dunklem Grund voraus, und ein weißer Blitz um 6 Uhr morgens ist eine eigene Form von Grausamkeit.
-- **Material You ist ein Opt-in, kein Standard.** Alarm-Tab → **⋮** → *Material You Farben* tauscht das rote Markenschema gegen das aus dem Hintergrundbild abgeleitete. Nur ab API 31 sichtbar, in DataStore gespeichert, sofort auf allen Bildschirmen wirksam.
+- **Material You ist ein Opt-in, kein Standard.** **⋮ → Einstellungen & Info** → *Material-You-Farben* tauscht das rote Markenschema gegen das aus dem Hintergrundbild abgeleitete. Nur ab API 31 sichtbar, in DataStore gespeichert, sofort auf allen Bildschirmen wirksam.
 - **Space Grotesk** trägt die Display-Skala, seit v2.1.0 mit **Tabellenziffern auf der gesamten Typo-Skala** — jede Uhr, jeder Countdown und jede Rundenzeit tickt, ohne dass die Ziffern seitlich zappeln.
 - **Reduzierte Bewegung wird respektiert.** `rememberReducedMotion()` liest `ANIMATOR_DURATION_SCALE` und schaltet die dekorativen Schleifen ab (atmende Hintergründe, pulsierender Snooze-Hinweis); zustandsgetriebene Übergänge springen dann einfach.
 
@@ -862,7 +883,7 @@ app/src/main/res/
 
 ## Tests und CI
 
-350 JVM-Unit-Tests sichern die Stellen, an denen ein Fehler bedeutet, dass jemand verschläft: was tatsächlich im `AlarmManager` landet, die Weckzeit-Arithmetik, die Persistenz, die Vollständigkeit beider Übersetzungen und jeden String, den der Nutzer auf einem Ziffernblatt liest. Es gibt keine Instrumentierungstests — die gesamte Suite läuft in Sekunden auf der JVM.
+371 JVM-Unit-Tests sichern die Stellen, an denen ein Fehler bedeutet, dass jemand verschläft: was tatsächlich im `AlarmManager` landet, die Weckzeit-Arithmetik, die Persistenz, die Vollständigkeit beider Übersetzungen und jeden String, den der Nutzer auf einem Ziffernblatt liest. Es gibt keine Instrumentierungstests — die gesamte Suite läuft in Sekunden auf der JVM.
 
 | Suite | Tests | Was sie festnagelt |
 |-------|-------|--------------------|
@@ -898,6 +919,9 @@ app/src/main/res/
 | `util/ChallengeDifficultyTest` | 8 | Zahlenbereiche, Reihenfolge der Schwellen, eigene Labels je Preset in beiden Sprachen |
 | `LocalizedRuntimeTest` | 7 | löst jeden deklarierten String über das Ressourcensystem in **beiden** Sprachen auf und rendert je eine vollständige Weckerkarte |
 | `util/AlarmSoundGeneratorTest` | 7 | PCM-Länge, Spitzenamplituden, sanfte Schleifen ohne Knacken an der Naht, sanft vs. hart vs. extrem |
+| `util/SynthSoundsTest` | 11 | was jeden Ton von v2.5.0 ausmacht, gemessen am Puffer — die Luftschutzsirene heult hoch und runter, Rückfahrwarner und Stroboskop werden schneller, das Meer schwillt an, Sonnenaufgang wird heller; harte mit voller Aussteuerung, sanfte bei 60 %, sanfte Schleifen sechs Sekunden |
+| `viewmodel/AlarmViewModelTest` | 3 | die Weckerliste unterscheidet „noch nicht geladen“ (`null`) von „keine Wecker“ — ein Kaltstart zeigt nicht mehr kurz den Leerzustand (Robolectric + Room) |
+| `ReadmeSyncTest` | 7 | Version, Unit-Test- und Codezeilen-Badge im README gegen `build.gradle.kts` und den Quellcode, beide Changelogs beginnen mit der aktuellen Version, der PayPal-Knopf ist derselbe wie in der App, jedes gezeigte Bild existiert in beiden Sprachen |
 | `util/AlarmSoundGeneratorPropertiesTest` | 7 | Invarianten für jeden synthetisierten Sound — Schleifenlänge, Determinismus, DC-Offset, Headroom; ein neuer Enum-Eintrag fällt automatisch hinein |
 | `util/PermissionDeepLinkTest` | 7 | die drei Zuverlässigkeits-Banner landen auf der richtigen Einstellungsseite (Action + `package:`-URI + `NEW_TASK`) (Robolectric) |
 | `data/RoomSchemaExportTest` | 7 | der **Identity-Hash der laufenden Datenbank gegen das committete `7.json`** — ein Feld ohne Migration fällt hier auf statt auf dem Gerät des Nutzers |
@@ -912,7 +936,7 @@ app/src/main/res/
 | `scheduler/AlarmSchedulerConstantsTest` | 4 | Ultra-Hardcore-Offsets, Sunrise-Vorlauf, Eindeutigkeit der Intent-Extras |
 
 ```bash
-./gradlew :app:testDebugUnitTest          # alle 350
+./gradlew :app:testDebugUnitTest          # alle 371
 ./gradlew :app:testDebugUnitTest --tests '*NextAlarmCalculatorTest'
 # HTML-Report: app/build/reports/tests/testDebugUnitTest/index.html
 ```

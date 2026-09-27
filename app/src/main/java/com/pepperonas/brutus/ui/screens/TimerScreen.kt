@@ -7,6 +7,8 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -108,25 +110,37 @@ fun TimerScreen(viewModel: TimerViewModel = viewModel()) {
         Spacer(modifier = Modifier.height(24.dp))
 
         if (state == TimerState.IDLE) {
-            TimerConfigurator(
-                hours = viewModel.hours, minutes = viewModel.minutes, seconds = viewModel.seconds,
-                onHours = { viewModel.hours = it },
-                onMinutes = { viewModel.minutes = it },
-                onSeconds = { viewModel.seconds = it },
-            )
-            Spacer(modifier = Modifier.height(32.dp))
-            QuickPresets { total ->
-                viewModel.hours = (total / 3600)
-                viewModel.minutes = ((total / 60) % 60)
-                viewModel.seconds = (total % 60)
+            // Everything above the Start button scrolls; the button itself stays put. With eight gentle
+            // sounds the tone picker grew by two rows and, without this, squeezed Start to a sliver on
+            // a 1080×2400 phone (v2.5.0).
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                TimerConfigurator(
+                    hours = viewModel.hours, minutes = viewModel.minutes, seconds = viewModel.seconds,
+                    onHours = { viewModel.hours = it },
+                    onMinutes = { viewModel.minutes = it },
+                    onSeconds = { viewModel.seconds = it },
+                )
+                Spacer(modifier = Modifier.height(32.dp))
+                QuickPresets { total ->
+                    viewModel.hours = (total / 3600)
+                    viewModel.minutes = ((total / 60) % 60)
+                    viewModel.seconds = (total % 60)
+                }
+                Spacer(modifier = Modifier.height(24.dp))
+                TimerSoundPicker(
+                    selected = selectedSound,
+                    onSelect = { snd -> viewModel.selectSound(snd) },
+                    onStopPreview = { viewModel.player.stop() }
+                )
+                Spacer(modifier = Modifier.height(16.dp))
             }
-            Spacer(modifier = Modifier.height(24.dp))
-            TimerSoundPicker(
-                selected = selectedSound,
-                onSelect = { snd -> viewModel.selectSound(snd) },
-                onStopPreview = { viewModel.player.stop() }
-            )
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(12.dp))
             Button(
                 onClick = { viewModel.start() },
                 enabled = (viewModel.hours + viewModel.minutes + viewModel.seconds) > 0,

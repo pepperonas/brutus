@@ -12,6 +12,7 @@ import com.pepperonas.brutus.util.UltraHardcoreNotifier
 import com.pepperonas.brutus.util.UltraHardcoreStore
 import com.pepperonas.brutus.widget.NextAlarmWidget
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -24,10 +25,15 @@ class AlarmViewModel(application: Application) : AndroidViewModel(application) {
         repository = AlarmRepository(db.alarmDao())
     }
 
-    val alarms = repository.allAlarms.stateIn(
+    /**
+     * `null` until the database has answered once. An empty list starting value made "not loaded yet"
+     * look like "no alarms": after a cold start the list showed *No alarms yet — Create alarm* and the
+     * header *No alarm set* for a moment although alarms existed.
+     */
+    val alarms: StateFlow<List<AlarmEntity>?> = repository.allAlarms.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
-        emptyList()
+        null
     )
 
     fun addAlarm(

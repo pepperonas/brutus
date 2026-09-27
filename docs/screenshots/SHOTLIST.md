@@ -2,7 +2,7 @@
 
 **English** · [Deutsch](SHOTLIST.de.md)
 
-The README gallery expects exactly these twelve files in this folder. Same device, same
+The README gallery expects exactly these ten files in this folder. Same device, same
 theme, same status bar for all of them — a gallery whose shots were taken on three
 different phones looks like three different apps.
 
@@ -17,7 +17,7 @@ language on Android 13+ via *Settings → Apps → Brutus → Language*.
 
 | Rule | Why |
 |------|-----|
-| **Dark theme**, Material You **off** (⋮ menu → *Material You colors* = off) | The brand red is the app's signature; wallpaper-tinted shots differ per device |
+| **Dark theme**, Material You **off** (⋮ → *Settings & info* → *Material You colors* = off) | The brand red is the app's signature; wallpaper-tinted shots differ per device |
 | One device for all shots, portrait | Consistent aspect ratio, consistent density |
 | No real personal data — use plausible alarm labels (`Work`, `Gym`, `Train 06:12`) | Screenshots end up in a public repo |
 | All three reliability banners resolved before shooting the list | Otherwise every shot is dominated by red permission warnings |
@@ -45,22 +45,39 @@ adb shell am broadcast -a com.android.systemui.demo -e command exit
 adb exec-out screencap -p > docs/screenshots/01-alarm-list.png
 ```
 
-## The twelve shots
+## The ten shots (v2.5.x)
 
 | # | File | Screen | How to get there | Must be visible |
 |---|------|--------|------------------|-----------------|
-| 1 | `01-alarm-list.png` | Alarm tab | Launch the app with **3–4 alarms**, at least one disabled | Countdown header, active cards in the muted red, one gray disabled card, thin outline on the next alarm, weekday strip, info chips |
-| 2 | `02-alarm-edit.png` | Edit bottom sheet | Tap an alarm card | Time picker, weekday row, sound picker, challenge toggles, snooze selector, Hardcore switches |
-| 3 | `03-alarm-ring.png` | Ringing alarm | Edit sheet → **Test wake modes now** on a Hardcore alarm | Large clock, `HARDCORE MODE` badge, challenge progress dots, slide-to-snooze track, **no** stop button |
-| 4 | `04-math-challenge.png` | Math challenge | Test an alarm with math enabled | A problem, the on-screen keypad, the `n / N` progress |
-| 5 | `05-shake-challenge.png` | Shake challenge | Test an alarm with shake enabled, shake it about a third of the way | Progress ring **partially** filled — an empty or full ring says nothing about the mechanic |
-| 6 | `06-qr-challenge.png` | QR challenge | Test an alarm with QR enabled | Camera preview with the scan frame; point it at the printed code but shoot **before** it matches |
-| 7 | `07-world-clock.png` | World Clock tab | Add 2–3 zones so both a day and a night zone are on screen | At least four rows, visibly different day/night treatment |
-| 8 | `08-stopwatch.png` | Stopwatch tab | Start, take 3–4 laps, leave it **running** | Large readout mid-run, lap list with both columns |
-| 9 | `09-timer.png` | Timer tab | Start a 5 min timer, shoot around 03:xx | Countdown readout plus the two circle buttons |
-| 10 | `10-sunrise.png` | Sunrise pre-alarm | Set an alarm ~10 min out with Sunrise on, wait for it | Dawn gradient mid-ramp (not fully black, not fully bright), countdown to the main alarm |
-| 11 | `11-widget.png` | Home screen | Place the Brutus widget, then screenshot the **home screen** | Widget with time, countdown and day strip — crop nothing, the home-screen context is the point |
-| 12 | `12-ultra-hardcore-task.png` | Anti-snooze task | Dismiss an Ultra Hardcore alarm → notification → *Solve task* | Step counter partway through the 30 steps |
+| 1 | `01-alarm-list.png` | Alarm tab | 3–4 plausible alarms (`Work`, `Gym`, `Weekend`) — wait until the list has loaded | Countdown header, the next alarm outlined, weekday strip, info chips incl. `♪` sound |
+| 2 | `02-sound-picker.png` | Edit sheet | Tap an alarm card, scroll to *Alarm sound* | The sound chips with the selected one |
+| 3 | `03-math-challenge.png` | Ringing alarm | Fire an Ultra Hardcore alarm with math (below), type one digit | `ULTRA HARDCORE MODE`, challenge dots, keypad, slide-to-snooze |
+| 4 | `04-shake-challenge.png` | Shake challenge | Fire an alarm with shake, shake via the emulator console (below) | Progress ring **partially** filled |
+| 5 | `05-sunrise.png` | Sunrise pre-alarm | Start `SunriseActivity` (below) and wait ~2 min | Dawn gradient mid-ramp, countdown to the main alarm |
+| 6 | `06-settings.png` | Settings & info | ⋮ → *Settings & info* | Appearance and the Sunrise sound |
+| 7 | `07-timer-setup.png` | Timer tab, idle | Timer tab | Presets, end tone and the **fully visible** Start button |
+| 8 | `08-timer.png` | Timer running | Start 5 min, shoot around 04:xx | Wavy ring, Abort / Pause |
+| 9 | `09-world-clock.png` | World Clock | 3 zones, one of them at night | Day and night icons, offsets |
+| 10 | `10-stopwatch.png` | Stopwatch | Start, take three laps, leave it running | Readout and lap list |
 
-If you skip one, say so — the gallery cell gets removed rather than left pointing at a
-missing file.
+Afterwards build the README strip: `python3 tools/mockups.py docs/screenshots/mockups.jpg <shot>:"Caption" …`.
+
+### Emulator helpers (root emulator image)
+
+```bash
+adb root
+# Plausible time: status bar and device clock agree with the alarms
+adb shell settings put global auto_time 0 && adb shell "date 092806302026.00"
+adb shell am broadcast -a com.android.systemui.demo -e command clock -e hhmm 0630
+# Fire alarm <id> now (the app must have been started once since a force stop)
+adb shell am broadcast -n com.pepperonas.brutus/.receiver.AlarmReceiver --el alarm_id <id>
+# The pinned alarm heads-up covers the clock while the screen is unlocked — swipe it up
+adb shell input swipe 540 270 540 20 250
+# Shake: one push every ~0.6 s counts as a shake
+adb emu sensor set acceleration 30:9.8:0; adb emu sensor set acceleration 0:9.8:0
+# Sunrise, main alarm in 4 minutes
+adb shell am start -n com.pepperonas.brutus/.SunriseActivity --el alarm_id <id> --el main_trigger_at <epoch-ms>
+```
+
+`uiautomator dump` fails while an animation runs and leaves the **previous** dump in place — check a
+screenshot before trusting coordinates from it.
