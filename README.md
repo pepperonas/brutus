@@ -650,14 +650,14 @@ check that it is really the one this repository published.
 | Key | RSA 4096, valid 2026-04-12 → 2053-08-28 (10,000 days) |
 | Signature scheme | APK Signature Scheme v2 |
 | **Certificate SHA-256** | `69d67a10a826cf4050da4b271af9b5ed500c962bfab07a8f8fe863e3d7600382` |
-| v2.5.1 APK | 4,607,650 bytes · SHA-256 `5af7e1d9ae607fa8f20e6013eae9185610b4af8908b3e3c14fcd5e5cdef49416` |
+| v2.5.2 APK | 4,607,654 bytes · SHA-256 `1f1614863512c103a6bf96d3b28698b83ef131a7200adf1ed22a2a04a9d4457a` |
 
 The **certificate** fingerprint is the durable one — it stays identical across every release,
 so a mismatch means the APK did not come from here. The APK hash changes with every version.
 
 ```bash
-shasum -a 256 brutus-v2.5.1.apk
-$ANDROID_HOME/build-tools/35.0.0/apksigner verify --print-certs -v brutus-v2.5.1.apk
+shasum -a 256 brutus-v2.5.2.apk
+$ANDROID_HOME/build-tools/35.0.0/apksigner verify --print-certs -v brutus-v2.5.2.apk
 ```
 
 ### Samsung note
