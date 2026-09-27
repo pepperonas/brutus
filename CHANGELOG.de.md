@@ -4,6 +4,36 @@
 
 Alle nennenswerten Änderungen an Brutus stehen hier. Versionen folgen [SemVer](https://semver.org).
 
+## [2.5.0] — 2026-09-27 · 25 Töne, nach Gehör ausgewählt, und ein Sunrise nach Wahl
+
+### Neu — Töne
+- **Neun harte Töne:** Luftschutzsirene, U-Boot-Tauchalarm („A-OO-GA“), Autoalarm (wechselt alle 1,5 s
+  das Muster), Schulglocke, ein Rückfahrwarner, der immer schneller wird, eine Shepard-Sirene, die
+  scheinbar endlos steigt, Stahlhammer, Stroboskop (schneller *und* höher) und ein Evakuierungs-Whoop.
+- **Acht sanfte Töne**, gebaut für Sunrise und den Timer: Klangschale, Vogelgezwitscher, Windspiel,
+  Kalimba, Harfe, Meeresrauschen, E-Piano und Sonnenaufgang. Sie sind **exakt periodisch** — ausklingende
+  Töne laufen an den Schleifenanfang, Dauertöne haben eine ganzzahlige Periodenzahl pro Schleife —, zehn
+  Minuten Sunrise knacken also nie an der Naht.
+- Nach Gehör aus zwanzig Kandidaten ausgewählt, gerendert von genau dem Code, den die App ausführt; jeder
+  übernommene Ton wurde Bit für Bit gegen die angehörte Datei geprüft.
+- **Alle 25 auf der Produktseite anhören** — brutus.celox.io/#sounds.
+
+### Neu — Sunrise-Klang
+- **⋮ → Einstellungen & Info → Sunrise:** wähle, was der Vorlauf spielt — einen sanften Ton oder Stille
+  (nur Licht). Vorher spielte er immer das Glockenspiel. Standard: Sonnenaufgang.
+
+### Entfernt
+- **Sirene, Glockenspiel, Marimba und Morgensonne.** Wecker, Timer und Sunrise können noch einen davon
+  gespeichert haben: diese Ids sind stillgelegt, werden nie neu vergeben und klingeln mit einem Nachfolger
+  gleichen Charakters — Sirene → Luftschutzsirene, Glockenspiel → Windspiel, Marimba → Kalimba,
+  Morgensonne → Sonnenaufgang — statt auf den System-Ton zurückzufallen. Der Wecker-Editor zeigt den
+  Nachfolger als ausgewählt. Der Timer startet jetzt mit Windspiel.
+
+### Tests
+- 339 → 350: die stillgelegten Ids und ihre Nachfolger, die Sunrise-Einstellung (nur sanft, Rückfälle), ein
+  Naht-Wächter für sanfte Schleifen und ein optionaler WAV-Export (in CI übersprungen). Jede neue Sperre
+  wurde einmal wieder ausgebaut, um ihren Test scheitern zu sehen.
+
 ## [2.4.0] — 2026-09-26 · Einstellungen & Info, Benachrichtigungen, ein echter Timer und Motion mit Physik
 
 ### Neu — Einstellungen & Info

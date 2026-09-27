@@ -19,7 +19,7 @@
 <!-- Project status — these badges are live and update themselves. -->
 
 [![Tests](https://img.shields.io/github/actions/workflow/status/pepperonas/brutus/tests.yml?branch=main&label=tests&logo=githubactions&logoColor=white)](https://github.com/pepperonas/brutus/actions/workflows/tests.yml)
-[![Unit tests](https://img.shields.io/badge/unit%20tests-339-brightgreen)](#tests-and-ci)
+[![Unit tests](https://img.shields.io/badge/unit%20tests-350-brightgreen)](#tests-and-ci)
 [![Release](https://img.shields.io/github/v/release/pepperonas/brutus?color=FF5252&logo=github&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/pepperonas/brutus/total?label=APK%20downloads&color=success&logo=github&logoColor=white)](https://github.com/pepperonas/brutus/releases)
 [![Last commit](https://img.shields.io/github/last-commit/pepperonas/brutus?logo=git&logoColor=white)](https://github.com/pepperonas/brutus/commits/main)
@@ -284,7 +284,7 @@ Settings are per-alarm and persist in the same Room row.
 
 ### Alarm sounds
 
-Every synthesized sound is generated on-device in real time using `AudioTrack` with `USAGE_ALARM` and `CONTENT_TYPE_SONIFICATION` attributes. No external audio assets, tiny APK impact, seamless looping.
+**25 synthesized sounds** plus the system alarm tone and silence — **hear every one on the [product page](https://brutus.celox.io/#sounds)**. Each is generated on-device in real time using `AudioTrack` with `USAGE_ALARM` and `CONTENT_TYPE_SONIFICATION` attributes: no audio files, a tiny APK, seamless loops. The v2.5.0 set was chosen by ear from twenty candidates rendered by the very code the app runs.
 
 **Harsh sounds** — built for wake-the-dead alarm duty:
 
@@ -293,31 +293,41 @@ Every synthesized sound is generated on-device in real time using `AudioTrack` w
 | **Silent** | No audio — useful for rehearsing wake modes quietly | — |
 | **System alarm** | Android default alarm (fallback) | `RingtoneManager.TYPE_ALARM` |
 | **Klaxon** | Pulsing two-tone alarm | 600/900 Hz square wave, 300 ms each |
-| **Siren** | Sweeping siren | 400 → 1200 Hz sine sweep, 2 s cycle |
 | **Nuclear Alert** | Rapid sharp beeping | 1 kHz square, 100 ms on / 100 ms off |
 | **Piercing** | Piercing continuous beep | 3.5 kHz square wave with 8 Hz pulse — the most annoying one by design |
+| **Stadium horn** _(v1.7.0)_ | Brash stadium air-horn blat | Three detuned sawtooth voices (Bb3 / ~Eb4 / Bb4) stacked, 0.9 s |
+| **Jackhammer** _(v1.7.0)_ | Pounding construction-site rattle | ~73 Hz square gated 28 ms on / 22 ms off, with a clattering 5th-harmonic grit |
+| **Fire alarm** _(v1.7.0)_ | Standardized T-3 smoke-alarm cadence | 3.1 kHz square, three 0.5 s beeps + 1.5 s pause, looped |
+| **Dental drill** _(v1.7.0)_ | Screeching dental drill | 1.6 kHz FM carrier, 42 Hz modulator (index 9) with a slow ±220 Hz wail |
+| **Banshee** _(v1.7.0)_ | Dissonant rising wail | Four tightly-detuned voices (620–652 Hz) beating while the cluster sweeps +90 % up |
+| **Air-raid siren** _(v2.5.0)_ | Motor siren winding up, holding, winding down | 8-harmonic sawtooth gliding 160 → 720 Hz with a 5.5 Hz wobble, soft-clipped, 6 s |
+| **Dive alarm** _(v2.5.0)_ | Submarine "A-OO-GA" | Square-ish horn gliding 190 → 460 → 410 Hz, 1.4 s |
+| **Car alarm** _(v2.5.0)_ | Four patterns, 1.5 s each | Wail, yelp, gated 420 Hz horn, 850/1150 Hz warble |
+| **School bell** _(v2.5.0)_ | Mechanical clapper | 22 strikes/s exciting four inharmonic bell partials around 1.48 kHz |
+| **Reverse beeper** _(v2.5.0)_ | Truck warning beep that keeps accelerating | 1.04 kHz saturated square, 2 → 12 beeps/s over 4 s |
+| **Shepard siren** _(v2.5.0)_ | Tone that seems to rise forever | Eight octave-spaced voices with a Gaussian envelope, one octave per 6 s loop |
+| **Steel hammer** _(v2.5.0)_ | Irregular blows on metal | Noise transients + five inharmonic partials, eight hits per 3 s |
+| **Strobe** _(v2.5.0)_ | High beeps, faster **and** higher | 4 → 30 beeps/s while the pitch climbs 1.5 → 4 kHz |
+| **Evacuation whoop** _(v2.5.0)_ | Industrial "whoop" | Upward sweep 380 → 1480 Hz in 0.8 s, hard restart |
 
-**Extreme sounds** _(v1.7.0)_ — five more ways to be ripped out of bed:
+**Gentle sounds** _(v2.5.0)_ — for the timer and the Sunrise pre-alarm, capped at 60 % amplitude and built to be **exactly periodic**: decaying notes are rendered circularly (their tail wraps round to the start of the loop) and sustained tones use frequencies with a whole number of cycles per loop, so ten minutes of Sunrise never click at the seam (`gentle sounds loop without a click` pins it).
 
 | Sound | Character | Signal |
 |-------|-----------|--------|
-| **Stadium horn** | Brash stadium air-horn blat | Three detuned sawtooth voices (Bb3 / ~Eb4 / Bb4) stacked, 0.9 s |
-| **Jackhammer** | Pounding construction-site rattle | ~73 Hz square gated 28 ms on / 22 ms off, with a clattering 5th-harmonic grit |
-| **Fire alarm** | Standardized T-3 smoke-alarm cadence | 3.1 kHz square, three 0.5 s beeps + 1.5 s pause, looped |
-| **Dental drill** | Screeching dental drill | 1.6 kHz FM carrier, 42 Hz modulator (index 9) with a slow ±220 Hz wail |
-| **Banshee** | Dissonant rising wail | Four tightly-detuned voices (620–652 Hz) beating while the cluster sweeps +90 % up |
-
-**Gentle sounds** _(v1.5.0)_ — for the timer and casual wake-ups, capped at ~50–60 % amplitude:
-
-| Sound | Character | Signal |
-|-------|-----------|--------|
-| **Chime** | Soft 3-note descending bell with overtones | E5 → C5 → G4 sine + 2nd/3rd harmonics, exp decay |
-| **Marimba** | Woody pluck pattern | 440 Hz sine + 4th harmonic, three plucks/loop, fast envelope |
-| **Morning sun** | Slow swelling A-major triad | A4 + C♯5 + E5, triangular envelope over 3 s |
+| **Singing bowl** | Deep, long-ringing bowl with a gentle beat | 196 Hz + a 0.9 Hz-detuned twin + partials at ×2.71/×5.1, 6 s |
+| **Birdsong** | Quiet chirps, loosely spread | 2.8–4.2 kHz chirps with vibrato in groups of two to four (fixed seed) |
+| **Wind chimes** | Pentatonic bells set off at random | C6–C7 pentatonic, bell partial ×2.76, 1.3 s decay |
+| **Kalimba** | Thumb-piano motif | Eight notes in G, tine partial ×5.4 |
+| **Harp** | Rising arpeggios | Cmaj7 and Fmaj7 over two octaves |
+| **Ocean waves** | A wave rolling in and back | Two-pole low-passed noise, cutoff and level swelling over 6 s |
+| **Electric piano** | Calm Rhodes chords | FM with a decaying index over Fmaj7 · Em7 · Dm7 · Cmaj7 |
+| **Daybreak** | A pad that breathes and brightens | D-major pad whose upper partials open and close once per loop |
 
 Choosing **Silent** skips the audio path entirely; vibration still runs so the alarm is noticeable if you need it.
 
-Sound preview works directly inside the edit dialog — tap a chip to hear it, tap _Stop preview_ when you're done. The Timer screen has its own sound picker (gentle sounds only) — defaults to **Chime**, persists in `SharedPreferences`.
+**Removed in v2.5.0:** Siren, Chime, Marimba and Morning sun. Their ids are **retired, never reused**, and map to a successor of the same character (`AlarmSound.RETIRED`): Siren → Air-raid siren, Chime → Wind chimes, Marimba → Kalimba, Morning sun → Daybreak. An alarm, timer or Sunrise setting saved with one of them keeps ringing with its successor instead of falling back to the system tone.
+
+Sound preview works directly inside the edit dialog — tap a chip to hear it, tap _Stop preview_ when you're done. The Timer screen has its own sound picker (gentle sounds only) — defaults to **Wind chimes**. The Sunrise sound is picked under ⋮ → **Settings & info** (default **Daybreak**, or silence for light only). To audition sounds on a computer: `BRUTUS_SOUND_EXPORT=~/Desktop/Brutus-Sounds ./gradlew :app:testDebugUnitTest --tests '*SoundExportTest'` writes every sound as WAV plus an overview page; `scripts/sound-previews.sh` rebuilds the product page's previews.
 
 ### Hardcore Mode
 
@@ -358,7 +368,7 @@ A per-alarm opt-in (v1.6.0) that gives you a 10-minute gentle wake-up window _be
 
 - A separate `setExactAndAllowWhileIdle` registration fires 10 min before the main trigger and launches `SunriseActivity` on top of the lock screen.
 - The activity ramps the **screen brightness** linearly from ~5 % to 100 % and the background gradient shifts from black to dawn-orange.
-- A soft **Chime** loops at the picker's amplitude — no max-volume override, no Hardcore guard. Just an ambient cue.
+- The gentle sound chosen under ⋮ → **Settings & info** loops softly (default **Daybreak**, or silence for light only) — no max-volume override, no Hardcore guard. Just an ambient cue.
 - The clock continues to tick centered on the screen with a live countdown to the main alarm.
 - Two buttons: **Stop alarm** (disables the alarm entirely, same effect as toggling it off in the list) and **Already awake — close sunrise** (closes the pre-alarm; main alarm still fires at the configured time).
 - Sunrise has _no_ challenge requirements and _no_ Hardcore behavior. The brutal alarm path takes over exactly at the configured time regardless of whether the Sunrise activity is still open.
@@ -448,7 +458,7 @@ Since **v1.8.0** the stopwatch (and the timer) keep their entire state — inclu
 
 ### Timer
 
-HMS picker (hours 0–23, minutes 0–59, seconds 0–59) with up/down steppers on each column. Quick-preset row for common durations (1m, 3m, 5m, 10m, 15m, 30m). A **gentle-sound picker** (added in v1.5.0) below the presets lets you pick the finish tone — defaults to **Chime**, choice persists across launches via `TimerSoundStore`. Tapping a chip previews the sound; **Stop** halts the preview.
+HMS picker (hours 0–23, minutes 0–59, seconds 0–59) with up/down steppers on each column. Quick-preset row for common durations (1m, 3m, 5m, 10m, 15m, 30m). A **gentle-sound picker** (added in v1.5.0) below the presets lets you pick the finish tone — defaults to **Wind chimes**, choice persists across launches via `TimerSoundStore`. Tapping a chip previews the sound; **Stop** halts the preview.
 
 During the countdown the screen switches to a large 56 sp readout in a continuously draining wavy ring and a button group (**Abort / Pause-Resume**). When the timer expires the chosen synthesized sound (or the system ringtone if **System alarm** is picked) plays in a loop with `USAGE_ALARM` audio attributes until **Stop** is pressed — behavior mirrors a classic kitchen timer rather than a brutal wake mode.
 
@@ -461,6 +471,8 @@ in the primary colour over a rounded card.
 
 - **Appearance** — theme **System / Light / Dark** (the alarm screens stay dark), **Material You colors**
   (Android 12+).
+- **Sunrise** _(v2.5.0)_ — the sound of the Sunrise pre-alarm: one of the eight gentle sounds or silence
+  (light only), default **Daybreak**; tapping a chip previews it.
 - **Notifications** — how long before an alarm the heads-up appears (**Off / 30 / 60 / 120 min**), and the
   opt-in **update check**.
 - **About Brutus** — the app mark, version and build, "Made by Martin Pfeffer", chips for the
@@ -876,7 +888,7 @@ app/src/main/res/
 
 ## Tests and CI
 
-339 JVM unit tests guard the parts where a bug means someone oversleeps: what actually lands in
+350 JVM unit tests guard the parts where a bug means someone oversleeps: what actually lands in
 `AlarmManager`, the alarm-time arithmetic, persistence, the completeness of both translations, and
 every string the user reads on a clock face. There are no instrumented tests — the whole suite runs
 on the JVM in seconds.
@@ -890,7 +902,7 @@ on the JVM in seconds.
 | `util/UltraHardcoreStoreTest` | 12 | the follow-up bookkeeping that has to survive a reboot: sequences tracked independently, `clearAllFor` scoped to one alarm, step-target keys never leaking into the pending list (Robolectric) |
 | `widget/NextAlarmWidgetFormatTest` | 12 | the two strings on the home screen in both languages, including singular/plural and the no-rounding-up rule (Robolectric) |
 | `util/NextAlarmCalendarEdgeTest` | 11 | **daylight saving**: 23 real hours between triggers on the short night, 25 on the long one, wall-clock time preserved; the skipped and the duplicated hour; month, year and leap-day rollovers |
-| `util/AlarmSoundTest` | 11 | the **persisted** sound ids as a golden map — renumbering would silently change what existing alarms play — plus the display names in both languages |
+| `util/AlarmSoundTest` | 14 | the **persisted** sound ids as a golden map — renumbering would silently change what existing alarms play — the retired ids of v2.5.0 and their successors of the same character, plus the display names in both languages |
 | `ResourceParityTest` | 11 | the two languages cannot drift: identical key sets, no blank values, **matching format specifiers**, complete plurals, seven weekdays each, no German left in the default file, and `locales_config.xml` in sync with the `values-*` folders |
 | `BrutusApplicationTest` | 10 | notification channels are write-once: importance, DND bypass, silence — and the update channel never breaks through DND (Robolectric) |
 | `update/UpdateCheckerTest` | 10 | the opt-in update check end to end with a fake source: off means **no request at all**, one notification per version, never for the installed or an older one, the tap opens the download page, the banner follows the switch (Robolectric) |
@@ -913,7 +925,7 @@ on the JVM in seconds.
 | `viewmodel/TimerViewModelTest` | 8 | countdown/pause math, cancel-undo state machine, an expired timer is deliberately *not* undoable (Robolectric) |
 | `util/ChallengeFlagsTest` | 8 | `describe` / `activeList` / `has` / `sanitize` bitmask edge cases, incl. the unknown-bit fallback |
 | `util/ChallengeDifficultyTest` | 8 | math operand ranges, shake threshold ordering (9 / 12 / 16 m/s²), distinct labels per preset in both languages |
-| `util/AlarmSoundGeneratorTest` | 7 | PCM buffer length, peak amplitudes, loop-boundary fade, gentle vs. harsh vs. extreme classification |
+| `util/AlarmSoundGeneratorTest` | 7 | PCM buffer length, peak amplitudes, gentle loops without a click at the seam, gentle vs. harsh vs. extreme classification |
 | `util/AlarmSoundGeneratorPropertiesTest` | 7 | invariants every synthesized sound must hold — loop length budget, determinism, DC offset, gentle headroom; a new enum entry is covered automatically |
 | `util/PermissionDeepLinkTest` | 7 | the three reliability banners land on the right settings page (action + `package:` URI + `NEW_TASK`) (Robolectric) |
 | `data/RoomSchemaExportTest` | 7 | the running database's **identity hash against the committed `7.json`** — a field added without a migration fails here instead of on a user's device |
@@ -922,12 +934,14 @@ on the JVM in seconds.
 | `data/AlarmEntityTest` | 7 | `timeString` padding, `repeatDaysString` / `soundName` / `challengeName` in English **and** German, weekday bitmask, `hardcoreEffective` |
 | `util/GlobalQrStoreTest` | 6 | the installation's QR code never changes — every printed copy depends on it (Robolectric) |
 | `util/WorldClockStoreTest` | 6 | default seeding on first launch, round-trips, an empty list stays empty, blank filtering (Robolectric) |
-| `util/TimerSoundStoreTest` | 6 | timer tone persistence, id 0 vs. "unset", corrupt id degrades to the system tone (Robolectric) |
+| `util/TimerSoundStoreTest` | 7 | timer tone persistence, id 0 vs. "unset", corrupt id degrades to the system tone, a retired id resolves to its successor (Robolectric) |
+| `util/SunriseSoundSettingTest` | 5 | the Sunrise sound: default, round-trip, only gentle sounds or silence, harsh/unknown ids fall back, retired ids resolve (Robolectric) |
+| `util/SoundExportTest` | 2 | writes every sound as WAV + overview page, and the product page previews — skipped unless `BRUTUS_SOUND_EXPORT` / `BRUTUS_SOUND_PREVIEWS` is set |
 | `viewmodel/StopwatchViewModelTest` | 6 | segment accumulation, laps, reset-undo snapshot semantics |
 | `scheduler/AlarmSchedulerConstantsTest` | 4 | Ultra Hardcore offsets, sunrise lead time, intent-extra uniqueness |
 
 ```bash
-./gradlew :app:testDebugUnitTest          # all 339
+./gradlew :app:testDebugUnitTest          # all 350
 ./gradlew :app:testDebugUnitTest --tests '*NextAlarmCalculatorTest'
 # HTML report: app/build/reports/tests/testDebugUnitTest/index.html
 ```
@@ -978,8 +992,8 @@ app/src/test/java/com/pepperonas/brutus/
 │   ├── UpdateCheckerTest.kt           10 — off = no request, notify once per shown version, banner, tap target
 │   └── UpdateSchedulerTest.kt          6 — daily network-bound work, immediate check, cancel on off
 ├── util/
-│   ├── AlarmSoundTest.kt              11 — golden map of the persisted sound ids, names per language
-│   ├── AlarmSoundGeneratorTest.kt      7 — PCM length, peak amplitudes, loop-boundary fade, gentle vs harsh
+│   ├── AlarmSoundTest.kt              14 — golden map of the persisted sound ids, retired ids, names per language
+│   ├── AlarmSoundGeneratorTest.kt      7 — PCM length, peak amplitudes, seamless gentle loops, gentle vs harsh
 │   ├── AlarmSoundGeneratorPropertiesTest.kt  7 — invariants across every synthesized sound
 │   ├── ChallengeFlagsTest.kt           8 — describe / activeList / has / sanitize, unknown-bit fallback
 │   ├── ChallengeDifficultyTest.kt      8 — operand ranges, threshold ordering, distinct labels
@@ -988,7 +1002,9 @@ app/src/test/java/com/pepperonas/brutus/
 │   ├── NextAlarmCalendarEdgeTest.kt   11 — DST nights (23 h / 25 h), skipped + duplicated hour, rollovers
 │   ├── StorageTest.kt                  7 — move to device-protected storage keeps the QR code
 │   ├── PermissionDeepLinkTest.kt       7 — the three reliability banners land on the right settings page
-│   ├── TimerSoundStoreTest.kt          6 — timer tone persistence and corrupt-id fallback
+│   ├── TimerSoundStoreTest.kt          7 — timer tone persistence, corrupt-id fallback, retired ids
+│   ├── SunriseSoundSettingTest.kt      5 — Sunrise sound: gentle only, fallbacks, retired ids
+│   ├── SoundExportTest.kt              2 — WAV export + product page previews (opt-in)
 │   ├── UltraHardcoreStoreTest.kt      12 — reboot-surviving follow-up bookkeeping
 │   └── WorldClockStoreTest.kt          6 — default seeding, round-trips, empty list sticks
 ├── viewmodel/

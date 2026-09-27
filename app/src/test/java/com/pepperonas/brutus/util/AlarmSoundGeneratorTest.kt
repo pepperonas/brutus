@@ -30,7 +30,7 @@ class AlarmSoundGeneratorTest {
 
     @Test
     fun `gentle sounds are noticeably quieter than the harsh ones`() {
-        val gentlePeaks = listOf(AlarmSound.CHIME, AlarmSound.MARIMBA, AlarmSound.MORNING)
+        val gentlePeaks = AlarmSound.entries.filter { it.gentle }
             .map { AlarmSoundGenerator.generatePcm(it).maxOf { s -> max(s.toInt(), -s.toInt()) } }
         val harshPeaks = listOf(AlarmSound.KLAXON, AlarmSound.NUCLEAR, AlarmSound.PIERCING)
             .map { AlarmSoundGenerator.generatePcm(it).maxOf { s -> max(s.toInt(), -s.toInt()) } }
@@ -43,29 +43,24 @@ class AlarmSoundGeneratorTest {
     }
 
     @Test
-    fun `gentle sounds start and end near zero to avoid click on loop boundary`() {
-        // The harsh sounds (PIERCING etc.) intentionally hard-start at full amplitude.
-        // The gentle sounds are meant to loop transparently and must fade in / out.
-        listOf(AlarmSound.CHIME, AlarmSound.MARIMBA, AlarmSound.MORNING).forEach { snd ->
-            val pcm = AlarmSoundGenerator.generatePcm(snd)
-            val tolerance = Short.MAX_VALUE / 20  // 5% of full scale
-            assertTrue(
-                pcm.first().toInt() in -tolerance..tolerance,
-                "$snd first sample ${pcm.first()} is outside ±$tolerance"
-            )
-            assertTrue(
-                pcm.last().toInt() in -tolerance..tolerance,
-                "$snd last sample ${pcm.last()} is outside ±$tolerance"
-            )
+    fun `gentle sounds loop without a click`() {
+        // Sunrise loops one for ten minutes. A click is a break in the waveform, not a steep slope:
+        // the first sample must follow the trend of the last two as closely as any sample inside
+        // the buffer follows its predecessors.
+        AlarmSound.entries.filter { it.gentle }.forEach { snd ->
+            val p = AlarmSoundGenerator.generatePcm(snd).map { it.toInt() }
+            val inside = (2 until p.size).map { kotlin.math.abs(p[it] - 2 * p[it - 1] + p[it - 2]) }.sorted()
+            val typical = inside[(inside.size * 0.999).toInt()].coerceAtLeast(1)
+            val wrap = kotlin.math.abs(p[0] - 2 * p[p.size - 1] + p[p.size - 2])
+            assertTrue(wrap <= typical, "$snd: wrap break $wrap vs 99.9th percentile $typical")
         }
     }
 
     @Test
     fun `gentleSounds list contains the new soft sounds plus SYSTEM and SILENT`() {
         val gentle = AlarmSound.gentleSounds()
-        assertTrue(AlarmSound.CHIME in gentle)
-        assertTrue(AlarmSound.MARIMBA in gentle)
-        assertTrue(AlarmSound.MORNING in gentle)
+        AlarmSound.entries.filter { it.gentle }.forEach { assertTrue(it in gentle, "$it") }
+        assertEquals(8, AlarmSound.entries.count { it.gentle })
         assertTrue(AlarmSound.SILENT in gentle)
         assertTrue(AlarmSound.SYSTEM in gentle)
         // Harsh sounds should NOT be in the gentle list
@@ -78,6 +73,10 @@ class AlarmSoundGeneratorTest {
         val extreme = listOf(
             AlarmSound.AIRHORN, AlarmSound.JACKHAMMER, AlarmSound.FIRE_ALARM,
             AlarmSound.DENTIST, AlarmSound.BANSHEE,
+            // v2.5.0
+            AlarmSound.AIR_RAID, AlarmSound.DIVE, AlarmSound.CAR_ALARM, AlarmSound.SCHOOL_BELL,
+            AlarmSound.REVERSE_BEEPER, AlarmSound.SHEPARD, AlarmSound.STEEL_HAMMER, AlarmSound.STROBE,
+            AlarmSound.WHOOP,
         )
         val gentle = AlarmSound.gentleSounds()
         extreme.forEach { snd ->
@@ -89,7 +88,8 @@ class AlarmSoundGeneratorTest {
     }
 
     @Test
-    fun `TimerSoundStore default is CHIME`() {
-        assertEquals(AlarmSound.CHIME, TimerSoundStore.DEFAULT_SOUND)
+    fun `TimerSoundStore default is the successor of the retired chime`() {
+        assertEquals(AlarmSound.WIND_CHIMES, TimerSoundStore.DEFAULT_SOUND)
+        assertEquals(AlarmSound.fromId(7), TimerSoundStore.DEFAULT_SOUND)
     }
 }

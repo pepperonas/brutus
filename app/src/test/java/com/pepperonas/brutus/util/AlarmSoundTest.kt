@@ -23,19 +23,53 @@ class AlarmSoundTest {
     private val pinnedIds = mapOf(
         "SYSTEM" to 0,
         "KLAXON" to 1,
-        "SIREN" to 2,
         "NUCLEAR" to 3,
         "PIERCING" to 5,
         "SILENT" to 6,
-        "CHIME" to 7,
-        "MARIMBA" to 8,
-        "MORNING" to 9,
         "AIRHORN" to 10,
         "JACKHAMMER" to 11,
         "FIRE_ALARM" to 12,
         "DENTIST" to 13,
         "BANSHEE" to 14,
+        "AIR_RAID" to 15,
+        "DIVE" to 16,
+        "CAR_ALARM" to 17,
+        "SCHOOL_BELL" to 18,
+        "REVERSE_BEEPER" to 19,
+        "SHEPARD" to 20,
+        "STEEL_HAMMER" to 21,
+        "STROBE" to 22,
+        "WHOOP" to 23,
+        "SINGING_BOWL" to 24,
+        "BIRDS" to 25,
+        "WIND_CHIMES" to 26,
+        "KALIMBA" to 27,
+        "HARP" to 28,
+        "OCEAN" to 29,
+        "ELECTRIC_PIANO" to 30,
+        "SUNRISE" to 31,
     )
+
+    /** Removed in v2.5.0: Siren, Chime, Marimba, Morning sun — alarms may still store these ids. */
+    private val retired = mapOf(2 to "AIR_RAID", 7 to "WIND_CHIMES", 8 to "KALIMBA", 9 to "SUNRISE")
+
+    @Test
+    fun `retired ids resolve to their successor, never to the system tone`() {
+        assertEquals(retired, AlarmSound.RETIRED.mapValues { it.value.name })
+        retired.forEach { (id, name) -> assertEquals(name, AlarmSound.fromId(id).name) }
+    }
+
+    @Test
+    fun `retired ids are never reused by a live sound`() {
+        assertTrue(AlarmSound.entries.none { it.id in AlarmSound.RETIRED.keys })
+    }
+
+    @Test
+    fun `a retired sound is replaced by one of the same character`() {
+        // The siren was harsh; chime, marimba and morning sun were gentle.
+        assertFalse(AlarmSound.fromId(2).gentle)
+        listOf(7, 8, 9).forEach { assertTrue(AlarmSound.fromId(it).gentle, "id $it") }
+    }
 
     @Test
     fun `persisted sound ids are pinned — renumbering would rewrite existing alarms`() {
@@ -103,8 +137,8 @@ class AlarmSoundTest {
         // Proper nouns stay put …
         assertEquals(AlarmSound.KLAXON.label(en), AlarmSound.KLAXON.label(de))
         // … while translated ones actually change.
-        assertEquals("Chime", AlarmSound.CHIME.label(en))
-        assertEquals("Glockenspiel", AlarmSound.CHIME.label(de))
+        assertEquals("Wind chimes", AlarmSound.WIND_CHIMES.label(en))
+        assertEquals("Windspiel", AlarmSound.WIND_CHIMES.label(de))
         assertEquals("Silent", AlarmSound.SILENT.label(en))
         assertEquals("Stumm", AlarmSound.SILENT.label(de))
     }

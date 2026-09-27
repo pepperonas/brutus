@@ -340,4 +340,48 @@
     });
     syncToggle();
   })();
+  // Sound previews (content.sounds): one plays at a time, a second tap stops it, and a file is only
+  // fetched on its first tap. The bar under a card shows how far it has played.
+  (function () {
+    var buttons = document.querySelectorAll('.snd-play');
+    if (!buttons.length) return;
+    var audio = null;
+    var current = null;
+    var frame = 0;
+    function bar(btn, f) {
+      var i = btn.closest('.snd').querySelector('.snd-bar i');
+      if (i) i.style.transform = 'scaleX(' + f + ')';
+    }
+    function stop() {
+      if (audio) audio.pause();
+      if (current) {
+        current.setAttribute('aria-pressed', 'false');
+        current.closest('.snd').classList.remove('playing');
+        bar(current, 0);
+      }
+      current = null;
+      cancelAnimationFrame(frame);
+    }
+    function tick() {
+      if (audio && current && audio.duration) bar(current, audio.currentTime / audio.duration);
+      frame = requestAnimationFrame(tick);
+    }
+    buttons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (current === btn) { stop(); return; }
+        stop();
+        if (!audio) {
+          audio = new Audio();
+          audio.addEventListener('ended', stop);
+        }
+        audio.src = btn.getAttribute('data-sound');
+        current = btn;
+        btn.setAttribute('aria-pressed', 'true');
+        btn.closest('.snd').classList.add('playing');
+        var played = audio.play();
+        if (played && played.catch) played.catch(stop);
+        tick();
+      });
+    });
+  })();
 })();

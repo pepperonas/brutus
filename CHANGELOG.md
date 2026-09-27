@@ -4,6 +4,35 @@
 
 All notable changes to Brutus are documented here. Versions follow [SemVer](https://semver.org).
 
+## [2.5.0] — 2026-09-27 · 25 sounds, chosen by ear, and a Sunrise you pick
+
+### Added — sounds
+- **Nine harsh sounds:** air-raid siren, dive alarm (“A-OO-GA”), car alarm (changes pattern every
+  1.5 s), school bell, reverse beeper that keeps speeding up, a Shepard siren that seems to rise forever,
+  steel hammer, strobe (faster *and* higher) and an evacuation whoop.
+- **Eight gentle sounds**, built for Sunrise and the timer: singing bowl, birdsong, wind chimes,
+  kalimba, harp, ocean waves, electric piano and Daybreak. They are **exactly periodic** — decaying notes
+  wrap round to the start of the loop, sustained tones have a whole number of cycles per loop — so ten
+  minutes of Sunrise never click at the seam.
+- Chosen by ear from twenty candidates rendered by the very code the app runs; each adopted sound was
+  checked bit for bit against the file that was listened to.
+- **Hear all 25 on the product page** — brutus.celox.io/#sounds.
+
+### Added — Sunrise sound
+- **⋮ → Settings & info → Sunrise:** pick what the pre-alarm plays — any gentle sound or silence (light
+  only). Before, it always played the chime. Default: Daybreak.
+
+### Removed
+- **Siren, Chime, Marimba and Morning sun.** Alarms, the timer and Sunrise may still have one stored:
+  those ids are retired, never reused, and ring with a successor of the same character — Siren → Air-raid
+  siren, Chime → Wind chimes, Marimba → Kalimba, Morning sun → Daybreak — instead of falling back to the
+  system tone. The alarm editor shows the successor as selected. The timer now defaults to Wind chimes.
+
+### Tests
+- 339 → 350: the retired ids and their successors, the Sunrise setting (gentle only, fallbacks), a seam
+  check for gentle loops, and an opt-in WAV export (skipped in CI). Each new guard was re-introduced once
+  to see its test fail.
+
 ## [2.4.0] — 2026-09-26 · Settings & info, notifications, a real timer, and motion with physics
 
 ### Added — Settings & info

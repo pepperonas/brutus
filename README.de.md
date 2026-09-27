@@ -19,7 +19,7 @@
 <!-- Projektstatus — diese Badges aktualisieren sich selbst. -->
 
 [![Tests](https://img.shields.io/github/actions/workflow/status/pepperonas/brutus/tests.yml?branch=main&label=tests&logo=githubactions&logoColor=white)](https://github.com/pepperonas/brutus/actions/workflows/tests.yml)
-[![Unit tests](https://img.shields.io/badge/unit%20tests-339-brightgreen)](#tests-und-ci)
+[![Unit tests](https://img.shields.io/badge/unit%20tests-350-brightgreen)](#tests-und-ci)
 [![Release](https://img.shields.io/github/v/release/pepperonas/brutus?color=FF5252&logo=github&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/pepperonas/brutus/total?label=APK%20downloads&color=success&logo=github&logoColor=white)](https://github.com/pepperonas/brutus/releases)
 [![Last commit](https://img.shields.io/github/last-commit/pepperonas/brutus?logo=git&logoColor=white)](https://github.com/pepperonas/brutus/commits/main)
@@ -284,7 +284,7 @@ Die Einstellungen gelten pro Wecker und liegen in derselben Room-Zeile.
 
 ### Wecker-Sounds
 
-Jeder synthetisierte Sound entsteht in Echtzeit auf dem Gerät über `AudioTrack` mit den Attributen `USAGE_ALARM` und `CONTENT_TYPE_SONIFICATION`. Keine Audio-Dateien, kaum APK-Zuwachs, nahtlose Schleifen.
+**25 synthetisierte Sounds** plus System-Weckton und Stille — **alle zum Anhören auf der [Produktseite](https://brutus.celox.io/#sounds)**. Jeder entsteht in Echtzeit auf dem Gerät über `AudioTrack` mit den Attributen `USAGE_ALARM` und `CONTENT_TYPE_SONIFICATION`: keine Audio-Dateien, kaum APK-Zuwachs, nahtlose Schleifen. Die Auswahl von v2.5.0 wurde nach Gehör aus zwanzig Kandidaten getroffen, gerendert von genau dem Code, den die App ausführt.
 
 **Harte Sounds** — gebaut fürs Wecken der Toten:
 
@@ -293,31 +293,41 @@ Jeder synthetisierte Sound entsteht in Echtzeit auf dem Gerät über `AudioTrack
 | **Stumm** | Kein Ton — praktisch, um die Weckmodi leise zu proben | — |
 | **System-Alarm** | Android-Standard-Alarmton (Fallback) | `RingtoneManager.TYPE_ALARM` |
 | **Klaxon** | Pulsierender Zwei-Ton-Alarm | 600/900 Hz Rechteck, je 300 ms |
-| **Sirene** | Auf- und abschwellende Sirene | 400 → 1200 Hz Sinus-Sweep, 2-s-Zyklus |
 | **Nuclear Alert** | Schnelles, scharfes Piepen | 1 kHz Rechteck, 100 ms an / 100 ms aus |
 | **Durchdringend** | Durchdringender Dauerton | 3,5 kHz Rechteck mit 8-Hz-Pulsation — der nervigste, mit Absicht |
+| **Stadion-Horn** _(v1.7.0)_ | Brüllendes Stadion-Airhorn | Drei verstimmte Sägezahn-Stimmen (Bb3 / ~Eb4 / Bb4) übereinander, 0,9 s |
+| **Presslufthammer** _(v1.7.0)_ | Pochendes Baustellen-Rattern | ~73 Hz Rechteck, 28 ms an / 22 ms aus, mit klapperndem 5.-Oberton |
+| **Feueralarm** _(v1.7.0)_ | Genormtes T-3-Rauchmelder-Muster | 3,1 kHz Rechteck, drei 0,5-s-Töne + 1,5 s Pause, in Schleife |
+| **Bohrer** _(v1.7.0)_ | Kreischender Zahnarztbohrer | 1,6 kHz FM-Träger, 42 Hz Modulator (Index 9) mit langsamem ±220-Hz-Jaulen |
+| **Banshee** _(v1.7.0)_ | Dissonantes, ansteigendes Heulen | Vier eng verstimmte Stimmen (620–652 Hz) im Schwebungs-Cluster, +90 % aufwärts gezogen |
+| **Luftschutzsirene** _(v2.5.0)_ | Motorsirene: heult hoch, hält, fällt | Sägezahn mit 8 Obertönen, gleitet 160 → 720 Hz mit 5,5-Hz-Flattern, weich übersteuert, 6 s |
+| **U-Boot-Tauchalarm** _(v2.5.0)_ | „A-OO-GA“ | Rechteckiger Hupenton, gleitet 190 → 460 → 410 Hz, 1,4 s |
+| **Autoalarm** _(v2.5.0)_ | Vier Muster, je 1,5 s | Heulen, Jaulen, getaktete 420-Hz-Hupe, Trillern 850/1150 Hz |
+| **Schulglocke** _(v2.5.0)_ | Mechanischer Klöppel | 22 Schläge/s regen vier unharmonische Glockenteiltöne um 1,48 kHz an |
+| **Rückfahrwarner** _(v2.5.0)_ | LKW-Warnpiep, der immer schneller wird | 1,04 kHz gesättigtes Rechteck, 2 → 12 Pieps/s über 4 s |
+| **Shepard-Sirene** _(v2.5.0)_ | Ton, der scheinbar endlos steigt | Acht Oktav-Stimmen mit Gauß-Hüllkurve, eine Oktave pro 6-s-Schleife |
+| **Stahlhammer** _(v2.5.0)_ | Unregelmäßige Schläge auf Metall | Rausch-Transienten + fünf unharmonische Teiltöne, acht Schläge pro 3 s |
+| **Stroboskop** _(v2.5.0)_ | Hohe Pieps, schneller **und** höher | 4 → 30 Pieps/s, die Tonhöhe steigt dabei 1,5 → 4 kHz |
+| **Evakuierungs-Whoop** _(v2.5.0)_ | Industrie-„Whoop“ | Aufwärts-Sweep 380 → 1480 Hz in 0,8 s, harter Neustart |
 
-**Extreme Sounds** _(v1.7.0)_ — fünf weitere Arten, aus dem Bett gerissen zu werden:
+**Sanfte Sounds** _(v2.5.0)_ — für den Timer und den Sunrise-Vorlauf, gedeckelt bei 60 % Amplitude und **exakt periodisch** gebaut: ausklingende Töne werden zirkulär gerendert (ihr Nachklang läuft an den Schleifenanfang), Dauertöne nutzen Frequenzen mit ganzzahliger Periodenzahl pro Schleife — zehn Minuten Sunrise knacken so nie an der Nahtstelle (gesichert durch `gentle sounds loop without a click`).
 
 | Sound | Charakter | Signal |
 |-------|-----------|--------|
-| **Stadion-Horn** | Brüllendes Stadion-Airhorn | Drei verstimmte Sägezahn-Stimmen (Bb3 / ~Eb4 / Bb4) übereinander, 0,9 s |
-| **Presslufthammer** | Pochendes Baustellen-Rattern | ~73 Hz Rechteck, 28 ms an / 22 ms aus, mit klapperndem 5.-Oberton |
-| **Feueralarm** | Genormtes T-3-Rauchmelder-Muster | 3,1 kHz Rechteck, drei 0,5-s-Töne + 1,5 s Pause, in Schleife |
-| **Bohrer** | Kreischender Zahnarztbohrer | 1,6 kHz FM-Träger, 42 Hz Modulator (Index 9) mit langsamem ±220-Hz-Jaulen |
-| **Banshee** | Dissonantes, ansteigendes Heulen | Vier eng verstimmte Stimmen (620–652 Hz) im Schwebungs-Cluster, +90 % aufwärts gezogen |
-
-**Sanfte Sounds** _(v1.5.0)_ — für den Timer und ruhiges Wecken, gedeckelt bei ~50–60 % Amplitude:
-
-| Sound | Charakter | Signal |
-|-------|-----------|--------|
-| **Glockenspiel** | Weiches absteigendes 3-Ton-Glockenspiel mit Obertönen | E5 → C5 → G4 Sinus + 2./3. Oberton, exponentieller Abfall |
-| **Marimba** | Holziges Anschlag-Pattern | 440 Hz Sinus + 4. Oberton, drei Anschläge pro Schleife, schnelle Hüllkurve |
-| **Morgensonne** | Langsam anschwellender A-Dur-Dreiklang | A4 + C♯5 + E5, dreieckige Hüllkurve über 3 s |
+| **Klangschale** | Tiefe, lang klingende Schale mit sanfter Schwebung | 196 Hz + ein um 0,9 Hz verstimmter Zwilling + Teiltöne ×2,71/×5,1, 6 s |
+| **Vogelgezwitscher** | Leise Rufe, locker verteilt | 2,8–4,2-kHz-Tschilps mit Vibrato in Gruppen von zwei bis vier (fester Seed) |
+| **Windspiel** | Pentatonische Glöckchen, zufällig angestoßen | C6–C7 pentatonisch, Glockenteilton ×2,76, 1,3 s Abklingen |
+| **Kalimba** | Daumenklavier-Motiv | Acht Töne in G, Zungen-Teilton ×5,4 |
+| **Harfe** | Aufsteigende Arpeggios | Cmaj7 und Fmaj7 über zwei Oktaven |
+| **Meeresrauschen** | Eine Welle, die anrollt und zurückgeht | Zweipolig tiefpassgefiltertes Rauschen, Grenzfrequenz und Pegel schwellen über 6 s |
+| **E-Piano** | Ruhige Rhodes-Akkorde | FM mit abklingendem Index über Fmaj7 · Em7 · Dm7 · Cmaj7 |
+| **Sonnenaufgang** | Klangfläche, die aufatmet und heller wird | D-Dur-Fläche, deren obere Teiltöne sich einmal pro Schleife öffnen und schließen |
 
 **Stumm** überspringt den Audio-Pfad vollständig; die Vibration läuft weiter, damit der Alarm trotzdem spürbar ist.
 
-Das Vorhören funktioniert direkt im Bearbeiten-Dialog — Chip antippen zum Hören, _Vorschau stoppen_ zum Beenden. Der Timer hat seinen eigenen Sound-Wähler (nur sanfte Töne) — Standard ist **Glockenspiel**, gespeichert in `SharedPreferences`.
+**Entfernt in v2.5.0:** Sirene, Glockenspiel, Marimba und Morgensonne. Ihre ids sind **stillgelegt, nie wieder vergeben** und zeigen auf einen Nachfolger gleichen Charakters (`AlarmSound.RETIRED`): Sirene → Luftschutzsirene, Glockenspiel → Windspiel, Marimba → Kalimba, Morgensonne → Sonnenaufgang. Ein Wecker, Timer oder Sunrise-Klang, der mit einem davon gespeichert ist, klingelt mit dem Nachfolger weiter statt mit dem System-Ton.
+
+Das Vorhören funktioniert direkt im Bearbeiten-Dialog — Chip antippen zum Hören, _Vorschau stoppen_ zum Beenden. Der Timer hat seinen eigenen Sound-Wähler (nur sanfte Töne) — Standard **Windspiel**. Der Sunrise-Klang wird unter ⋮ → **Einstellungen & Info** gewählt (Standard **Sonnenaufgang**, oder Stille für reines Licht). Zum Probehören am Computer: `BRUTUS_SOUND_EXPORT=~/Desktop/Brutus-Sounds ./gradlew :app:testDebugUnitTest --tests '*SoundExportTest'` schreibt jeden Sound als WAV samt Übersichtsseite; `scripts/sound-previews.sh` baut die Hörproben der Produktseite neu.
 
 ### Hardcore Mode
 
@@ -358,7 +368,7 @@ Ein Opt-in pro Wecker (v1.6.0), das dir 10 Minuten sanftes Aufwachen _vor_ dem e
 
 - Eine separate `setExactAndAllowWhileIdle`-Registrierung feuert 10 Min vor dem Hauptalarm und startet `SunriseActivity` über dem Sperrbildschirm.
 - Die Activity fährt die **Bildschirmhelligkeit** linear von ~5 % auf 100 % hoch, der Hintergrundverlauf wandert von Schwarz nach Morgenrot.
-- Ein leises **Glockenspiel** läuft in Schleife mit der Amplitude des Sound-Wählers — keine Maximallautstärke, kein Hardcore-Schutz. Nur ein sanftes Signal.
+- Der unter ⋮ → **Einstellungen & Info** gewählte sanfte Klang läuft leise in Schleife (Standard **Sonnenaufgang**, oder Stille für reines Licht) — keine Maximallautstärke, kein Hardcore-Schutz. Nur ein sanftes Signal.
 - Die Uhr tickt weiter in der Bildschirmmitte, mit Live-Countdown bis zum Hauptalarm.
 - Zwei Knöpfe: **Wecker stoppen** (schaltet den Wecker ganz ab, wie der Schalter in der Liste) und **Schon wach — Sunrise schliessen** (schließt nur den Vorlauf; der Hauptalarm klingelt trotzdem zur eingestellten Zeit).
 - Sunrise hat _keine_ Aufgaben und _kein_ Hardcore-Verhalten. Der brutale Pfad übernimmt exakt zur eingestellten Zeit, egal ob die Sunrise-Activity noch offen ist.
@@ -448,7 +458,7 @@ Seit **v1.8.0** halten Stoppuhr und Timer ihren gesamten Zustand — laufende Me
 
 ### Timer
 
-HMS-Picker (Stunden 0–23, Minuten 0–59, Sekunden 0–59) mit Auf-/Ab-Steppern je Spalte. Schnellwahl-Reihe für gängige Dauern (1m, 3m, 5m, 10m, 15m, 30m). Ein **Wähler für sanfte Sounds** (seit v1.5.0) unter der Schnellwahl bestimmt den Endton — Standard **Glockenspiel**, die Wahl überlebt Neustarts über `TimerSoundStore`. Ein Tipp auf einen Chip spielt den Ton probeweise; **Stopp** beendet die Vorschau.
+HMS-Picker (Stunden 0–23, Minuten 0–59, Sekunden 0–59) mit Auf-/Ab-Steppern je Spalte. Schnellwahl-Reihe für gängige Dauern (1m, 3m, 5m, 10m, 15m, 30m). Ein **Wähler für sanfte Sounds** (seit v1.5.0) unter der Schnellwahl bestimmt den Endton — Standard **Windspiel**, die Wahl überlebt Neustarts über `TimerSoundStore`. Ein Tipp auf einen Chip spielt den Ton probeweise; **Stopp** beendet die Vorschau.
 
 Während des Countdowns wechselt der Bildschirm auf eine große 56-sp-Anzeige in einem fließend leerlaufenden, welligen Ring und eine Knopfgruppe (**Abbruch / Pause-Weiter**). Läuft der Timer ab, spielt der gewählte synthetisierte Sound (oder der System-Klingelton bei **System-Alarm**) in Schleife mit `USAGE_ALARM`-Attributen, bis **Stopp** gedrückt wird — Verhalten wie eine klassische Küchenuhr, nicht wie ein brutaler Weckmodus.
 
@@ -461,6 +471,8 @@ Abschnittstitel in der Primärfarbe über einer abgerundeten Karte.
 
 - **Darstellung** — Design **System / Hell / Dunkel** (die Alarm-Bildschirme bleiben dunkel),
   **Material-You-Farben** (ab Android 12).
+- **Sunrise** _(v2.5.0)_ — der Klang des Sunrise-Vorlaufs: einer der acht sanften Klänge oder Stille (nur
+  Licht), Standard **Sonnenaufgang**; ein Tipp auf einen Chip spielt ihn an.
 - **Benachrichtigungen** — wie lange vor einem Wecker der Hinweis erscheint (**Aus / 30 / 60 / 120 Min.**),
   und die optionale **Update-Prüfung**.
 - **Über Brutus** — App-Zeichen, Version und Build, „Von Martin Pfeffer“, Chips für die
@@ -850,7 +862,7 @@ app/src/main/res/
 
 ## Tests und CI
 
-339 JVM-Unit-Tests sichern die Stellen, an denen ein Fehler bedeutet, dass jemand verschläft: was tatsächlich im `AlarmManager` landet, die Weckzeit-Arithmetik, die Persistenz, die Vollständigkeit beider Übersetzungen und jeden String, den der Nutzer auf einem Ziffernblatt liest. Es gibt keine Instrumentierungstests — die gesamte Suite läuft in Sekunden auf der JVM.
+350 JVM-Unit-Tests sichern die Stellen, an denen ein Fehler bedeutet, dass jemand verschläft: was tatsächlich im `AlarmManager` landet, die Weckzeit-Arithmetik, die Persistenz, die Vollständigkeit beider Übersetzungen und jeden String, den der Nutzer auf einem Ziffernblatt liest. Es gibt keine Instrumentierungstests — die gesamte Suite läuft in Sekunden auf der JVM.
 
 | Suite | Tests | Was sie festnagelt |
 |-------|-------|--------------------|
@@ -862,7 +874,7 @@ app/src/main/res/
 | `widget/NextAlarmWidgetFormatTest` | 12 | die zwei Strings auf dem Homescreen in beiden Sprachen, inklusive Singular/Plural und der Kein-Aufrunden-Regel (Robolectric) |
 | `util/NextAlarmCalendarEdgeTest` | 11 | **Sommerzeit**: 23 echte Stunden zwischen zwei Auslösungen in der kurzen Nacht, 25 in der langen, Wanduhrzeit bleibt; übersprungene und doppelte Stunde; Monats-, Jahres- und Schaltjahreswechsel |
 | `ResourceParityTest` | 11 | die zwei Sprachen können nicht auseinanderlaufen: identische Schlüsselsätze, keine leeren Werte, **passende Format-Platzhalter**, vollständige Plurale, je sieben Wochentage, kein Deutsch im Standardsatz und `locales_config.xml` im Einklang mit den `values-*`-Ordnern |
-| `util/AlarmSoundTest` | 11 | die **persistierten** Sound-Ids als Goldene Map — ein Umnummerieren würde still ändern, was bestehende Wecker spielen — plus die Anzeigenamen in beiden Sprachen |
+| `util/AlarmSoundTest` | 14 | die **persistierten** Sound-Ids als Goldene Map — ein Umnummerieren würde still ändern, was bestehende Wecker spielen — die stillgelegten Ids von v2.5.0 samt Nachfolger gleichen Charakters, plus die Anzeigenamen in beiden Sprachen |
 | `BrutusApplicationTest` | 10 | Notification-Kanäle sind write-once: Wichtigkeit, DND-Bypass, Stummheit — und der Update-Kanal geht nie durch „Nicht stören“ (Robolectric) |
 | `update/UpdateCheckerTest` | 10 | die optionale Update-Prüfung komplett mit Fake-Quelle: aus heißt **gar keine Anfrage**, eine Benachrichtigung pro Version, nie für die installierte oder eine ältere, Tippen öffnet die Download-Seite, der Banner folgt dem Schalter (Robolectric) |
 | `update/ReleaseSourceTest` | 9 | Version aus `latest.json` der Produktseite und aus GitHubs Release lesen, Müll wirft nie, GitHub nur, wenn die Seite scheitert |
@@ -885,7 +897,7 @@ app/src/main/res/
 | `util/ChallengeFlagsTest` | 8 | `describe` / `activeList` / `has` / `sanitize`, inklusive Fallback bei unbekanntem Bit |
 | `util/ChallengeDifficultyTest` | 8 | Zahlenbereiche, Reihenfolge der Schwellen, eigene Labels je Preset in beiden Sprachen |
 | `LocalizedRuntimeTest` | 7 | löst jeden deklarierten String über das Ressourcensystem in **beiden** Sprachen auf und rendert je eine vollständige Weckerkarte |
-| `util/AlarmSoundGeneratorTest` | 7 | PCM-Länge, Spitzenamplituden, Ausblenden an der Schleifengrenze, sanft vs. hart vs. extrem |
+| `util/AlarmSoundGeneratorTest` | 7 | PCM-Länge, Spitzenamplituden, sanfte Schleifen ohne Knacken an der Naht, sanft vs. hart vs. extrem |
 | `util/AlarmSoundGeneratorPropertiesTest` | 7 | Invarianten für jeden synthetisierten Sound — Schleifenlänge, Determinismus, DC-Offset, Headroom; ein neuer Enum-Eintrag fällt automatisch hinein |
 | `util/PermissionDeepLinkTest` | 7 | die drei Zuverlässigkeits-Banner landen auf der richtigen Einstellungsseite (Action + `package:`-URI + `NEW_TASK`) (Robolectric) |
 | `data/RoomSchemaExportTest` | 7 | der **Identity-Hash der laufenden Datenbank gegen das committete `7.json`** — ein Feld ohne Migration fällt hier auf statt auf dem Gerät des Nutzers |
@@ -893,12 +905,14 @@ app/src/main/res/
 | `data/AlarmEntityTest` | 7 | `timeString`, `repeatDaysString` / `soundName` / `challengeName` auf Deutsch **und** Englisch, Wochentags-Bitmaske, `hardcoreEffective` |
 | `util/GlobalQrStoreTest` | 6 | der QR-Code der Installation ändert sich nie — jeder Ausdruck hängt daran (Robolectric) |
 | `util/WorldClockStoreTest` | 6 | Default-Seeding beim ersten Start, Roundtrips, leere Liste bleibt leer, Blank-Filterung (Robolectric) |
-| `util/TimerSoundStoreTest` | 6 | Persistenz des Timer-Tons, Id 0 vs. „nicht gesetzt", korrupte Id fällt auf den Systemton zurück (Robolectric) |
+| `util/TimerSoundStoreTest` | 7 | Persistenz des Timer-Tons, Id 0 vs. „nicht gesetzt", korrupte Id fällt auf den Systemton zurück, stillgelegte Id führt zum Nachfolger (Robolectric) |
+| `util/SunriseSoundSettingTest` | 5 | der Sunrise-Klang: Standard, Round-Trip, nur sanfte Klänge oder Stille, harte/unbekannte Ids fallen zurück, stillgelegte Ids lösen auf (Robolectric) |
+| `util/SoundExportTest` | 2 | schreibt jeden Sound als WAV + Übersichtsseite und die Hörproben der Produktseite — übersprungen, solange `BRUTUS_SOUND_EXPORT` / `BRUTUS_SOUND_PREVIEWS` nicht gesetzt ist |
 | `viewmodel/StopwatchViewModelTest` | 6 | Segment-Akkumulation, Runden, Reset-Undo-Snapshot-Semantik |
 | `scheduler/AlarmSchedulerConstantsTest` | 4 | Ultra-Hardcore-Offsets, Sunrise-Vorlauf, Eindeutigkeit der Intent-Extras |
 
 ```bash
-./gradlew :app:testDebugUnitTest          # alle 339
+./gradlew :app:testDebugUnitTest          # alle 350
 ./gradlew :app:testDebugUnitTest --tests '*NextAlarmCalculatorTest'
 # HTML-Report: app/build/reports/tests/testDebugUnitTest/index.html
 ```

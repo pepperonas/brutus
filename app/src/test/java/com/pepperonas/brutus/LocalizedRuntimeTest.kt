@@ -93,12 +93,12 @@ class LocalizedRuntimeTest {
             minute = 5,
             repeatDays = 0b0011111,                     // Mon–Fri
             challengeFlags = ChallengeFlags.MATH or ChallengeFlags.QR,
-            soundId = AlarmSound.MORNING.id,
+            soundId = AlarmSound.SUNRISE.id,
         )
         assertEquals("06:05", alarm.timeString())
         assertEquals("Mon, Tue, Wed, Thu, Fri", alarm.repeatDaysString(en))
         assertEquals("Math + QR code", alarm.challengeName(en))
-        assertEquals("Morning sun", alarm.soundName(en))
+        assertEquals("Daybreak", alarm.soundName(en))
         assertEquals(
             "Alarm in 2 hours, 30 minutes",
             NextAlarmCalculator.formatCountdown(en, 0L, 150 * 60_000L)
@@ -112,12 +112,12 @@ class LocalizedRuntimeTest {
             minute = 5,
             repeatDays = 0b0011111,
             challengeFlags = ChallengeFlags.MATH or ChallengeFlags.QR,
-            soundId = AlarmSound.MORNING.id,
+            soundId = AlarmSound.SUNRISE.id,
         )
         assertEquals("06:05", alarm.timeString())
         assertEquals("Mo, Di, Mi, Do, Fr", alarm.repeatDaysString(de))
         assertEquals("Mathe + QR-Code", alarm.challengeName(de))
-        assertEquals("Morgensonne", alarm.soundName(de))
+        assertEquals("Sonnenaufgang", alarm.soundName(de))
         assertEquals(
             "Alarm in 2 Stunden, 30 Minuten",
             NextAlarmCalculator.formatCountdown(de, 0L, 150 * 60_000L)

@@ -26,17 +26,17 @@ class TimerSoundStoreTest {
     @Test
     fun `a fresh install gets the gentle default, not the harsh system alarm`() {
         val sound = TimerSoundStore.get(context)
-        assertEquals(AlarmSound.CHIME, sound)
+        assertEquals(AlarmSound.WIND_CHIMES, sound)
         assertTrue(sound.gentle, "the kitchen timer must not ring like a hardcore alarm")
     }
 
     @Test
     fun `a chosen gentle sound round-trips`() {
-        TimerSoundStore.set(context, AlarmSound.MARIMBA)
-        assertEquals(AlarmSound.MARIMBA, TimerSoundStore.get(context))
+        TimerSoundStore.set(context, AlarmSound.KALIMBA)
+        assertEquals(AlarmSound.KALIMBA, TimerSoundStore.get(context))
 
-        TimerSoundStore.set(context, AlarmSound.MORNING)
-        assertEquals(AlarmSound.MORNING, TimerSoundStore.get(context))
+        TimerSoundStore.set(context, AlarmSound.HARP)
+        assertEquals(AlarmSound.HARP, TimerSoundStore.get(context))
     }
 
     @Test
@@ -64,5 +64,13 @@ class TimerSoundStoreTest {
             TimerSoundStore.set(context, sound)
             assertEquals(sound, TimerSoundStore.get(context), "round-trip failed for $sound")
         }
+    }
+
+    @Test
+    fun `a timer saved with a retired sound keeps ringing with its successor`() {
+        writeRawId(7) // the chime, removed in v2.5.0
+        assertEquals(AlarmSound.WIND_CHIMES, TimerSoundStore.get(context))
+        writeRawId(8) // marimba
+        assertEquals(AlarmSound.KALIMBA, TimerSoundStore.get(context))
     }
 }

@@ -23,8 +23,8 @@ android {
         applicationId = "com.pepperonas.brutus"
         minSdk = 26
         targetSdk = 35
-        versionCode = 19
-        versionName = "2.4.0"
+        versionCode = 20
+        versionName = "2.5.0"
     }
 
     signingConfigs {

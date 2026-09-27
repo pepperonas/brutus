@@ -74,6 +74,13 @@ challenges in sequence → `ACTION_STOP` / `ACTION_SNOOZE` back to the service.
   lambdas, never in composition; `rememberReducedMotion()` gates them.
 - **Snooze vs. dismiss**: `AlarmService.stopAlarm(dismissed)` — only a completed challenge arms UHC
   follow-ups. Snoozes use their own request-code space `0x5A000000 | id`.
+- **Sounds**: `util/AlarmSoundGenerator` synthesizes every sound (the v2.5.0 set lives in
+  `util/SynthSounds` with its own toolkit). Gentle sounds must be exactly periodic in their ≤ 6 s loop —
+  circular note rendering, whole-cycle frequencies — because Sunrise loops them for ten minutes;
+  `AlarmSoundGeneratorTest` checks the seam. To audition on a computer:
+  `BRUTUS_SOUND_EXPORT=<dir> ./gradlew :app:testDebugUnitTest --tests '*SoundExportTest'` (WAV + overview);
+  `scripts/sound-previews.sh` rebuilds the product page's `website/assets/sounds/<slug>.m4a`. Sunrise
+  plays `AppSettings.sunriseSound` (gentle only, default `SUNRISE`).
 - `SunriseActivity`, `TestAlarmActivity` and `widget/NextAlarmWidget` are side entry points;
   `util/NextAlarmCalculator` is the shared next-trigger arithmetic (DST-sensitive).
 
@@ -92,7 +99,8 @@ committed JSON. Small non-alarm state lives in SharedPreferences/DataStore store
 (`GlobalQrStore`, `WorldClockStore`, `TimerSoundStore`, `ThemeSettings`).
 
 **Persisted contracts — do not renumber**: `AlarmSound` ids (pinned as a golden map in
-`AlarmSoundTest`), `ChallengeFlags` bits (`MATH=1, SHAKE=2, QR=4`; `sanitize()` turns 0 into MATH),
+`AlarmSoundTest`; a removed sound's id goes into `AlarmSound.RETIRED` with a successor of the same
+character and is never reused — alarms, the timer and the Sunrise setting may still store it), `ChallengeFlags` bits (`MATH=1, SHAKE=2, QR=4`; `sanitize()` turns 0 into MATH),
 `AlarmEntity` constructor defaults, and the global QR payload (users print it).
 
 **UI**: single-activity `MainActivity` with a 4-tab bottom nav (`ui/screens/HomeScreen`).

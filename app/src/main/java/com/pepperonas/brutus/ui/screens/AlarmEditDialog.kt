@@ -124,7 +124,8 @@ fun AlarmEditDialog(
         mutableIntStateOf(existingAlarm?.challengeFlags ?: ChallengeFlags.MATH)
     }
     var snoozeDuration by remember { mutableIntStateOf(existingAlarm?.snoozeDuration ?: 5) }
-    var soundId by remember { mutableIntStateOf(existingAlarm?.soundId ?: AlarmSound.KLAXON.id) }
+    // fromId maps a retired sound to its successor, so the picker shows what actually rings.
+    var soundId by remember { mutableIntStateOf(AlarmSound.fromId(existingAlarm?.soundId ?: AlarmSound.KLAXON.id).id) }
     var mathProblemCount by remember { mutableIntStateOf(existingAlarm?.mathProblemCount ?: 3) }
     var shakeCount by remember { mutableIntStateOf(existingAlarm?.shakeCount ?: 30) }
     var hardcoreMode by remember { mutableStateOf(existingAlarm?.hardcoreMode ?: false) }

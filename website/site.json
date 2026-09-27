@@ -8,7 +8,7 @@
   "tagline": "You WILL wake up.",
   "license": "MIT",
   "year": 2026,
-  "asset_version": 2,
+  "asset_version": 3,
   "theme_source": "app/src/main/java/com/pepperonas/brutus/ui/theme/Color.kt — dark red-seed roles (primary lifted to red tone 80 for text contrast on the web)",
   "theme": {
     "bg": "#141110",
@@ -77,15 +77,15 @@
       "twitter_description": "Free, open-source Android alarm clock: math, shake and QR challenges, a volume lock and follow-up alarms. No ads, no tracking, offline by default.",
       "image_alt": "Two phones with the Brutus alarm screen — a math challenge and a shake challenge — in front of red alarm rings."
     },
-    "summary": "Brutus is a free, open-source (MIT) alarm clock for Android 8.0 and later. A ringing alarm only stops once you complete the challenges you chose for it: solve math problems, shake the phone, or scan a QR code you placed somewhere else in your home — in any combination, one after the other. Hardcore mode keeps the alarm at full volume while it rings; Ultra Hardcore mode re-rings 10 and 15 minutes later unless you walk 30 steps. It notifies you before an alarm and lets you dismiss it early, and it also has a world clock, stopwatch, a timer that rings even with the app closed and a home-screen widget, runs in English and German, has no ads or tracking, and stays offline unless you switch on its update check, which then reads the newest version number once a day and notifies you. Distributed as a signed APK through GitHub Releases.",
+    "summary": "Brutus is a free, open-source (MIT) alarm clock for Android 8.0 and later. A ringing alarm only stops once you complete the challenges you chose for it: solve math problems, shake the phone, or scan a QR code you placed somewhere else in your home — in any combination, one after the other. Hardcore mode keeps the alarm at full volume while it rings; Ultra Hardcore mode re-rings 10 and 15 minutes later unless you walk 30 steps. It synthesizes 25 alarm sounds on the device, notifies you before an alarm and lets you dismiss it early, and it also has a world clock, stopwatch, a timer that rings even with the app closed and a home-screen widget, runs in English and German, has no ads or tracking, and stays offline unless you switch on its update check, which then reads the newest version number once a day and notifies you. Distributed as a signed APK through GitHub Releases.",
     "meta_fallback": "Newest release · Android 8.0+ · free, MIT licence",
     "feature_list": [
       "Wake-up challenges: math problems, shaking the phone and scanning a QR code, combinable and run in sequence",
       "Three math difficulties and three shake sensitivities per alarm",
       "Hardcore mode: alarm volume stays at maximum and the volume keys do nothing while it rings",
       "Ultra Hardcore mode: two follow-up alarms after dismissal, cancelled only by walking 30 steps",
-      "Eleven alarm sounds synthesized on the device, plus the system alarm tone and a silent option",
-      "Sunrise pre-alarm: screen brightens over the 10 minutes before the alarm",
+      "25 alarm sounds synthesized on the device (17 harsh, 8 gentle), plus the system alarm tone and a silent option",
+      "Sunrise pre-alarm: screen brightens over the 10 minutes before the alarm, with a gentle sound of your choice",
       "Slide-to-snooze with configurable snooze length, or no snooze at all",
       "Test mode to try a wake-up chain without setting a real alarm",
       "World clock, stopwatch, and a timer that rings even after you leave the app",
@@ -199,11 +199,11 @@
           "fr": "Des sons créés sur le téléphone"
         },
         "p": {
-          "en": "Eleven alarm sounds are synthesized in real time — from klaxon, siren and fire alarm to a gentle chime — plus the system tone. Preview each one while you set the alarm.",
-          "de": "Elf Wecktöne werden in Echtzeit synthetisiert — von Hupe, Sirene und Feuermelder bis zum sanften Glockenspiel — dazu der Systemton. Jeder lässt sich beim Einstellen probehören.",
-          "es": "Once sonidos de alarma se sintetizan en tiempo real, desde bocina, sirena y alarma de incendios hasta un suave carillón, además del tono del sistema. Puedes escucharlos al configurar la alarma.",
-          "it": "Undici suonerie sono sintetizzate in tempo reale, da clacson, sirena e allarme antincendio a un dolce carillon, più il tono di sistema. Puoi ascoltarle mentre imposti la sveglia.",
-          "fr": "Onze sonneries sont synthétisées en temps réel, du klaxon à la sirène et à l’alarme incendie jusqu’à un carillon doux, plus la tonalité système. Chacune s’écoute pendant le réglage."
+          "en": "25 alarm sounds are synthesized in real time — 17 harsh ones, from klaxon and air-raid siren to steel hammer, and 8 gentle ones like singing bowl, birdsong and ocean waves — plus the system tone. Preview each one while you set the alarm.",
+          "de": "25 Wecktöne werden in Echtzeit synthetisiert — 17 harte, von Hupe und Luftschutzsirene bis Stahlhammer, und 8 sanfte wie Klangschale, Vogelgezwitscher und Meeresrauschen — dazu der Systemton. Jeder lässt sich beim Einstellen probehören.",
+          "es": "25 sonidos de alarma se sintetizan en tiempo real: 17 duros, desde la bocina y la sirena antiaérea hasta el martillo de acero, y 8 suaves como el cuenco tibetano, el canto de los pájaros o las olas, además del tono del sistema. Puedes escucharlos al configurar la alarma.",
+          "it": "25 suonerie sono sintetizzate in tempo reale: 17 dure, dal clacson alla sirena antiaerea fino al martello d’acciaio, e 8 dolci come la campana tibetana, il canto degli uccelli e le onde, più il tono di sistema. Puoi ascoltarle mentre imposti la sveglia.",
+          "fr": "25 sonneries sont synthétisées en temps réel : 17 dures, du klaxon à la sirène d’alerte jusqu’au marteau d’acier, et 8 douces comme le bol chantant, les oiseaux ou les vagues, plus la tonalité système. Chacune s’écoute pendant le réglage."
         }
       },
       {
@@ -215,11 +215,11 @@
           "fr": "Lever du soleil et widget"
         },
         "p": {
-          "en": "An optional pre-alarm brightens the screen over the ten minutes before it rings. A home-screen widget shows the next alarm with a countdown.",
-          "de": "Ein optionaler Vorwecker hellt den Bildschirm in den zehn Minuten vor dem Klingeln langsam auf. Ein Widget zeigt den nächsten Wecker samt Countdown.",
-          "es": "Una prealarma opcional aclara la pantalla durante los diez minutos anteriores. Un widget muestra la próxima alarma con una cuenta atrás.",
-          "it": "Una pre-sveglia opzionale schiarisce lo schermo nei dieci minuti prima che suoni. Un widget mostra la prossima sveglia con il conto alla rovescia.",
-          "fr": "Une pré-alarme facultative éclaircit l’écran pendant les dix minutes qui précèdent. Un widget affiche la prochaine alarme avec un compte à rebours."
+          "en": "An optional pre-alarm brightens the screen over the ten minutes before it rings, with a gentle sound of your choice. A home-screen widget shows the next alarm with a countdown.",
+          "de": "Ein optionaler Vorwecker hellt den Bildschirm in den zehn Minuten vor dem Klingeln langsam auf, begleitet von einem sanften Klang deiner Wahl. Ein Widget zeigt den nächsten Wecker samt Countdown.",
+          "es": "Una prealarma opcional aclara la pantalla durante los diez minutos anteriores, con un sonido suave a tu elección. Un widget muestra la próxima alarma con una cuenta atrás.",
+          "it": "Una pre-sveglia opzionale schiarisce lo schermo nei dieci minuti prima che suoni, con un suono dolce a scelta. Un widget mostra la prossima sveglia con il conto alla rovescia.",
+          "fr": "Une pré-alarme facultative éclaircit l’écran pendant les dix minutes qui précèdent, avec un son doux de votre choix. Un widget affiche la prochaine alarme avec un compte à rebours."
         }
       },
       {
@@ -375,11 +375,11 @@
           "fr": "Comment mettre à jour ?"
         },
         "a": {
-          "en": "Switch on <em>Check for updates</em> in the ⋮ menu of the alarm list: Brutus then looks once a day for a new release and notifies you. Download the APK from this page and install it over the existing app; your alarms and settings stay.",
-          "de": "Schalte im ⋮-Menü der Weckerliste <em>Nach Updates suchen</em> ein: Brutus schaut dann einmal täglich nach einer neuen Version und benachrichtigt dich. Die APK von dieser Seite laden und über die bestehende App installieren; Wecker und Einstellungen bleiben erhalten.",
-          "es": "Activa <em>Check for updates</em> en el menú ⋮ de la lista de alarmas: Brutus comprobará una vez al día si hay una versión nueva y te avisará. Descarga la APK desde esta página e instálala sobre la app existente; tus alarmas y ajustes se conservan.",
-          "it": "Attiva <em>Check for updates</em> nel menu ⋮ dell’elenco delle sveglie: Brutus controllerà una volta al giorno se c’è una nuova versione e ti avviserà. Scarica l’APK da questa pagina e installalo sopra l’app esistente; sveglie e impostazioni restano.",
-          "fr": "Activez <em>Check for updates</em> dans le menu ⋮ de la liste des alarmes : Brutus vérifie alors une fois par jour s’il existe une nouvelle version et vous prévient. Téléchargez l’APK depuis cette page et installez-le par-dessus l’app existante ; vos alarmes et réglages sont conservés."
+          "en": "Switch on <em>Check for updates</em> under ⋮ → <em>Settings &amp; info</em>: Brutus then looks once a day for a new release and notifies you. Download the APK from this page and install it over the existing app; your alarms and settings stay.",
+          "de": "Schalte unter ⋮ → <em>Einstellungen &amp; Info</em> <em>Nach Updates suchen</em> ein: Brutus schaut dann einmal täglich nach einer neuen Version und benachrichtigt dich. Die APK von dieser Seite laden und über die bestehende App installieren; Wecker und Einstellungen bleiben erhalten.",
+          "es": "Activa <em>Check for updates</em> en ⋮ → <em>Settings &amp; info</em>: Brutus comprobará una vez al día si hay una versión nueva y te avisará. Descarga la APK desde esta página e instálala sobre la app existente; tus alarmas y ajustes se conservan.",
+          "it": "Attiva <em>Check for updates</em> in ⋮ → <em>Settings &amp; info</em>: Brutus controllerà una volta al giorno se c’è una nuova versione e ti avviserà. Scarica l’APK da questa pagina e installalo sopra l’app esistente; sveglie e impostazioni restano.",
+          "fr": "Activez <em>Check for updates</em> dans ⋮ → <em>Settings &amp; info</em> : Brutus vérifie alors une fois par jour s’il existe une nouvelle version et vous prévient. Téléchargez l’APK depuis cette page et installez-le par-dessus l’app existante ; vos alarmes et réglages sont conservés."
         }
       },
       {
@@ -427,6 +427,469 @@
       "open-source",
       "apk"
     ],
-    "skill_description": "Download, verify and install the newest Brutus APK — the free, open-source Android alarm clock that only stops after math, shake or QR-code challenges. Use when someone asks for the app, its latest version, a download link, or how to check the APK is genuine."
+    "skill_description": "Download, verify and install the newest Brutus APK — the free, open-source Android alarm clock that only stops after math, shake or QR-code challenges. Use when someone asks for the app, its latest version, a download link, or how to check the APK is genuine.",
+    "so.h": {
+      "en": "Hear the sounds",
+      "de": "Hör dir die Töne an",
+      "es": "Escucha los sonidos",
+      "it": "Ascolta i suoni",
+      "fr": "Écoutez les sons"
+    },
+    "so.lead": {
+      "en": "All 25 sounds are made on the phone, in real time — nothing is downloaded. Tap one to hear it; these previews play a little quieter than your phone will.",
+      "de": "Alle 25 Töne entstehen direkt auf dem Handy, in Echtzeit — nichts wird heruntergeladen. Tippe einen an, um ihn zu hören; die Hörproben hier spielen etwas leiser als dein Handy.",
+      "es": "Los 25 sonidos se generan en el móvil, en tiempo real: no se descarga nada. Toca uno para escucharlo; estas muestras suenan algo más bajo que en tu móvil.",
+      "it": "Tutti i 25 suoni nascono sul telefono, in tempo reale: non si scarica nulla. Tocca un suono per ascoltarlo; queste anteprime suonano un po’ più piano che sul telefono.",
+      "fr": "Les 25 sons sont créés sur le téléphone, en temps réel : rien n’est téléchargé. Touchez-en un pour l’écouter ; ces extraits jouent un peu moins fort que votre téléphone."
+    },
+    "sounds": [
+      {
+        "t": {
+          "en": "Harsh — to get you up",
+          "de": "Krass — damit du aufstehst",
+          "es": "Duros — para que te levantes",
+          "it": "Duri — per farti alzare",
+          "fr": "Durs — pour vous lever"
+        },
+        "items": [
+          {
+            "id": "klaxon",
+            "t": {
+              "en": "Klaxon",
+              "de": "Klaxon",
+              "es": "Klaxon",
+              "it": "Klaxon",
+              "fr": "Klaxon"
+            },
+            "p": {
+              "en": "Pulsing two-tone alarm",
+              "de": "Pulsierender Zwei-Ton Alarm",
+              "es": "Alarma pulsante de dos tonos",
+              "it": "Allarme pulsante a due toni",
+              "fr": "Alarme pulsée à deux tons"
+            }
+          },
+          {
+            "id": "nuclear",
+            "t": {
+              "en": "Nuclear alert",
+              "de": "Nuclear Alert",
+              "es": "Nuclear alert",
+              "it": "Nuclear alert",
+              "fr": "Nuclear alert"
+            },
+            "p": {
+              "en": "Fast, sharp beeping",
+              "de": "Schnelles, scharfes Piepen",
+              "es": "Pitido rápido y agudo",
+              "it": "Bip rapido e secco",
+              "fr": "Bip rapide et strident"
+            }
+          },
+          {
+            "id": "piercing",
+            "t": {
+              "en": "Piercing",
+              "de": "Durchdringend",
+              "es": "Piercing",
+              "it": "Piercing",
+              "fr": "Piercing"
+            },
+            "p": {
+              "en": "Ultra-high beep — maximum annoyance",
+              "de": "Ultra-hohes Piepen — maximal nervig",
+              "es": "Pitido ultraagudo, lo más molesto posible",
+              "it": "Bip acutissimo, il più fastidioso possibile",
+              "fr": "Bip suraigu, aussi agaçant que possible"
+            }
+          },
+          {
+            "id": "airhorn",
+            "t": {
+              "en": "Stadium horn",
+              "de": "Stadion-Horn",
+              "es": "Stadium horn",
+              "it": "Stadium horn",
+              "fr": "Stadium horn"
+            },
+            "p": {
+              "en": "Blaring air horn made of detuned sawtooths",
+              "de": "Brüllendes Air-Horn aus verstimmten Sägezähnen",
+              "es": "Bocina de estadio con dientes de sierra desafinados",
+              "it": "Tromba da stadio con denti di sega stonati",
+              "fr": "Corne de stade en dents de scie désaccordées"
+            }
+          },
+          {
+            "id": "jackhammer",
+            "t": {
+              "en": "Jackhammer",
+              "de": "Presslufthammer",
+              "es": "Jackhammer",
+              "it": "Jackhammer",
+              "fr": "Jackhammer"
+            },
+            "p": {
+              "en": "Pounding low-end bursts like a construction site",
+              "de": "Pochende Tiefton-Salven wie eine Baustelle",
+              "es": "Ráfagas graves y martilleantes, como una obra",
+              "it": "Raffiche gravi e martellanti, come un cantiere",
+              "fr": "Salves graves et martelantes, comme un chantier"
+            }
+          },
+          {
+            "id": "fire-alarm",
+            "t": {
+              "en": "Fire alarm",
+              "de": "Feueralarm",
+              "es": "Fire alarm",
+              "it": "Fire alarm",
+              "fr": "Fire alarm"
+            },
+            "p": {
+              "en": "Temporal-3 smoke-detector pattern at 3.1 kHz",
+              "de": "Temporal-3 Rauchmelder-Muster bei 3,1 kHz",
+              "es": "Patrón de detector de humo Temporal-3 a 3,1 kHz",
+              "it": "Schema Temporal-3 del rilevatore di fumo a 3,1 kHz",
+              "fr": "Motif Temporal-3 de détecteur de fumée à 3,1 kHz"
+            }
+          },
+          {
+            "id": "dentist",
+            "t": {
+              "en": "Dental drill",
+              "de": "Bohrer",
+              "es": "Dental drill",
+              "it": "Dental drill",
+              "fr": "Dental drill"
+            },
+            "p": {
+              "en": "FM-modulated dental drill — screeching grind",
+              "de": "FM-modulierter Zahnarzt-Bohrer — kreischendes Schleifen",
+              "es": "Torno de dentista modulado en FM, un chirrido que rechina",
+              "it": "Trapano da dentista modulato in FM, uno stridio che gratta",
+              "fr": "Fraise de dentiste modulée en FM, un crissement grinçant"
+            }
+          },
+          {
+            "id": "banshee",
+            "t": {
+              "en": "Banshee",
+              "de": "Banshee",
+              "es": "Banshee",
+              "it": "Banshee",
+              "fr": "Banshee"
+            },
+            "p": {
+              "en": "Dissonant, rising cluster of beating tones",
+              "de": "Dissonanter, aufsteigender Schwebungs-Cluster",
+              "es": "Racimo disonante y ascendente de batidos",
+              "it": "Grappolo dissonante e crescente di battimenti",
+              "fr": "Grappe dissonante et montante de battements"
+            }
+          },
+          {
+            "id": "air-raid",
+            "t": {
+              "en": "Air-raid siren",
+              "de": "Luftschutzsirene",
+              "es": "Air-raid siren",
+              "it": "Air-raid siren",
+              "fr": "Air-raid siren"
+            },
+            "p": {
+              "en": "Motor siren: winds up, holds, winds down — full of overtones",
+              "de": "Motorsirene: heult hoch, hält, fällt wieder — voller Obertöne",
+              "es": "Sirena de motor: sube, se mantiene y vuelve a bajar, llena de armónicos",
+              "it": "Sirena a motore: sale, resta, riscende — piena di armonici",
+              "fr": "Sirène à moteur : monte, tient, redescend — pleine d’harmoniques"
+            }
+          },
+          {
+            "id": "dive",
+            "t": {
+              "en": "Dive alarm",
+              "de": "U-Boot-Tauchalarm",
+              "es": "Dive alarm",
+              "it": "Dive alarm",
+              "fr": "Dive alarm"
+            },
+            "p": {
+              "en": "“A-OO-GA” — a two-step horn blast in quick succession",
+              "de": "„A-OO-GA“ — zweistufiger Hupenschrei in schneller Folge",
+              "es": "«A-OO-GA»: un bocinazo de dos tiempos en rápida sucesión",
+              "it": "«A-OO-GA»: una trombata in due tempi, in rapida successione",
+              "fr": "« A-OO-GA » : un coup de corne en deux temps, en rafale"
+            }
+          },
+          {
+            "id": "car-alarm",
+            "t": {
+              "en": "Car alarm",
+              "de": "Autoalarm",
+              "es": "Car alarm",
+              "it": "Car alarm",
+              "fr": "Car alarm"
+            },
+            "p": {
+              "en": "Changes pattern every 1.5 s: wail, yelp, horn, warble",
+              "de": "Wechselt alle 1,5 s das Muster: Heulen, Jaulen, Hupe, Trillern",
+              "es": "Cambia de patrón cada 1,5 s: aullido, gañido, bocina, trino",
+              "it": "Cambia schema ogni 1,5 s: ululato, guaito, clacson, trillo",
+              "fr": "Change de motif toutes les 1,5 s : hurlement, glapissement, klaxon, trille"
+            }
+          },
+          {
+            "id": "school-bell",
+            "t": {
+              "en": "School bell",
+              "de": "Schulglocke",
+              "es": "School bell",
+              "it": "School bell",
+              "fr": "School bell"
+            },
+            "p": {
+              "en": "Mechanical clapper, about 22 strikes a second, metallic",
+              "de": "Mechanischer Klöppel, rund 22 Schläge pro Sekunde, metallisch",
+              "es": "Badajo mecánico, unos 22 golpes por segundo, metálico",
+              "it": "Battaglio meccanico, circa 22 colpi al secondo, metallico",
+              "fr": "Battant mécanique, environ 22 coups par seconde, métallique"
+            }
+          },
+          {
+            "id": "reverse-beeper",
+            "t": {
+              "en": "Reverse beeper",
+              "de": "Rückfahrwarner",
+              "es": "Reverse beeper",
+              "it": "Reverse beeper",
+              "fr": "Reverse beeper"
+            },
+            "p": {
+              "en": "Low, hard warning beep that keeps getting faster",
+              "de": "Tiefer, harter Warnpiep, der immer schneller wird",
+              "es": "Pitido de aviso grave y duro que cada vez va más rápido",
+              "it": "Bip di avviso grave e duro che accelera sempre di più",
+              "fr": "Bip d’avertissement grave et dur qui accélère sans cesse"
+            }
+          },
+          {
+            "id": "shepard",
+            "t": {
+              "en": "Shepard siren",
+              "de": "Shepard-Sirene",
+              "es": "Shepard siren",
+              "it": "Shepard siren",
+              "fr": "Shepard siren"
+            },
+            "p": {
+              "en": "A tone that seems to rise forever — restless, never resolves",
+              "de": "Scheinbar endlos steigender Ton — unruhig, ohne Auflösung",
+              "es": "Un tono que parece subir sin fin: inquieto, nunca se resuelve",
+              "it": "Un tono che sembra salire all’infinito: inquieto, senza risoluzione",
+              "fr": "Un son qui semble monter sans fin : agité, jamais résolu"
+            }
+          },
+          {
+            "id": "steel-hammer",
+            "t": {
+              "en": "Steel hammer",
+              "de": "Stahlhammer",
+              "es": "Steel hammer",
+              "it": "Steel hammer",
+              "fr": "Steel hammer"
+            },
+            "p": {
+              "en": "Irregular hammer blows on metal with a ringing tail",
+              "de": "Unregelmäßige Hammerschläge auf Metall mit Nachklirren",
+              "es": "Martillazos irregulares sobre metal con un tintineo final",
+              "it": "Martellate irregolari sul metallo con una coda squillante",
+              "fr": "Coups de marteau irréguliers sur du métal, avec une traîne qui tinte"
+            }
+          },
+          {
+            "id": "strobe",
+            "t": {
+              "en": "Strobe",
+              "de": "Stroboskop",
+              "es": "Strobe",
+              "it": "Strobe",
+              "fr": "Strobe"
+            },
+            "p": {
+              "en": "High beeps that get faster and higher",
+              "de": "Hohe Pieps, die schneller und höher werden",
+              "es": "Pitidos agudos que van más rápido y más alto",
+              "it": "Bip acuti che diventano più veloci e più alti",
+              "fr": "Bips aigus qui deviennent plus rapides et plus hauts"
+            }
+          },
+          {
+            "id": "whoop",
+            "t": {
+              "en": "Evacuation whoop",
+              "de": "Evakuierungs-Whoop",
+              "es": "Evacuation whoop",
+              "it": "Evacuation whoop",
+              "fr": "Evacuation whoop"
+            },
+            "p": {
+              "en": "Industrial alarm: fast upward sweep, hard restart",
+              "de": "Industrie-Alarm: schneller Aufwärts-Sweep, harter Neustart",
+              "es": "Alarma industrial: barrido rápido hacia arriba, reinicio brusco",
+              "it": "Allarme industriale: sweep veloce verso l’alto, ripartenza secca",
+              "fr": "Alarme industrielle : balayage rapide vers le haut, redémarrage sec"
+            }
+          }
+        ]
+      },
+      {
+        "t": {
+          "en": "Gentle — for Sunrise and the timer",
+          "de": "Sanft — für Sunrise und den Timer",
+          "es": "Suaves — para Sunrise y el temporizador",
+          "it": "Dolci — per Sunrise e il timer",
+          "fr": "Doux — pour Sunrise et le minuteur"
+        },
+        "items": [
+          {
+            "id": "singing-bowl",
+            "t": {
+              "en": "Singing bowl",
+              "de": "Klangschale",
+              "es": "Singing bowl",
+              "it": "Singing bowl",
+              "fr": "Singing bowl"
+            },
+            "p": {
+              "en": "Deep, long-ringing bowl tone with a gentle beat",
+              "de": "Tiefer, lang ausklingender Schalenton mit sanfter Schwebung",
+              "es": "Tono de cuenco grave y largo, con un batido suave",
+              "it": "Tono di campana tibetana profondo e lungo, con un battimento leggero",
+              "fr": "Son de bol grave et long, avec un léger battement"
+            }
+          },
+          {
+            "id": "birds",
+            "t": {
+              "en": "Birdsong",
+              "de": "Vogelgezwitscher",
+              "es": "Birdsong",
+              "it": "Birdsong",
+              "fr": "Birdsong"
+            },
+            "p": {
+              "en": "Quiet chirps, loosely spread, like early morning",
+              "de": "Leise Tschilp-Rufe, locker verteilt, wie am frühen Morgen",
+              "es": "Trinos suaves, repartidos sin prisa, como al amanecer",
+              "it": "Cinguettii sommessi, sparsi, come al mattino presto",
+              "fr": "Pépiements discrets, épars, comme au petit matin"
+            }
+          },
+          {
+            "id": "wind-chimes",
+            "t": {
+              "en": "Wind chimes",
+              "de": "Windspiel",
+              "es": "Wind chimes",
+              "it": "Wind chimes",
+              "fr": "Wind chimes"
+            },
+            "p": {
+              "en": "Pentatonic bells, set off at random by the wind",
+              "de": "Pentatonische Glöckchen, zufällig vom Wind angestoßen",
+              "es": "Campanillas pentatónicas que el viento toca al azar",
+              "it": "Campanelle pentatoniche mosse a caso dal vento",
+              "fr": "Carillons pentatoniques agités au hasard par le vent"
+            }
+          },
+          {
+            "id": "kalimba",
+            "t": {
+              "en": "Kalimba",
+              "de": "Kalimba",
+              "es": "Kalimba",
+              "it": "Kalimba",
+              "fr": "Kalimba"
+            },
+            "p": {
+              "en": "Thumb-piano motif, round and woody",
+              "de": "Daumenklavier-Motiv, rund und holzig",
+              "es": "Motivo de piano de pulgar, redondo y amaderado",
+              "it": "Motivo di piano a pollice, rotondo e legnoso",
+              "fr": "Motif de piano à pouces, rond et boisé"
+            }
+          },
+          {
+            "id": "harp",
+            "t": {
+              "en": "Harp",
+              "de": "Harfe",
+              "es": "Harp",
+              "it": "Harp",
+              "fr": "Harp"
+            },
+            "p": {
+              "en": "Rising harp arpeggios over two chords",
+              "de": "Aufsteigende Harfen-Arpeggios über zwei Akkorde",
+              "es": "Arpegios de arpa ascendentes sobre dos acordes",
+              "it": "Arpeggi d’arpa ascendenti su due accordi",
+              "fr": "Arpèges de harpe ascendants sur deux accords"
+            }
+          },
+          {
+            "id": "ocean",
+            "t": {
+              "en": "Ocean waves",
+              "de": "Meeresrauschen",
+              "es": "Ocean waves",
+              "it": "Ocean waves",
+              "fr": "Ocean waves"
+            },
+            "p": {
+              "en": "A wave that rolls in and draws back",
+              "de": "Eine Welle, die anrollt und sich wieder zurückzieht",
+              "es": "Una ola que llega y se retira",
+              "it": "Un’onda che arriva e si ritira",
+              "fr": "Une vague qui arrive et se retire"
+            }
+          },
+          {
+            "id": "electric-piano",
+            "t": {
+              "en": "Electric piano",
+              "de": "E-Piano",
+              "es": "Electric piano",
+              "it": "Electric piano",
+              "fr": "Electric piano"
+            },
+            "p": {
+              "en": "Calm Rhodes chords, softly struck",
+              "de": "Ruhige Rhodes-Akkorde, weich angeschlagen",
+              "es": "Acordes tranquilos de Rhodes, tocados con suavidad",
+              "it": "Accordi Rhodes tranquilli, suonati con dolcezza",
+              "fr": "Accords Rhodes calmes, joués en douceur"
+            }
+          },
+          {
+            "id": "sunrise",
+            "t": {
+              "en": "Daybreak",
+              "de": "Sonnenaufgang",
+              "es": "Daybreak",
+              "it": "Daybreak",
+              "fr": "Daybreak"
+            },
+            "p": {
+              "en": "A sound pad that breathes and brightens",
+              "de": "Klangfläche, die aufatmet und heller wird",
+              "es": "Una capa de sonido que respira y se ilumina",
+              "it": "Un tappeto sonoro che respira e si schiarisce",
+              "fr": "Une nappe sonore qui respire et s’éclaircit"
+            }
+          }
+        ]
+      }
+    ]
   }
 }

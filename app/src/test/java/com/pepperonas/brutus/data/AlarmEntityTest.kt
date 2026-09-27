@@ -94,9 +94,13 @@ class AlarmEntityTest {
         assertEquals("Klaxon", alarm.soundName(en))
         assertEquals("Klaxon", alarm.soundName(de))
 
-        val chime = alarm.copy(soundId = AlarmSound.CHIME.id)
-        assertEquals("Chime", chime.soundName(en))
-        assertEquals("Glockenspiel", chime.soundName(de))
+        val chimes = alarm.copy(soundId = AlarmSound.WIND_CHIMES.id)
+        assertEquals("Wind chimes", chimes.soundName(en))
+        assertEquals("Windspiel", chimes.soundName(de))
+
+        // An alarm saved with the retired chime (id 7) shows — and rings — its successor.
+        val retired = alarm.copy(soundId = 7)
+        assertEquals("Wind chimes", retired.soundName(en))
     }
 
     @Test

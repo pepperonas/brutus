@@ -37,6 +37,7 @@ import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -55,6 +56,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -76,7 +78,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.pm.PackageInfoCompat
 import com.pepperonas.brutus.R
 import com.pepperonas.brutus.scheduler.Rescheduler
+import com.pepperonas.brutus.util.AlarmSound
 import com.pepperonas.brutus.util.AppSettings
+import com.pepperonas.brutus.util.SoundPreviewPlayer
 import kotlinx.coroutines.Dispatchers
 import com.pepperonas.brutus.ui.theme.ThemeSettings
 import com.pepperonas.brutus.ui.theme.springPressed
@@ -146,6 +150,10 @@ fun SettingsScreen(
                 }
             }
 
+            SettingsSection(stringResource(R.string.settings_sunrise)) {
+                SunriseSoundRow()
+            }
+
             SettingsSection(stringResource(R.string.settings_notifications)) {
                 UpcomingLeadRow()
                 Spacer(Modifier.height(16.dp))
@@ -199,6 +207,42 @@ private fun ThemeModeRow() {
             )
         }
     }
+}
+
+/** What the Sunrise pre-alarm plays. Tapping a chip picks it and previews it; leaving stops the preview. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun SunriseSoundRow() {
+    val context = LocalContext.current
+    var selected by remember { mutableStateOf(AppSettings.sunriseSound(context)) }
+    val preview = remember { SoundPreviewPlayer(context) }
+    DisposableEffect(Unit) { onDispose { preview.stop() } }
+    Text(stringResource(R.string.settings_sunrise_sound), style = MaterialTheme.typography.bodyLarge)
+    Text(
+        stringResource(R.string.settings_sunrise_sound_hint),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Spacer(Modifier.height(8.dp))
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        AlarmSound.sunriseSounds().forEach { snd ->
+            FilterChip(
+                selected = selected == snd,
+                onClick = {
+                    selected = snd
+                    AppSettings.setSunriseSound(context, snd)
+                    preview.play(snd)
+                },
+                label = { Text(stringResource(snd.labelRes)) },
+            )
+        }
+    }
+    Text(
+        stringResource(selected.descriptionRes),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    TextButton(onClick = { preview.stop() }) { Text(stringResource(R.string.settings_sunrise_stop_preview)) }
 }
 
 /** How long before an alarm the quiet heads-up appears; changing it re-arms every alarm. */

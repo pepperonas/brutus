@@ -45,7 +45,7 @@ import androidx.compose.ui.unit.sp
 import com.pepperonas.brutus.data.AlarmDatabase
 import com.pepperonas.brutus.scheduler.AlarmScheduler
 import com.pepperonas.brutus.ui.theme.BrutusTheme
-import com.pepperonas.brutus.util.AlarmSound
+import com.pepperonas.brutus.util.AppSettings
 import com.pepperonas.brutus.util.SoundPreviewPlayer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -60,8 +60,8 @@ import com.pepperonas.brutus.R
 /**
  * Pre-alarm "Sunrise" — fires up to [AlarmScheduler.SUNRISE_LEAD_MIN] minutes before
  * the main alarm. Ramps screen brightness from 0 to 1 over the lead window and plays
- * the soft Glockenspiel at gradually rising amplitude. Has no challenges, no
- * Hardcore guard, and no foreground service — the actual alarm is a separate
+ * the gentle sound chosen in Settings (default: the sunrise pad) at gradually rising amplitude.
+ * Has no challenges, no Hardcore guard, and no foreground service — the actual alarm is a separate
  * registration that fires on time regardless of whether this activity is open.
  *
  * "Wecker stoppen" cancels the upcoming main alarm too (handy if the user is
@@ -83,7 +83,7 @@ class SunriseActivity : ComponentActivity() {
             .cancel(notificationIdForSunrise(alarmId))
 
         soundPlayer = SoundPreviewPlayer(this).also {
-            it.play(AlarmSound.CHIME)
+            it.play(AppSettings.sunriseSound(this))
         }
 
         // Hidden until the alarm is known: a Hardcore alarm must not be switched off with one tap

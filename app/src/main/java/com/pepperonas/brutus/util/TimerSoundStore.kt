@@ -4,13 +4,14 @@ import android.content.Context
 
 /**
  * Persists the user's chosen timer-finished sound across launches.
- * Default is [AlarmSound.CHIME] — a soft 3-note bell rather than the harsh system alarm.
+ * Default is [AlarmSound.WIND_CHIMES] — soft bells rather than the harsh system alarm. A stored id of a
+ * retired sound resolves to its successor through [AlarmSound.fromId].
  */
 object TimerSoundStore {
 
     private const val PREFS = "brutus_timer"
     private const val KEY_SOUND_ID = "timer_sound_id"
-    val DEFAULT_SOUND: AlarmSound = AlarmSound.CHIME
+    val DEFAULT_SOUND: AlarmSound = AlarmSound.WIND_CHIMES
 
     fun get(context: Context): AlarmSound {
         val prefs = Storage.prefs(context, PREFS)
