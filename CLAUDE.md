@@ -131,6 +131,17 @@ version vs. `versionName`, unit tests vs. the counted `@Test`s, lines of code ±
 is also the product page hero (`build.py … --hero docs/banner.jpg`; `site.json` theme `bg` = hero `bg` =
 the art's edge colour, or the art shows as a box).
 
+**German shots for celox.io/projekte** (2026-11-08) live in the website repo
+(`_customers/celox/website/assets/showcase-quellen/brutus/`), not here — this README stays English.
+Recipe: `adb root`, `cmd locale set-app-locales com.pepperonas.brutus --locales de-DE`, `cmd uimode
+night yes`, alarms via sqlite in `/data/user_de/0/com.pepperonas.brutus/databases/brutus_alarms.db`
+(device-protected storage, not `/data/data/…`), status bar via demo mode set to the **real** time.
+⚠️ Do **not** change the emulator date with `date …` — on `brutus-test` that sent `system_server` into a
+restart loop (`DeadSystemException`, `Can't find service: activity`, "MainActivity does not exist");
+only `-wipe-data` recovered it. If `adb exec-out screencap` hangs, `adb emu screenrecord screenshot
+<file>` still works. German plurals: every count with a unit goes through `<plurals>` — v2.5.3 fixed
+"1 Stunden" in the countdown (`CountdownPluralTest`).
+
 ## Releasing
 
 Bump `versionCode` + `versionName` in `app/build.gradle.kts`, add a CHANGELOG entry (both
@@ -140,6 +151,9 @@ keystore from secrets, builds `assembleRelease`, **verifies the APK certificate 
 alias is a repo *variable* (`RELEASE_KEY_ALIAS`), not a secret. Local signing reads
 `brutus.storeFile/storePassword/keyAlias/keyPassword` from `local.properties` (git-ignored).
 `workflow_dispatch` runs the full signed build without publishing.
+After the release: put the APK's size + SHA-256 into both READMEs (`docs(readme): vX APK checksum`).
+brutus.celox.io picks the release up via `brutus-latest.timer` on the VPS (every ~15 min);
+`systemctl start brutus-latest.service` publishes it at once (`latest.json`, `/download/android`).
 
 ## Product page (`website/`)
 
