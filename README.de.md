@@ -17,8 +17,8 @@
 <h3>👉 <a href="https://brutus.celox.io">brutus.celox.io</a> — Funktionen, <a href="https://brutus.celox.io/#sounds">alle 25 Töne zum Anhören</a>, FAQ und immer die neueste APK</h3>
 
 <!-- BADGES:BIG — version, unit tests and lines of code; ReadmeSyncTest keeps them true. -->
-[![version](https://img.shields.io/badge/version-2.5.2-E53935?style=for-the-badge&logo=android&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
-[![unit tests](https://img.shields.io/badge/unit%20tests-376-2E9E5B?style=for-the-badge&logo=junit5&logoColor=white)](#tests-und-ci)
+[![version](https://img.shields.io/badge/version-2.5.3-E53935?style=for-the-badge&logo=android&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
+[![unit tests](https://img.shields.io/badge/unit%20tests-378-2E9E5B?style=for-the-badge&logo=junit5&logoColor=white)](#tests-und-ci)
 [![lines of code](https://img.shields.io/badge/lines%20of%20code-11.3k-4B6BDF?style=for-the-badge&logo=kotlin&logoColor=white)](app/src/main/java/com/pepperonas/brutus)
 [![test code](https://img.shields.io/badge/test%20code-5.6k-2E9E5B?style=for-the-badge&logo=kotlin&logoColor=white)](app/src/test/java/com/pepperonas/brutus)
 [![sounds](https://img.shields.io/badge/sounds-25-FF5252?style=for-the-badge&logo=audiomack&logoColor=white)](https://brutus.celox.io/#sounds)
@@ -237,6 +237,7 @@ Aufnahmeliste steht in [`docs/screenshots/SHOTLIST.de.md`](docs/screenshots/SHOT
   Kaltstart zeigt nicht mehr kurz „Noch kein Alarm“, bevor die Liste geladen ist.
 - **2.5.2:** Bei entsperrtem Handy verdeckt die angeheftete Wecker-Benachrichtigung nicht mehr die Uhr des
   Alarmbildschirms — sie weicht, solange er vorne ist, und kommt zurück, sobald du ihn verlässt.
+- **2.5.3:** Der Countdown über der Liste sagt „1 Stunde“ und „1 Minute“ statt „1 Stunden“.
 - Alles im Detail: [CHANGELOG](CHANGELOG.de.md).
 
 ## Warum Brutus?
@@ -885,7 +886,7 @@ app/src/main/res/
 
 ## Tests und CI
 
-376 JVM-Unit-Tests sichern die Stellen, an denen ein Fehler bedeutet, dass jemand verschläft: was tatsächlich im `AlarmManager` landet, die Weckzeit-Arithmetik, die Persistenz, die Vollständigkeit beider Übersetzungen und jeden String, den der Nutzer auf einem Ziffernblatt liest. Es gibt keine Instrumentierungstests — die gesamte Suite läuft in Sekunden auf der JVM.
+378 JVM-Unit-Tests sichern die Stellen, an denen ein Fehler bedeutet, dass jemand verschläft: was tatsächlich im `AlarmManager` landet, die Weckzeit-Arithmetik, die Persistenz, die Vollständigkeit beider Übersetzungen und jeden String, den der Nutzer auf einem Ziffernblatt liest. Es gibt keine Instrumentierungstests — die gesamte Suite läuft in Sekunden auf der JVM.
 
 | Suite | Tests | Was sie festnagelt |
 |-------|-------|--------------------|
@@ -939,7 +940,7 @@ app/src/main/res/
 | `scheduler/AlarmSchedulerConstantsTest` | 4 | Ultra-Hardcore-Offsets, Sunrise-Vorlauf, Eindeutigkeit der Intent-Extras |
 
 ```bash
-./gradlew :app:testDebugUnitTest          # alle 376
+./gradlew :app:testDebugUnitTest          # alle 378
 ./gradlew :app:testDebugUnitTest --tests '*NextAlarmCalculatorTest'
 # HTML-Report: app/build/reports/tests/testDebugUnitTest/index.html
 ```

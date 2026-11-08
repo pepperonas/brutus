@@ -76,8 +76,15 @@ object NextAlarmCalculator {
             days > 0 -> context.resources.getQuantityString(
                 R.plurals.countdown_days, days, days, hours
             )
-            hours > 0 -> context.getString(R.string.countdown_hours, hours, minutes)
-            else -> context.getString(R.string.countdown_minutes, minutes)
+            hours > 0 -> context.getString(
+                R.string.countdown_hours,
+                context.resources.getQuantityString(R.plurals.countdown_unit_hours, hours, hours),
+                context.resources.getQuantityString(R.plurals.countdown_unit_minutes, minutes, minutes),
+            )
+            else -> context.getString(
+                R.string.countdown_minutes,
+                context.resources.getQuantityString(R.plurals.countdown_unit_minutes, minutes, minutes),
+            )
         }
     }
 }

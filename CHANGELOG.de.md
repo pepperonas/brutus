@@ -4,6 +4,16 @@
 
 Alle nennenswerten Änderungen an Brutus stehen hier. Versionen folgen [SemVer](https://semver.org).
 
+## [2.5.3] — 2026-11-08 · „1 Stunde“ statt „1 Stunden“
+
+### Behoben
+- **Der Countdown über der Weckerliste kannte keine Einzahl:** dort stand „Alarm in 1 Stunden“, englisch
+  „Alarm in 1 hours, 1 minutes“. Stunden und Minuten laufen jetzt jeweils über eine eigene Pluralform
+  („1 Stunde“, „1 Minute“).
+
+### Tests
+- 376 → 378: der Countdown wird in beiden Sprachen für eine Stunde, eine Minute und die Mehrzahl geprüft.
+
 ## [2.5.2] — 2026-09-27 · Die Uhr auf dem Alarmbildschirm ist nicht mehr verdeckt
 
 ### Behoben

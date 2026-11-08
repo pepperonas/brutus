@@ -4,6 +4,16 @@
 
 All notable changes to Brutus are documented here. Versions follow [SemVer](https://semver.org).
 
+## [2.5.3] — 2026-11-08 · "1 Stunde" instead of "1 Stunden"
+
+### Fixed
+- **The list header's countdown used the plural for one:** it read "Alarm in 1 hours, 1 minutes", in
+  German "Alarm in 1 Stunden". Hours and minutes now each go through their own plural ("1 hour",
+  "1 Stunde", "1 Minute").
+
+### Tests
+- 376 → 378: the countdown is checked in both languages for one hour, one minute and the plural cases.
+
 ## [2.5.2] — 2026-09-27 · The alarm screen's clock is no longer covered
 
 ### Fixed

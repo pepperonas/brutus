@@ -255,8 +255,17 @@
         <item quantity="one">Alarm in %1$d Tag, %2$d Std.</item>
         <item quantity="other">Alarm in %1$d Tagen, %2$d Std.</item>
     </plurals>
-    <string name="countdown_hours">Alarm in %1$d Stunden, %2$d Minuten</string>
-    <string name="countdown_minutes">Alarm in %1$d Minuten</string>
+    <!-- Hours and minutes each go through their own plural ("1 hour", not "1 hours"). -->
+    <plurals name="countdown_unit_hours">
+        <item quantity="one">%d Stunde</item>
+        <item quantity="other">%d Stunden</item>
+    </plurals>
+    <plurals name="countdown_unit_minutes">
+        <item quantity="one">%d Minute</item>
+        <item quantity="other">%d Minuten</item>
+    </plurals>
+    <string name="countdown_hours">Alarm in %1$s, %2$s</string>
+    <string name="countdown_minutes">Alarm in %1$s</string>
 
     <!-- ===================== Benachrichtigungen ===================== -->
     <string name="channel_alarm_name">Alarm</string>
