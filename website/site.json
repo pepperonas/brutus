@@ -77,7 +77,7 @@
       "twitter_description": "Free, open-source Android alarm clock: math, shake and QR challenges, a volume lock and follow-up alarms. No ads, no tracking, offline by default.",
       "image_alt": "Two phones with the Brutus alarm screen — a math challenge and a shake challenge — in front of red alarm rings."
     },
-    "summary": "Brutus is a free, open-source (MIT) alarm clock for Android 8.0 and later. A ringing alarm only stops once you complete the challenges you chose for it: solve math problems, shake the phone, or scan a QR code you placed somewhere else in your home — in any combination, one after the other. Hardcore mode keeps the alarm at full volume while it rings; Ultra Hardcore mode re-rings 10 and 15 minutes later unless you walk 30 steps. It synthesizes 25 alarm sounds on the device, notifies you before an alarm and lets you dismiss it early, and it also has a world clock, stopwatch, a timer that rings even with the app closed and a home-screen widget, runs in English and German, has no ads or tracking, and stays offline unless you switch on its update check, which then reads the newest version number once a day and notifies you. Distributed as a signed APK through GitHub Releases.",
+    "summary": "Brutus is a free, open-source (MIT) alarm clock for Android 8.0 and later. A ringing alarm only stops once you complete the challenges you chose for it: solve math problems, shake the phone, or scan a QR code you placed somewhere else in your home — in any combination, one after the other. Hardcore mode keeps the alarm at full volume while it rings; Ultra Hardcore mode re-rings 10 and 15 minutes later unless you walk 30 steps. It synthesizes 25 alarm sounds on the device, can swell from quiet to full volume, pauses every alarm for a vacation and backs alarms up to a file; it notifies you before an alarm and lets you dismiss it early, and it also has a world clock, stopwatch, a timer that rings even with the app closed and a home-screen widget, runs in English and German, has no ads or tracking, and stays offline unless you switch on its update check, which then reads the newest version number once a day and notifies you. Distributed as a signed APK through GitHub Releases.",
     "meta_fallback": "Newest release · Android 8.0+ · free, MIT licence",
     "feature_list": [
       "Wake-up challenges: math problems, shaking the phone and scanning a QR code, combinable and run in sequence",
@@ -87,6 +87,12 @@
       "25 alarm sounds synthesized on the device (17 harsh, 8 gentle), plus the system alarm tone and a silent option",
       "Sunrise pre-alarm: screen brightens over the 10 minutes before the alarm, with a gentle sound of your choice",
       "Slide-to-snooze with configurable snooze length, or no snooze at all",
+      "Crescendo: normal alarms can start 30 dB below full volume and swell to it within 15, 30 or 60 seconds",
+      "Snooze when unanswered: an alarm nobody reacts to snoozes itself and rings again, up to three times",
+      "During a phone call the alarm plays quietly so the call stays audible; music and podcasts pause while it rings",
+      "Vacation mode: pause every alarm through a chosen last day, from Settings, a quick-settings tile or a launcher shortcut",
+      "Launcher shortcuts for a new alarm, the timer and vacation mode",
+      "Backup to a file: export alarms, the QR code and the settings as JSON and import them on another phone",
       "Test mode to try a wake-up chain without setting a real alarm",
       "World clock, stopwatch, and a timer that rings even after you leave the app",
       "Heads-up notification before an alarm, with a countdown and Dismiss early (Hardcore alarms only via their challenges)",
@@ -208,18 +214,18 @@
       },
       {
         "t": {
-          "en": "Sunrise and widget",
-          "de": "Sonnenaufgang und Widget",
-          "es": "Amanecer y widget",
-          "it": "Alba e widget",
-          "fr": "Lever du soleil et widget"
+          "en": "Sunrise, crescendo, vacation",
+          "de": "Sonnenaufgang, Crescendo, Urlaub",
+          "es": "Amanecer, crescendo, vacaciones",
+          "it": "Alba, crescendo, vacanze",
+          "fr": "Aube, crescendo, vacances"
         },
         "p": {
-          "en": "An optional pre-alarm brightens the screen over the ten minutes before it rings, with a gentle sound of your choice. A home-screen widget shows the next alarm with a countdown.",
-          "de": "Ein optionaler Vorwecker hellt den Bildschirm in den zehn Minuten vor dem Klingeln langsam auf, begleitet von einem sanften Klang deiner Wahl. Ein Widget zeigt den nächsten Wecker samt Countdown.",
-          "es": "Una prealarma opcional aclara la pantalla durante los diez minutos anteriores, con un sonido suave a tu elección. Un widget muestra la próxima alarma con una cuenta atrás.",
-          "it": "Una pre-sveglia opzionale schiarisce lo schermo nei dieci minuti prima che suoni, con un suono dolce a scelta. Un widget mostra la prossima sveglia con il conto alla rovescia.",
-          "fr": "Une pré-alarme facultative éclaircit l’écran pendant les dix minutes qui précèdent, avec un son doux de votre choix. Un widget affiche la prochaine alarme avec un compte à rebours."
+          "en": "An optional pre-alarm brightens the screen over the ten minutes before it rings, and normal alarms can swell from quiet to full volume. Vacation mode pauses every alarm through a chosen day — from Settings, a quick-settings tile or a launcher shortcut. A home-screen widget shows the next alarm.",
+          "de": "Ein optionaler Vorwecker hellt den Bildschirm in den zehn Minuten vor dem Alarm auf, und normale Wecker können leise beginnen und lauter werden. Der Urlaubsmodus pausiert alle Wecker bis zu einem gewählten Tag — in den Einstellungen, per Schnelleinstellungs-Kachel oder App-Verknüpfung. Ein Widget zeigt den nächsten Wecker.",
+          "es": "Un prealarma opcional ilumina la pantalla durante los diez minutos previos, y las alarmas normales pueden empezar bajo e ir subiendo. El modo vacaciones pausa todas las alarmas hasta el día que elijas, desde los ajustes, un mosaico de ajustes rápidos o un acceso directo. Un widget muestra la próxima alarma.",
+          "it": "Una pre-sveglia opzionale schiarisce lo schermo nei dieci minuti prima, e le sveglie normali possono partire piano e crescere. La modalità vacanza sospende tutte le sveglie fino al giorno scelto, dalle impostazioni, da un riquadro delle impostazioni rapide o da una scorciatoia. Un widget mostra la prossima sveglia.",
+          "fr": "Un pré-réveil facultatif éclaire l’écran pendant les dix minutes qui précèdent, et les alarmes normales peuvent commencer doucement puis monter. Le mode vacances met toutes les alarmes en pause jusqu’au jour choisi, depuis les réglages, une vignette de réglages rapides ou un raccourci. Un widget affiche la prochaine alarme."
         }
       },
       {
@@ -380,6 +386,22 @@
           "es": "Activa <em>Check for updates</em> en ⋮ → <em>Settings &amp; info</em>: Brutus comprobará una vez al día si hay una versión nueva y te avisará. Descarga la APK desde esta página e instálala sobre la app existente; tus alarmas y ajustes se conservan.",
           "it": "Attiva <em>Check for updates</em> in ⋮ → <em>Settings &amp; info</em>: Brutus controllerà una volta al giorno se c’è una nuova versione e ti avviserà. Scarica l’APK da questa pagina e installalo sopra l’app esistente; sveglie e impostazioni restano.",
           "fr": "Activez <em>Check for updates</em> dans ⋮ → <em>Settings &amp; info</em> : Brutus vérifie alors une fois par jour s’il existe une nouvelle version et vous prévient. Téléchargez l’APK depuis cette page et installez-le par-dessus l’app existante ; vos alarmes et réglages sont conservés."
+        }
+      },
+      {
+        "q": {
+          "en": "Can I pause my alarms for a holiday or keep them when I switch phones?",
+          "de": "Kann ich meine Wecker im Urlaub pausieren oder aufs neue Handy mitnehmen?",
+          "es": "¿Puedo pausar las alarmas en vacaciones o llevarlas a otro móvil?",
+          "it": "Posso sospendere le sveglie in vacanza o portarle su un altro telefono?",
+          "fr": "Puis-je mettre mes alarmes en pause pendant les vacances ou les garder en changeant de téléphone ?"
+        },
+        "a": {
+          "en": "Yes. Vacation mode pauses every alarm through the last day you pick and resumes them on its own. Under ⋮ → <em>Settings &amp; info</em> → <em>Backup</em> you export alarms, the QR code and the settings to a file and import it on the new phone — a printed QR code keeps working.",
+          "de": "Ja. Der Urlaubsmodus pausiert alle Wecker bis zum gewählten letzten Tag und setzt sie danach von selbst fort. Unter ⋮ → <em>Einstellungen &amp; Info</em> → <em>Sicherung</em> exportierst du Wecker, QR-Code und Einstellungen in eine Datei und importierst sie auf dem neuen Handy — ein ausgedruckter QR-Code bleibt gültig.",
+          "es": "Sí. El modo vacaciones pausa todas las alarmas hasta el último día que elijas y las reanuda solo. En ⋮ → <em>Settings &amp; info</em> → <em>Backup</em> exportas alarmas, código QR y ajustes a un archivo y lo importas en el móvil nuevo; un QR impreso sigue funcionando.",
+          "it": "Sì. La modalità vacanza sospende tutte le sveglie fino all’ultimo giorno scelto e poi le riprende da sola. In ⋮ → <em>Settings &amp; info</em> → <em>Backup</em> esporti sveglie, codice QR e impostazioni in un file e lo importi sul nuovo telefono: un QR stampato resta valido.",
+          "fr": "Oui. Le mode vacances met toutes les alarmes en pause jusqu’au dernier jour choisi, puis les reprend tout seul. Dans ⋮ → <em>Settings &amp; info</em> → <em>Backup</em>, vous exportez alarmes, code QR et réglages dans un fichier et l’importez sur le nouveau téléphone ; un code QR imprimé reste valable."
         }
       },
       {

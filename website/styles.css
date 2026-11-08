@@ -308,6 +308,23 @@ h1 {
 .rs-detail:empty { display: none; }
 .rs-note { margin: 12px 0 0; font-size: .85rem; color: var(--on-variant); }
 
+/* Demo video (content.video): heading, one line, the player. No autoplay, no preload. */
+.vd-lead { margin: -4px 0 18px; color: var(--on-variant); font-size: 1.05rem; line-height: 1.6; max-width: 72ch; }
+.vd-player {
+  display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: var(--r-xl); background: var(--bg-lowest);
+  box-shadow: 0 0 0 1px var(--outline-variant), 0 40px 90px -40px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+/* Showcase: one large illustration beside a heading + paragraph (content.showcase). */
+.showcase { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: clamp(24px, 5vw, 56px); align-items: center; }
+.sc-art img {
+  display: block; width: 100%; height: auto; border-radius: var(--r-xl); background: var(--bg-lowest);
+  box-shadow: 0 0 0 1px var(--outline-variant), 0 40px 90px -40px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+.sc-text h2 { margin-top: 0; }
+.sc-text p { margin: 0; color: var(--on-variant); font-size: 1.05rem; line-height: 1.6; }
+@media (max-width: 860px) { .showcase { grid-template-columns: 1fr; } }
+
 /* Gallery: captioned mockups; a click opens the large view (#shot-view). */
 .shot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 22px; }
 .shot { margin: 0; display: flex; flex-direction: column; gap: 12px; }

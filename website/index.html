@@ -56,7 +56,7 @@
   "@type": "MobileApplication",
   "@id": "https://brutus.celox.io/#app",
   "name": "Brutus",
-  "description": "Brutus is a free, open-source (MIT) alarm clock for Android 8.0 and later. A ringing alarm only stops once you complete the challenges you chose for it: solve math problems, shake the phone, or scan a QR code you placed somewhere else in your home — in any combination, one after the other. Hardcore mode keeps the alarm at full volume while it rings; Ultra Hardcore mode re-rings 10 and 15 minutes later unless you walk 30 steps. It synthesizes 25 alarm sounds on the device, notifies you before an alarm and lets you dismiss it early, and it also has a world clock, stopwatch, a timer that rings even with the app closed and a home-screen widget, runs in English and German, has no ads or tracking, and stays offline unless you switch on its update check, which then reads the newest version number once a day and notifies you. Distributed as a signed APK through GitHub Releases.",
+  "description": "Brutus is a free, open-source (MIT) alarm clock for Android 8.0 and later. A ringing alarm only stops once you complete the challenges you chose for it: solve math problems, shake the phone, or scan a QR code you placed somewhere else in your home — in any combination, one after the other. Hardcore mode keeps the alarm at full volume while it rings; Ultra Hardcore mode re-rings 10 and 15 minutes later unless you walk 30 steps. It synthesizes 25 alarm sounds on the device, can swell from quiet to full volume, pauses every alarm for a vacation and backs alarms up to a file; it notifies you before an alarm and lets you dismiss it early, and it also has a world clock, stopwatch, a timer that rings even with the app closed and a home-screen widget, runs in English and German, has no ads or tracking, and stays offline unless you switch on its update check, which then reads the newest version number once a day and notifies you. Distributed as a signed APK through GitHub Releases.",
   "url": "https://brutus.celox.io/",
   "image": "https://brutus.celox.io/assets/og.jpg?v=5",
   "operatingSystem": "Android 8.0 or later",
@@ -97,6 +97,12 @@
    "25 alarm sounds synthesized on the device (17 harsh, 8 gentle), plus the system alarm tone and a silent option",
    "Sunrise pre-alarm: screen brightens over the 10 minutes before the alarm, with a gentle sound of your choice",
    "Slide-to-snooze with configurable snooze length, or no snooze at all",
+   "Crescendo: normal alarms can start 30 dB below full volume and swell to it within 15, 30 or 60 seconds",
+   "Snooze when unanswered: an alarm nobody reacts to snoozes itself and rings again, up to three times",
+   "During a phone call the alarm plays quietly so the call stays audible; music and podcasts pause while it rings",
+   "Vacation mode: pause every alarm through a chosen last day, from Settings, a quick-settings tile or a launcher shortcut",
+   "Launcher shortcuts for a new alarm, the timer and vacation mode",
+   "Backup to a file: export alarms, the QR code and the settings as JSON and import them on another phone",
    "Test mode to try a wake-up chain without setting a real alarm",
    "World clock, stopwatch, and a timer that rings even after you leave the app",
    "Heads-up notification before an alarm, with a countdown and Dismiss early (Hardcore alarms only via their challenges)",
@@ -183,6 +189,14 @@
     "acceptedAnswer": {
      "@type": "Answer",
      "text": "Switch on Check for updates under ⋮ → Settings & info: Brutus then looks once a day for a new release and notifies you. Download the APK from this page and install it over the existing app; your alarms and settings stay."
+    }
+   },
+   {
+    "@type": "Question",
+    "name": "Can I pause my alarms for a holiday or keep them when I switch phones?",
+    "acceptedAnswer": {
+     "@type": "Answer",
+     "text": "Yes. Vacation mode pauses every alarm through the last day you pick and resumes them on its own. Under ⋮ → Settings & info → Backup you export alarms, the QR code and the settings to a file and import it on the new phone — a printed QR code keeps working."
     }
    },
    {
@@ -293,8 +307,8 @@
           <p data-i18n="f4.p">25 alarm sounds are synthesized in real time — 17 harsh ones, from klaxon and air-raid siren to steel hammer, and 8 gentle ones like singing bowl, birdsong and ocean waves — plus the system tone. Preview each one while you set the alarm.</p>
         </article>
         <article class="card">
-          <h3 data-i18n="f5.t">Sunrise and widget</h3>
-          <p data-i18n="f5.p">An optional pre-alarm brightens the screen over the ten minutes before it rings, with a gentle sound of your choice. A home-screen widget shows the next alarm with a countdown.</p>
+          <h3 data-i18n="f5.t">Sunrise, crescendo, vacation</h3>
+          <p data-i18n="f5.p">An optional pre-alarm brightens the screen over the ten minutes before it rings, and normal alarms can swell from quiet to full volume. Vacation mode pauses every alarm through a chosen day — from Settings, a quick-settings tile or a launcher shortcut. A home-screen widget shows the next alarm.</p>
         </article>
         <article class="card">
           <h3 data-i18n="f6.t">Reliable, offline by default</h3>
@@ -581,12 +595,16 @@
           <p data-i18n="faq.q4a">Switch on <em>Check for updates</em> under ⋮ → <em>Settings &amp; info</em>: Brutus then looks once a day for a new release and notifies you. Download the APK from this page and install it over the existing app; your alarms and settings stay.</p>
         </details>
         <details class="faq-item">
-          <summary data-i18n="faq.q5">What does it do besides alarms?</summary>
-          <p data-i18n="faq.q5a">A world clock, a stopwatch with laps, a timer that rings even after you leave the app, and a home-screen widget. Before an alarm a notification counts down and lets you dismiss it early. Theme (light, dark or system) is set under ⋮ → Settings & info. The app is in English and German and follows the system language.</p>
+          <summary data-i18n="faq.q5">Can I pause my alarms for a holiday or keep them when I switch phones?</summary>
+          <p data-i18n="faq.q5a">Yes. Vacation mode pauses every alarm through the last day you pick and resumes them on its own. Under ⋮ → <em>Settings &amp; info</em> → <em>Backup</em> you export alarms, the QR code and the settings to a file and import it on the new phone — a printed QR code keeps working.</p>
         </details>
         <details class="faq-item">
-          <summary data-i18n="faq.q6">How do I know the APK is genuine?</summary>
-          <p data-i18n="faq.q6a">Compare its SHA-256 with the value above and check the signing certificate with apksigner verify --print-certs; the certificate is the same for every release since 1.0.0.</p>
+          <summary data-i18n="faq.q6">What does it do besides alarms?</summary>
+          <p data-i18n="faq.q6a">A world clock, a stopwatch with laps, a timer that rings even after you leave the app, and a home-screen widget. Before an alarm a notification counts down and lets you dismiss it early. Theme (light, dark or system) is set under ⋮ → Settings & info. The app is in English and German and follows the system language.</p>
+        </details>
+        <details class="faq-item">
+          <summary data-i18n="faq.q7">How do I know the APK is genuine?</summary>
+          <p data-i18n="faq.q7a">Compare its SHA-256 with the value above and check the signing certificate with apksigner verify --print-certs; the certificate is the same for every release since 1.0.0.</p>
         </details>
       </div>
     </section>
