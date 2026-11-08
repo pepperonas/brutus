@@ -4,6 +4,39 @@
 
 All notable changes to Brutus are documented here. Versions follow [SemVer](https://semver.org).
 
+## [2.6.0] — 2026-11-08 · Crescendo, vacation mode and a real backup
+
+### Added
+- **Crescendo** _(Settings → Ringing, off by default)_: normal alarms start 30 dB below full volume and reach
+  it within 15, 30 or 60 s, evenly in decibels. Hardcore alarms stay loud from the first second.
+- **Snooze when unanswered** _(default 15 min)_: an alarm nobody reacts to snoozes itself and rings again — at
+  least 5 minutes later, also when its own snooze is off — up to three times; then it stops and posts a
+  *Missed alarm* notice saying it rang unanswered. Hardcore alarms and Ultra Hardcore re-alarms never stop on
+  their own.
+- **Vacation mode:** pause every alarm through a chosen last day — from Settings, the new quick-settings tile or
+  a launcher shortcut. The alarm list shows a banner with *Resume now*; list header, widget, heads-up and
+  AlarmManager all honour the pause.
+- **Quick-settings tile *Vacation*** and **launcher shortcuts** for a new alarm, the timer and vacation mode.
+- **Backup to a file:** Settings → Backup exports alarms, the QR code and the settings as JSON and imports them
+  again — only new alarms are added, and the file's QR code takes over so a printed copy keeps working.
+
+### Changed
+- **Calls and music:** a ringing alarm takes audio focus (music and podcasts pause) and plays every alarm at
+  15 % while the phone rings or a call runs, so the call stays audible.
+- **Android backup** leaves moment-bound state behind (snoozes, missed-alarm bookkeeping, Ultra Hardcore
+  follow-ups, a running timer, update-check state) and re-arms restored alarms right away instead of waiting
+  for the app to be opened.
+- The release APK carries a baseline profile for the cold start and the ringing path.
+- The two largest screen files are split into smaller ones; behaviour unchanged.
+
+### Fixed
+- A test of the heads-up notification failed every day between 06:30 and 07:00.
+
+### Tests
+- 379 → 427: the ringing rules, the real service at the ring limit and with audio focus, the export format and
+  import, the backup rules, vacation mode across DST and west of UTC, shortcuts and tile. Each new guard was
+  broken once on purpose to see its test fail.
+
 ## [2.5.3] — 2026-11-08 · "1 Stunde" instead of "1 Stunden"
 
 ### Fixed

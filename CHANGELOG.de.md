@@ -4,6 +4,42 @@
 
 Alle nennenswerten Änderungen an Brutus stehen hier. Versionen folgen [SemVer](https://semver.org).
 
+## [2.6.0] — 2026-11-08 · Lauter werden, Urlaubsmodus und eine echte Sicherung
+
+### Neu
+- **Lauter werden** _(Einstellungen → Klingeln, standardmäßig aus)_: Normale Wecker beginnen 30 dB unter voller
+  Lautstärke und erreichen sie nach 15, 30 oder 60 s, gleichmäßig in Dezibel. Hardcore-Wecker bleiben ab der
+  ersten Sekunde laut.
+- **Schlummern ohne Reaktion** _(Standard 15 Min.)_: Ein Wecker, auf den niemand reagiert, schlummert von selbst
+  und klingelt erneut — frühestens nach 5 Minuten, auch wenn sein eigenes Schlummern aus ist —, bis zu dreimal;
+  dann hört er auf und meldet sich als *Verpasster Wecker*, der unbeantwortet geklingelt hat. Hardcore-Wecker und
+  Ultra-Hardcore-Re-Alarme hören nie von selbst auf.
+- **Urlaubsmodus:** alle Wecker bis einschließlich eines letzten freien Tages pausieren — aus den Einstellungen,
+  über die neue Schnelleinstellungs-Kachel oder ein Launcher-Shortcut. Die Weckerliste zeigt ein Banner mit
+  *Jetzt fortsetzen*; Kopfzeile, Widget, Hinweis-Benachrichtigung und AlarmManager berücksichtigen die Pause.
+- **Schnelleinstellungs-Kachel *Urlaub*** und **Launcher-Shortcuts** für einen neuen Wecker, den Timer und den
+  Urlaubsmodus.
+- **Sicherung in eine Datei:** Einstellungen → Sicherung exportiert Wecker, QR-Code und Einstellungen als JSON und
+  importiert sie wieder — nur neue Wecker kommen hinzu, und der QR-Code der Datei wird übernommen, damit ein
+  ausgedrucktes Exemplar weiter funktioniert.
+
+### Geändert
+- **Anrufe und Musik:** Ein klingelnder Wecker holt sich den Audio-Fokus (Musik und Podcasts pausieren) und spielt
+  jeden Wecker mit 15 %, solange das Handy klingelt oder ein Gespräch läuft, damit das Gespräch hörbar bleibt.
+- **Android-Sicherung** lässt momentgebundenen Zustand zurück (Schlummern, Buchführung für verpasste Wecker,
+  Ultra-Hardcore-Re-Alarme, einen laufenden Timer, Zustand der Update-Prüfung) und stellt wiederhergestellte
+  Wecker sofort scharf, statt zu warten, bis die App geöffnet wird.
+- Das Release-APK enthält ein Baseline-Profil für Kaltstart und Klingel-Pfad.
+- Die beiden größten Bildschirm-Dateien sind in kleinere aufgeteilt; das Verhalten ist unverändert.
+
+### Behoben
+- Ein Test der Hinweis-Benachrichtigung schlug jeden Tag zwischen 06:30 und 07:00 Uhr fehl.
+
+### Tests
+- 379 → 427: die Klingel-Regeln, der echte Service am Klingel-Limit und mit Audio-Fokus, Exportformat und Import,
+  die Backup-Regeln, der Urlaubsmodus über die Zeitumstellung und westlich von UTC, Shortcuts und Kachel. Jede neue
+  Absicherung wurde einmal absichtlich gebrochen, um ihren Test scheitern zu sehen.
+
 ## [2.5.3] — 2026-11-08 · „1 Stunde“ statt „1 Stunden“
 
 ### Behoben

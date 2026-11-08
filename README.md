@@ -17,10 +17,10 @@
 <h3>👉 <a href="https://brutus.celox.io">brutus.celox.io</a> — features, <a href="https://brutus.celox.io/#sounds">all 25 sounds to listen to</a>, FAQ and always the newest APK</h3>
 
 <!-- BADGES:BIG — version, unit tests and lines of code; ReadmeSyncTest keeps them true. -->
-[![version](https://img.shields.io/badge/version-2.5.3-E53935?style=for-the-badge&logo=android&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
-[![unit tests](https://img.shields.io/badge/unit%20tests-379-2E9E5B?style=for-the-badge&logo=junit5&logoColor=white)](#tests-and-ci)
-[![lines of code](https://img.shields.io/badge/lines%20of%20code-11.3k-4B6BDF?style=for-the-badge&logo=kotlin&logoColor=white)](app/src/main/java/com/pepperonas/brutus)
-[![test code](https://img.shields.io/badge/test%20code-5.6k-2E9E5B?style=for-the-badge&logo=kotlin&logoColor=white)](app/src/test/java/com/pepperonas/brutus)
+[![version](https://img.shields.io/badge/version-2.6.0-E53935?style=for-the-badge&logo=android&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
+[![unit tests](https://img.shields.io/badge/unit%20tests-427-2E9E5B?style=for-the-badge&logo=junit5&logoColor=white)](#tests-and-ci)
+[![lines of code](https://img.shields.io/badge/lines%20of%20code-12.7k-4B6BDF?style=for-the-badge&logo=kotlin&logoColor=white)](app/src/main/java/com/pepperonas/brutus)
+[![test code](https://img.shields.io/badge/test%20code-6.6k-2E9E5B?style=for-the-badge&logo=kotlin&logoColor=white)](app/src/test/java/com/pepperonas/brutus)
 [![sounds](https://img.shields.io/badge/sounds-25-FF5252?style=for-the-badge&logo=audiomack&logoColor=white)](https://brutus.celox.io/#sounds)
 
 [![Donate with PayPal](https://img.shields.io/badge/PayPal-support%20this%20project-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://www.paypal.com/donate/?business=martin.pfeffer@celox.io&currency_code=EUR&item_name=Brutus)
@@ -126,6 +126,7 @@ Everything is packed into a four-tab bottom navigation that keeps the brutal ala
 ## Table of Contents
 
 - [Screenshots](#screenshots)
+- [New in 2.6](#new-in-26)
 - [New in 2.5](#new-in-25)
 - [Why Brutus?](#why-brutus)
 - [App structure](#app-structure)
@@ -145,6 +146,10 @@ Everything is packed into a four-tab bottom navigation that keeps the brutal ala
   - [World Clock](#world-clock)
   - [Stopwatch](#stopwatch)
   - [Timer](#timer)
+  - [Ringing: crescendo, calls, unanswered alarms](#ringing-crescendo-calls-unanswered-alarms)
+  - [Vacation mode](#vacation-mode)
+  - [Quick settings tile and shortcuts](#quick-settings-tile-and-shortcuts)
+  - [Backup and restore](#backup-and-restore)
   - [Settings & info](#settings--info)
   - [Notifications](#notifications)
   - [Motion and physics](#motion-and-physics)
@@ -224,6 +229,21 @@ Everything is packed into a four-tab bottom navigation that keeps the brutal ala
 </table>
 
 <p align="center"><img src="docs/screenshots/10-stopwatch.png" alt="Stopwatch with laps" width="32%" /><br /><sub><b>Stopwatch</b> — running readout and a lap list with lap and total times.</sub></p>
+
+## New in 2.6
+
+- **Crescendo** _(optional)_ — normal alarms start quietly and reach full volume within 15, 30 or 60 s.
+  Hardcore alarms stay loud from the first second.
+- **Calls and music:** during a phone call every alarm plays quietly so you can still hear the call, and
+  music or podcasts pause while an alarm rings.
+- **Unanswered alarms snooze themselves** after a limit you choose (default 15 min) and ring again — up to
+  three times, then they stop and report themselves missed. Hardcore alarms never stop on their own.
+- **Vacation mode** — pause every alarm through a chosen day, from Settings, a quick-settings tile or a
+  launcher shortcut. The alarms stay as they are.
+- **Backup:** Android's backup now leaves snoozes and other moment-bound state behind and re-arms restored
+  alarms right away; you can also export everything — alarms, QR code, settings — to a file and import it.
+- **Launcher shortcuts** for a new alarm, the timer and vacation mode.
+- Everything in detail: [CHANGELOG](CHANGELOG.md).
 
 ## New in 2.5
 
@@ -488,6 +508,49 @@ During the countdown the screen switches to a large 56 sp readout in a continuou
 
 Since **v2.4.0 the timer is a real alarm**: its state is persisted (`timer/TimerController`), AlarmManager wakes the phone at the end and a foreground service rings — also when the app was left with Back or its process was killed (before, it silently ended). A notification shows the countdown with Pause/Resume/Abort; the ringing one has **Stop**. Verified on an emulator: timer started, app left, process killed, it rang on time.
 
+### Ringing: crescendo, calls, unanswered alarms
+
+Since **v2.6.0**, under **⋮ → Settings & info → Ringing**:
+
+- **Crescendo** (**Off** / 15 / 30 / 60 s, default off) — a normal alarm starts 30 dB below full volume and
+  rises evenly in decibels. The alarm stream itself still goes to maximum; only the sound's own gain ramps.
+  Hardcore alarms ignore the setting.
+- **Snooze when unanswered** (**Never** / 5 / 10 / **15** / 30 min, default **15**) — if nobody reacts, a normal
+  alarm snoozes itself and rings again after its snooze time (at least 5 min, also when its snooze is off).
+  After three such rounds it stops and posts a *Missed alarm* notice saying it rang unanswered. Dismissing or
+  snoozing by hand resets the count. Hardcore alarms and Ultra Hardcore re-alarms never stop on their own.
+- **Calls:** while the phone rings, a call runs or is being screened, every alarm — Hardcore included — plays
+  at 15 % gain; vibration and challenges are unaffected. No phone permission is needed: Brutus reads the
+  audio mode.
+- **Audio focus:** a ringing alarm asks music, podcasts and navigation to pause and gives the focus back when
+  it ends.
+
+### Vacation mode
+
+Since **v2.6.0**: pick the **last day off** — under **⋮ → Settings & info → Vacation**, from the quick-settings
+tile or the *Vacation* launcher shortcut — and no alarm rings before the day after. Every alarm keeps its
+settings; the first occurrence on the day back rings normally (a one-shot alarm moves there too). The list
+shows a banner with **Resume now**, the header and the widget show the real next alarm. Running snoozes and
+Ultra Hardcore re-alarms belong to an alarm that already rang and are not paused.
+
+### Quick settings tile and shortcuts
+
+- **Tile *Vacation*** _(v2.6.0)_ — add it from the quick-settings editor. Active while alarms are paused (with
+  the last day as subtitle); a tap ends the pause at once. Inactive, a tap opens the date picker.
+- **Launcher shortcuts** _(v2.6.0)_ — long-press the app icon: **New alarm**, **Timer**, **Vacation**.
+
+### Backup and restore
+
+- **Android backup** — alarms, the global QR code, settings, world clocks and the timer tone are backed up.
+  Since **v2.6.0** state that only describes this phone's current moment stays behind (snoozes, missed-alarm
+  bookkeeping, Ultra Hardcore follow-ups, a running timer, update-check state) — restored elsewhere it would
+  ring stale snoozes or report alarms as missed that were never due there. After a restore Brutus re-arms
+  every alarm immediately, so they ring without opening the app first.
+- **File export / import** _(v2.6.0)_ — **⋮ → Settings & info → Backup** saves a JSON file wherever you choose
+  (no storage permission). Importing adds only alarms that are not there yet (same time, days and label count
+  as there), clamps values to what the app offers, takes over the settings and the file's QR code — so a
+  printed copy keeps working on a new phone.
+
 ### Settings & info
 
 Since **v2.4.0**: **⋮ → Settings & info**, built like Flipper the Ripper's settings — a section title
@@ -497,8 +560,12 @@ in the primary colour over a rounded card.
   (Android 12+).
 - **Sunrise** _(v2.5.0)_ — the sound of the Sunrise pre-alarm: one of the eight gentle sounds or silence
   (light only), default **Daybreak**; tapping a chip previews it.
+- **Vacation** _(v2.6.0)_ — pause all alarms through a chosen day, see [Vacation mode](#vacation-mode).
+- **Ringing** _(v2.6.0)_ — crescendo and snooze when unanswered, see
+  [Ringing](#ringing-crescendo-calls-unanswered-alarms).
 - **Notifications** — how long before an alarm the heads-up appears (**Off / 30 / 60 / 120 min**), and the
   opt-in **update check**.
+- **Backup** _(v2.6.0)_ — export to and import from a file, see [Backup and restore](#backup-and-restore).
 - **About Brutus** — the app mark, version and build, "Made by Martin Pfeffer", chips for the
   [website](https://brutus.celox.io), celox.io, the source code and the MIT licence, the **Space Grotesk
   font licence (OFL 1.1)** in a dialog, and a PayPal donate button that springs under the finger.
@@ -510,7 +577,7 @@ in the primary colour over a rounded card.
 | **Heads-up** | the chosen lead before an alarm (default 60 min) | countdown to the alarm; **Dismiss early** skips this one occurrence — for **Hardcore alarms only after solving the alarm's own challenges** (silent, no snooze) |
 | **Snoozed** | while an alarm is snoozed | countdown to when it rings again; **Cancel snooze** (not for Hardcore alarms) |
 | **Ultra Hardcore** | while follow-ups are armed | countdown to the next re-alarm; opens the step task |
-| **Missed alarm** | after a reboot or clock jump, if an alarm was due while the phone was off | the time it was due |
+| **Missed alarm** | after a reboot or clock jump, if an alarm was due while the phone was off — or since v2.6.0 when an alarm rang unanswered three rounds | the time it was due |
 | **Timer** | while the timer runs | countdown with **Pause / Resume / Abort**; when it ends, a ringing notification with **Stop** |
 
 A skipped occurrence is remembered, so a reboot cannot bring it back; the list header and the widget show
@@ -912,13 +979,20 @@ app/src/main/res/
 
 ## Tests and CI
 
-379 JVM unit tests guard the parts where a bug means someone oversleeps: what actually lands in
+427 JVM unit tests guard the parts where a bug means someone oversleeps: what actually lands in
 `AlarmManager`, the alarm-time arithmetic, persistence, the completeness of both translations, and
 every string the user reads on a clock face. There are no instrumented tests — the whole suite runs
 on the JVM in seconds.
 
 | Suite | Tests | What it pins down |
 |-------|-------|-------------------|
+| `service/AlarmServiceRingingTest` | 8 | the real service while it rings: it takes audio focus and gives it back, snoozes itself at the ring limit (at least 5 min also with snooze off), gives up after three rounds with a missed notice, never for Hardcore or with the limit off, a manual dismiss/snooze resets the count (Robolectric) |
+| `util/RingPolicyTest` | 9 | the ringing rules as pure functions: crescendo from −30 dB evenly in dB and never quieter over time, Hardcore ignores it, a call caps every alarm at 15 % but never makes a quiet one louder, which audio modes count as a call, the limit and the three rounds |
+| `backup/AlarmBackupTest` | 8 | the export file: every alarm field round-trips (and a new `AlarmEntity` field without export fails), missing fields take defaults, values clamped, retired sounds mapped, impossible times dropped and counted, non-backups refused, no duplicates on re-import (Robolectric for org.json) |
+| `util/VacationTest` | 8 | vacation mode in the next-trigger arithmetic: first occurrence on the day back for repeating and one-shot alarms, an alarm exactly at the end rings, an expired pause changes nothing; the picker's UTC day ↔ local day across DST and west of UTC |
+| `backup/BackupManagerTest` | 6 | an export brought to an empty phone restores alarms, QR code and settings and arms them; re-import adds nothing; foreign settings and QR codes are ignored; a system restore re-arms without opening the app (Robolectric) |
+| `tile/VacationModeTest` | 5 | pausing re-arms AlarmManager for the day back and the missed-alarm bookkeeping follows, resuming restores the normal time, every launcher shortcut carries a request MainActivity understands, the tile is declared correctly (Robolectric) |
+| `backup/BackupRulesTest` | 4 | cloud backup, device transfer and the pre-Android-12 rules agree, moment-bound state stays on the phone, every preference file is sorted into kept or excluded |
 | `scheduler/AlarmSchedulerTest` | 28 | the registrations that actually reach `AlarmManager`: trigger on the configured wall-clock time, passed times roll to tomorrow, weekday matching, sunrise exactly 10 min ahead (and skipped when it would be in the past), `setExactAndAllowWhileIdle` against Doze, the v1.8.0 stale-sunrise fix, snooze intervals, and the request-code carve-out that keeps main / sunrise / two follow-ups from overwriting each other (Robolectric) |
 | `util/NextAlarmCalculatorTest` | 17 | one-shot today vs. tomorrow, repeating wrap-around, weekend selection, `formatCountdown` |
 | `data/AlarmDaoTest` | 15 | real SQL on an in-memory Room database: ordering, `getEnabledAlarms` for boot recovery, full-field round-trip, REPLACE on conflict, undo-restore via `id = 0`, repository pass-through (Robolectric) |
@@ -969,7 +1043,7 @@ on the JVM in seconds.
 | `scheduler/AlarmSchedulerConstantsTest` | 4 | Ultra Hardcore offsets, sunrise lead time, intent-extra uniqueness |
 
 ```bash
-./gradlew :app:testDebugUnitTest          # all 379
+./gradlew :app:testDebugUnitTest          # all 427
 ./gradlew :app:testDebugUnitTest --tests '*NextAlarmCalculatorTest'
 # HTML report: app/build/reports/tests/testDebugUnitTest/index.html
 ```
@@ -1202,7 +1276,9 @@ Planned, no specific timeline:
 - [x] **English + German localization** — every string in `values/` + `values-de/`, per-app language picker on Android 13+
 - [ ] Localization beyond English and German
 - [ ] Sleep statistics tab (how often, dismiss latency, snooze rate)
-- [ ] Backup / restore alarm list as JSON
+- [x] Backup / restore alarm list as JSON, plus Android backup rules (v2.6.0)
+- [x] Vacation mode, quick-settings tile, launcher shortcuts (v2.6.0)
+- [x] Crescendo, quiet during calls, audio focus, auto-snooze when unanswered (v2.6.0)
 
 Contributions welcome on any of these — open an issue first to coordinate.
 

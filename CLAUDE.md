@@ -67,6 +67,28 @@ challenges in sequence → `ACTION_STOP` / `ACTION_SNOOZE` back to the service.
 - **Timer** (`timer/`): `TimerController` is the source of truth (persisted, elapsed-time AlarmManager
   wake-up at code `0x71000000`, ongoing notification); `TimerReceiver` handles fire/pause/resume/cancel,
   `TimerRingService` rings. `TimerViewModel` only mirrors it and runs the repaint ticker.
+- **Ringing dynamics** (`util/RingPolicy`, pure): crescendo gain (−30 dB → 0 dB, evenly in dB), a call
+  (audio mode ringtone/in-call/communication/screening) caps the gain at 0.15, ring limit → auto-snooze
+  (≥ 5 min, `RingingStore.autoSnoozes`, reset by a manual stop/snooze) up to 3 rounds, then a missed notice.
+  `AlarmService` applies it on a 250 ms main-thread ticker via player gain (the stream stays at max);
+  Hardcore and UHC follow-ups are exempt. Audio focus `GAIN_TRANSIENT` is taken on ring, abandoned in
+  `cleanupPlayback`. Settings in `AppSettings` (crescendo default 0, ring limit default 15).
+- **Vacation mode** (`util/VacationStore`, `brutus_vacation`): stores 00:00 of the first day back. Every
+  "next trigger" goes through `NextAlarmCalculator.upcoming(context, …)` / `findNext(context, …)`, which add
+  skips and the pause — never call the context-free overloads from app code, or one surface ignores the
+  pause. `AlarmActions.pauseThrough/resumeFromVacation` re-arm everything and redraw widget + tile.
+  The date picker speaks UTC midnights: convert via `util/VacationDates` (calendar date, not offsets).
+- **Entry points from outside** (`ui/screens/HomeRequest`): launcher shortcuts (`res/xml/shortcuts.xml`) and
+  `tile/VacationTileService` start `MainActivity` with a `HomeRequest` action; `HomeScreen` navigates once
+  and clears it. `VacationModeTest` keeps shortcuts and enum in sync.
+- **Backup** (`backup/`): `data_extraction_rules.xml` + `backup_rules.xml` exclude moment-bound prefs
+  (ringing, UHC, timer state, updates) and all credential-storage files; `BackupRulesTest` forces every
+  `Storage.PREFERENCE_FILES` entry into "kept" or "excluded" — a new store must be sorted there.
+  `BrutusBackupAgent` (fullBackupOnly) only re-arms after a restore. File export/import: `AlarmBackup`
+  (JSON, field names are a contract with users' files — add, never rename; a new `AlarmEntity` field must be
+  exported, `AlarmBackupTest` fails otherwise) and `BackupManager`.
+- **Baseline profile**: `app/src/main/baseline-prof.txt`, hand-written package wildcards; check
+  `app/build/intermediates/r8_art_profile/release/expandReleaseArtProfileWildcards/` when packages move.
 - **Settings & info** (`ui/settings/`): route `settings` in `HomeScreen`'s NavHost, opened from the ⋮
   menu; About facts in `AboutLinks` (pinned by `AboutLinksTest`).
 - **Motion**: specs come from `MaterialTheme.motionScheme` (files opt in with

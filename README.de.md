@@ -17,10 +17,10 @@
 <h3>👉 <a href="https://brutus.celox.io">brutus.celox.io</a> — Funktionen, <a href="https://brutus.celox.io/#sounds">alle 25 Töne zum Anhören</a>, FAQ und immer die neueste APK</h3>
 
 <!-- BADGES:BIG — version, unit tests and lines of code; ReadmeSyncTest keeps them true. -->
-[![version](https://img.shields.io/badge/version-2.5.3-E53935?style=for-the-badge&logo=android&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
-[![unit tests](https://img.shields.io/badge/unit%20tests-379-2E9E5B?style=for-the-badge&logo=junit5&logoColor=white)](#tests-und-ci)
-[![lines of code](https://img.shields.io/badge/lines%20of%20code-11.3k-4B6BDF?style=for-the-badge&logo=kotlin&logoColor=white)](app/src/main/java/com/pepperonas/brutus)
-[![test code](https://img.shields.io/badge/test%20code-5.6k-2E9E5B?style=for-the-badge&logo=kotlin&logoColor=white)](app/src/test/java/com/pepperonas/brutus)
+[![version](https://img.shields.io/badge/version-2.6.0-E53935?style=for-the-badge&logo=android&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
+[![unit tests](https://img.shields.io/badge/unit%20tests-427-2E9E5B?style=for-the-badge&logo=junit5&logoColor=white)](#tests-und-ci)
+[![lines of code](https://img.shields.io/badge/lines%20of%20code-12.7k-4B6BDF?style=for-the-badge&logo=kotlin&logoColor=white)](app/src/main/java/com/pepperonas/brutus)
+[![test code](https://img.shields.io/badge/test%20code-6.6k-2E9E5B?style=for-the-badge&logo=kotlin&logoColor=white)](app/src/test/java/com/pepperonas/brutus)
 [![sounds](https://img.shields.io/badge/sounds-25-FF5252?style=for-the-badge&logo=audiomack&logoColor=white)](https://brutus.celox.io/#sounds)
 
 [![Donate with PayPal](https://img.shields.io/badge/PayPal-dieses%20Projekt%20unterst%C3%BCtzen-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://www.paypal.com/donate/?business=martin.pfeffer@celox.io&currency_code=EUR&item_name=Brutus)
@@ -126,6 +126,7 @@ Alles steckt in einer Bottom-Navigation mit vier Tabs, die den brutalen Wecker-K
 ## Inhaltsverzeichnis
 
 - [Screenshots](#screenshots)
+- [Neu in 2.6](#neu-in-26)
 - [Neu in 2.5](#neu-in-25)
 - [Warum Brutus?](#warum-brutus)
 - [Aufbau der App](#aufbau-der-app)
@@ -145,6 +146,10 @@ Alles steckt in einer Bottom-Navigation mit vier Tabs, die den brutalen Wecker-K
   - [Weltuhr](#weltuhr)
   - [Stoppuhr](#stoppuhr)
   - [Timer](#timer)
+  - [Klingeln: Crescendo, Anrufe, unbeantwortete Wecker](#klingeln-crescendo-anrufe-unbeantwortete-wecker)
+  - [Urlaubsmodus](#urlaubsmodus)
+  - [Schnelleinstellungs-Kachel und Shortcuts](#schnelleinstellungs-kachel-und-shortcuts)
+  - [Sicherung und Wiederherstellung](#sicherung-und-wiederherstellung)
   - [Einstellungen & Info](#einstellungen--info)
   - [Benachrichtigungen](#benachrichtigungen)
   - [Motion und Physik](#motion-und-physik)
@@ -224,6 +229,22 @@ Aufnahmeliste steht in [`docs/screenshots/SHOTLIST.de.md`](docs/screenshots/SHOT
 </table>
 
 <p align="center"><img src="docs/screenshots/10-stopwatch.png" alt="Stoppuhr mit Runden" width="32%" /><br /><sub><b>Stoppuhr</b> — laufende Anzeige und eine Rundenliste mit Runden- und Gesamtzeit.</sub></p>
+
+## Neu in 2.6
+
+- **Lauter werden** _(optional)_ — normale Wecker beginnen leise und sind nach 15, 30 oder 60 s voll laut.
+  Hardcore-Wecker bleiben ab der ersten Sekunde laut.
+- **Anrufe und Musik:** Während eines Anrufs klingelt jeder Wecker leise, damit du das Gespräch hörst, und
+  Musik oder Podcasts pausieren, solange ein Wecker klingelt.
+- **Unbeantwortete Wecker schlummern von selbst** nach einer wählbaren Zeit (Standard 15 Min.) und klingeln
+  erneut — bis zu dreimal, dann hören sie auf und melden sich als verpasst. Hardcore-Wecker hören nie von selbst auf.
+- **Urlaubsmodus** — alle Wecker bis einschließlich eines Tages pausieren, aus den Einstellungen, über eine
+  Schnelleinstellungs-Kachel oder ein Launcher-Shortcut. Die Wecker bleiben, wie sie sind.
+- **Sicherung:** Androids Backup lässt Schlummern und anderen momentgebundenen Zustand jetzt zurück und stellt
+  wiederhergestellte Wecker sofort scharf; zusätzlich lässt sich alles — Wecker, QR-Code, Einstellungen — in eine
+  Datei exportieren und wieder importieren.
+- **Launcher-Shortcuts** für einen neuen Wecker, den Timer und den Urlaubsmodus.
+- Alles im Detail: [CHANGELOG](CHANGELOG.de.md).
 
 ## Neu in 2.5
 
@@ -488,6 +509,52 @@ Während des Countdowns wechselt der Bildschirm auf eine große 56-sp-Anzeige in
 
 Seit **v2.4.0 ist der Timer ein echter Wecker**: sein Zustand wird gespeichert (`timer/TimerController`), AlarmManager weckt das Handy am Ende, und ein Vordergrund-Service klingelt — auch wenn die App mit Zurück verlassen oder ihr Prozess beendet wurde (vorher endete er dann stillschweigend). Eine Benachrichtigung zeigt den Countdown mit Pause/Weiter/Abbruch; die klingelnde hat **Stopp**. Auf dem Emulator geprüft: Timer gestartet, App verlassen, Prozess beendet, er klingelte pünktlich.
 
+### Klingeln: Crescendo, Anrufe, unbeantwortete Wecker
+
+Seit **v2.6.0** unter **⋮ → Einstellungen & Info → Klingeln**:
+
+- **Lauter werden** (**Aus** / 15 / 30 / 60 s, Standard aus) — ein normaler Wecker beginnt 30 dB unter voller
+  Lautstärke und steigt gleichmäßig in Dezibel. Der Wecker-Lautstärkestrom geht weiterhin auf Maximum; nur die
+  Verstärkung des Klangs selbst steigt. Hardcore-Wecker ignorieren die Einstellung.
+- **Schlummern ohne Reaktion** (**Nie** / 5 / 10 / **15** / 30 Min., Standard **15**) — reagiert niemand, schlummert
+  ein normaler Wecker von selbst und klingelt nach seiner Schlummerzeit erneut (mindestens 5 Min., auch wenn
+  sein Schlummern ausgeschaltet ist). Nach drei solchen Runden hört er auf und meldet sich als *Verpasster
+  Wecker* mit dem Hinweis, dass er unbeantwortet geklingelt hat. Beenden oder Schlummern von Hand setzt die Zählung
+  zurück. Hardcore-Wecker und Ultra-Hardcore-Re-Alarme hören nie von selbst auf.
+- **Anrufe:** Solange das Handy klingelt, ein Gespräch läuft oder gefiltert wird, spielt jeder Wecker — auch
+  Hardcore — mit 15 % Verstärkung; Vibration und Challenges bleiben unberührt. Eine Telefon-Berechtigung ist nicht
+  nötig: Brutus liest den Audiomodus.
+- **Audio-Fokus:** Ein klingelnder Wecker bittet Musik, Podcasts und Navigation zu pausieren und gibt den Fokus am
+  Ende zurück.
+
+### Urlaubsmodus
+
+Seit **v2.6.0**: den **letzten freien Tag** wählen — unter **⋮ → Einstellungen & Info → Urlaub**, über die
+Schnelleinstellungs-Kachel oder das Launcher-Shortcut *Urlaub* — und bis dahin klingelt kein Wecker. Jeder Wecker
+behält seine Einstellungen; die erste Auslösung am Tag danach klingelt normal (ein einmaliger Wecker rückt
+ebenfalls dorthin). Die Liste zeigt ein Banner mit **Jetzt fortsetzen**, Kopfzeile und Widget zeigen den wirklich
+nächsten Wecker. Laufendes Schlummern und Ultra-Hardcore-Re-Alarme gehören zu einem Wecker, der schon geklingelt
+hat, und werden nicht pausiert.
+
+### Schnelleinstellungs-Kachel und Shortcuts
+
+- **Kachel *Urlaub*** _(v2.6.0)_ — im Editor der Schnelleinstellungen hinzufügen. Aktiv, solange Wecker pausieren
+  (mit dem letzten Tag als Untertitel); ein Tipp beendet die Pause sofort. Inaktiv öffnet ein Tipp die Datumsauswahl.
+- **Launcher-Shortcuts** _(v2.6.0)_ — lange auf das App-Symbol drücken: **Neuer Wecker**, **Timer**, **Urlaub**.
+
+### Sicherung und Wiederherstellung
+
+- **Android-Sicherung** — Wecker, globaler QR-Code, Einstellungen, Weltuhren und Timer-Ton werden gesichert. Seit
+  **v2.6.0** bleibt Zustand, der nur den aktuellen Moment dieses Handys beschreibt, zurück (Schlummern,
+  Buchführung für verpasste Wecker, Ultra-Hardcore-Re-Alarme, ein laufender Timer, Zustand der Update-Prüfung) —
+  auf einem anderen Handy würde er alte Schlummerphasen klingeln lassen oder Wecker als verpasst melden, die dort
+  nie fällig waren. Nach einer Wiederherstellung stellt Brutus sofort alle Wecker scharf, sie klingeln also, ohne
+  dass die App vorher geöffnet werden muss.
+- **Datei-Export / -Import** _(v2.6.0)_ — **⋮ → Einstellungen & Info → Sicherung** speichert eine JSON-Datei, wo du
+  willst (ohne Speicher-Berechtigung). Der Import fügt nur Wecker hinzu, die es noch nicht gibt (gleiche Zeit,
+  Tage und Bezeichnung gelten als vorhanden), begrenzt Werte auf das, was die App anbietet, übernimmt die
+  Einstellungen und den QR-Code der Datei — ein ausgedrucktes Exemplar funktioniert also auf dem neuen Handy weiter.
+
 ### Einstellungen & Info
 
 Seit **v2.4.0**: **⋮ → Einstellungen & Info**, aufgebaut wie die Einstellungen von Flipper the Ripper —
@@ -497,8 +564,13 @@ Abschnittstitel in der Primärfarbe über einer abgerundeten Karte.
   **Material-You-Farben** (ab Android 12).
 - **Sunrise** _(v2.5.0)_ — der Klang des Sunrise-Vorlaufs: einer der acht sanften Klänge oder Stille (nur
   Licht), Standard **Sonnenaufgang**; ein Tipp auf einen Chip spielt ihn an.
+- **Urlaub** _(v2.6.0)_ — alle Wecker bis einschließlich eines Tages pausieren, siehe [Urlaubsmodus](#urlaubsmodus).
+- **Klingeln** _(v2.6.0)_ — Lauter werden und Schlummern ohne Reaktion, siehe
+  [Klingeln](#klingeln-crescendo-anrufe-unbeantwortete-wecker).
 - **Benachrichtigungen** — wie lange vor einem Wecker der Hinweis erscheint (**Aus / 30 / 60 / 120 Min.**),
   und die optionale **Update-Prüfung**.
+- **Sicherung** _(v2.6.0)_ — Export in und Import aus einer Datei, siehe
+  [Sicherung und Wiederherstellung](#sicherung-und-wiederherstellung).
 - **Über Brutus** — App-Zeichen, Version und Build, „Von Martin Pfeffer“, Chips für die
   [Website](https://brutus.celox.io), celox.io, den Quellcode und die MIT-Lizenz, die **Lizenz der Schrift
   Space Grotesk (OFL 1.1)** im Dialog und ein PayPal-Spendenknopf, der unter dem Finger federt.
@@ -510,7 +582,7 @@ Abschnittstitel in der Primärfarbe über einer abgerundeten Karte.
 | **Hinweis** | der gewählte Vorlauf vor einem Wecker (Standard 60 Min.) | Countdown bis zum Wecker; **Vorzeitig beenden** überspringt diese eine Auslösung — bei **Hardcore-Weckern nur nach gelöster eigener Challenge** (lautlos, ohne Snooze) |
 | **Schlummert** | solange ein Wecker schlummert | Countdown bis zum erneuten Klingeln; **Snooze beenden** (nicht bei Hardcore) |
 | **Ultra Hardcore** | solange Re-Alarme scharf sind | Countdown bis zum nächsten Re-Alarm; öffnet die Schrittaufgabe |
-| **Verpasster Wecker** | nach einem Neustart oder Uhrzeitsprung, wenn ein Wecker fällig war, während das Handy aus war | die fällige Uhrzeit |
+| **Verpasster Wecker** | nach einem Neustart oder Uhrzeitsprung, wenn ein Wecker fällig war, während das Handy aus war — oder seit v2.6.0, wenn ein Wecker drei Runden unbeantwortet geklingelt hat | die fällige Uhrzeit |
 | **Timer** | solange der Timer läuft | Countdown mit **Pause / Weiter / Abbruch**; am Ende eine klingelnde Benachrichtigung mit **Stopp** |
 
 Eine übersprungene Auslösung wird gemerkt, ein Neustart holt sie nicht zurück; Kopfzeile und Widget zeigen
@@ -886,10 +958,17 @@ app/src/main/res/
 
 ## Tests und CI
 
-379 JVM-Unit-Tests sichern die Stellen, an denen ein Fehler bedeutet, dass jemand verschläft: was tatsächlich im `AlarmManager` landet, die Weckzeit-Arithmetik, die Persistenz, die Vollständigkeit beider Übersetzungen und jeden String, den der Nutzer auf einem Ziffernblatt liest. Es gibt keine Instrumentierungstests — die gesamte Suite läuft in Sekunden auf der JVM.
+427 JVM-Unit-Tests sichern die Stellen, an denen ein Fehler bedeutet, dass jemand verschläft: was tatsächlich im `AlarmManager` landet, die Weckzeit-Arithmetik, die Persistenz, die Vollständigkeit beider Übersetzungen und jeden String, den der Nutzer auf einem Ziffernblatt liest. Es gibt keine Instrumentierungstests — die gesamte Suite läuft in Sekunden auf der JVM.
 
 | Suite | Tests | Was sie festnagelt |
 |-------|-------|--------------------|
+| `service/AlarmServiceRingingTest` | 8 | der echte Service beim Klingeln: holt sich den Audio-Fokus und gibt ihn zurück, schlummert am Limit von selbst (mindestens 5 Min. auch ohne Schlummern), gibt nach drei Runden mit Verpasst-Hinweis auf, nie bei Hardcore oder ausgeschaltetem Limit, Beenden/Schlummern von Hand setzt die Zählung zurück (Robolectric) |
+| `util/RingPolicyTest` | 9 | die Klingel-Regeln als reine Funktionen: Crescendo ab −30 dB gleichmäßig in dB und nie leiser, Hardcore ignoriert es, ein Anruf begrenzt jeden Wecker auf 15 %, macht einen leisen aber nie lauter, welche Audiomodi als Anruf zählen, Limit und drei Runden |
+| `backup/AlarmBackupTest` | 8 | die Exportdatei: jedes Weckerfeld übersteht den Roundtrip (ein neues `AlarmEntity`-Feld ohne Export fällt auf), fehlende Felder nehmen Standards, Werte begrenzt, entfernte Töne gemappt, unmögliche Zeiten verworfen und gezählt, Fremddateien abgewiesen, kein Doppeln beim erneuten Import (Robolectric für org.json) |
+| `util/VacationTest` | 8 | Urlaubsmodus in der Auslöse-Arithmetik: erste Auslösung am Tag danach für wiederholte und einmalige Wecker, ein Wecker genau am Ende klingelt, eine abgelaufene Pause ändert nichts; UTC-Tag der Datumsauswahl ↔ lokaler Tag über die Zeitumstellung und westlich von UTC |
+| `backup/BackupManagerTest` | 6 | ein Export auf einem leeren Handy stellt Wecker, QR-Code und Einstellungen wieder her und stellt sie scharf; erneuter Import fügt nichts hinzu; fremde Einstellungen und QR-Codes werden ignoriert; eine System-Wiederherstellung stellt scharf, ohne die App zu öffnen (Robolectric) |
+| `tile/VacationModeTest` | 5 | Pausieren stellt den AlarmManager auf den Tag danach, die Verpasst-Buchführung folgt, Fortsetzen bringt die normale Zeit zurück, jedes Launcher-Shortcut trägt eine Anfrage, die MainActivity versteht, die Kachel ist korrekt deklariert (Robolectric) |
+| `backup/BackupRulesTest` | 4 | Cloud-Sicherung, Geräteumzug und die Regeln vor Android 12 stimmen überein, momentgebundener Zustand bleibt auf dem Handy, jede Preference-Datei ist bewusst einsortiert |
 | `scheduler/AlarmSchedulerTest` | 28 | die Registrierungen, die wirklich beim `AlarmManager` ankommen: Auslösung auf der eingestellten Wanduhrzeit, verstrichene Zeiten rutschen auf morgen, Wochentags-Treffer, Sunrise exakt 10 min davor (und übersprungen, wenn er in der Vergangenheit läge), `setExactAndAllowWhileIdle` gegen Doze, der Stale-Sunrise-Fix aus v1.8.0, Snooze-Intervalle und die Request-Code-Trennung, die Haupt-/Sunrise-/zwei Re-Alarm-Registrierungen davor bewahrt, sich gegenseitig zu überschreiben (Robolectric) |
 | `util/NextAlarmCalculatorTest` | 17 | einmalig heute vs. morgen, Wochenumbruch bei Wiederholung, Wochenendauswahl, `formatCountdown` in beiden Sprachen |
 | `data/AlarmDaoTest` | 15 | echtes SQL auf einer In-Memory-Room-Datenbank: Sortierung, `getEnabledAlarms` fürs Boot-Rescheduling, Vollfeld-Roundtrip, REPLACE-Konflikt, Undo-Restore mit `id = 0`, Repository-Durchreiche (Robolectric) |
@@ -940,7 +1019,7 @@ app/src/main/res/
 | `scheduler/AlarmSchedulerConstantsTest` | 4 | Ultra-Hardcore-Offsets, Sunrise-Vorlauf, Eindeutigkeit der Intent-Extras |
 
 ```bash
-./gradlew :app:testDebugUnitTest          # alle 379
+./gradlew :app:testDebugUnitTest          # alle 427
 ./gradlew :app:testDebugUnitTest --tests '*NextAlarmCalculatorTest'
 # HTML-Report: app/build/reports/tests/testDebugUnitTest/index.html
 ```
@@ -1109,7 +1188,9 @@ Geplant, ohne festen Zeitplan:
 - [ ] Mehrere QR-Codes (verschiedene Codes für verschiedene Wecker)
 - [ ] Wear-OS-Begleiter
 - [ ] Schlafstatistik-Tab (wie oft, Dismiss-Latenz, Snooze-Rate)
-- [ ] Backup / Restore der Weckerliste als JSON
+- [x] Backup / Restore der Weckerliste als JSON, dazu Regeln für die Android-Sicherung (v2.6.0)
+- [x] Urlaubsmodus, Schnelleinstellungs-Kachel, Launcher-Shortcuts (v2.6.0)
+- [x] Lauter werden, leise bei Anrufen, Audio-Fokus, Schlummern ohne Reaktion (v2.6.0)
 
 Beiträge zu allem davon sind willkommen — bitte vorher ein Issue aufmachen, damit wir uns abstimmen.
 
