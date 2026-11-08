@@ -299,7 +299,7 @@ class AlarmService : Service() {
         when (RingPolicy.afterLimit(RingingStore.autoSnoozes(applicationContext, alarmId))) {
             RingPolicy.LimitOutcome.SNOOZE -> {
                 RingingStore.recordAutoSnooze(applicationContext, alarmId)
-                snoozeAlarm(alarmId)
+                snoozeAlarm(alarmId, minMinutes = RingPolicy.AUTO_SNOOZE_MIN_MINUTES)
             }
             RingPolicy.LimitOutcome.GIVE_UP -> {
                 RingingStore.clearAutoSnoozes(applicationContext, alarmId)
@@ -458,13 +458,18 @@ class AlarmService : Service() {
      * Snoozing is not dismissing: it must not arm the Ultra Hardcore follow-ups, and snoozing a
      * follow-up keeps it a follow-up.
      */
-    private fun snoozeAlarm(alarmId: Long) {
+    private fun snoozeAlarm(alarmId: Long, minMinutes: Int = 0) {
         val isFollowup = currentAlarmId == alarmId && currentIsFollowup
         val seq = if (isFollowup) currentFollowupSeq else 0
         stopAlarm(dismissed = false) {
             val app = applicationContext as BrutusApplication
             val alarm = AlarmRepository(app.database.alarmDao()).getById(alarmId)
-            if (alarm != null) AlarmScheduler.scheduleSnooze(this@AlarmService, alarm, isFollowup, seq)
+            if (alarm != null) {
+                // An alarm with snooze switched off (0 min) would ring again at once when it pauses
+                // itself — the automatic pause uses at least minMinutes.
+                val pause = alarm.copy(snoozeDuration = maxOf(alarm.snoozeDuration, minMinutes))
+                AlarmScheduler.scheduleSnooze(this@AlarmService, pause, isFollowup, seq)
+            }
             NextAlarmWidget.refresh(applicationContext)
         }
     }

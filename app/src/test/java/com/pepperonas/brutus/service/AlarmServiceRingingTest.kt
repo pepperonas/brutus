@@ -118,6 +118,17 @@ class AlarmServiceRingingTest {
     }
 
     @Test
+    fun `an alarm with snooze switched off still pauses for a few minutes, not zero`() {
+        AppSettings.setRingLimitMinutes(context, 5)
+        val (svc, _) = ring(AlarmEntity(hour = 7, minute = 0, repeatDays = 0x7F, snoozeDuration = 0))
+        advance(5)
+        waitFor("snoozed itself") { Shadows.shadowOf(svc).isStoppedBySelf }
+        val snooze = RingingStore.snoozes(context).single()
+        val pause = snooze.triggerAt - System.currentTimeMillis()
+        assertTrue(pause > (RingPolicy.AUTO_SNOOZE_MIN_MINUTES - 1) * 60_000L, "paused only ${pause / 1000} s")
+    }
+
+    @Test
     fun `after three unanswered rounds it stops and reports itself missed instead of snoozing again`() {
         AppSettings.setRingLimitMinutes(context, 5)
         val (svc, alarm) = ring()

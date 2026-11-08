@@ -24,6 +24,9 @@ object RingPolicy {
     /** How often an unanswered alarm snoozes itself before it gives up and reports itself missed. */
     const val MAX_AUTO_SNOOZES = 3
 
+    /** Shortest pause of an automatic snooze — also for alarms whose own snooze is switched off. */
+    const val AUTO_SNOOZE_MIN_MINUTES = 5
+
     /** How often the service re-evaluates gain, call state and ring limit. */
     const val TICK_MS = 250L
 
