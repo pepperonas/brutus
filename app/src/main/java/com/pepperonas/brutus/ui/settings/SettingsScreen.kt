@@ -150,6 +150,18 @@ fun SettingsScreen(
                 }
             }
 
+            SettingsSection(stringResource(R.string.settings_ringing)) {
+                CrescendoRow()
+                Spacer(Modifier.height(16.dp))
+                RingLimitRow()
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    stringResource(R.string.settings_ringing_calls_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
             SettingsSection(stringResource(R.string.settings_sunrise)) {
                 SunriseSoundRow()
             }
@@ -243,6 +255,71 @@ private fun SunriseSoundRow() {
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
     TextButton(onClick = { preview.stop() }) { Text(stringResource(R.string.settings_sunrise_stop_preview)) }
+}
+
+/** A titled single-choice row of segmented buttons — used by the ringing settings. */
+@Composable
+private fun OptionRow(
+    title: String,
+    hint: String,
+    options: List<Int>,
+    selected: Int,
+    label: @Composable (Int) -> String,
+    onSelect: (Int) -> Unit,
+) {
+    Text(title, style = MaterialTheme.typography.bodyLarge)
+    Text(hint, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Spacer(Modifier.height(8.dp))
+    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+        options.forEachIndexed { index, value ->
+            SegmentedButton(
+                selected = selected == value,
+                onClick = { onSelect(value) },
+                shape = SegmentedButtonDefaults.itemShape(index, options.size),
+                label = { Text(label(value), maxLines = 1) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun CrescendoRow() {
+    val context = LocalContext.current
+    var seconds by remember { mutableStateOf(AppSettings.crescendoSeconds(context)) }
+    OptionRow(
+        title = stringResource(R.string.settings_crescendo),
+        hint = stringResource(R.string.settings_crescendo_hint),
+        options = AppSettings.CRESCENDO_OPTIONS,
+        selected = seconds,
+        label = {
+            if (it == 0) stringResource(R.string.settings_crescendo_off)
+            else stringResource(R.string.settings_crescendo_seconds, it)
+        },
+        onSelect = {
+            seconds = it
+            AppSettings.setCrescendoSeconds(context, it)
+        },
+    )
+}
+
+@Composable
+private fun RingLimitRow() {
+    val context = LocalContext.current
+    var minutes by remember { mutableStateOf(AppSettings.ringLimitMinutes(context)) }
+    OptionRow(
+        title = stringResource(R.string.settings_ring_limit),
+        hint = stringResource(R.string.settings_ring_limit_hint),
+        options = AppSettings.RING_LIMIT_OPTIONS,
+        selected = minutes,
+        label = {
+            if (it == 0) stringResource(R.string.settings_ring_limit_off)
+            else stringResource(R.string.settings_ring_limit_minutes, it)
+        },
+        onSelect = {
+            minutes = it
+            AppSettings.setRingLimitMinutes(context, it)
+        },
+    )
 }
 
 /** How long before an alarm the quiet heads-up appears; changing it re-arms every alarm. */

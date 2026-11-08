@@ -14,6 +14,7 @@ object RingingStore {
     private const val KEY_EXPECTED = "expected_"    // expected_{alarmId} = trigger AlarmManager was given
     private const val KEY_SKIP = "skip_"            // skip_{alarmId} = occurrence the user dismissed early
     private const val KEY_UPCOMING = "upcoming_"    // upcoming_{alarmId} = trigger its heads-up announces
+    private const val KEY_AUTO_SNOOZE = "auto_snooze_" // auto_snooze_{alarmId} = rounds it snoozed itself
 
     data class Snooze(val alarmId: Long, val triggerAt: Long, val isFollowup: Boolean, val followupSeq: Int)
 
@@ -86,6 +87,19 @@ object RingingStore {
 
     fun upcomingShown(context: Context, alarmId: Long): Long? =
         prefs(context).getLong("$KEY_UPCOMING$alarmId", -1L).takeIf { it >= 0 }
+
+    // ---- unanswered alarms: how often one has snoozed itself in a row ---------------------------
+
+    fun autoSnoozes(context: Context, alarmId: Long): Int =
+        prefs(context).getInt("$KEY_AUTO_SNOOZE$alarmId", 0)
+
+    fun recordAutoSnooze(context: Context, alarmId: Long) {
+        prefs(context).edit().putInt("$KEY_AUTO_SNOOZE$alarmId", autoSnoozes(context, alarmId) + 1).commit()
+    }
+
+    fun clearAutoSnoozes(context: Context, alarmId: Long) {
+        prefs(context).edit().remove("$KEY_AUTO_SNOOZE$alarmId").commit()
+    }
 
     private fun longMap(context: Context, prefix: String): Map<Long, Long> =
         prefs(context).all.mapNotNull { (key, value) ->

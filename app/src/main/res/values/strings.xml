@@ -397,4 +397,15 @@
     <string name="shake_sensitivity_normal_description">Standard threshold (delta ≥ 12)</string>
     <string name="shake_sensitivity_hard">Strong</string>
     <string name="shake_sensitivity_hard_description">Only vigorous shaking counts</string>
+    <string name="settings_ringing">Ringing</string>
+    <string name="settings_crescendo">Crescendo</string>
+    <string name="settings_crescendo_hint">Normal alarms start quietly and reach full volume within this time. Hardcore alarms are always loud from the first second.</string>
+    <string name="settings_crescendo_off">Off</string>
+    <string name="settings_crescendo_seconds">%1$d s</string>
+    <string name="settings_ring_limit">Snooze when unanswered</string>
+    <string name="settings_ring_limit_hint">If nobody reacts, a normal alarm snoozes itself after this time and rings again — up to three times, then it stops and reports itself missed. Hardcore alarms never stop on their own.</string>
+    <string name="settings_ring_limit_off">Never</string>
+    <string name="settings_ring_limit_minutes">%1$d min</string>
+    <string name="settings_ringing_calls_hint">During a phone call every alarm plays quietly, so you can still hear the call. Music and podcasts pause while an alarm rings.</string>
+    <string name="notification_unanswered_text">It rang, but nobody reacted.</string>
 </resources>

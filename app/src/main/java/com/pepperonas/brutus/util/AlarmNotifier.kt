@@ -110,11 +110,19 @@ object AlarmNotifier {
         RingingStore.clearUpcomingShown(context, alarmId)
     }
 
-    fun postMissed(context: Context, alarm: AlarmEntity, dueAt: Long) {
+    /**
+     * [unanswered] = it rang, but nobody reacted until it gave up — a different story than a
+     * phone that was off when the alarm was due.
+     */
+    fun postMissed(context: Context, alarm: AlarmEntity, dueAt: Long, unanswered: Boolean = false) {
         val notification = Notification.Builder(context, BrutusApplication.CHANNEL_MISSED)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setContentTitle(context.getString(R.string.notification_missed_title, time(context, dueAt)))
-            .setContentText(context.getString(R.string.notification_missed_text))
+            .setContentText(
+                context.getString(
+                    if (unanswered) R.string.notification_unanswered_text else R.string.notification_missed_text
+                )
+            )
             .setWhen(dueAt)
             .setShowWhen(true)
             .setAutoCancel(true)

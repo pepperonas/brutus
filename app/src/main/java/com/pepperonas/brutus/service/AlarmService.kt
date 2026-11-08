@@ -7,13 +7,17 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.media.AudioAttributes
+import android.media.AudioFocusRequest
 import android.media.AudioFormat
 import android.media.AudioManager
 import android.media.AudioTrack
 import android.media.MediaPlayer
 import android.media.RingtoneManager
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.os.PowerManager
+import android.os.SystemClock
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
@@ -25,7 +29,9 @@ import com.pepperonas.brutus.scheduler.AlarmScheduler
 import com.pepperonas.brutus.util.AlarmNotifier
 import com.pepperonas.brutus.util.AlarmSound
 import com.pepperonas.brutus.util.AlarmSoundGenerator
+import com.pepperonas.brutus.util.AppSettings
 import com.pepperonas.brutus.util.HardcoreAudioGuard
+import com.pepperonas.brutus.util.RingPolicy
 import com.pepperonas.brutus.util.RingingStore
 import com.pepperonas.brutus.util.UltraHardcoreNotifier
 import com.pepperonas.brutus.util.UltraHardcoreStore
@@ -55,6 +61,23 @@ class AlarmService : Service() {
     /** Whether the alarm screen is in front — then the quiet notification carries the service. */
     private var screenShown = false
 
+    // Session dynamics (see RingPolicy): crescendo, quieting for calls, giving up when unanswered.
+    private val handler = Handler(Looper.getMainLooper())
+    private var focusRequest: AudioFocusRequest? = null
+    private var ringStartedAt = 0L          // elapsedRealtime when the sound started
+    private var ringStartedWallClock = 0L   // for the "unanswered" notice
+    private var crescendoSeconds = 0
+    private var ringLimitMinutes = 0
+    private var currentHardcore = false
+    private var lastGain = -1f
+    private val ticker = object : Runnable {
+        override fun run() {
+            if (currentAlarmId == -1L) return
+            onTick()
+            if (currentAlarmId != -1L) handler.postDelayed(this, RingPolicy.TICK_MS)
+        }
+    }
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -76,7 +99,10 @@ class AlarmService : Service() {
                 }
                 if (alarmId != -1L) startAlarm(alarmId, isFollowup, followupSeq)
             }
-            ACTION_STOP -> stopAlarm(dismissed = true)
+            ACTION_STOP -> {
+                if (currentAlarmId != -1L) RingingStore.clearAutoSnoozes(applicationContext, currentAlarmId)
+                stopAlarm(dismissed = true)
+            }
             ACTION_SCREEN_SHOWN, ACTION_SCREEN_HIDDEN -> {
                 if (currentAlarmId == -1L) {
                     // Only the screen reporting in, no session: don't linger as a started service.
@@ -87,7 +113,11 @@ class AlarmService : Service() {
             }
             ACTION_SNOOZE -> {
                 val alarmId = intent.getLongExtra("alarm_id", -1)
-                if (alarmId != -1L) snoozeAlarm(alarmId)
+                if (alarmId != -1L) {
+                    // Someone reacted: the count of unanswered rounds starts over.
+                    RingingStore.clearAutoSnoozes(applicationContext, alarmId)
+                    snoozeAlarm(alarmId)
+                }
             }
         }
         return START_STICKY
@@ -146,10 +176,21 @@ class AlarmService : Service() {
                 // the DB — never write into (or play on top of) the new session.
                 if (currentAlarmId != alarmId) return@launch
                 currentUltraHardcore = alarm?.ultraHardcoreMode == true
+                // A follow-up belongs to an Ultra Hardcore alarm — it never softens or gives up.
+                currentHardcore = alarm?.hardcoreEffective == true || isFollowup
                 if (alarm?.hardcoreEffective == true) {
                     hardcoreGuard = HardcoreAudioGuard(applicationContext).also { it.attach() }
                 }
+                crescendoSeconds = AppSettings.crescendoSeconds(applicationContext)
+                ringLimitMinutes = AppSettings.ringLimitMinutes(applicationContext)
+                ringStartedAt = SystemClock.elapsedRealtime()
+                ringStartedWallClock = System.currentTimeMillis()
+                lastGain = -1f
+                requestAudioFocus()
                 playAlarmSound(sound)
+                applyGain(currentGain())
+                handler.removeCallbacks(ticker)
+                handler.postDelayed(ticker, RingPolicy.TICK_MS)
             }
 
             // Follow-ups don't reschedule the main alarm and don't disable repeating
@@ -227,6 +268,79 @@ class AlarmService : Service() {
         }
     }
 
+    private fun elapsed(): Long = SystemClock.elapsedRealtime() - ringStartedAt
+
+    private fun currentGain(): Float = RingPolicy.gain(
+        elapsedMs = elapsed(),
+        rampSeconds = crescendoSeconds,
+        hardcore = currentHardcore,
+        inCall = RingPolicy.isInCall(getSystemService(AudioManager::class.java).mode),
+    )
+
+    private fun onTick() {
+        applyGain(currentGain())
+        if (RingPolicy.ringLimitReached(elapsed(), ringLimitMinutes, currentHardcore)) onRingLimit()
+    }
+
+    /** Sets the player gain; the stream itself stays at maximum (and Hardcore keeps it there). */
+    private fun applyGain(gain: Float) {
+        if (gain == lastGain) return
+        lastGain = gain
+        try {
+            audioTrack?.setVolume(gain)
+            mediaPlayer?.setVolume(gain, gain)
+        } catch (_: IllegalStateException) { }
+    }
+
+    /** Nobody reacted within the limit: snooze on our own, or after enough rounds give up. */
+    private fun onRingLimit() {
+        val alarmId = currentAlarmId
+        val wallClock = ringStartedWallClock
+        when (RingPolicy.afterLimit(RingingStore.autoSnoozes(applicationContext, alarmId))) {
+            RingPolicy.LimitOutcome.SNOOZE -> {
+                RingingStore.recordAutoSnooze(applicationContext, alarmId)
+                snoozeAlarm(alarmId)
+            }
+            RingPolicy.LimitOutcome.GIVE_UP -> {
+                RingingStore.clearAutoSnoozes(applicationContext, alarmId)
+                stopAlarm(dismissed = false) {
+                    val app = applicationContext as BrutusApplication
+                    val alarm = AlarmRepository(app.database.alarmDao()).getById(alarmId)
+                    if (alarm != null) AlarmNotifier.postMissed(applicationContext, alarm, wallClock, unanswered = true)
+                }
+            }
+        }
+    }
+
+    /**
+     * Asks other audio (music, podcasts, navigation) to step aside while the alarm rings. A refusal —
+     * e.g. during a call — changes nothing: the alarm plays anyway, quieter while the call lasts.
+     */
+    private fun requestAudioFocus() {
+        abandonAudioFocus()
+        val request = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
+            .setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+            )
+            .setOnAudioFocusChangeListener({ /* call state is read from the audio mode each tick */ }, handler)
+            .build()
+        focusRequest = request
+        try {
+            getSystemService(AudioManager::class.java).requestAudioFocus(request)
+        } catch (_: Exception) { }
+    }
+
+    private fun abandonAudioFocus() {
+        val request = focusRequest ?: return
+        focusRequest = null
+        try {
+            getSystemService(AudioManager::class.java).abandonAudioFocusRequest(request)
+        } catch (_: Exception) { }
+    }
+
     private fun setMaxVolume() {
         val audioManager = getSystemService(AudioManager::class.java)
         // Persisted: if the process dies while ringing, the next start restores it.
@@ -279,6 +393,7 @@ class AlarmService : Service() {
             player.setDataSource(this, alarmUri)
             player.isLooping = true
             player.prepare()
+            currentGain().let { player.setVolume(it, it) } // a crescendo starts quiet, not after a blast
             player.start()
             mediaPlayer = player
         } catch (e: Exception) {
@@ -322,6 +437,7 @@ class AlarmService : Service() {
 
         track.write(pcm, 0, pcm.size)
         track.setLoopPoints(0, pcm.size, -1)
+        track.setVolume(currentGain()) // a crescendo starts quiet, not after a blast
         track.play()
         audioTrack = track
     }
@@ -355,6 +471,9 @@ class AlarmService : Service() {
 
     /** Stops audio/vibration and releases guard, volume override and wake lock. */
     private fun cleanupPlayback() {
+        handler.removeCallbacks(ticker)
+        abandonAudioFocus()
+        lastGain = -1f
         mediaPlayer?.let {
             try {
                 if (it.isPlaying) it.stop()
@@ -421,6 +540,7 @@ class AlarmService : Service() {
         currentIsFollowup = false
         currentFollowupSeq = 0
         currentUltraHardcore = false
+        currentHardcore = false
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -473,7 +593,8 @@ class AlarmService : Service() {
             PowerManager.PARTIAL_WAKE_LOCK,
             "brutus:alarm_wakelock"
         ).apply {
-            acquire(10 * 60 * 1000L)
+            // Covers the longest ring limit; an alarm without a limit is kept awake by its playback.
+            acquire(31 * 60 * 1000L)
         }
     }
 

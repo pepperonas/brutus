@@ -397,4 +397,15 @@
     <string name="shake_sensitivity_normal_description">Standard-Schwellwert (delta ≥ 12)</string>
     <string name="shake_sensitivity_hard">Stark</string>
     <string name="shake_sensitivity_hard_description">Nur kräftiges Schütteln zählt</string>
+    <string name="settings_ringing">Klingeln</string>
+    <string name="settings_crescendo">Lauter werden</string>
+    <string name="settings_crescendo_hint">Normale Wecker beginnen leise und sind nach dieser Zeit voll laut. Hardcore-Wecker sind immer ab der ersten Sekunde laut.</string>
+    <string name="settings_crescendo_off">Aus</string>
+    <string name="settings_crescendo_seconds">%1$d s</string>
+    <string name="settings_ring_limit">Schlummern ohne Reaktion</string>
+    <string name="settings_ring_limit_hint">Reagiert niemand, schlummert ein normaler Wecker nach dieser Zeit von selbst und klingelt erneut — bis zu dreimal, dann hört er auf und meldet sich als verpasst. Hardcore-Wecker hören nie von selbst auf.</string>
+    <string name="settings_ring_limit_off">Nie</string>
+    <string name="settings_ring_limit_minutes">%1$d Min.</string>
+    <string name="settings_ringing_calls_hint">Während eines Anrufs klingelt jeder Wecker leise, damit du das Gespräch hörst. Musik und Podcasts pausieren, solange ein Wecker klingelt.</string>
+    <string name="notification_unanswered_text">Er hat geklingelt, aber niemand hat reagiert.</string>
 </resources>
