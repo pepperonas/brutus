@@ -444,4 +444,5 @@
     <string name="shortcut_timer_long">Open the timer</string>
     <string name="shortcut_vacation_short">Vacation</string>
     <string name="shortcut_vacation_long">Pause alarms for a vacation</string>
+    <string name="settings_vacation_picker_none">Pick a day</string>
 </resources>

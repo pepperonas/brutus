@@ -437,6 +437,17 @@ private fun VacationRow(openPicker: Boolean, onPickerOpened: () -> Unit) {
         ) {
             DatePicker(
                 state = state,
+                // The default headline ("Selected date" / "Ausgewähltes Datum") is cut off in German.
+                headline = {
+                    Text(
+                        state.selectedDateMillis
+                            ?.let { VacationDates.format(VacationDates.fromPickerMillis(it)) }
+                            ?: stringResource(R.string.settings_vacation_picker_none),
+                        style = MaterialTheme.typography.headlineMedium,
+                        maxLines = 1,
+                        modifier = Modifier.padding(start = 24.dp, end = 12.dp, bottom = 12.dp),
+                    )
+                },
                 title = {
                     Text(
                         stringResource(R.string.settings_vacation_picker_title),

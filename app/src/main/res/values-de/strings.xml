@@ -444,4 +444,5 @@
     <string name="shortcut_timer_long">Timer öffnen</string>
     <string name="shortcut_vacation_short">Urlaub</string>
     <string name="shortcut_vacation_long">Wecker für den Urlaub pausieren</string>
+    <string name="settings_vacation_picker_none">Tag wählen</string>
 </resources>
