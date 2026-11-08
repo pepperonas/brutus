@@ -2,33 +2,16 @@
 
 package com.pepperonas.brutus.ui.screens
 
-import android.Manifest
-import android.content.pm.PackageManager
-import android.content.res.Configuration
-import android.os.Build
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.animation.togetherWith
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.AnimatedVisibility
+import android.provider.Settings
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,25 +21,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.BeachAccess
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.SystemUpdate
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material.icons.outlined.AlarmAdd
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -64,12 +34,8 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -82,51 +48,31 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.pepperonas.brutus.R
 import com.pepperonas.brutus.data.AlarmEntity
-import com.pepperonas.brutus.ui.theme.BrutusTheme
-import com.pepperonas.brutus.ui.theme.ThemeSettings
-import android.content.Intent
-import android.provider.Settings
-import androidx.core.app.NotificationManagerCompat
-import com.pepperonas.brutus.update.UpdateCheckStore
-import com.pepperonas.brutus.util.UltraHardcoreNotifier
-import com.pepperonas.brutus.util.UltraHardcoreStore
-import com.pepperonas.brutus.util.VacationStore
 import com.pepperonas.brutus.scheduler.AlarmActions
+import com.pepperonas.brutus.update.UpdateCheckStore
 import com.pepperonas.brutus.update.UpdateChecker
-import com.pepperonas.brutus.update.UpdateScheduler
 import com.pepperonas.brutus.util.BatteryOptimizationPermission
 import com.pepperonas.brutus.util.ExactAlarmPermission
 import com.pepperonas.brutus.util.FullScreenIntentPermission
 import com.pepperonas.brutus.util.NextAlarmCalculator
 import com.pepperonas.brutus.util.SoundPreviewPlayer
+import com.pepperonas.brutus.util.UltraHardcoreStore
+import com.pepperonas.brutus.util.VacationStore
 import com.pepperonas.brutus.util.rememberBrutusHaptics
 import com.pepperonas.brutus.viewmodel.AlarmViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.stringArrayResource
-import androidx.compose.ui.res.pluralStringResource
-import com.pepperonas.brutus.R
 
 @Composable
 fun AlarmListScreen(
@@ -276,85 +222,20 @@ fun AlarmListScreen(
                 }
             }
 
-            BannerSlot(updateVersion != null) {
-                PermissionBanner(
-                    title = stringResource(R.string.banner_update_title, updateVersion ?: ""),
-                    body = stringResource(R.string.banner_update_body),
-                    actionLabel = stringResource(R.string.banner_update_action),
-                    info = true,
-                    icon = Icons.Default.SystemUpdate,
-                    onFix = { UpdateChecker.openDownload(context) },
-                )
-            }
-
-            BannerSlot(pausedUntil != null) {
-                val lastDay = (pausedUntil ?: 0L) - 1
-                PermissionBanner(
-                    title = stringResource(
-                        R.string.banner_vacation_title,
-                        com.pepperonas.brutus.util.VacationDates.format(lastDay),
-                    ),
-                    body = stringResource(R.string.banner_vacation_body),
-                    actionLabel = stringResource(R.string.vacation_resume),
-                    info = true,
-                    icon = Icons.Default.BeachAccess,
-                    onFix = {
-                        vacationScope.launch(kotlinx.coroutines.Dispatchers.IO) {
-                            AlarmActions.resumeFromVacation(context.applicationContext)
-                        }
-                    },
-                )
-            }
-
-            BannerSlot(!exactGranted) {
-                ExactAlarmBanner(onFix = {
-                    ExactAlarmPermission.settingsIntent(context)?.let { context.startActivity(it) }
-                })
-            }
-
-            BannerSlot(!batteryIgnoring) {
-                BatteryOptimizationBanner(onFix = {
-                    try {
-                        context.startActivity(BatteryOptimizationPermission.settingsIntent(context))
-                    } catch (_: Exception) {
-                        context.startActivity(BatteryOptimizationPermission.fallbackSettingsIntent())
+            AlarmStatusBanners(
+                updateVersion = updateVersion,
+                pausedUntil = pausedUntil,
+                onResumeVacation = {
+                    vacationScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                        AlarmActions.resumeFromVacation(context.applicationContext)
                     }
-                })
-            }
-
-            BannerSlot(!fsiGranted) {
-                FullScreenIntentBanner(onFix = {
-                    FullScreenIntentPermission.settingsIntent(context)?.let { context.startActivity(it) }
-                })
-            }
-
-            BannerSlot(!notificationsOn) {
-                PermissionBanner(
-                    title = stringResource(R.string.banner_notifications_title),
-                    body = stringResource(R.string.banner_notifications_body),
-                    actionLabel = stringResource(R.string.banner_notifications_action),
-                    onFix = {
-                        runCatching {
-                            context.startActivity(
-                                Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
-                                    .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-                                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            )
-                        }
-                    },
-                )
-            }
-
-            BannerSlot(uhcPendingId != null) {
-                val pendingId = uhcPendingId ?: -1L
-                PermissionBanner(
-                    title = stringResource(R.string.notification_uhc_title),
-                    body = stringResource(R.string.banner_uhc_body),
-                    actionLabel = stringResource(R.string.notification_uhc_action),
-                    warning = true,
-                    onFix = { context.startActivity(UltraHardcoreNotifier.taskIntent(context, pendingId)) },
-                )
-            }
+                },
+                exactGranted = exactGranted,
+                batteryIgnoring = batteryIgnoring,
+                fsiGranted = fsiGranted,
+                notificationsOn = notificationsOn,
+                uhcPendingId = uhcPendingId,
+            )
 
             Spacer(modifier = Modifier.height(4.dp))
 
@@ -521,547 +402,4 @@ fun AlarmListScreen(
     }
 }
 
-/** Brand FAB with a press shape-morph: pill relaxes toward a squircle under the finger. */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-private fun AddAlarmFab(onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val interaction = remember { MutableInteractionSource() }
-    val pressed by interaction.collectIsPressedAsState()
-    val corner by animateDpAsState(
-        targetValue = if (pressed) 12.dp else 20.dp,
-        animationSpec = MaterialTheme.motionScheme.fastSpatialSpec(),
-        label = "fabCorner"
-    )
-    FloatingActionButton(
-        onClick = onClick,
-        shape = RoundedCornerShape(corner),
-        containerColor = MaterialTheme.colorScheme.primary,
-        contentColor = MaterialTheme.colorScheme.onPrimary,
-        interactionSource = interaction,
-        modifier = modifier,
-    ) {
-        Icon(Icons.Default.Add, contentDescription = stringResource(R.string.alarm_list_add))
-    }
-}
-
 private enum class ListState { LOADING, EMPTY, LIST }
-
-@Composable
-private fun NextAlarmHeader(next: AlarmEntity?, now: Long, loaded: Boolean, modifier: Modifier = Modifier) {
-    val context = LocalContext.current
-    val triggerMillis = remember(next, now) {
-        next?.let { NextAlarmCalculator.upcoming(context, it, now) }
-    }
-
-    Column(
-        modifier = modifier.padding(top = 28.dp, bottom = 20.dp),
-    ) {
-        if (triggerMillis != null) {
-            Text(
-                text = stringResource(R.string.alarm_list_next_alarm),
-                style = MaterialTheme.typography.labelMedium,
-                letterSpacing = 2.sp,
-                color = MaterialTheme.colorScheme.primary,
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = NextAlarmCalculator.formatCountdown(
-                    LocalContext.current, now, triggerMillis
-                ),
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = formatTriggerDate(
-                    triggerMillis,
-                    stringResource(R.string.format_next_alarm_date)
-                ),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        } else if (loaded) {
-            Text(
-                text = stringResource(R.string.alarm_list_no_alarm),
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-private fun formatTriggerDate(millis: Long, pattern: String): String {
-    // Pattern comes from resources — German writes "Mo, 17. Aug, 06:30",
-    // English "Mon, Aug 17, 06:30".
-    val fmt = SimpleDateFormat(pattern, Locale.getDefault())
-    return fmt.format(Date(millis))
-}
-
-/** Swipe-to-delete wrapper: drag the card off to the left, undo via snackbar. */
-@Composable
-private fun DismissableAlarmCard(
-    alarm: AlarmEntity,
-    isNext: Boolean,
-    modifier: Modifier = Modifier,
-    onToggle: () -> Unit,
-    onDelete: () -> Unit,
-    onCopy: () -> Unit,
-    onClick: () -> Unit,
-) {
-    val haptics = rememberBrutusHaptics()
-    val dismissState = rememberSwipeToDismissBoxState(
-        confirmValueChange = { value ->
-            if (value == SwipeToDismissBoxValue.EndToStart) {
-                onDelete()
-                true
-            } else {
-                false
-            }
-        }
-    )
-    // A tick when releasing would now delete — and again if the finger pulls back out of it.
-    LaunchedEffect(dismissState.targetValue) {
-        if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) haptics.tap()
-    }
-    SwipeToDismissBox(
-        state = dismissState,
-        modifier = modifier,
-        enableDismissFromStartToEnd = false,
-        backgroundContent = {
-            // Everything follows the finger: the red deepens and the bin grows with the drag, and
-            // jumps once more when letting go would delete. Read in draw/layer lambdas only.
-            val errorContainer = MaterialTheme.colorScheme.errorContainer
-            fun fraction(): Float =
-                if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart)
-                    dismissState.progress.coerceIn(0f, 1f) else 0f
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(MaterialTheme.shapes.large)
-                    .drawBehind { drawRect(errorContainer.copy(alpha = (fraction() * 2.5f).coerceIn(0f, 1f))) },
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                Icon(
-                    Icons.Default.Delete,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onErrorContainer,
-                    modifier = Modifier
-                        .padding(end = 28.dp)
-                        .graphicsLayer {
-                            val f = fraction()
-                            val armed = dismissState.targetValue == SwipeToDismissBoxValue.EndToStart
-                            val scale = if (armed) 1.25f else 0.6f + 0.4f * (f * 2f).coerceAtMost(1f)
-                            scaleX = scale
-                            scaleY = scale
-                            alpha = (f * 4f).coerceIn(0f, 1f)
-                        }
-                )
-            }
-        }
-    ) {
-        AlarmCard(
-            alarm = alarm,
-            isNext = isNext,
-            onToggle = onToggle,
-            onDelete = onDelete,
-            onCopy = onCopy,
-            onClick = onClick,
-        )
-    }
-}
-
-/**
- * Card color encodes the ENABLED state only: every enabled alarm sits on the
- * same muted red container (primaryContainer blended toward the surface so a
- * list full of alarms stays calm), disabled ones sink to surfaceContainerLow.
- * The next firing alarm keeps its color and is marked by a thin primary
- * outline instead — same state, same color; the header names it anyway.
- */
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun AlarmCard(
-    alarm: AlarmEntity,
-    isNext: Boolean,
-    onToggle: () -> Unit,
-    onDelete: () -> Unit,
-    onCopy: () -> Unit,
-    onClick: () -> Unit
-) {
-    val cs = MaterialTheme.colorScheme
-    val dim = !alarm.enabled
-
-    // Muted red: primaryContainer pulled halfway toward the neutral surface —
-    // clearly "armed", but a screen full of enabled alarms doesn't scream.
-    val enabledContainer = lerp(cs.surfaceContainerHigh, cs.primaryContainer, 0.45f)
-    val containerColor by animateColorAsState(
-        targetValue = if (alarm.enabled) enabledContainer else cs.surfaceContainerLow,
-        animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
-        label = "cardColor"
-    )
-    val timeColor = if (alarm.enabled) cs.onSurface else cs.onSurfaceVariant.copy(alpha = 0.6f)
-    val subColor = when {
-        alarm.enabled -> lerp(cs.onSurfaceVariant, cs.onPrimaryContainer, 0.5f)
-        else -> cs.onSurfaceVariant.copy(alpha = 0.5f)
-    }
-
-    Card(
-        onClick = onClick,
-        colors = CardDefaults.cardColors(containerColor = containerColor),
-        shape = MaterialTheme.shapes.large,
-        border = if (isNext && alarm.enabled) BorderStroke(2.dp, cs.primary) else null,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 16.dp)
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = alarm.timeString(),
-                        style = MaterialTheme.typography.displayMedium,
-                        color = timeColor
-                    )
-                    Text(
-                        text = alarm.repeatDaysString(LocalContext.current),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = subColor
-                    )
-                    if (alarm.label.isNotBlank()) {
-                        Text(
-                            text = alarm.label,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Medium,
-                            color = timeColor.copy(alpha = if (dim) 0.6f else 0.9f)
-                        )
-                    }
-                }
-                IconButton(onClick = onCopy) {
-                    Icon(
-                        Icons.Default.ContentCopy,
-                        contentDescription = stringResource(R.string.alarm_card_copy),
-                        tint = subColor,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-                IconButton(onClick = onDelete) {
-                    Icon(
-                        Icons.Default.Delete,
-                        contentDescription = stringResource(R.string.alarm_card_delete),
-                        tint = subColor
-                    )
-                }
-                Switch(
-                    checked = alarm.enabled,
-                    onCheckedChange = { onToggle() },
-                )
-            }
-
-            Spacer(modifier = Modifier.height(14.dp))
-            WeekdayStrip(
-                repeatDays = alarm.repeatDays,
-                enabled = alarm.enabled,
-                inactiveColor = subColor,
-            )
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // Info chips: mode, sunrise, challenge, snooze, sound
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                if (alarm.ultraHardcoreMode) {
-                    InfoChip(
-                        stringResource(R.string.chip_ultra_hardcore),
-                        cs.error, cs.onError, dim = dim
-                    )
-                } else if (alarm.hardcoreMode) {
-                    InfoChip(
-                        stringResource(R.string.chip_hardcore),
-                        cs.errorContainer, cs.onErrorContainer, dim = dim
-                    )
-                }
-                if (alarm.sunriseEnabled) {
-                    InfoChip(
-                        stringResource(R.string.chip_sunrise),
-                        cs.tertiaryContainer, cs.onTertiaryContainer, dim = dim
-                    )
-                }
-                val ctx = LocalContext.current
-                InfoChip(
-                    alarm.challengeName(ctx),
-                    cs.secondaryContainer, cs.onSecondaryContainer, dim = dim
-                )
-                InfoChip(
-                    stringResource(R.string.chip_snooze, alarm.snoozeDuration),
-                    cs.surfaceContainerHighest, cs.onSurfaceVariant, dim = dim
-                )
-                InfoChip(
-                    stringResource(R.string.chip_sound, alarm.soundName(ctx)),
-                    cs.surfaceContainerHighest, cs.onSurfaceVariant, dim = dim
-                )
-            }
-        }
-    }
-}
-
-/** Full-width weekday strip — always a single row, each day gets an equal slice. */
-@Composable
-private fun WeekdayStrip(
-    repeatDays: Int,
-    enabled: Boolean,
-    inactiveColor: Color,
-) {
-    val cs = MaterialTheme.colorScheme
-    val labels = stringArrayResource(R.array.weekday_short)
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
-    ) {
-        labels.forEachIndexed { index, label ->
-            val isOn = (repeatDays and (1 shl index)) != 0
-            val textColor = when {
-                !enabled -> inactiveColor.copy(alpha = 0.5f)
-                isOn -> cs.onPrimary
-                else -> inactiveColor
-            }
-            val bg = when {
-                isOn && enabled -> cs.primary
-                isOn -> cs.primary.copy(alpha = 0.25f)
-                else -> Color.Transparent
-            }
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(MaterialTheme.shapes.extraSmall)
-                    .background(bg)
-                    .padding(vertical = 5.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = if (isOn) FontWeight.Bold else FontWeight.Normal,
-                    color = textColor
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun InfoChip(
-    text: String,
-    container: Color,
-    content: Color,
-    dim: Boolean = false,
-) {
-    val alpha = if (dim) 0.55f else 1f
-    Text(
-        text = text,
-        style = MaterialTheme.typography.labelSmall,
-        color = content.copy(alpha = alpha),
-        modifier = Modifier
-            .clip(MaterialTheme.shapes.extraSmall)
-            .background(container.copy(alpha = alpha))
-            .padding(horizontal = 8.dp, vertical = 3.dp)
-    )
-}
-
-@Composable
-private fun EmptyState(onCreate: () -> Unit) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(
-                Icons.Outlined.AlarmAdd,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(72.dp)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = stringResource(R.string.alarm_list_empty_title),
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = stringResource(R.string.alarm_list_empty_body),
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-            FilledTonalButton(onClick = onCreate) {
-                Text(stringResource(R.string.alarm_list_create))
-            }
-        }
-    }
-}
-
-@Composable
-private fun ExactAlarmBanner(onFix: () -> Unit) {
-    PermissionBanner(
-        title = stringResource(R.string.banner_exact_alarm_title),
-        body = stringResource(R.string.banner_exact_alarm_body),
-        actionLabel = stringResource(R.string.banner_exact_alarm_action),
-        onFix = onFix,
-    )
-}
-
-@Composable
-private fun BatteryOptimizationBanner(onFix: () -> Unit) {
-    PermissionBanner(
-        title = stringResource(R.string.banner_battery_title),
-        body = stringResource(R.string.banner_battery_body),
-        actionLabel = stringResource(R.string.banner_battery_action),
-        warning = true,
-        onFix = onFix,
-    )
-}
-
-@Composable
-private fun FullScreenIntentBanner(onFix: () -> Unit) {
-    PermissionBanner(
-        title = stringResource(R.string.banner_fullscreen_title),
-        body = stringResource(R.string.banner_fullscreen_body),
-        actionLabel = stringResource(R.string.banner_fullscreen_action),
-        onFix = onFix,
-    )
-}
-
-/** A banner that slides in and out on the theme's springs instead of making the list jump. */
-@Composable
-private fun ColumnScope.BannerSlot(visible: Boolean, content: @Composable () -> Unit) {
-    AnimatedVisibility(
-        visible = visible,
-        enter = expandVertically(MaterialTheme.motionScheme.defaultSpatialSpec()) +
-            fadeIn(MaterialTheme.motionScheme.defaultEffectsSpec()),
-        exit = shrinkVertically(MaterialTheme.motionScheme.fastSpatialSpec()) +
-            fadeOut(MaterialTheme.motionScheme.fastEffectsSpec()),
-    ) {
-        Column {
-            content()
-            Spacer(modifier = Modifier.height(12.dp))
-        }
-    }
-}
-
-/**
- * Error container for hard blockers, tertiary (warm orange) for soft warnings,
- * secondary for plain information (an available update).
- */
-@Composable
-private fun PermissionBanner(
-    title: String,
-    body: String,
-    actionLabel: String,
-    warning: Boolean = false,
-    info: Boolean = false,
-    icon: ImageVector = Icons.Default.Warning,
-    onFix: () -> Unit,
-) {
-    val cs = MaterialTheme.colorScheme
-    val container = when {
-        info -> cs.secondaryContainer
-        warning -> cs.tertiaryContainer
-        else -> cs.errorContainer
-    }
-    val content = when {
-        info -> cs.onSecondaryContainer
-        warning -> cs.onTertiaryContainer
-        else -> cs.onErrorContainer
-    }
-    Card(
-        colors = CardDefaults.cardColors(containerColor = container),
-        shape = MaterialTheme.shapes.medium,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                icon,
-                contentDescription = null,
-                tint = content,
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.size(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = title, fontWeight = FontWeight.SemiBold, color = content)
-                Text(
-                    text = body,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = content.copy(alpha = 0.85f),
-                )
-            }
-            Spacer(modifier = Modifier.size(8.dp))
-            TextButton(onClick = onFix) {
-                Text(actionLabel, color = content, fontWeight = FontWeight.SemiBold)
-            }
-        }
-    }
-}
-
-// ---------------------------------------------------------------------------
-// Previews
-// ---------------------------------------------------------------------------
-
-private val previewNextAlarm = AlarmEntity(
-    id = 1, hour = 6, minute = 30, label = "Frühschicht",
-    repeatDays = 0b0011111, ultraHardcoreMode = true, sunriseEnabled = true,
-)
-private val previewAlarm = AlarmEntity(
-    id = 2, hour = 9, minute = 15, repeatDays = 0b1100000, hardcoreMode = true,
-)
-private val previewDisabledAlarm = AlarmEntity(
-    id = 3, hour = 14, minute = 0, label = "Powernap", enabled = false,
-)
-
-@Composable
-private fun CardStack() {
-    Column(
-        modifier = Modifier.padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        AlarmCard(previewNextAlarm, isNext = true, {}, {}, {}, {})
-        AlarmCard(previewAlarm, isNext = false, {}, {}, {}, {})
-        AlarmCard(previewDisabledAlarm, isNext = false, {}, {}, {}, {})
-    }
-}
-
-@Preview(name = "Cards dark", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
-@Composable
-private fun AlarmCardsPreviewDark() {
-    BrutusTheme(darkTheme = true) { CardStack() }
-}
-
-@Preview(name = "Cards light", uiMode = Configuration.UI_MODE_NIGHT_NO, showBackground = true)
-@Composable
-private fun AlarmCardsPreviewLight() {
-    BrutusTheme(darkTheme = false) { CardStack() }
-}
-
-@Preview(
-    name = "Cards dynamic",
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-    showBackground = true,
-    wallpaper = androidx.compose.ui.tooling.preview.Wallpapers.RED_DOMINATED_EXAMPLE,
-)
-@Composable
-private fun AlarmCardsPreviewDynamic() {
-    BrutusTheme(darkTheme = true) { CardStack() }
-}
-
-@Preview(name = "Empty dark", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
-@Composable
-private fun EmptyStatePreviewDark() {
-    BrutusTheme(darkTheme = true) { EmptyState(onCreate = {}) }
-}

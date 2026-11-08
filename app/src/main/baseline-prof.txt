@@ -1,0 +1,26 @@
+# Baseline profile for Brutus' own code: what has to be fast without waiting for the JIT.
+# AGP compiles it into assets/dexopt/baseline.prof; profileinstaller (pulled in by Compose) applies
+# it on sideloaded APKs too, which is how Brutus is distributed. Written by hand, not generated —
+# the app is small, so whole packages are listed instead of single methods.
+#
+# Cold start: launcher -> MainActivity -> alarm list.
+HSPLcom/pepperonas/brutus/MainActivity;->**(**)**
+HSPLcom/pepperonas/brutus/BrutusApplication;->**(**)**
+HSPLcom/pepperonas/brutus/ui/screens/**;->**(**)**
+HSPLcom/pepperonas/brutus/ui/theme/**;->**(**)**
+HSPLcom/pepperonas/brutus/viewmodel/AlarmViewModel**;->**(**)**
+HSPLcom/pepperonas/brutus/data/**;->**(**)**
+# The ringing path: it opens over the lock screen and must show at once.
+HSPLcom/pepperonas/brutus/receiver/AlarmReceiver;->**(**)**
+HSPLcom/pepperonas/brutus/service/**;->**(**)**
+HSPLcom/pepperonas/brutus/AlarmActivity;->**(**)**
+HSPLcom/pepperonas/brutus/ui/alarm/**;->**(**)**
+HSPLcom/pepperonas/brutus/util/**;->**(**)**
+HSPLcom/pepperonas/brutus/scheduler/**;->**(**)**
+# Classes the first frame needs — only the cold-start path; the ringing path is AOT-compiled above
+# but not preloaded, so it costs no memory in every app start.
+Lcom/pepperonas/brutus/MainActivity;
+Lcom/pepperonas/brutus/BrutusApplication;
+Lcom/pepperonas/brutus/ui/screens/HomeScreen**;
+Lcom/pepperonas/brutus/ui/screens/AlarmListScreen**;
+Lcom/pepperonas/brutus/ui/theme/**;

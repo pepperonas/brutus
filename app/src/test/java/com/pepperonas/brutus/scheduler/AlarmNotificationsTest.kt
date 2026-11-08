@@ -100,7 +100,10 @@ class AlarmNotificationsTest {
 
     @Test
     fun `the heads-up is armed the configured lead before the alarm`() {
-        val alarm = insert(AlarmEntity(hour = 7, minute = 0, repeatDays = 0b1111111))
+        // Three hours ahead: a fixed 07:00 made this test fail between 06:30 and 07:00, when the
+        // heads-up would lie in the past and is rightly not armed.
+        val hour = (java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY) + 3) % 24
+        val alarm = insert(AlarmEntity(hour = hour, minute = 0, repeatDays = 0b1111111))
         AppSettings.setUpcomingLeadMinutes(context, 30)
         AlarmScheduler.schedule(context, alarm)
 
