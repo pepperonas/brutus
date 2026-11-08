@@ -718,7 +718,7 @@ check that it is really the one this repository published.
 | Key | RSA 4096, valid 2026-04-12 → 2053-08-28 (10,000 days) |
 | Signature scheme | APK Signature Scheme v2 |
 | **Certificate SHA-256** | `69d67a10a826cf4050da4b271af9b5ed500c962bfab07a8f8fe863e3d7600382` |
-| v2.5.3 APK | 4,607,914 bytes · SHA-256 `574c3107eab78f8be4e2d9032281c782968318314af66190ab517e4e12c3dd71` |
+| v2.6.0 APK | 4,810,082 bytes · SHA-256 `5890582e46afbc280d1ae619deb5f9f6f8e85e3c80e775c747229dda43c650fc` |
 
 The **certificate** fingerprint is the durable one — it stays identical across every release,
 so a mismatch means the APK did not come from here. The APK hash changes with every version.

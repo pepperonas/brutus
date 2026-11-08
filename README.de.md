@@ -706,7 +706,7 @@ Sideloading heißt, einer Datei aus dem Internet zu vertrauen — hier ist alles
 | Schlüssel | RSA 4096, gültig 2026-04-12 → 2053-08-28 (10.000 Tage) |
 | Signaturschema | APK Signature Scheme v2 |
 | **Zertifikat-SHA-256** | `69d67a10a826cf4050da4b271af9b5ed500c962bfab07a8f8fe863e3d7600382` |
-| APK v2.5.3 | 4.607.914 Bytes · SHA-256 `574c3107eab78f8be4e2d9032281c782968318314af66190ab517e4e12c3dd71` |
+| APK v2.6.0 | 4.810.082 Bytes · SHA-256 `5890582e46afbc280d1ae619deb5f9f6f8e85e3c80e775c747229dda43c650fc` |
 
 Der **Zertifikats**-Fingerabdruck ist der dauerhafte — er bleibt über alle Releases identisch, eine Abweichung bedeutet also, dass das APK nicht von hier stammt. Der APK-Hash ändert sich mit jeder Version.
 
