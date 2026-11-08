@@ -23,7 +23,7 @@ object AlarmScheduler {
     fun schedule(context: Context, alarm: AlarmEntity) {
         val alarmManager = context.getSystemService(AlarmManager::class.java)
         val now = System.currentTimeMillis()
-        val nextTrigger = NextAlarmCalculator.nextTrigger(alarm, now, RingingStore.skips(context)[alarm.id])
+        val nextTrigger = NextAlarmCalculator.upcoming(context, alarm, now)
             ?: calculateNextTrigger(alarm, now)
         val intent = createPendingIntent(context, alarm)
 

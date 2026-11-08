@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Launcher long-press shortcuts. Each one is a HomeRequest action on MainActivity. -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="new_alarm"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_new_alarm"
+        android:shortcutShortLabel="@string/shortcut_new_alarm_short"
+        android:shortcutLongLabel="@string/shortcut_new_alarm_long">
+        <intent
+            android:action="com.pepperonas.brutus.action.NEW_ALARM"
+            android:targetPackage="com.pepperonas.brutus"
+            android:targetClass="com.pepperonas.brutus.MainActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="timer"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_timer"
+        android:shortcutShortLabel="@string/shortcut_timer_short"
+        android:shortcutLongLabel="@string/shortcut_timer_long">
+        <intent
+            android:action="com.pepperonas.brutus.action.TIMER"
+            android:targetPackage="com.pepperonas.brutus"
+            android:targetClass="com.pepperonas.brutus.MainActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="vacation"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_vacation"
+        android:shortcutShortLabel="@string/shortcut_vacation_short"
+        android:shortcutLongLabel="@string/shortcut_vacation_long">
+        <intent
+            android:action="com.pepperonas.brutus.action.VACATION"
+            android:targetPackage="com.pepperonas.brutus"
+            android:targetClass="com.pepperonas.brutus.MainActivity" />
+    </shortcut>
+</shortcuts>

@@ -15,19 +15,38 @@ object NextAlarmCalculator {
         alarms: List<AlarmEntity>,
         now: Long = System.currentTimeMillis(),
         skips: Map<Long, Long> = emptyMap(),
+        pausedUntil: Long? = null,
     ): AlarmEntity? {
         return alarms
             .filter { it.enabled }
-            .mapNotNull { a -> nextTrigger(a, now, skips[a.id])?.let { t -> a to t } }
+            .mapNotNull { a -> nextTrigger(a, now, skips[a.id], pausedUntil)?.let { t -> a to t } }
             .minByOrNull { it.second }
             ?.first
     }
 
-    /** Next occurrence after [now], stepping past [skipped] if it is exactly that occurrence. */
-    fun nextTrigger(alarm: AlarmEntity, now: Long = System.currentTimeMillis(), skipped: Long?): Long? {
-        val next = nextTrigger(alarm, now) ?: return null
+    /**
+     * Next occurrence after [now], stepping past [skipped] if it is exactly that occurrence, and
+     * not before [pausedUntil] (vacation mode) — the first occurrence at or after it.
+     */
+    fun nextTrigger(
+        alarm: AlarmEntity,
+        now: Long = System.currentTimeMillis(),
+        skipped: Long?,
+        pausedUntil: Long? = null,
+    ): Long? {
+        // nextTrigger(x) is strictly after x; one ms earlier lets an alarm at exactly pausedUntil count.
+        val from = if (pausedUntil != null && pausedUntil > now) pausedUntil - 1 else now
+        val next = nextTrigger(alarm, from) ?: return null
         return if (skipped != null && next == skipped) nextTrigger(alarm, skipped) else next
     }
+
+    /** Next trigger as the whole app sees it: skips and vacation mode included. */
+    fun upcoming(context: Context, alarm: AlarmEntity, now: Long = System.currentTimeMillis()): Long? =
+        nextTrigger(alarm, now, RingingStore.skips(context)[alarm.id], VacationStore.pausedUntil(context, now))
+
+    /** The alarm that rings soonest as the whole app sees it: skips and vacation mode included. */
+    fun findNext(context: Context, alarms: List<AlarmEntity>, now: Long = System.currentTimeMillis()): AlarmEntity? =
+        findNext(alarms, now, RingingStore.skips(context), VacationStore.pausedUntil(context, now))
 
     fun nextTrigger(alarm: AlarmEntity, now: Long = System.currentTimeMillis()): Long? {
         val nowCal = Calendar.getInstance().apply { timeInMillis = now }

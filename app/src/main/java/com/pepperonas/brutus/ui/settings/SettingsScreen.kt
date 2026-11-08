@@ -92,6 +92,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import com.pepperonas.brutus.backup.AlarmBackup
 import com.pepperonas.brutus.backup.BackupManager
+import com.pepperonas.brutus.scheduler.AlarmActions
+import com.pepperonas.brutus.util.VacationDates
+import com.pepperonas.brutus.util.VacationStore
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.SelectableDates
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.runtime.LaunchedEffect
 
 /**
  * Settings & info, reached from the ⋮ menu of the alarm list. Same build as Flipper the Ripper's
@@ -103,6 +111,8 @@ import com.pepperonas.brutus.backup.BackupManager
 fun SettingsScreen(
     onBack: () -> Unit,
     notificationExtras: @Composable () -> Unit = {},
+    openVacation: Boolean = false,
+    onVacationOpened: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -151,6 +161,10 @@ fun SettingsScreen(
                         },
                     )
                 }
+            }
+
+            SettingsSection(stringResource(R.string.settings_vacation)) {
+                VacationRow(openPicker = openVacation, onPickerOpened = onVacationOpened)
             }
 
             SettingsSection(stringResource(R.string.settings_ringing)) {
@@ -347,6 +361,91 @@ internal fun importSummary(res: android.content.res.Resources, r: BackupManager.
     if (r.skipped > 0) parts += res.getQuantityString(R.plurals.backup_import_skipped, r.skipped, r.skipped)
     if (r.qrReplaced) parts += res.getString(R.string.backup_import_qr_replaced)
     return parts.joinToString(" ")
+}
+
+/**
+ * Vacation mode: pick the last day off; no alarm rings before the day after. The quick-settings
+ * tile and the launcher shortcut land here with [openPicker] set.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun VacationRow(openPicker: Boolean, onPickerOpened: () -> Unit) {
+    val context = LocalContext.current
+    val app = context.applicationContext
+    val scope = rememberCoroutineScope()
+    val tick by VacationStore.changes(context).collectAsState(initial = -1)
+    val pausedUntil = remember(tick) { VacationStore.pausedUntil(context) }
+    var picking by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(openPicker) {
+        if (openPicker) {
+            picking = true
+            onPickerOpened()
+        }
+    }
+
+    Text(
+        if (pausedUntil != null) {
+            stringResource(R.string.settings_vacation_active, VacationDates.format(pausedUntil - 1))
+        } else {
+            stringResource(R.string.settings_vacation_hint)
+        },
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Spacer(Modifier.height(12.dp))
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+        Button(onClick = { picking = true }, modifier = Modifier.weight(1f)) {
+            Text(
+                stringResource(
+                    if (pausedUntil != null) R.string.settings_vacation_change else R.string.settings_vacation_start
+                )
+            )
+        }
+        if (pausedUntil != null) {
+            androidx.compose.material3.OutlinedButton(
+                onClick = { scope.launch(Dispatchers.IO) { AlarmActions.resumeFromVacation(app) } },
+                modifier = Modifier.weight(1f),
+            ) { Text(stringResource(R.string.vacation_resume)) }
+        }
+    }
+
+    if (picking) {
+        val today = remember { VacationDates.todayUtcMidnight() }
+        val state = rememberDatePickerState(
+            initialSelectedDateMillis = pausedUntil?.let { VacationDates.toPickerMillis(it - 1) },
+            selectableDates = object : SelectableDates {
+                override fun isSelectableDate(utcTimeMillis: Long) = utcTimeMillis >= today
+            },
+        )
+        DatePickerDialog(
+            onDismissRequest = { picking = false },
+            confirmButton = {
+                TextButton(
+                    enabled = state.selectedDateMillis != null,
+                    onClick = {
+                        val picked = state.selectedDateMillis ?: return@TextButton
+                        picking = false
+                        scope.launch(Dispatchers.IO) {
+                            AlarmActions.pauseThrough(app, VacationDates.fromPickerMillis(picked))
+                        }
+                    },
+                ) { Text(stringResource(R.string.settings_vacation_confirm)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { picking = false }) { Text(stringResource(R.string.action_cancel)) }
+            },
+        ) {
+            DatePicker(
+                state = state,
+                title = {
+                    Text(
+                        stringResource(R.string.settings_vacation_picker_title),
+                        modifier = Modifier.padding(start = 24.dp, end = 12.dp, top = 16.dp),
+                    )
+                },
+            )
+        }
+    }
 }
 
 /** A titled single-choice row of segmented buttons — used by the ringing settings. */

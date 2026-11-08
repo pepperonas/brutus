@@ -425,4 +425,23 @@
         <item quantity="other">%1$d waren nicht lesbar.</item>
     </plurals>
     <string name="backup_import_qr_replaced">Der QR-Code aus der Datei ist jetzt aktiv.</string>
+    <string name="settings_vacation">Urlaub</string>
+    <string name="settings_vacation_hint">Pausiere alle Wecker bis einschließlich eines Tages, den du wählst. Die Wecker bleiben, wie sie sind, und klingeln ab dem Tag danach wieder.</string>
+    <string name="settings_vacation_active">Wecker pausieren bis einschließlich %1$s.</string>
+    <string name="settings_vacation_start">Wecker pausieren</string>
+    <string name="settings_vacation_change">Datum ändern</string>
+    <string name="settings_vacation_confirm">Pausieren</string>
+    <string name="settings_vacation_picker_title">Letzter freier Tag</string>
+    <string name="vacation_resume">Jetzt fortsetzen</string>
+    <string name="banner_vacation_title">Urlaub bis einschließlich %1$s</string>
+    <string name="banner_vacation_body">Bis dahin klingelt kein Wecker. Laufendes Schlummern ist davon nicht betroffen.</string>
+    <string name="tile_vacation_label">Urlaub</string>
+    <string name="tile_vacation_until">Bis %1$s</string>
+    <string name="tile_vacation_off">Wecker aktiv</string>
+    <string name="shortcut_new_alarm_short">Neuer Wecker</string>
+    <string name="shortcut_new_alarm_long">Neuen Wecker anlegen</string>
+    <string name="shortcut_timer_short">Timer</string>
+    <string name="shortcut_timer_long">Timer öffnen</string>
+    <string name="shortcut_vacation_short">Urlaub</string>
+    <string name="shortcut_vacation_long">Wecker für den Urlaub pausieren</string>
 </resources>

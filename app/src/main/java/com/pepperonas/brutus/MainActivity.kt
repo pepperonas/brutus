@@ -1,5 +1,10 @@
 package com.pepperonas.brutus
 
+import android.content.Intent
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import com.pepperonas.brutus.ui.screens.HomeRequest
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
@@ -25,6 +30,9 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var viewModel: AlarmViewModel
 
+    /** A shortcut or the quick-settings tile asked for something; HomeScreen clears it once done. */
+    private var request by mutableStateOf<HomeRequest?>(null)
+
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { /* granted or not, we proceed */ }
@@ -36,11 +44,12 @@ class MainActivity : ComponentActivity() {
         viewModel = ViewModelProvider(this)[AlarmViewModel::class.java]
 
         requestPermissions()
+        if (savedInstanceState == null) request = HomeRequest.from(intent)
 
         setContent {
             BrutusTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    HomeScreen(viewModel = viewModel)
+                    HomeScreen(viewModel = viewModel, request = request, onRequestHandled = { request = null })
                 }
             }
         }
@@ -51,6 +60,11 @@ class MainActivity : ComponentActivity() {
      * "on" in the list that AlarmManager no longer knows. Re-registering on every return to the
      * app is cheap and idempotent (fixed request codes, FLAG_UPDATE_CURRENT).
      */
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        HomeRequest.from(intent)?.let { request = it }
+    }
+
     override fun onResume() {
         super.onResume()
         lifecycleScope.launch(Dispatchers.IO) { Rescheduler.rescheduleAll(applicationContext) }

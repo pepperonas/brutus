@@ -29,6 +29,10 @@ import androidx.compose.material3.ShortNavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -65,8 +69,28 @@ private enum class HomeTab(
 private const val SETTINGS_ROUTE = "settings"
 
 @Composable
-fun HomeScreen(viewModel: AlarmViewModel) {
+fun HomeScreen(
+    viewModel: AlarmViewModel,
+    request: HomeRequest? = null,
+    onRequestHandled: () -> Unit = {},
+) {
     val navController = rememberNavController()
+    // One-shot flags the target screens consume, so a recomposition does not repeat them.
+    var openNewAlarm by remember { mutableStateOf(false) }
+    var openVacation by remember { mutableStateOf(false) }
+    LaunchedEffect(request) {
+        val r = request ?: return@LaunchedEffect
+        val route = when (r) {
+            HomeRequest.NEW_ALARM -> HomeTab.ALARM.route.also { openNewAlarm = true }
+            HomeRequest.TIMER -> HomeTab.TIMER.route
+            HomeRequest.VACATION -> SETTINGS_ROUTE.also { openVacation = true }
+        }
+        navController.navigate(route) {
+            popUpTo(HomeTab.ALARM.route) { saveState = true }
+            launchSingleTop = true
+        }
+        onRequestHandled()
+    }
     // Activity-scoped (created here, outside the NavHost) so running timers /
     // stopwatch measurements survive tab switches.
     val timerViewModel: TimerViewModel = viewModel()
@@ -134,9 +158,20 @@ fun HomeScreen(viewModel: AlarmViewModel) {
             },
         ) {
             composable(HomeTab.ALARM.route) {
-                AlarmListScreen(viewModel = viewModel, onOpenSettings = { navController.navigate(SETTINGS_ROUTE) })
+                AlarmListScreen(
+                    viewModel = viewModel,
+                    onOpenSettings = { navController.navigate(SETTINGS_ROUTE) },
+                    openNewAlarm = openNewAlarm,
+                    onNewAlarmOpened = { openNewAlarm = false },
+                )
             }
-            composable(SETTINGS_ROUTE) { SettingsScreen(onBack = { navController.popBackStack() }) }
+            composable(SETTINGS_ROUTE) {
+                SettingsScreen(
+                    onBack = { navController.popBackStack() },
+                    openVacation = openVacation,
+                    onVacationOpened = { openVacation = false },
+                )
+            }
             composable(HomeTab.WORLD.route) { WorldClockScreen() }
             composable(HomeTab.STOPWATCH.route) { StopwatchScreen(viewModel = stopwatchViewModel) }
             composable(HomeTab.TIMER.route) { TimerScreen(viewModel = timerViewModel) }

@@ -425,4 +425,23 @@
         <item quantity="other">%1$d could not be read.</item>
     </plurals>
     <string name="backup_import_qr_replaced">The QR code from the file is now active.</string>
+    <string name="settings_vacation">Vacation</string>
+    <string name="settings_vacation_hint">Pause every alarm up to and including a day you choose — the alarms stay as they are and ring again from the day after.</string>
+    <string name="settings_vacation_active">Alarms are paused through %1$s.</string>
+    <string name="settings_vacation_start">Pause alarms</string>
+    <string name="settings_vacation_change">Change date</string>
+    <string name="settings_vacation_confirm">Pause</string>
+    <string name="settings_vacation_picker_title">Last day off</string>
+    <string name="vacation_resume">Resume now</string>
+    <string name="banner_vacation_title">Vacation through %1$s</string>
+    <string name="banner_vacation_body">No alarm rings before then. Running snoozes are not affected.</string>
+    <string name="tile_vacation_label">Vacation</string>
+    <string name="tile_vacation_until">Through %1$s</string>
+    <string name="tile_vacation_off">Alarms on</string>
+    <string name="shortcut_new_alarm_short">New alarm</string>
+    <string name="shortcut_new_alarm_long">Create a new alarm</string>
+    <string name="shortcut_timer_short">Timer</string>
+    <string name="shortcut_timer_long">Open the timer</string>
+    <string name="shortcut_vacation_short">Vacation</string>
+    <string name="shortcut_vacation_long">Pause alarms for a vacation</string>
 </resources>

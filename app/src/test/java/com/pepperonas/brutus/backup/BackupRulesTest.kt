@@ -26,7 +26,7 @@ class BackupRulesTest {
     }
 
     private val transient = setOf("brutus_ringing", "brutus_ultra_hardcore", "brutus_timer_state", "brutus_updates")
-    private val kept = setOf("brutus_global", "brutus_settings", "brutus_timer", "brutus_world_clock")
+    private val kept = setOf("brutus_global", "brutus_settings", "brutus_timer", "brutus_world_clock", "brutus_vacation")
 
     @Test
     fun `cloud backup, device transfer and the pre-Android-12 rules exclude the same things`() {

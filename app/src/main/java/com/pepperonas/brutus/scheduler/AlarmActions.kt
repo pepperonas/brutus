@@ -6,6 +6,8 @@ import com.pepperonas.brutus.data.AlarmRepository
 import com.pepperonas.brutus.util.AlarmNotifier
 import com.pepperonas.brutus.util.NextAlarmCalculator
 import com.pepperonas.brutus.util.RingingStore
+import com.pepperonas.brutus.util.VacationStore
+import com.pepperonas.brutus.tile.VacationTileService
 import com.pepperonas.brutus.widget.NextAlarmWidget
 
 /** What the notification actions do. Kept out of the receivers so tests can call them directly. */
@@ -31,7 +33,7 @@ object AlarmActions {
             AlarmScheduler.cancel(context, alarm)
             repo.setEnabled(alarmId, false)
         } else {
-            val occurrence = NextAlarmCalculator.nextTrigger(alarm, now, RingingStore.skips(context)[alarmId]) ?: return false
+            val occurrence = NextAlarmCalculator.upcoming(context, alarm, now) ?: return false
             RingingStore.skip(context, alarmId, occurrence)
             AlarmScheduler.schedule(context, alarm)
         }
@@ -43,5 +45,21 @@ object AlarmActions {
     fun cancelSnooze(context: Context, alarmId: Long) {
         AlarmScheduler.cancelSnooze(context, alarmId)
         NextAlarmWidget.refresh(context)
+    }
+
+    /** Vacation mode on: no alarm rings before the day after [lastDay]. Re-arms everything. */
+    suspend fun pauseThrough(context: Context, lastDay: Long) {
+        VacationStore.pauseThrough(context, lastDay)
+        Rescheduler.rescheduleAll(context)
+        NextAlarmWidget.refresh(context)
+        VacationTileService.requestUpdate(context)
+    }
+
+    /** Vacation mode off: every alarm is back on its normal schedule. */
+    suspend fun resumeFromVacation(context: Context) {
+        VacationStore.resume(context)
+        Rescheduler.rescheduleAll(context)
+        NextAlarmWidget.refresh(context)
+        VacationTileService.requestUpdate(context)
     }
 }

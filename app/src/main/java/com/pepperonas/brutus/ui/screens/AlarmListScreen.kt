@@ -41,6 +41,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.BeachAccess
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
@@ -105,8 +106,9 @@ import android.provider.Settings
 import androidx.core.app.NotificationManagerCompat
 import com.pepperonas.brutus.update.UpdateCheckStore
 import com.pepperonas.brutus.util.UltraHardcoreNotifier
-import com.pepperonas.brutus.util.RingingStore
 import com.pepperonas.brutus.util.UltraHardcoreStore
+import com.pepperonas.brutus.util.VacationStore
+import com.pepperonas.brutus.scheduler.AlarmActions
 import com.pepperonas.brutus.update.UpdateChecker
 import com.pepperonas.brutus.update.UpdateScheduler
 import com.pepperonas.brutus.util.BatteryOptimizationPermission
@@ -127,12 +129,25 @@ import androidx.compose.ui.res.pluralStringResource
 import com.pepperonas.brutus.R
 
 @Composable
-fun AlarmListScreen(viewModel: AlarmViewModel, onOpenSettings: () -> Unit = {}) {
+fun AlarmListScreen(
+    viewModel: AlarmViewModel,
+    onOpenSettings: () -> Unit = {},
+    openNewAlarm: Boolean = false,
+    onNewAlarmOpened: () -> Unit = {},
+) {
     val loadedAlarms by viewModel.alarms.collectAsState()
     val loaded = loadedAlarms != null
     val alarms = loadedAlarms.orEmpty()
     var showDialog by remember { mutableStateOf(false) }
     var editingAlarm by remember { mutableStateOf<AlarmEntity?>(null) }
+    // Launcher shortcut "New alarm".
+    LaunchedEffect(openNewAlarm) {
+        if (openNewAlarm) {
+            editingAlarm = null
+            showDialog = true
+            onNewAlarmOpened()
+        }
+    }
     var menuOpen by remember { mutableStateOf(false) }
     var confirmDeleteAll by remember { mutableStateOf(false) }
 
@@ -177,9 +192,13 @@ fun AlarmListScreen(viewModel: AlarmViewModel, onOpenSettings: () -> Unit = {}) 
             delay(30_000L)
         }
     }
-    // A skipped occurrence ("Dismiss early") is not the next alarm.
-    val nextAlarm = remember(alarms, nowMillis) {
-        NextAlarmCalculator.findNext(alarms, nowMillis, RingingStore.skips(context))
+    // Vacation mode is set in Settings or from the quick-settings tile; the list follows it live.
+    val vacationTick by VacationStore.changes(context).collectAsState(initial = -1)
+    val pausedUntil = remember(vacationTick, nowMillis) { VacationStore.pausedUntil(context, nowMillis) }
+    val vacationScope = rememberCoroutineScope()
+    // A skipped occurrence ("Dismiss early") or a vacation is not the next alarm.
+    val nextAlarm = remember(alarms, nowMillis, vacationTick) {
+        NextAlarmCalculator.findNext(context, alarms, nowMillis)
     }
 
     // Re-check exact-alarm + battery + full-screen-intent permissions on resume
@@ -265,6 +284,25 @@ fun AlarmListScreen(viewModel: AlarmViewModel, onOpenSettings: () -> Unit = {}) 
                     info = true,
                     icon = Icons.Default.SystemUpdate,
                     onFix = { UpdateChecker.openDownload(context) },
+                )
+            }
+
+            BannerSlot(pausedUntil != null) {
+                val lastDay = (pausedUntil ?: 0L) - 1
+                PermissionBanner(
+                    title = stringResource(
+                        R.string.banner_vacation_title,
+                        com.pepperonas.brutus.util.VacationDates.format(lastDay),
+                    ),
+                    body = stringResource(R.string.banner_vacation_body),
+                    actionLabel = stringResource(R.string.vacation_resume),
+                    info = true,
+                    icon = Icons.Default.BeachAccess,
+                    onFix = {
+                        vacationScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                            AlarmActions.resumeFromVacation(context.applicationContext)
+                        }
+                    },
                 )
             }
 
@@ -512,7 +550,7 @@ private enum class ListState { LOADING, EMPTY, LIST }
 private fun NextAlarmHeader(next: AlarmEntity?, now: Long, loaded: Boolean, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val triggerMillis = remember(next, now) {
-        next?.let { NextAlarmCalculator.nextTrigger(it, now, RingingStore.skips(context)[it.id]) }
+        next?.let { NextAlarmCalculator.upcoming(context, it, now) }
     }
 
     Column(

@@ -52,6 +52,9 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
         </activity>
 
         <activity
@@ -167,6 +170,21 @@
             android:exported="false"
             android:directBootAware="true"
             android:foregroundServiceType="mediaPlayback" />
+
+        <!-- Quick-settings tile for vacation mode. -->
+        <service
+            android:name=".tile.VacationTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_tile_vacation"
+            android:label="@string/tile_vacation_label"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.quicksettings.TOGGLEABLE_TILE"
+                android:value="true" />
+        </service>
 
     </application>
 
