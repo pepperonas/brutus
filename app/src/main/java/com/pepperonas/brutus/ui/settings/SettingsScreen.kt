@@ -89,6 +89,9 @@ import com.pepperonas.brutus.update.UpdateCheckStore
 import com.pepperonas.brutus.update.UpdateScheduler
 import com.pepperonas.brutus.util.rememberBrutusHaptics
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import com.pepperonas.brutus.backup.AlarmBackup
+import com.pepperonas.brutus.backup.BackupManager
 
 /**
  * Settings & info, reached from the ⋮ menu of the alarm list. Same build as Flipper the Ripper's
@@ -173,6 +176,10 @@ fun SettingsScreen(
                 notificationExtras()
             }
 
+            SettingsSection(stringResource(R.string.settings_backup)) {
+                BackupRow(snackbar)
+            }
+
             SettingsSection(stringResource(R.string.settings_about)) {
                 AboutSection(onOpenFailed = ::reportOpenFailed)
             }
@@ -255,6 +262,91 @@ private fun SunriseSoundRow() {
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
     TextButton(onClick = { preview.stop() }) { Text(stringResource(R.string.settings_sunrise_stop_preview)) }
+}
+
+/**
+ * Export to and import from a JSON file the user picks (Storage Access Framework — no storage
+ * permission). The file carries alarms, the QR code and the settings; see [AlarmBackup].
+ */
+@Composable
+private fun BackupRow(snackbar: SnackbarHostState) {
+    val context = LocalContext.current
+    val app = context.applicationContext
+    val scope = rememberCoroutineScope()
+    val res = context.resources
+    fun say(text: String) = scope.launch { snackbar.showSnackbar(text) }
+
+    val exporter = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument(AlarmBackup.MIME_TYPE)
+    ) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        scope.launch {
+            val ok = withContext(Dispatchers.IO) {
+                runCatching {
+                    val text = BackupManager.export(app)
+                    app.contentResolver.openOutputStream(uri, "wt")!!.use { it.write(text.toByteArray()) }
+                }.isSuccess
+            }
+            say(res.getString(if (ok) R.string.backup_export_done else R.string.backup_export_failed))
+        }
+    }
+    val importer = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        scope.launch {
+            val result = withContext(Dispatchers.IO) {
+                runCatching {
+                    val text = app.contentResolver.openInputStream(uri)!!.use { input ->
+                        // A backup is a few kilobytes; refuse to read a huge file into memory.
+                        val bytes = input.readNBytesCompat(BACKUP_MAX_BYTES + 1)
+                        require(bytes.size <= BACKUP_MAX_BYTES) { "too large" }
+                        String(bytes)
+                    }
+                    BackupManager.import(app, text)
+                }
+            }
+            say(result.fold(onSuccess = { importSummary(res, it) }, onFailure = { res.getString(R.string.backup_import_failed) }))
+        }
+    }
+
+    Text(
+        stringResource(R.string.settings_backup_hint),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Spacer(Modifier.height(12.dp))
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+        Button(
+            onClick = { exporter.launch(AlarmBackup.suggestedFileName(System.currentTimeMillis())) },
+            modifier = Modifier.weight(1f),
+        ) { Text(stringResource(R.string.settings_backup_export)) }
+        androidx.compose.material3.OutlinedButton(
+            onClick = { importer.launch(arrayOf(AlarmBackup.MIME_TYPE, "text/plain", "application/octet-stream")) },
+            modifier = Modifier.weight(1f),
+        ) { Text(stringResource(R.string.settings_backup_import)) }
+    }
+}
+
+private const val BACKUP_MAX_BYTES = 1_000_000
+
+private fun java.io.InputStream.readNBytesCompat(max: Int): ByteArray {
+    val out = java.io.ByteArrayOutputStream()
+    val buf = ByteArray(8192)
+    while (out.size() < max) {
+        val n = read(buf, 0, minOf(buf.size, max - out.size()))
+        if (n < 0) break
+        out.write(buf, 0, n)
+    }
+    return out.toByteArray()
+}
+
+internal fun importSummary(res: android.content.res.Resources, r: BackupManager.ImportResult): String {
+    val parts = mutableListOf(
+        if (r.added == 0) res.getString(R.string.backup_import_nothing_new)
+        else res.getQuantityString(R.plurals.backup_import_added, r.added, r.added)
+    )
+    if (r.skipped > 0) parts += res.getQuantityString(R.plurals.backup_import_skipped, r.skipped, r.skipped)
+    if (r.qrReplaced) parts += res.getString(R.string.backup_import_qr_replaced)
+    return parts.joinToString(" ")
 }
 
 /** A titled single-choice row of segmented buttons — used by the ringing settings. */

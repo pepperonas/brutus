@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 11 and older: the same choice as data_extraction_rules.xml. -->
+<full-backup-content>
+    <exclude domain="device_sharedpref" path="brutus_ringing.xml" />
+    <exclude domain="device_sharedpref" path="brutus_ultra_hardcore.xml" />
+    <exclude domain="device_sharedpref" path="brutus_timer_state.xml" />
+    <exclude domain="device_sharedpref" path="brutus_updates.xml" />
+    <exclude domain="sharedpref" path="." />
+    <exclude domain="database" path="." />
+</full-backup-content>

@@ -408,4 +408,21 @@
     <string name="settings_ring_limit_minutes">%1$d min</string>
     <string name="settings_ringing_calls_hint">During a phone call every alarm plays quietly, so you can still hear the call. Music and podcasts pause while an alarm rings.</string>
     <string name="notification_unanswered_text">It rang, but nobody reacted.</string>
+    <string name="settings_backup">Backup</string>
+    <string name="settings_backup_hint">Android\'s own backup already takes your alarms, the QR code and the settings along. For a second copy, or to move to a phone without Google backup, save them to a file — importing adds only alarms that are not there yet and takes over the file\'s QR code, so a printed copy keeps working.</string>
+    <string name="settings_backup_export">Export</string>
+    <string name="settings_backup_import">Import</string>
+    <string name="backup_export_done">Backup saved.</string>
+    <string name="backup_export_failed">Could not save the backup.</string>
+    <string name="backup_import_failed">This file is not a Brutus backup.</string>
+    <string name="backup_import_nothing_new">No new alarms — they are all there already.</string>
+    <plurals name="backup_import_added">
+        <item quantity="one">%1$d alarm added.</item>
+        <item quantity="other">%1$d alarms added.</item>
+    </plurals>
+    <plurals name="backup_import_skipped">
+        <item quantity="one">%1$d could not be read.</item>
+        <item quantity="other">%1$d could not be read.</item>
+    </plurals>
+    <string name="backup_import_qr_replaced">The QR code from the file is now active.</string>
 </resources>
