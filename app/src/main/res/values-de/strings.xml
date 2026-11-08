@@ -168,7 +168,7 @@
     <string name="shake_instruction">Schüttle dein Handy!</string>
     <plurals name="shake_remaining">
         <item quantity="one">Noch einmal!</item>
-        <item quantity="other">Noch %d mal!</item>
+        <item quantity="other">Noch %d-mal!</item>
     </plurals>
 
     <string name="qr_title">QR-Code scannen</string>

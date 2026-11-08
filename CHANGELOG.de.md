@@ -10,9 +10,11 @@ Alle nennenswerten Änderungen an Brutus stehen hier. Versionen folgen [SemVer](
 - **Der Countdown über der Weckerliste kannte keine Einzahl:** dort stand „Alarm in 1 Stunden“, englisch
   „Alarm in 1 hours, 1 minutes“. Stunden und Minuten laufen jetzt jeweils über eine eigene Pluralform
   („1 Stunde“, „1 Minute“).
+- **Schüttelzähler:** „Noch 25 mal!“ heißt jetzt richtig „Noch 25-mal!“.
 
 ### Tests
-- 376 → 378: der Countdown wird in beiden Sprachen für eine Stunde, eine Minute und die Mehrzahl geprüft.
+- 376 → 379: der Countdown wird in beiden Sprachen für eine Stunde, eine Minute und die Mehrzahl geprüft,
+  dazu ist der deutsche Schüttelzähler gepinnt.
 
 ## [2.5.2] — 2026-09-27 · Die Uhr auf dem Alarmbildschirm ist nicht mehr verdeckt
 

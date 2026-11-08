@@ -46,4 +46,12 @@ class CountdownPluralTest {
         assertEquals("Alarm in 1 minute", fmt(en, 0, 1))
         assertEquals("Alarm in 45 minutes", fmt(en, 0, 45))
     }
+
+    @Test
+    fun `German shake counter writes "25-mal" as one word`() {
+        val text = de.resources.getQuantityString(
+            com.pepperonas.brutus.R.plurals.shake_remaining, 25, 25
+        )
+        assertEquals("Noch 25-mal!", text)
+    }
 }

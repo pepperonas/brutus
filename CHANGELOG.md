@@ -10,9 +10,11 @@ All notable changes to Brutus are documented here. Versions follow [SemVer](http
 - **The list header's countdown used the plural for one:** it read "Alarm in 1 hours, 1 minutes", in
   German "Alarm in 1 Stunden". Hours and minutes now each go through their own plural ("1 hour",
   "1 Stunde", "1 Minute").
+- **German shake counter:** "Noch 25 mal!" is now spelled "Noch 25-mal!".
 
 ### Tests
-- 376 → 378: the countdown is checked in both languages for one hour, one minute and the plural cases.
+- 376 → 379: the countdown is checked in both languages for one hour, one minute and the plural cases,
+  and the German shake counter is pinned.
 
 ## [2.5.2] — 2026-09-27 · The alarm screen's clock is no longer covered
 

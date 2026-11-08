@@ -18,7 +18,7 @@
 
 <!-- BADGES:BIG — version, unit tests and lines of code; ReadmeSyncTest keeps them true. -->
 [![version](https://img.shields.io/badge/version-2.5.3-E53935?style=for-the-badge&logo=android&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
-[![unit tests](https://img.shields.io/badge/unit%20tests-378-2E9E5B?style=for-the-badge&logo=junit5&logoColor=white)](#tests-and-ci)
+[![unit tests](https://img.shields.io/badge/unit%20tests-379-2E9E5B?style=for-the-badge&logo=junit5&logoColor=white)](#tests-and-ci)
 [![lines of code](https://img.shields.io/badge/lines%20of%20code-11.3k-4B6BDF?style=for-the-badge&logo=kotlin&logoColor=white)](app/src/main/java/com/pepperonas/brutus)
 [![test code](https://img.shields.io/badge/test%20code-5.6k-2E9E5B?style=for-the-badge&logo=kotlin&logoColor=white)](app/src/test/java/com/pepperonas/brutus)
 [![sounds](https://img.shields.io/badge/sounds-25-FF5252?style=for-the-badge&logo=audiomack&logoColor=white)](https://brutus.celox.io/#sounds)
@@ -912,7 +912,7 @@ app/src/main/res/
 
 ## Tests and CI
 
-378 JVM unit tests guard the parts where a bug means someone oversleeps: what actually lands in
+379 JVM unit tests guard the parts where a bug means someone oversleeps: what actually lands in
 `AlarmManager`, the alarm-time arithmetic, persistence, the completeness of both translations, and
 every string the user reads on a clock face. There are no instrumented tests — the whole suite runs
 on the JVM in seconds.
@@ -969,7 +969,7 @@ on the JVM in seconds.
 | `scheduler/AlarmSchedulerConstantsTest` | 4 | Ultra Hardcore offsets, sunrise lead time, intent-extra uniqueness |
 
 ```bash
-./gradlew :app:testDebugUnitTest          # all 378
+./gradlew :app:testDebugUnitTest          # all 379
 ./gradlew :app:testDebugUnitTest --tests '*NextAlarmCalculatorTest'
 # HTML report: app/build/reports/tests/testDebugUnitTest/index.html
 ```
