@@ -516,7 +516,7 @@ Since **v2.6.0**, under **⋮ → Settings & info → Ringing**:
 - **Alarm volume** (5–100 %, step 5 %, default 100 %) — sets the maximum playback gain (scaled evenly in dB)
   for normal alarms. Hardcore alarms ignore it and always ring at 100 %.
 - **Crescendo** (**Off** / 30 s / 1 m / 2 m / 5 m / **Other** 5–600 s, default off) — a normal alarm starts
-  30 dB below full volume and rises evenly in decibels up to the chosen volume. The alarm stream itself
+  30 dB below the chosen volume and rises evenly in decibels up to it. The alarm stream itself
   still goes to maximum; only the sound's own gain ramps. Hardcore alarms ignore the setting.
 - **Snooze when unanswered** (**Never** / 5 / 10 / **15** / 30 min, default **15**) — if nobody reacts, a normal
   alarm snoozes itself and rings again after its snooze time (at least 5 min, also when its snooze is off).

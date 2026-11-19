@@ -517,7 +517,7 @@ Seit **v2.6.0** unter **⋮ → Einstellungen & Info → Klingeln**:
 - **Weckerlautstärke** (5–100 %, Schritt 5 %, Standard 100 %) — setzt die maximale Wiedergabe-Verstärkung
   (gleichmäßig in dB skaliert) für normale Wecker. Hardcore-Wecker ignorieren dies und klingeln immer mit 100 %.
 - **Lauter werden** (**Aus** / 30 s / 1 Min. / 2 Min. / 5 Min. / **Andere** 5–600 s, Standard aus) — ein normaler
-  Wecker beginnt 30 dB unter voller Lautstärke und steigt gleichmäßig in Dezibel bis zur gewählten Lautstärke.
+  Wecker beginnt 30 dB unter der gewählten Lautstärke und steigt gleichmäßig in Dezibel bis zu ihr an.
   Der Wecker-Lautstärkestrom geht weiterhin auf Maximum; nur die Verstärkung des Klangs selbst steigt.
   Hardcore-Wecker ignorieren die Einstellung.
 - **Schlummern ohne Reaktion** (**Nie** / 5 / 10 / **15** / 30 Min., Standard **15**) — reagiert niemand, schlummert
