@@ -28,6 +28,7 @@ object AlarmBackup {
         val ringLimitMinutes: Int? = null,
         val upcomingLeadMinutes: Int? = null,
         val sunriseSoundId: Int? = null,
+        val alarmVolumePercent: Int? = null,
     )
 
     data class Contents(
@@ -51,6 +52,7 @@ object AlarmBackup {
                 settings.ringLimitMinutes?.let { put("ringLimitMinutes", it) }
                 settings.upcomingLeadMinutes?.let { put("upcomingLeadMinutes", it) }
                 settings.sunriseSoundId?.let { put("sunriseSoundId", it) }
+                settings.alarmVolumePercent?.let { put("alarmVolumePercent", it) }
             },
         )
         root.put("alarms", JSONArray().apply { alarms.forEach { put(alarmToJson(it)) } })
@@ -101,6 +103,7 @@ object AlarmBackup {
                 ringLimitMinutes = s.optIntOrNull("ringLimitMinutes"),
                 upcomingLeadMinutes = s.optIntOrNull("upcomingLeadMinutes"),
                 sunriseSoundId = s.optIntOrNull("sunriseSoundId"),
+                alarmVolumePercent = s.optIntOrNull("alarmVolumePercent"),
             ),
             skipped = skipped,
         )
@@ -128,7 +131,7 @@ object AlarmBackup {
             shakeCount = (o.optIntOrNull("shakeCount") ?: d.shakeCount).coerceIn(10, 100),
             hardcoreMode = o.optBoolean("hardcoreMode", d.hardcoreMode),
             ultraHardcoreMode = o.optBoolean("ultraHardcoreMode", d.ultraHardcoreMode),
-            mathDifficulty = (o.optIntOrNull("mathDifficulty") ?: d.mathDifficulty).coerceIn(0, 2),
+            mathDifficulty = (o.optIntOrNull("mathDifficulty") ?: d.mathDifficulty).coerceIn(0, 3),
             shakeSensitivity = (o.optIntOrNull("shakeSensitivity") ?: d.shakeSensitivity).coerceIn(0, 2),
             sunriseEnabled = o.optBoolean("sunriseEnabled", d.sunriseEnabled),
         )

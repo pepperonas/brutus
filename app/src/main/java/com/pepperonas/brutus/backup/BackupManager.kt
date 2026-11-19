@@ -28,6 +28,7 @@ object BackupManager {
                 ringLimitMinutes = AppSettings.ringLimitMinutes(context),
                 upcomingLeadMinutes = AppSettings.upcomingLeadMinutes(context),
                 sunriseSoundId = AppSettings.sunriseSound(context).id,
+                alarmVolumePercent = AppSettings.alarmVolumePercent(context),
             ),
             exportedAt = now,
         )
@@ -49,7 +50,7 @@ object BackupManager {
             ?.let { GlobalQrStore.set(context, it); true } ?: false
 
         contents.settings.let { s ->
-            s.crescendoSeconds?.takeIf { it in AppSettings.CRESCENDO_OPTIONS }
+            s.crescendoSeconds?.takeIf { AppSettings.isValidCrescendo(it) }
                 ?.let { AppSettings.setCrescendoSeconds(context, it) }
             s.ringLimitMinutes?.takeIf { it in AppSettings.RING_LIMIT_OPTIONS }
                 ?.let { AppSettings.setRingLimitMinutes(context, it) }
@@ -57,6 +58,8 @@ object BackupManager {
                 ?.let { AppSettings.setUpcomingLeadMinutes(context, it) }
             s.sunriseSoundId?.let { AlarmSound.fromId(it) }?.takeIf { it in AlarmSound.sunriseSounds() }
                 ?.let { AppSettings.setSunriseSound(context, it) }
+            s.alarmVolumePercent?.takeIf { AppSettings.isValidAlarmVolume(it) }
+                ?.let { AppSettings.setAlarmVolumePercent(context, it) }
         }
 
         Rescheduler.rescheduleAll(context)

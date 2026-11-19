@@ -378,6 +378,7 @@ fun AlarmEditDialog(
                     title = stringResource(R.string.edit_math_difficulty),
                     options = listOf(
                         ChallengeDifficulty.MATH_EASY,
+                        ChallengeDifficulty.MATH_MEDIUM,
                         ChallengeDifficulty.MATH_HARD,
                         ChallengeDifficulty.MATH_BRUTAL,
                     ),

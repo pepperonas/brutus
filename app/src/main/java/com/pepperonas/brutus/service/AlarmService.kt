@@ -66,6 +66,7 @@ class AlarmService : Service() {
     private var focusRequest: AudioFocusRequest? = null
     private var ringStartedAt = 0L          // elapsedRealtime when the sound started
     private var ringStartedWallClock = 0L   // for the "unanswered" notice
+    private var alarmVolumePercent = AppSettings.DEFAULT_ALARM_VOLUME
     private var crescendoSeconds = 0
     private var ringLimitMinutes = 0
     private var currentHardcore = false
@@ -181,6 +182,7 @@ class AlarmService : Service() {
                 if (alarm?.hardcoreEffective == true) {
                     hardcoreGuard = HardcoreAudioGuard(applicationContext).also { it.attach() }
                 }
+                alarmVolumePercent = AppSettings.alarmVolumePercent(applicationContext)
                 crescendoSeconds = AppSettings.crescendoSeconds(applicationContext)
                 ringLimitMinutes = AppSettings.ringLimitMinutes(applicationContext)
                 ringStartedAt = SystemClock.elapsedRealtime()
@@ -275,6 +277,7 @@ class AlarmService : Service() {
         rampSeconds = crescendoSeconds,
         hardcore = currentHardcore,
         inCall = RingPolicy.isInCall(getSystemService(AudioManager::class.java).mode),
+        volumePercent = alarmVolumePercent,
     )
 
     private fun onTick() {

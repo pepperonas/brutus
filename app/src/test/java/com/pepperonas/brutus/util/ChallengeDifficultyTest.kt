@@ -60,9 +60,21 @@ class ChallengeDifficultyTest {
     }
 
     @Test
+    fun `medium math generates 4 operands in 2 to 25 with non-negative intermediate steps`() {
+        repeat(200) {
+            val p = generateProblem(ChallengeDifficulty.MATH_MEDIUM)
+            assertEquals(4, p.operands.size)
+            assertEquals(3, p.operators.size)
+            assertTrue(p.operands.all { it in 2..25 })
+            assertTrue(p.answer >= 0)
+        }
+    }
+
+    @Test
     fun `labels exist for all valid difficulty levels, in both languages`() {
         val mathLevels = listOf(
             ChallengeDifficulty.MATH_EASY,
+            ChallengeDifficulty.MATH_MEDIUM,
             ChallengeDifficulty.MATH_HARD,
             ChallengeDifficulty.MATH_BRUTAL,
         )
@@ -89,6 +101,7 @@ class ChallengeDifficultyTest {
         // every level; distinct resource ids catch that without hardcoding text.
         val math = listOf(
             ChallengeDifficulty.MATH_EASY,
+            ChallengeDifficulty.MATH_MEDIUM,
             ChallengeDifficulty.MATH_HARD,
             ChallengeDifficulty.MATH_BRUTAL,
         ).map { ChallengeDifficulty.mathLabel(it) }

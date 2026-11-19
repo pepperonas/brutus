@@ -49,14 +49,49 @@ import kotlin.random.Random
 import androidx.compose.ui.res.stringResource
 import com.pepperonas.brutus.R
 
-data class MathProblem(val a: Int, val b: Int, val operator: Char) {
-    val answer: Int = when (operator) {
-        '+' -> a + b
-        '-' -> a - b
-        '*' -> a * b
-        else -> a + b
+data class MathProblem(
+    val a: Int,
+    val b: Int,
+    val operator: Char,
+    val operands: List<Int> = listOf(a, b),
+    val operators: List<Char> = listOf(operator),
+) {
+    constructor(operands: List<Int>, operators: List<Char>) : this(
+        a = operands.getOrElse(0) { 0 },
+        b = operands.getOrElse(1) { 0 },
+        operator = operators.getOrElse(0) { '+' },
+        operands = operands,
+        operators = operators,
+    )
+
+    val answer: Int = if (operands.size <= 2 && operators.size == 1) {
+        when (operator) {
+            '+' -> a + b
+            '-' -> a - b
+            '*' -> a * b
+            else -> a + b
+        }
+    } else {
+        var acc = operands.firstOrNull() ?: 0
+        for (i in operators.indices) {
+            val rhs = operands.getOrElse(i + 1) { 0 }
+            acc = when (operators[i]) {
+                '+' -> acc + rhs
+                '-' -> acc - rhs
+                '*' -> acc * rhs
+                else -> acc + rhs
+            }
+        }
+        acc
     }
-    val display: String = "$a $operator $b = ?"
+
+    val display: String = buildString {
+        operands.forEachIndexed { index, value ->
+            if (index > 0) append(' ').append(operators.getOrElse(index - 1) { '+' }).append(' ')
+            append(value)
+        }
+        append(" = ?")
+    }
 }
 
 fun generateProblem(difficulty: Int): MathProblem = when (difficulty) {
@@ -71,6 +106,20 @@ fun generateProblem(difficulty: Int): MathProblem = when (difficulty) {
         } else {
             MathProblem(Random.nextInt(1, 11), Random.nextInt(1, 11), op)
         }
+    }
+    ChallengeDifficulty.MATH_MEDIUM -> {
+        // 4 numbers in 2..25 with 3 +/- operations; every left-to-right intermediate result stays ≥ 0.
+        val operands = mutableListOf(Random.nextInt(2, 26))
+        val operators = mutableListOf<Char>()
+        var acc = operands[0]
+        repeat(3) {
+            val op = if (acc >= 2 && Random.nextBoolean()) '-' else '+'
+            val next = if (op == '-') Random.nextInt(2, minOf(acc, 25) + 1) else Random.nextInt(2, 26)
+            operators += op
+            operands += next
+            acc = if (op == '-') acc - next else acc + next
+        }
+        MathProblem(operands, operators)
     }
     ChallengeDifficulty.MATH_BRUTAL -> {
         // Two-digit multiplication or very large additions/subtractions.
@@ -178,7 +227,9 @@ fun MathChallenge(
 
         Text(
             text = problem.display,
-            style = MaterialTheme.typography.displaySmall.copy(fontSize = 40.sp),
+            style = MaterialTheme.typography.displaySmall.copy(
+                fontSize = if (problem.operands.size > 2) 28.sp else 40.sp,
+            ),
             color = Color.White,
             textAlign = TextAlign.Center
         )

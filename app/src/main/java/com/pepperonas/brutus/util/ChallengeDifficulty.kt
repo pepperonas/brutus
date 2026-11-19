@@ -16,10 +16,12 @@ object ChallengeDifficulty {
     const val MATH_EASY = 0
     const val MATH_HARD = 1
     const val MATH_BRUTAL = 2
+    const val MATH_MEDIUM = 3
 
     @StringRes
     fun mathLabel(level: Int): Int = when (level) {
         MATH_EASY -> R.string.math_difficulty_easy
+        MATH_MEDIUM -> R.string.math_difficulty_medium
         MATH_BRUTAL -> R.string.math_difficulty_brutal
         else -> R.string.math_difficulty_hard
     }
@@ -27,6 +29,7 @@ object ChallengeDifficulty {
     @StringRes
     fun mathDescription(level: Int): Int = when (level) {
         MATH_EASY -> R.string.math_difficulty_easy_description
+        MATH_MEDIUM -> R.string.math_difficulty_medium_description
         MATH_BRUTAL -> R.string.math_difficulty_brutal_description
         else -> R.string.math_difficulty_hard_description
     }

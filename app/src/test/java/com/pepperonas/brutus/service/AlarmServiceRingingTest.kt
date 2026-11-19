@@ -180,9 +180,19 @@ class AlarmServiceRingingTest {
     @Test
     fun `settings fall back to their defaults and refuse values outside the offer`() {
         assertEquals(AppSettings.DEFAULT_CRESCENDO, AppSettings.crescendoSeconds(context))
+        assertEquals(AppSettings.DEFAULT_ALARM_VOLUME, AppSettings.alarmVolumePercent(context))
         assertEquals(AppSettings.DEFAULT_RING_LIMIT, AppSettings.ringLimitMinutes(context))
         Storage.prefs(context, "brutus_settings").edit().putInt("ring_limit_minutes", 7).commit()
         assertEquals(AppSettings.DEFAULT_RING_LIMIT, AppSettings.ringLimitMinutes(context))
-        runCatching { AppSettings.setCrescendoSeconds(context, 45) }.onSuccess { fail("45 s is not offered") }
+
+        AppSettings.setCrescendoSeconds(context, 45)
+        assertEquals(45, AppSettings.crescendoSeconds(context))
+        runCatching { AppSettings.setCrescendoSeconds(context, 4) }.onSuccess { fail("4 s is below minimum 5 s") }
+        runCatching { AppSettings.setCrescendoSeconds(context, 601) }.onSuccess { fail("601 s is above maximum 600 s") }
+
+        AppSettings.setAlarmVolumePercent(context, 35)
+        assertEquals(35, AppSettings.alarmVolumePercent(context))
+        runCatching { AppSettings.setAlarmVolumePercent(context, 0) }.onSuccess { fail("0 % is below 5 %") }
+        runCatching { AppSettings.setAlarmVolumePercent(context, 33) }.onSuccess { fail("33 % is not a step of 5") }
     }
 }

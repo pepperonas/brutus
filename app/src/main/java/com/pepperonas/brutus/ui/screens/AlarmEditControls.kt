@@ -134,9 +134,10 @@ internal fun DifficultyChips(
                 SegmentedButton(
                     selected = selected == opt,
                     onClick = { onSelect(opt) },
-                    shape = SegmentedButtonDefaults.itemShape(index, options.size)
+                    shape = SegmentedButtonDefaults.itemShape(index, options.size),
+                    icon = { if (options.size <= 3) SegmentedButtonDefaults.Icon(active = selected == opt) },
                 ) {
-                    Text(stringResource(label(opt)))
+                    Text(stringResource(label(opt)), maxLines = 1)
                 }
             }
         }

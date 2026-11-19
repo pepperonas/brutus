@@ -41,8 +41,29 @@ class RingPolicyTest {
     }
 
     @Test
-    fun `a hardcore alarm ignores the crescendo`() {
-        assertEquals(1f, RingPolicy.gain(0, 60, hardcore = true, inCall = false))
+    fun `a hardcore alarm ignores the crescendo and reduced volume`() {
+        assertEquals(1f, RingPolicy.gain(0, 60, hardcore = true, inCall = false, volumePercent = 25))
+        assertEquals(1f, RingPolicy.gain(60_000, 0, hardcore = true, inCall = false, volumePercent = 5))
+    }
+
+    @Test
+    fun `reduced volume scales evenly in dB from 5 to 100 percent`() {
+        assertEquals(1f, RingPolicy.volumeGain(100), 0.0001f)
+        assertEquals(RingPolicy.MIN_VOLUME_DB, db(RingPolicy.volumeGain(5)), 0.01f)
+        assertEquals(RingPolicy.MIN_VOLUME_DB / 2f, db(RingPolicy.volumeGain(52)), 0.5f)
+        assertTrue(RingPolicy.volumeGain(5) < RingPolicy.volumeGain(50))
+        assertTrue(RingPolicy.volumeGain(50) < RingPolicy.volumeGain(100))
+    }
+
+    @Test
+    fun `a crescendo with reduced volume rises evenly in dB up to the chosen cap`() {
+        val targetDb = RingPolicy.volumeDb(50)
+        val startDb = targetDb + RingPolicy.CRESCENDO_START_DB
+        assertEquals(startDb, db(RingPolicy.crescendoGain(0, 120, 50)), 0.01f)
+        val midDb = db(RingPolicy.crescendoGain(60_000, 120, 50))
+        assertEquals((startDb + targetDb) / 2f, midDb, 0.01f)
+        assertEquals(targetDb, db(RingPolicy.crescendoGain(120_000, 120, 50)), 0.01f)
+        assertEquals(targetDb, db(RingPolicy.crescendoGain(300_000, 120, 50)), 0.01f)
     }
 
     @Test
