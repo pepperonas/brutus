@@ -18,6 +18,9 @@ object RingPolicy {
     /** Where a crescendo starts, in dB below full volume. -30 dB is quiet but clearly audible. */
     const val CRESCENDO_START_DB = -30f
 
+    /** Target dB at the minimum 5 % volume setting (~5 % amplitude, still above [CRESCENDO_START_DB]). */
+    const val MIN_VOLUME_DB = -26f
+
     /** Gain while a call rings or runs — the user must still hear the other person. */
     const val IN_CALL_GAIN = 0.15f
 
@@ -31,19 +34,42 @@ object RingPolicy {
     const val TICK_MS = 250L
 
     /**
-     * Gain of a crescendo [elapsedMs] into the ring. Rises evenly in dB (what the ear perceives as
-     * evenly louder) from [CRESCENDO_START_DB] to 0 dB over [rampSeconds]; 0 = no crescendo.
+     * Target ceiling in dB for [volumePercent] (5..100). Scaled evenly in dB from [MIN_VOLUME_DB]
+     * at 5 % to 0 dB at 100 %, so each slider step feels equally loud to the human ear.
      */
-    fun crescendoGain(elapsedMs: Long, rampSeconds: Int): Float {
-        if (rampSeconds <= 0) return 1f
+    fun volumeDb(volumePercent: Int): Float {
+        val clamped = volumePercent.coerceIn(AppSettings.MIN_ALARM_VOLUME, AppSettings.MAX_ALARM_VOLUME)
+        if (clamped >= AppSettings.MAX_ALARM_VOLUME) return 0f
+        val fraction = (clamped - AppSettings.MIN_ALARM_VOLUME).toFloat() /
+            (AppSettings.MAX_ALARM_VOLUME - AppSettings.MIN_ALARM_VOLUME).toFloat()
+        return MIN_VOLUME_DB * (1f - fraction)
+    }
+
+    /** Player gain for the chosen [volumePercent] (5..100) without a crescendo. */
+    fun volumeGain(volumePercent: Int): Float =
+        if (volumePercent >= AppSettings.MAX_ALARM_VOLUME) 1f else 10f.pow(volumeDb(volumePercent) / 20f)
+
+    /**
+     * Gain of a crescendo [elapsedMs] into the ring. Rises evenly in dB (what the ear perceives as
+     * evenly louder) from [CRESCENDO_START_DB] to [volumeDb] over [rampSeconds]; 0 = no crescendo.
+     */
+    fun crescendoGain(elapsedMs: Long, rampSeconds: Int, volumePercent: Int = AppSettings.DEFAULT_ALARM_VOLUME): Float {
+        val targetDb = volumeDb(volumePercent)
+        if (rampSeconds <= 0) return if (targetDb == 0f) 1f else 10f.pow(targetDb / 20f)
         val t = (elapsedMs.coerceAtLeast(0L).toFloat() / (rampSeconds * 1000f)).coerceAtMost(1f)
-        val db = CRESCENDO_START_DB * (1f - t)
+        val db = CRESCENDO_START_DB + (targetDb - CRESCENDO_START_DB) * t
         return 10f.pow(db / 20f)
     }
 
-    /** The gain to play at right now. */
-    fun gain(elapsedMs: Long, rampSeconds: Int, hardcore: Boolean, inCall: Boolean): Float {
-        val base = if (hardcore) 1f else crescendoGain(elapsedMs, rampSeconds)
+    /** The gain to play at right now. Hardcore ignores both crescendo and reduced volume. */
+    fun gain(
+        elapsedMs: Long,
+        rampSeconds: Int,
+        hardcore: Boolean,
+        inCall: Boolean,
+        volumePercent: Int = AppSettings.DEFAULT_ALARM_VOLUME,
+    ): Float {
+        val base = if (hardcore) 1f else crescendoGain(elapsedMs, rampSeconds, volumePercent)
         return if (inCall) min(base, IN_CALL_GAIN) else base
     }
 

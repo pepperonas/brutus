@@ -25,11 +25,12 @@ class AlarmBackupTest {
 
     @Test
     fun `every alarm field survives a round trip - only the id is not carried`() {
-        val text = AlarmBackup.encode(listOf(full), qr, AlarmBackup.Settings(30, 15, 60, AlarmSound.SUNRISE.id), 0)
+        val settings = AlarmBackup.Settings(30, 15, 60, AlarmSound.SUNRISE.id, 75)
+        val text = AlarmBackup.encode(listOf(full), qr, settings, 0)
         val back = AlarmBackup.decode(text)
         assertEquals(listOf(full.copy(id = 0)), back.alarms)
         assertEquals(qr, back.qrData)
-        assertEquals(AlarmBackup.Settings(30, 15, 60, AlarmSound.SUNRISE.id), back.settings)
+        assertEquals(settings, back.settings)
         assertEquals(0, back.skipped)
     }
 

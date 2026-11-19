@@ -28,6 +28,7 @@ object AlarmBackup {
         val ringLimitMinutes: Int? = null,
         val upcomingLeadMinutes: Int? = null,
         val sunriseSoundId: Int? = null,
+        val alarmVolumePercent: Int? = null,
     )
 
     data class Contents(
@@ -51,6 +52,7 @@ object AlarmBackup {
                 settings.ringLimitMinutes?.let { put("ringLimitMinutes", it) }
                 settings.upcomingLeadMinutes?.let { put("upcomingLeadMinutes", it) }
                 settings.sunriseSoundId?.let { put("sunriseSoundId", it) }
+                settings.alarmVolumePercent?.let { put("alarmVolumePercent", it) }
             },
         )
         root.put("alarms", JSONArray().apply { alarms.forEach { put(alarmToJson(it)) } })
@@ -101,6 +103,7 @@ object AlarmBackup {
                 ringLimitMinutes = s.optIntOrNull("ringLimitMinutes"),
                 upcomingLeadMinutes = s.optIntOrNull("upcomingLeadMinutes"),
                 sunriseSoundId = s.optIntOrNull("sunriseSoundId"),
+                alarmVolumePercent = s.optIntOrNull("alarmVolumePercent"),
             ),
             skipped = skipped,
         )

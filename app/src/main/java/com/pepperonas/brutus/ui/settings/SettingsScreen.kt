@@ -21,7 +21,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -44,10 +46,12 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
@@ -59,6 +63,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -73,6 +78,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.PackageInfoCompat
@@ -100,6 +106,7 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.LaunchedEffect
+import kotlin.math.roundToInt
 
 /**
  * Settings & info, reached from the ⋮ menu of the alarm list. Same build as Flipper the Ripper's
@@ -168,6 +175,8 @@ fun SettingsScreen(
             }
 
             SettingsSection(stringResource(R.string.settings_ringing)) {
+                AlarmVolumeRow()
+                Spacer(Modifier.height(16.dp))
                 CrescendoRow()
                 Spacer(Modifier.height(16.dp))
                 RingLimitRow()
@@ -485,23 +494,132 @@ private fun OptionRow(
 }
 
 @Composable
+private fun AlarmVolumeRow() {
+    val context = LocalContext.current
+    var volume by remember { mutableIntStateOf(AppSettings.alarmVolumePercent(context)) }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            stringResource(R.string.settings_volume),
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.weight(1f),
+        )
+        Text(
+            stringResource(R.string.settings_volume_percent, volume),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.primary,
+        )
+    }
+    Text(
+        stringResource(R.string.settings_volume_hint),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Spacer(Modifier.height(4.dp))
+    val steps = (AppSettings.MAX_ALARM_VOLUME - AppSettings.MIN_ALARM_VOLUME) / AppSettings.ALARM_VOLUME_STEP - 1
+    Slider(
+        value = volume.toFloat(),
+        onValueChange = { raw ->
+            val snapped = ((raw / AppSettings.ALARM_VOLUME_STEP).roundToInt() * AppSettings.ALARM_VOLUME_STEP)
+                .coerceIn(AppSettings.MIN_ALARM_VOLUME, AppSettings.MAX_ALARM_VOLUME)
+            if (snapped != volume) {
+                volume = snapped
+                AppSettings.setAlarmVolumePercent(context, snapped)
+            }
+        },
+        valueRange = AppSettings.MIN_ALARM_VOLUME.toFloat()..AppSettings.MAX_ALARM_VOLUME.toFloat(),
+        steps = steps,
+        modifier = Modifier.fillMaxWidth(),
+    )
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
 private fun CrescendoRow() {
     val context = LocalContext.current
-    var seconds by remember { mutableStateOf(AppSettings.crescendoSeconds(context)) }
-    OptionRow(
-        title = stringResource(R.string.settings_crescendo),
-        hint = stringResource(R.string.settings_crescendo_hint),
-        options = AppSettings.CRESCENDO_OPTIONS,
-        selected = seconds,
-        label = {
-            if (it == 0) stringResource(R.string.settings_crescendo_off)
-            else stringResource(R.string.settings_crescendo_seconds, it)
-        },
-        onSelect = {
-            seconds = it
-            AppSettings.setCrescendoSeconds(context, it)
-        },
+    var seconds by remember { mutableIntStateOf(AppSettings.crescendoSeconds(context)) }
+    var customSelected by remember { mutableStateOf(seconds !in AppSettings.CRESCENDO_OPTIONS) }
+    var customText by remember { mutableStateOf(if (customSelected) seconds.toString() else "") }
+
+    Text(stringResource(R.string.settings_crescendo), style = MaterialTheme.typography.bodyLarge)
+    Text(
+        stringResource(R.string.settings_crescendo_hint),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
+    Spacer(Modifier.height(8.dp))
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        AppSettings.CRESCENDO_OPTIONS.forEach { option ->
+            val label = when {
+                option == 0 -> stringResource(R.string.settings_crescendo_off)
+                option >= 60 && option % 60 == 0 -> stringResource(R.string.settings_crescendo_minutes, option / 60)
+                else -> stringResource(R.string.settings_crescendo_seconds, option)
+            }
+            FilterChip(
+                selected = !customSelected && seconds == option,
+                onClick = {
+                    customSelected = false
+                    seconds = option
+                    AppSettings.setCrescendoSeconds(context, option)
+                },
+                label = { Text(label, maxLines = 1) },
+            )
+        }
+        FilterChip(
+            selected = customSelected,
+            onClick = {
+                customSelected = true
+                if (customText.isEmpty() && seconds in AppSettings.CRESCENDO_CUSTOM_RANGE) {
+                    customText = seconds.toString()
+                }
+            },
+            label = { Text(stringResource(R.string.settings_crescendo_other), maxLines = 1) },
+        )
+    }
+    if (customSelected) {
+        val parsed = customText.toIntOrNull()
+        val showError = customText.isNotEmpty() && (parsed == null || parsed !in AppSettings.CRESCENDO_CUSTOM_RANGE)
+        Spacer(Modifier.height(8.dp))
+        OutlinedTextField(
+            value = customText,
+            onValueChange = { raw ->
+                val digits = raw.filter(Char::isDigit).take(3)
+                customText = digits
+                val value = digits.toIntOrNull()
+                if (value != null && value in AppSettings.CRESCENDO_CUSTOM_RANGE) {
+                    seconds = value
+                    AppSettings.setCrescendoSeconds(context, value)
+                }
+            },
+            label = {
+                Text(
+                    stringResource(
+                        R.string.settings_crescendo_custom_label,
+                        AppSettings.CRESCENDO_MIN_SECONDS,
+                        AppSettings.CRESCENDO_MAX_SECONDS,
+                    )
+                )
+            },
+            suffix = { Text("s") },
+            isError = showError,
+            supportingText = if (showError) {
+                {
+                    Text(
+                        stringResource(
+                            R.string.settings_crescendo_custom_error,
+                            AppSettings.CRESCENDO_MIN_SECONDS,
+                            AppSettings.CRESCENDO_MAX_SECONDS,
+                        )
+                    )
+                }
+            } else null,
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            modifier = Modifier.width(200.dp),
+        )
+    }
 }
 
 @Composable

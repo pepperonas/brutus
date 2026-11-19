@@ -7,6 +7,7 @@ object AppSettings {
     private const val PREFS = "brutus_settings"
     private const val KEY_UPCOMING_LEAD = "upcoming_lead_minutes"
     private const val KEY_SUNRISE_SOUND = "sunrise_sound_id"
+    private const val KEY_ALARM_VOLUME = "alarm_volume_percent"
     private const val KEY_CRESCENDO = "crescendo_seconds"
     private const val KEY_RING_LIMIT = "ring_limit_minutes"
 
@@ -36,16 +37,41 @@ object AppSettings {
         Storage.prefs(context, PREFS).edit().putInt(KEY_SUNRISE_SOUND, sound.id).commit()
     }
 
+    /** Maximum alarm volume for normal alarms, in percent (5..100, step 5). Hardcore ignores it. */
+    const val MIN_ALARM_VOLUME = 5
+    const val MAX_ALARM_VOLUME = 100
+    const val ALARM_VOLUME_STEP = 5
+    val ALARM_VOLUME_RANGE = MIN_ALARM_VOLUME..MAX_ALARM_VOLUME
+    const val DEFAULT_ALARM_VOLUME = 100
+
+    fun isValidAlarmVolume(percent: Int): Boolean =
+        percent in ALARM_VOLUME_RANGE && percent % ALARM_VOLUME_STEP == 0
+
+    fun alarmVolumePercent(context: Context): Int =
+        Storage.prefs(context, PREFS).getInt(KEY_ALARM_VOLUME, DEFAULT_ALARM_VOLUME)
+            .takeIf { isValidAlarmVolume(it) } ?: DEFAULT_ALARM_VOLUME
+
+    fun setAlarmVolumePercent(context: Context, percent: Int) {
+        require(isValidAlarmVolume(percent)) { "unsupported alarm volume $percent" }
+        Storage.prefs(context, PREFS).edit().putInt(KEY_ALARM_VOLUME, percent).commit()
+    }
+
     /** Crescendo for normal alarms, in seconds; 0 = full volume at once (the old behaviour). */
-    val CRESCENDO_OPTIONS = listOf(0, 15, 30, 60)
+    val CRESCENDO_OPTIONS = listOf(0, 30, 60, 120, 300)
+    const val CRESCENDO_MIN_SECONDS = 5
+    const val CRESCENDO_MAX_SECONDS = 600
+    val CRESCENDO_CUSTOM_RANGE = CRESCENDO_MIN_SECONDS..CRESCENDO_MAX_SECONDS
     const val DEFAULT_CRESCENDO = 0
+
+    fun isValidCrescendo(seconds: Int): Boolean =
+        seconds == 0 || seconds in CRESCENDO_CUSTOM_RANGE
 
     fun crescendoSeconds(context: Context): Int =
         Storage.prefs(context, PREFS).getInt(KEY_CRESCENDO, DEFAULT_CRESCENDO)
-            .takeIf { it in CRESCENDO_OPTIONS } ?: DEFAULT_CRESCENDO
+            .takeIf { isValidCrescendo(it) } ?: DEFAULT_CRESCENDO
 
     fun setCrescendoSeconds(context: Context, seconds: Int) {
-        require(seconds in CRESCENDO_OPTIONS) { "unsupported crescendo $seconds" }
+        require(isValidCrescendo(seconds)) { "unsupported crescendo $seconds" }
         Storage.prefs(context, PREFS).edit().putInt(KEY_CRESCENDO, seconds).commit()
     }
 

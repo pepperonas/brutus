@@ -49,7 +49,8 @@ class BackupManagerTest {
         db.alarmDao().insert(AlarmEntity(hour = 6, minute = 0, repeatDays = 0x7F, label = "Work"))
         db.alarmDao().insert(AlarmEntity(hour = 9, minute = 30, enabled = false))
         val qr = GlobalQrStore.get(context)
-        AppSettings.setCrescendoSeconds(context, 60)
+        AppSettings.setCrescendoSeconds(context, 180)
+        AppSettings.setAlarmVolumePercent(context, 65)
         AppSettings.setRingLimitMinutes(context, 5)
         AppSettings.setSunriseSound(context, AlarmSound.SILENT)
         val file = BackupManager.export(context)
@@ -61,7 +62,8 @@ class BackupManagerTest {
         assertTrue(result.qrReplaced)
         assertEquals(listOf("Work", ""), db.alarmDao().getAll().map { it.label })
         assertEquals(qr, GlobalQrStore.get(context), "the printed code must keep working")
-        assertEquals(60, AppSettings.crescendoSeconds(context))
+        assertEquals(180, AppSettings.crescendoSeconds(context))
+        assertEquals(65, AppSettings.alarmVolumePercent(context))
         assertEquals(5, AppSettings.ringLimitMinutes(context))
         assertEquals(AlarmSound.SILENT, AppSettings.sunriseSound(context))
         assertTrue(scheduled() > 0, "imported alarms must ring without opening the app first")
@@ -83,11 +85,12 @@ class BackupManagerTest {
         val before = GlobalQrStore.get(context)
         BackupManager.import(
             context,
-            """{"format":"brutus-backup","version":1,"qr":"evil","settings":{"crescendoSeconds":45,
-               "ringLimitMinutes":-1,"sunriseSoundId":${AlarmSound.KLAXON.id}},"alarms":[]}""",
+            """{"format":"brutus-backup","version":1,"qr":"evil","settings":{"crescendoSeconds":700,
+               "alarmVolumePercent":33,"ringLimitMinutes":-1,"sunriseSoundId":${AlarmSound.KLAXON.id}},"alarms":[]}""",
         )
         assertEquals(before, GlobalQrStore.get(context))
         assertEquals(AppSettings.DEFAULT_CRESCENDO, AppSettings.crescendoSeconds(context))
+        assertEquals(AppSettings.DEFAULT_ALARM_VOLUME, AppSettings.alarmVolumePercent(context))
         assertEquals(AppSettings.DEFAULT_RING_LIMIT, AppSettings.ringLimitMinutes(context))
         assertEquals(AppSettings.DEFAULT_SUNRISE_SOUND, AppSettings.sunriseSound(context))
     }
