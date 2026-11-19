@@ -18,8 +18,8 @@
 
 <!-- BADGES:BIG — version, unit tests and lines of code; ReadmeSyncTest keeps them true. -->
 [![version](https://img.shields.io/badge/version-2.6.0-E53935?style=for-the-badge&logo=android&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
-[![unit tests](https://img.shields.io/badge/unit%20tests-427-2E9E5B?style=for-the-badge&logo=junit5&logoColor=white)](#tests-and-ci)
-[![lines of code](https://img.shields.io/badge/lines%20of%20code-12.7k-4B6BDF?style=for-the-badge&logo=kotlin&logoColor=white)](app/src/main/java/com/pepperonas/brutus)
+[![unit tests](https://img.shields.io/badge/unit%20tests-431-2E9E5B?style=for-the-badge&logo=junit5&logoColor=white)](#tests-and-ci)
+[![lines of code](https://img.shields.io/badge/lines%20of%20code-13.0k-4B6BDF?style=for-the-badge&logo=kotlin&logoColor=white)](app/src/main/java/com/pepperonas/brutus)
 [![test code](https://img.shields.io/badge/test%20code-6.6k-2E9E5B?style=for-the-badge&logo=kotlin&logoColor=white)](app/src/test/java/com/pepperonas/brutus)
 [![sounds](https://img.shields.io/badge/sounds-25-FF5252?style=for-the-badge&logo=audiomack&logoColor=white)](https://brutus.celox.io/#sounds)
 
@@ -310,11 +310,12 @@ Combination examples:
 
 ### Difficulty + sensitivity presets
 
-Both Math and Shake now ship with a 3-step preset selector that appears inline in the edit dialog when the respective challenge is enabled.
+Both Math (4 levels) and Shake (3 levels) ship with a preset selector that appears inline in the edit dialog when the respective challenge is enabled.
 
 | Math difficulty | Operator pool | Operand range |
 |-----------------|---------------|---------------|
 | **Easy** | `+`, `-` | 1–20 (subtraction always ≥ 0) |
+| **Medium** | `+`, `-` | 4 numbers in 2–25 (every intermediate step ≥ 0) |
 | **Hard** _(default)_ | `+`, `-`, `*` | up to 50 × 20 or three-digit add/sub |
 | **Brutal** | `+`, `-`, `*` (biased) | two-digit × two-digit, four-digit sums |
 
@@ -512,9 +513,11 @@ Since **v2.4.0 the timer is a real alarm**: its state is persisted (`timer/Timer
 
 Since **v2.6.0**, under **⋮ → Settings & info → Ringing**:
 
-- **Crescendo** (**Off** / 15 / 30 / 60 s, default off) — a normal alarm starts 30 dB below full volume and
-  rises evenly in decibels. The alarm stream itself still goes to maximum; only the sound's own gain ramps.
-  Hardcore alarms ignore the setting.
+- **Alarm volume** (5–100 %, step 5 %, default 100 %) — sets the maximum playback gain (scaled evenly in dB)
+  for normal alarms. Hardcore alarms ignore it and always ring at 100 %.
+- **Crescendo** (**Off** / 30 s / 1 m / 2 m / 5 m / **Other** 5–600 s, default off) — a normal alarm starts
+  30 dB below full volume and rises evenly in decibels up to the chosen volume. The alarm stream itself
+  still goes to maximum; only the sound's own gain ramps. Hardcore alarms ignore the setting.
 - **Snooze when unanswered** (**Never** / 5 / 10 / **15** / 30 min, default **15**) — if nobody reacts, a normal
   alarm snoozes itself and rings again after its snooze time (at least 5 min, also when its snooze is off).
   After three such rounds it stops and posts a *Missed alarm* notice saying it rang unanswered. Dismissing or
@@ -979,7 +982,7 @@ app/src/main/res/
 
 ## Tests and CI
 
-427 JVM unit tests guard the parts where a bug means someone oversleeps: what actually lands in
+431 JVM unit tests guard the parts where a bug means someone oversleeps: what actually lands in
 `AlarmManager`, the alarm-time arithmetic, persistence, the completeness of both translations, and
 every string the user reads on a clock face. There are no instrumented tests — the whole suite runs
 on the JVM in seconds.
@@ -987,7 +990,7 @@ on the JVM in seconds.
 | Suite | Tests | What it pins down |
 |-------|-------|-------------------|
 | `service/AlarmServiceRingingTest` | 8 | the real service while it rings: it takes audio focus and gives it back, snoozes itself at the ring limit (at least 5 min also with snooze off), gives up after three rounds with a missed notice, never for Hardcore or with the limit off, a manual dismiss/snooze resets the count (Robolectric) |
-| `util/RingPolicyTest` | 9 | the ringing rules as pure functions: crescendo from −30 dB evenly in dB and never quieter over time, Hardcore ignores it, a call caps every alarm at 15 % but never makes a quiet one louder, which audio modes count as a call, the limit and the three rounds |
+| `util/RingPolicyTest` | 11 | the ringing rules as pure functions: crescendo from −30 dB evenly in dB up to the chosen volume cap (5–100 %) and never quieter over time, Hardcore ignores both, a call caps every alarm at 15 % but never makes a quiet one louder, which audio modes count as a call, the limit and the three rounds |
 | `backup/AlarmBackupTest` | 8 | the export file: every alarm field round-trips (and a new `AlarmEntity` field without export fails), missing fields take defaults, values clamped, retired sounds mapped, impossible times dropped and counted, non-backups refused, no duplicates on re-import (Robolectric for org.json) |
 | `util/VacationTest` | 8 | vacation mode in the next-trigger arithmetic: first occurrence on the day back for repeating and one-shot alarms, an alarm exactly at the end rings, an expired pause changes nothing; the picker's UTC day ↔ local day across DST and west of UTC |
 | `backup/BackupManagerTest` | 6 | an export brought to an empty phone restores alarms, QR code and settings and arms them; re-import adds nothing; foreign settings and QR codes are ignored; a system restore re-arms without opening the app (Robolectric) |
@@ -1020,10 +1023,10 @@ on the JVM in seconds.
 | `receiver/SystemChangeReceiverTest` | 3 | every handled action is in the manifest filter, the whole ringing path is `directBootAware` |
 | `widget/NextAlarmWidgetLockedTest` | 2 | the widget is never touched before the first unlock |
 | `update/UpdateSchedulerTest` | 6 | switching on schedules a daily, network-bound check plus one immediate check; off cancels everything; default stays off after updating (WorkManager test driver) |
-| `ui/alarm/MathProblemTest` | 8 | answer/display correctness, per-difficulty operand range and sign invariants across 500 samples, operator fallback |
+| `ui/alarm/MathProblemTest` | 9 | answer/display correctness, per-difficulty operand range and sign invariants across 500 samples, operator fallback |
 | `viewmodel/TimerViewModelTest` | 8 | countdown/pause math, cancel-undo state machine, an expired timer is deliberately *not* undoable (Robolectric) |
 | `util/ChallengeFlagsTest` | 8 | `describe` / `activeList` / `has` / `sanitize` bitmask edge cases, incl. the unknown-bit fallback |
-| `util/ChallengeDifficultyTest` | 8 | math operand ranges, shake threshold ordering (9 / 12 / 16 m/s²), distinct labels per preset in both languages |
+| `util/ChallengeDifficultyTest` | 9 | math operand ranges, shake threshold ordering (9 / 12 / 16 m/s²), distinct labels per preset in both languages |
 | `util/AlarmSoundGeneratorTest` | 7 | PCM buffer length, peak amplitudes, gentle loops without a click at the seam, gentle vs. harsh vs. extreme classification |
 | `util/SynthSoundsTest` | 11 | what makes each v2.5.0 sound itself, measured on the buffer — the air-raid siren winds up and down, the reverse beeper and the strobe speed up, the ocean swells, Daybreak brightens; harsh at full scale, gentle at 60 %, six-second gentle loops |
 | `viewmodel/AlarmViewModelTest` | 3 | the alarm list tells "not loaded yet" (`null`) from "no alarms" — a cold start no longer flashes the empty state (Robolectric + Room) |
@@ -1043,7 +1046,7 @@ on the JVM in seconds.
 | `scheduler/AlarmSchedulerConstantsTest` | 4 | Ultra Hardcore offsets, sunrise lead time, intent-extra uniqueness |
 
 ```bash
-./gradlew :app:testDebugUnitTest          # all 427
+./gradlew :app:testDebugUnitTest          # all 431
 ./gradlew :app:testDebugUnitTest --tests '*NextAlarmCalculatorTest'
 # HTML report: app/build/reports/tests/testDebugUnitTest/index.html
 ```
@@ -1087,7 +1090,7 @@ app/src/test/java/com/pepperonas/brutus/
 │   ├── AlarmServiceScreenNotificationTest.kt 5 — heads-up gives way while the alarm screen is in front
 │   └── AlarmServiceUltraHardcoreTest.kt 5 — snooze ≠ dismiss, volume restored after a mid-ring kill
 ├── ui/
-│   ├── alarm/MathProblemTest.kt        8 — answer/display, per-difficulty range + sign invariants (500 samples)
+│   ├── alarm/MathProblemTest.kt        9 — answer/display, per-difficulty range + sign invariants (500 samples)
 │   └── screens/ClockFormattingTest.kt 14 — stopwatch/timer readouts, hour column, constant string width
 ├── update/
 │   ├── AppVersionTest.kt               8 — tag vs. installed version, v-prefix, suffixes, garbage
@@ -1100,7 +1103,7 @@ app/src/test/java/com/pepperonas/brutus/
 │   ├── AlarmSoundGeneratorTest.kt      7 — PCM length, peak amplitudes, seamless gentle loops, gentle vs harsh
 │   ├── AlarmSoundGeneratorPropertiesTest.kt  7 — invariants across every synthesized sound
 │   ├── ChallengeFlagsTest.kt           8 — describe / activeList / has / sanitize, unknown-bit fallback
-│   ├── ChallengeDifficultyTest.kt      8 — operand ranges, threshold ordering, distinct labels
+│   ├── ChallengeDifficultyTest.kt      9 — operand ranges, threshold ordering, distinct labels
 │   ├── GlobalQrStoreTest.kt            6 — the installation QR code is generated once and never changes
 │   ├── NextAlarmCalculatorTest.kt     17 — one-shot today/tomorrow, repeating wrap, weekend selection
 │   ├── NextAlarmCalendarEdgeTest.kt   11 — DST nights (23 h / 25 h), skipped + duplicated hour, rollovers

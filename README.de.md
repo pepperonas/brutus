@@ -18,8 +18,8 @@
 
 <!-- BADGES:BIG — version, unit tests and lines of code; ReadmeSyncTest keeps them true. -->
 [![version](https://img.shields.io/badge/version-2.6.0-E53935?style=for-the-badge&logo=android&logoColor=white)](https://github.com/pepperonas/brutus/releases/latest)
-[![unit tests](https://img.shields.io/badge/unit%20tests-427-2E9E5B?style=for-the-badge&logo=junit5&logoColor=white)](#tests-und-ci)
-[![lines of code](https://img.shields.io/badge/lines%20of%20code-12.7k-4B6BDF?style=for-the-badge&logo=kotlin&logoColor=white)](app/src/main/java/com/pepperonas/brutus)
+[![unit tests](https://img.shields.io/badge/unit%20tests-431-2E9E5B?style=for-the-badge&logo=junit5&logoColor=white)](#tests-und-ci)
+[![lines of code](https://img.shields.io/badge/lines%20of%20code-13.0k-4B6BDF?style=for-the-badge&logo=kotlin&logoColor=white)](app/src/main/java/com/pepperonas/brutus)
 [![test code](https://img.shields.io/badge/test%20code-6.6k-2E9E5B?style=for-the-badge&logo=kotlin&logoColor=white)](app/src/test/java/com/pepperonas/brutus)
 [![sounds](https://img.shields.io/badge/sounds-25-FF5252?style=for-the-badge&logo=audiomack&logoColor=white)](https://brutus.celox.io/#sounds)
 
@@ -311,11 +311,12 @@ Kombinationsbeispiele:
 
 ### Schwierigkeits- und Empfindlichkeits-Presets
 
-Mathe und Schütteln haben je einen dreistufigen Preset-Wähler, der im Bearbeiten-Dialog erscheint, sobald die jeweilige Aufgabe aktiv ist.
+Mathe (vierstufig) und Schütteln (dreistufig) haben einen Preset-Wähler, der im Bearbeiten-Dialog erscheint, sobald die jeweilige Aufgabe aktiv ist.
 
 | Mathe-Schwierigkeit | Operatoren | Zahlenbereich |
 |---------------------|------------|---------------|
 | **Einfach** | `+`, `-` | 1–20 (Subtraktion immer ≥ 0) |
+| **Mittel** | `+`, `-` | 4 Zahlen von 2–25 (jeder Zwischenschritt ≥ 0) |
 | **Hart** _(Standard)_ | `+`, `-`, `*` | bis 50 × 20 bzw. dreistellige Addition/Subtraktion |
 | **Brutal** | `+`, `-`, `*` (gewichtet) | zweistellig × zweistellig, vierstellige Summen |
 
@@ -513,9 +514,12 @@ Seit **v2.4.0 ist der Timer ein echter Wecker**: sein Zustand wird gespeichert (
 
 Seit **v2.6.0** unter **⋮ → Einstellungen & Info → Klingeln**:
 
-- **Lauter werden** (**Aus** / 15 / 30 / 60 s, Standard aus) — ein normaler Wecker beginnt 30 dB unter voller
-  Lautstärke und steigt gleichmäßig in Dezibel. Der Wecker-Lautstärkestrom geht weiterhin auf Maximum; nur die
-  Verstärkung des Klangs selbst steigt. Hardcore-Wecker ignorieren die Einstellung.
+- **Weckerlautstärke** (5–100 %, Schritt 5 %, Standard 100 %) — setzt die maximale Wiedergabe-Verstärkung
+  (gleichmäßig in dB skaliert) für normale Wecker. Hardcore-Wecker ignorieren dies und klingeln immer mit 100 %.
+- **Lauter werden** (**Aus** / 30 s / 1 Min. / 2 Min. / 5 Min. / **Andere** 5–600 s, Standard aus) — ein normaler
+  Wecker beginnt 30 dB unter voller Lautstärke und steigt gleichmäßig in Dezibel bis zur gewählten Lautstärke.
+  Der Wecker-Lautstärkestrom geht weiterhin auf Maximum; nur die Verstärkung des Klangs selbst steigt.
+  Hardcore-Wecker ignorieren die Einstellung.
 - **Schlummern ohne Reaktion** (**Nie** / 5 / 10 / **15** / 30 Min., Standard **15**) — reagiert niemand, schlummert
   ein normaler Wecker von selbst und klingelt nach seiner Schlummerzeit erneut (mindestens 5 Min., auch wenn
   sein Schlummern ausgeschaltet ist). Nach drei solchen Runden hört er auf und meldet sich als *Verpasster
@@ -958,12 +962,12 @@ app/src/main/res/
 
 ## Tests und CI
 
-427 JVM-Unit-Tests sichern die Stellen, an denen ein Fehler bedeutet, dass jemand verschläft: was tatsächlich im `AlarmManager` landet, die Weckzeit-Arithmetik, die Persistenz, die Vollständigkeit beider Übersetzungen und jeden String, den der Nutzer auf einem Ziffernblatt liest. Es gibt keine Instrumentierungstests — die gesamte Suite läuft in Sekunden auf der JVM.
+431 JVM-Unit-Tests sichern die Stellen, an denen ein Fehler bedeutet, dass jemand verschläft: was tatsächlich im `AlarmManager` landet, die Weckzeit-Arithmetik, die Persistenz, die Vollständigkeit beider Übersetzungen und jeden String, den der Nutzer auf einem Ziffernblatt liest. Es gibt keine Instrumentierungstests — die gesamte Suite läuft in Sekunden auf der JVM.
 
 | Suite | Tests | Was sie festnagelt |
 |-------|-------|--------------------|
 | `service/AlarmServiceRingingTest` | 8 | der echte Service beim Klingeln: holt sich den Audio-Fokus und gibt ihn zurück, schlummert am Limit von selbst (mindestens 5 Min. auch ohne Schlummern), gibt nach drei Runden mit Verpasst-Hinweis auf, nie bei Hardcore oder ausgeschaltetem Limit, Beenden/Schlummern von Hand setzt die Zählung zurück (Robolectric) |
-| `util/RingPolicyTest` | 9 | die Klingel-Regeln als reine Funktionen: Crescendo ab −30 dB gleichmäßig in dB und nie leiser, Hardcore ignoriert es, ein Anruf begrenzt jeden Wecker auf 15 %, macht einen leisen aber nie lauter, welche Audiomodi als Anruf zählen, Limit und drei Runden |
+| `util/RingPolicyTest` | 11 | die Klingel-Regeln als reine Funktionen: Crescendo ab −30 dB gleichmäßig in dB bis zur gewählten Lautstärke (5–100 %) und nie leiser, Hardcore ignoriert beides, ein Anruf begrenzt jeden Wecker auf 15 %, macht einen leisen aber nie lauter, welche Audiomodi als Anruf zählen, Limit und drei Runden |
 | `backup/AlarmBackupTest` | 8 | die Exportdatei: jedes Weckerfeld übersteht den Roundtrip (ein neues `AlarmEntity`-Feld ohne Export fällt auf), fehlende Felder nehmen Standards, Werte begrenzt, entfernte Töne gemappt, unmögliche Zeiten verworfen und gezählt, Fremddateien abgewiesen, kein Doppeln beim erneuten Import (Robolectric für org.json) |
 | `util/VacationTest` | 8 | Urlaubsmodus in der Auslöse-Arithmetik: erste Auslösung am Tag danach für wiederholte und einmalige Wecker, ein Wecker genau am Ende klingelt, eine abgelaufene Pause ändert nichts; UTC-Tag der Datumsauswahl ↔ lokaler Tag über die Zeitumstellung und westlich von UTC |
 | `backup/BackupManagerTest` | 6 | ein Export auf einem leeren Handy stellt Wecker, QR-Code und Einstellungen wieder her und stellt sie scharf; erneuter Import fügt nichts hinzu; fremde Einstellungen und QR-Codes werden ignoriert; eine System-Wiederherstellung stellt scharf, ohne die App zu öffnen (Robolectric) |
@@ -996,10 +1000,10 @@ app/src/main/res/
 | `receiver/SystemChangeReceiverTest` | 3 | jede behandelte Aktion steht im Manifest-Filter, der ganze Klingel-Pfad ist `directBootAware` |
 | `widget/NextAlarmWidgetLockedTest` | 2 | das Widget wird vor dem ersten Entsperren nie angefasst |
 | `update/UpdateSchedulerTest` | 6 | Einschalten plant eine tägliche, netzgebundene Prüfung plus eine sofortige; Aus löscht alles; nach dem Update bleibt es aus (WorkManager-Testtreiber) |
-| `ui/alarm/MathProblemTest` | 8 | Antwort-/Anzeigelogik, Range- und Vorzeichen-Invarianten je Schwierigkeitsgrad über 500 Samples, Operator-Fallback |
+| `ui/alarm/MathProblemTest` | 9 | Antwort-/Anzeigelogik, Range- und Vorzeichen-Invarianten je Schwierigkeitsgrad über 500 Samples, Operator-Fallback |
 | `viewmodel/TimerViewModelTest` | 8 | Countdown-/Pause-Mathematik, Cancel-Undo-Automat, ein abgelaufener Timer ist bewusst *nicht* undoable (Robolectric) |
 | `util/ChallengeFlagsTest` | 8 | `describe` / `activeList` / `has` / `sanitize`, inklusive Fallback bei unbekanntem Bit |
-| `util/ChallengeDifficultyTest` | 8 | Zahlenbereiche, Reihenfolge der Schwellen, eigene Labels je Preset in beiden Sprachen |
+| `util/ChallengeDifficultyTest` | 9 | Zahlenbereiche, Reihenfolge der Schwellen, eigene Labels je Preset in beiden Sprachen |
 | `LocalizedRuntimeTest` | 7 | löst jeden deklarierten String über das Ressourcensystem in **beiden** Sprachen auf und rendert je eine vollständige Weckerkarte |
 | `util/AlarmSoundGeneratorTest` | 7 | PCM-Länge, Spitzenamplituden, sanfte Schleifen ohne Knacken an der Naht, sanft vs. hart vs. extrem |
 | `util/SynthSoundsTest` | 11 | was jeden Ton von v2.5.0 ausmacht, gemessen am Puffer — die Luftschutzsirene heult hoch und runter, Rückfahrwarner und Stroboskop werden schneller, das Meer schwillt an, Sonnenaufgang wird heller; harte mit voller Aussteuerung, sanfte bei 60 %, sanfte Schleifen sechs Sekunden |
@@ -1019,7 +1023,7 @@ app/src/main/res/
 | `scheduler/AlarmSchedulerConstantsTest` | 4 | Ultra-Hardcore-Offsets, Sunrise-Vorlauf, Eindeutigkeit der Intent-Extras |
 
 ```bash
-./gradlew :app:testDebugUnitTest          # alle 427
+./gradlew :app:testDebugUnitTest          # alle 431
 ./gradlew :app:testDebugUnitTest --tests '*NextAlarmCalculatorTest'
 # HTML-Report: app/build/reports/tests/testDebugUnitTest/index.html
 ```
