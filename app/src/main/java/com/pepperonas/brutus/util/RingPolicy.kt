@@ -15,11 +15,11 @@ import kotlin.math.pow
  */
 object RingPolicy {
 
-    /** Where a crescendo starts, in dB below full volume. -30 dB is quiet but clearly audible. */
+    /** Where a crescendo starts, in dB relative to target volume. -30 dB is quiet but clearly audible. */
     const val CRESCENDO_START_DB = -30f
 
-    /** Target dB at the minimum 5 % volume setting (~5 % amplitude, still above [CRESCENDO_START_DB]). */
-    const val MIN_VOLUME_DB = -26f
+    /** Target dB at the minimum 5 % volume setting (~1 % amplitude, -40 dB). */
+    const val MIN_VOLUME_DB = -40f
 
     /** Gain while a call rings or runs — the user must still hear the other person. */
     const val IN_CALL_GAIN = 0.15f
@@ -51,13 +51,13 @@ object RingPolicy {
 
     /**
      * Gain of a crescendo [elapsedMs] into the ring. Rises evenly in dB (what the ear perceives as
-     * evenly louder) from [CRESCENDO_START_DB] to [volumeDb] over [rampSeconds]; 0 = no crescendo.
+     * evenly louder) from [CRESCENDO_START_DB] below [volumeDb] up to [volumeDb] over [rampSeconds]; 0 = no crescendo.
      */
     fun crescendoGain(elapsedMs: Long, rampSeconds: Int, volumePercent: Int = AppSettings.DEFAULT_ALARM_VOLUME): Float {
         val targetDb = volumeDb(volumePercent)
         if (rampSeconds <= 0) return if (targetDb == 0f) 1f else 10f.pow(targetDb / 20f)
         val t = (elapsedMs.coerceAtLeast(0L).toFloat() / (rampSeconds * 1000f)).coerceAtMost(1f)
-        val db = CRESCENDO_START_DB + (targetDb - CRESCENDO_START_DB) * t
+        val db = targetDb + CRESCENDO_START_DB * (1f - t)
         return 10f.pow(db / 20f)
     }
 
