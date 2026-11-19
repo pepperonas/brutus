@@ -387,6 +387,8 @@
     <!-- ===================== Schwierigkeits-Presets ===================== -->
     <string name="math_difficulty_easy">Einfach</string>
     <string name="math_difficulty_easy_description">Addition und Subtraktion bis 20</string>
+    <string name="math_difficulty_medium">Mittel</string>
+    <string name="math_difficulty_medium_description">Vier Zahlen mit Addition und Subtraktion bis 25</string>
     <string name="math_difficulty_hard">Hart</string>
     <string name="math_difficulty_hard_description">Mix mit Multiplikation bis 50 × 20</string>
     <string name="math_difficulty_brutal">Brutal</string>

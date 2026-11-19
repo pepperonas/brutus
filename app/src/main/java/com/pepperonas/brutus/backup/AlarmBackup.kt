@@ -131,7 +131,7 @@ object AlarmBackup {
             shakeCount = (o.optIntOrNull("shakeCount") ?: d.shakeCount).coerceIn(10, 100),
             hardcoreMode = o.optBoolean("hardcoreMode", d.hardcoreMode),
             ultraHardcoreMode = o.optBoolean("ultraHardcoreMode", d.ultraHardcoreMode),
-            mathDifficulty = (o.optIntOrNull("mathDifficulty") ?: d.mathDifficulty).coerceIn(0, 2),
+            mathDifficulty = (o.optIntOrNull("mathDifficulty") ?: d.mathDifficulty).coerceIn(0, 3),
             shakeSensitivity = (o.optIntOrNull("shakeSensitivity") ?: d.shakeSensitivity).coerceIn(0, 2),
             sunriseEnabled = o.optBoolean("sunriseEnabled", d.sunriseEnabled),
         )

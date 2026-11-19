@@ -33,6 +33,8 @@ class MathProblemTest {
     @Test
     fun `display renders the question with a placeholder`() {
         assertEquals("7 - 5 = ?", MathProblem(7, 5, '-').display)
+        assertEquals("12 - 5 + 8 - 3 = ?", MathProblem(listOf(12, 5, 8, 3), listOf('-', '+', '-')).display)
+        assertEquals(12, MathProblem(listOf(12, 5, 8, 3), listOf('-', '+', '-')).answer)
     }
 
     // ----- Generator invariants per difficulty -----
@@ -45,6 +47,25 @@ class MathProblemTest {
             assertTrue(p.answer >= 0, "negative answer: ${p.display}")
             // "Addition und Subtraktion bis 20" — the promised difficulty cap.
             assertTrue(p.answer <= 20, "answer above easy cap: ${p.display}")
+        }
+    }
+
+    @Test
+    fun `medium problems have 4 operands in 2 to 25 and non-negative intermediate steps`() {
+        repeat(samples) {
+            val p = generateProblem(ChallengeDifficulty.MATH_MEDIUM)
+            assertEquals(4, p.operands.size, "expected 4 operands: ${p.display}")
+            assertEquals(3, p.operators.size, "expected 3 operators: ${p.display}")
+            assertTrue(p.operands.all { it in 2..25 }, "operand out of 2..25 range: ${p.display}")
+            assertTrue(p.operators.all { it == '+' || it == '-' }, "unexpected op in ${p.display}")
+
+            var acc = p.operands[0]
+            assertTrue(acc >= 0, "initial operand negative: ${p.display}")
+            for (i in p.operators.indices) {
+                acc = if (p.operators[i] == '-') acc - p.operands[i + 1] else acc + p.operands[i + 1]
+                assertTrue(acc >= 0, "negative intermediate result at step $i: ${p.display}")
+            }
+            assertEquals(acc, p.answer, "answer mismatch for ${p.display}")
         }
     }
 
@@ -96,9 +117,10 @@ class MathProblemTest {
     @Test
     fun `every difficulty eventually produces each of its operators`() {
         fun opsSeen(level: Int): Set<Char> =
-            (1..samples).map { generateProblem(level).operator }.toSet()
+            (1..samples).flatMap { generateProblem(level).operators }.toSet()
 
         assertEquals(setOf('+', '-'), opsSeen(ChallengeDifficulty.MATH_EASY))
+        assertEquals(setOf('+', '-'), opsSeen(ChallengeDifficulty.MATH_MEDIUM))
         assertEquals(setOf('+', '-', '*'), opsSeen(ChallengeDifficulty.MATH_HARD))
         assertEquals(setOf('+', '-', '*'), opsSeen(ChallengeDifficulty.MATH_BRUTAL))
     }

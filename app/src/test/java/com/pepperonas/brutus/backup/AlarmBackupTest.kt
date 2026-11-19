@@ -66,7 +66,7 @@ class AlarmBackupTest {
         assertEquals(retired.value.id, back.soundId)
         assertEquals(10, back.mathProblemCount)
         assertEquals(10, back.shakeCount)
-        assertEquals(2, back.mathDifficulty)
+        assertEquals(3, back.mathDifficulty)
         assertEquals(0, back.shakeSensitivity)
         assertEquals(100, back.label.length)
     }
